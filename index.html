@@ -279,6 +279,7 @@ table{
   font-size:13px;
   min-width:900px;
 }
+thead{display:table-header-group}
 th{
   font-size:10.5px;
   font-weight:700;
@@ -293,8 +294,8 @@ th{
   top:calc(var(--header-h) + env(safe-area-inset-top));
   z-index:5;
   box-shadow:0 1px 0 var(--separator);
-  backdrop-filter:saturate(180%) blur(16px);
   -webkit-backdrop-filter:saturate(180%) blur(16px);
+  backdrop-filter:saturate(180%) blur(16px);
   background-clip:padding-box;
 }
 th:first-child{border-top-left-radius:var(--r-sm)}
@@ -369,9 +370,13 @@ tbody tr.row-info td:first-child::before{background:var(--blue)}
 
 /* FILTERS */
 .filter-bar{
-  display:flex;flex-wrap:wrap;gap:8px;
-  margin-bottom:14px;padding-bottom:14px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:14px;
+  padding-bottom:14px;
   border-bottom:1px solid var(--separator);
+  align-items:center;
 }
 .filter-btn{
   padding:9px 14px;border-radius:999px;
@@ -405,7 +410,7 @@ tbody tr.row-info td:first-child::before{background:var(--blue)}
 .empty-state .em-icon{font-size:40px;display:block;margin-bottom:12px;opacity:.5}
 .empty-state .em-title{font-weight:700;color:var(--text);margin-bottom:6px;font-size:15px}
 
-/* NUM — исправлено: цифры полностью влезают */
+/* NUM */
 .num{
   width:70px;
   min-width:66px;
@@ -544,6 +549,11 @@ pre.code{
   .num{width:76px;min-width:72px;height:42px;font-size:15px}
   .income-cell .num{width:70px;min-width:66px;height:42px}
 }
+@media (max-width:640px){
+  .filter-bar{gap:6px;margin-bottom:10px;padding-bottom:10px}
+  .filter-btn{padding:7px 10px;font-size:11.5px;min-height:34px;gap:4px}
+  .filter-btn .filter-count{font-size:10px;padding:1px 6px}
+}
 @media (max-width:400px){
   .card{padding:16px;border-radius:16px}
   .card h2{font-size:15px}
@@ -554,7 +564,6 @@ pre.code{
   .action-buttons{gap:8px}
   button{padding:12px 16px;font-size:14.5px;min-height:46px}
   input[type=text],input[type=date],input[type=number],input[type=time],select{padding:12px 14px;min-height:46px;font-size:16px}
-  .filter-btn{padding:8px 12px;font-size:12px;min-height:38px}
   .status-chip{padding:5px 10px;font-size:11.5px}
   .num{width:62px;min-width:58px;height:40px;font-size:14px;padding:4px 4px}
   .income-cell .num{width:58px;min-width:54px;height:40px;font-size:13px}
@@ -695,18 +704,9 @@ pre.code{
       <button class="filter-btn filter-info" data-filter="info">🔵 Только продажи <span class="filter-count" data-count="info">0</span></button>
     </div>
 
-    <div class="table-wrap" style="margin-top:14px">
+    <div class="table-wrap" style="margin-top:10px">
       <table id="resultTable">
-        <thead><tr>
-          <th style="width:24%">Наименование</th>
-          <th style="width:90px;text-align:center">Остаток</th>
-          <th style="width:80px;text-align:center">Продано</th>
-          <th style="width:80px;text-align:center">Срок</th>
-          <th style="width:90px;text-align:center">Свежих на витрине</th>
-          <th style="width:90px;text-align:center">Продано свежих</th>
-          <th style="width:100px;text-align:center">Просрочено на витрине</th>
-          <th style="width:100px;text-align:center">Продано просроченным</th>
-        </tr></thead>
+        <thead><tr></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -730,7 +730,7 @@ pre.code{
     <button id="restoreSessionBtn" class="secondary block" style="margin-top:10px">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block" style="margin-top:10px">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:14px;text-align:center;font-size:11.5px;color:var(--text-tertiary)">
-      FB Audit · iOS 27 · v1.2
+      FB Audit · iOS 27 · v1.3
     </div>
   </div>
 
@@ -1693,6 +1693,7 @@ async function shareToAI() {
     if (btn) btn.classList.remove('busy');
   }
 }
+
 function buildPrompt() {
   const cd = $('checkDate'), ct = $('checkTime');
   const checkDate = (cd && cd.value) || new Date().toISOString().slice(0, 10);
@@ -1711,14 +1712,29 @@ function buildPrompt() {
 ПРИОРИТЕТ: приход ← накладная, продажи ← iiko. Не суммировать.
 
 ═══════════════════════════════════════════
-🔍 2 ЭТАПА РАБОТЫ
+🔍 3 ЭТАПА РАБОТЫ (СТРОГО ПО ПОРЯДКУ)
 ═══════════════════════════════════════════
+
 ЭТАП 1. ЧЕРНОВИК
 Выпиши ВСЕ строки из каждого документа:
 [документ] | [название] | [количество] | [дата]
 
-ЭТАП 2. СБОРКА CSV
-Собери таблицу. Перед отправкой сверь сумму приходов.
+ЭТАП 2. ФИЛЬТРАЦИЯ (КРИТИЧЕСКИЙ ШАГ)
+Из черновика оставь ТОЛЬКО те позиции, которые есть в СПРАВОЧНИКЕ СРОКОВ (ниже).
+Всё остальное — напитки, кофе, блюда, десерты, не указанные в справочнике — ИГНОРИРУЙ ПОЛНОСТЬЮ.
+Если позиция есть в чеке, но её нет в справочнике — НЕ добавляй её в CSV и НЕ упоминай в сомнительных строках.
+
+ЭТАП 3. СБОРКА CSV
+Собери таблицу ТОЛЬКО из отфильтрованных позиций. Перед отправкой сверь сумму приходов.
+
+═══════════════════════════════════════════
+🚫 ЖЁСТКИЙ ФИЛЬТР (ГЛАВНОЕ ПРАВИЛО)
+═══════════════════════════════════════════
+Включай в CSV ТОЛЬКО те наименования, которые дословно (или с минимальной нормализацией) присутствуют в СПРАВОЧНИКЕ СРОКОВ.
+Всё, чего нет в справочнике, — игнорируй. Даже если это есть в чеке iiko.
+
+Пример: если в чеке есть «Мохито 0,45», а в справочнике нет — НЕ добавляй.
+Пример: если в чеке есть «Каша ОВСЯНАЯ», а в справочнике нет — НЕ добавляй.
 
 ═══════════════════════════════════════════
 ⚠️ ЧАСТЫЕ ОШИБКИ OCR
@@ -1756,7 +1772,7 @@ function buildPrompt() {
 После CSV выведи:
 1. Сомнительные строки: [название] | [что неясно] | [предположение]
    Если нет → «Сомнительных строк нет».
-2. Проверка: строк N, из справочника N, вне N, дат приходов N.
+2. Проверка: строк N, из справочника N, вне N (должно быть 0), дат приходов N.
 
 ═══════════════════════════════════════════
 📚 СПРАВОЧНИК СРОКОВ (часы)
@@ -2181,7 +2197,7 @@ function init() {
     saveSession();
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c FB Audit ', 'background:linear-gradient(135deg,#0a84ff,#0066d6);color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v1.2 · iOS 27 · каталог:', PRODUCTS.length);
+  console.log('%c FB Audit ', 'background:linear-gradient(135deg,#0a84ff,#0066d6);color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v1.3 · iOS 27 · каталог:', PRODUCTS.length);
 }
 
 bindUI();
