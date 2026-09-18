@@ -1,220 +1,695 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-theme="auto">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>☕ Аудит сроков</title>
+<meta name="apple-mobile-web-app-title" content="FB Audit">
+<title>FB Audit</title>
 <style>
-:root{
-  --bg:#f5f7fb;--bg-grad-1:#eef2ff;--bg-grad-2:#faf5ff;--surface:#ffffff;--surface-2:#f8fafc;--surface-3:#f1f5f9;
-  --border:#e5e7eb;--border-strong:#cbd5e1;--text:#0f172a;--text-muted:#64748b;--text-light:#94a3b8;
-  --primary:#6366f1;--primary-hover:#4f46e5;--primary-soft:#eef2ff;--primary-ring:rgba(99,102,241,.18);
-  --success:#10b981;--success-soft:#ecfdf5;--danger:#ef4444;--danger-soft:#fef2f2;
-  --warning:#f59e0b;--warning-soft:#fffbeb;--info:#0ea5e9;--info-soft:#f0f9ff;
-  --r:16px;--r-sm:12px;--r-xs:8px;
-  --sh-1:0 1px 2px rgba(15,23,42,.04);
-  --sh-2:0 2px 6px rgba(15,23,42,.06),0 1px 2px rgba(15,23,42,.04);
-  --sh-3:0 12px 28px rgba(15,23,42,.10),0 6px 12px rgba(15,23,42,.05);
-  --sh-4:0 24px 48px rgba(15,23,42,.16);
-  --sh-focus:0 0 0 4px var(--primary-ring);
-  --trans:.18s cubic-bezier(.4,0,.2,1);
+/* ============================================================
+   iOS 27 DESIGN SYSTEM
+   ============================================================ */
+:root, [data-theme="light"]{
+  --bg: #f2f2f7;
+  --bg-grouped: #f2f2f7;
+  --bg-card: #ffffff;
+  --bg-elev-1: #ffffff;
+  --bg-elev-2: #f2f2f7;
+  --bg-input: #f2f2f7;
+  --bg-hover: rgba(60,60,67,.06);
+  --bg-pressed: rgba(60,60,67,.12);
+  --separator: rgba(60,60,67,.12);
+  --separator-opaque: #c6c6c8;
+  --text: #000000;
+  --text-secondary: rgba(60,60,67,.6);
+  --text-tertiary: rgba(60,60,67,.3);
+  --text-quaternary: rgba(60,60,67,.18);
+  --accent: #007aff;
+  --accent-hover: #0066d6;
+  --accent-soft: rgba(0,122,255,.12);
+  --accent-soft-hover: rgba(0,122,255,.2);
+  --green: #34c759;
+  --green-soft: rgba(52,199,89,.14);
+  --orange: #ff9500;
+  --orange-soft: rgba(255,149,0,.14);
+  --red: #ff3b30;
+  --red-soft: rgba(255,59,48,.14);
+  --blue: #007aff;
+  --blue-soft: rgba(0,122,255,.14);
+  --shadow-1: 0 1px 2px rgba(0,0,0,.04), 0 0 0 .5px rgba(0,0,0,.04);
+  --shadow-2: 0 2px 8px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-3: 0 8px 24px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
+  --shadow-4: 0 20px 48px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.06);
+  --glass-bg: rgba(255,255,255,.72);
+  --glass-border: rgba(255,255,255,.6);
+  --glass-highlight: rgba(255,255,255,.9);
+  --r-lg: 22px;
+  --r-md: 16px;
+  --r-sm: 12px;
+  --r-xs: 8px;
+  --blur: saturate(180%) blur(30px);
+  --spring: cubic-bezier(.34, 1.56, .64, 1);
+  --ease: cubic-bezier(.25, .1, .25, 1);
+}
+[data-theme="dark"]{
+  --bg: #000000;
+  --bg-grouped: #000000;
+  --bg-card: #1c1c1e;
+  --bg-elev-1: #1c1c1e;
+  --bg-elev-2: #2c2c2e;
+  --bg-input: #2c2c2e;
+  --bg-hover: rgba(255,255,255,.06);
+  --bg-pressed: rgba(255,255,255,.12);
+  --separator: rgba(255,255,255,.12);
+  --separator-opaque: #38383a;
+  --text: #ffffff;
+  --text-secondary: rgba(235,235,245,.6);
+  --text-tertiary: rgba(235,235,245,.3);
+  --text-quaternary: rgba(235,235,245,.18);
+  --accent: #0a84ff;
+  --accent-hover: #409cff;
+  --accent-soft: rgba(10,132,255,.18);
+  --accent-soft-hover: rgba(10,132,255,.28);
+  --green: #30d158;
+  --green-soft: rgba(48,209,88,.18);
+  --orange: #ff9f0a;
+  --orange-soft: rgba(255,159,10,.18);
+  --red: #ff453a;
+  --red-soft: rgba(255,69,58,.18);
+  --blue: #0a84ff;
+  --blue-soft: rgba(10,132,255,.18);
+  --shadow-1: 0 1px 2px rgba(0,0,0,.3), 0 0 0 .5px rgba(255,255,255,.06);
+  --shadow-2: 0 2px 8px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+  --shadow-3: 0 8px 24px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.3);
+  --shadow-4: 0 20px 48px rgba(0,0,0,.7), 0 4px 12px rgba(0,0,0,.4);
+  --glass-bg: rgba(28,28,30,.72);
+  --glass-border: rgba(255,255,255,.1);
+  --glass-highlight: rgba(255,255,255,.16);
+}
+@media (prefers-color-scheme: dark){
+  [data-theme="auto"]{
+    --bg: #000000; --bg-grouped: #000000;
+    --bg-card: #1c1c1e; --bg-elev-1: #1c1c1e; --bg-elev-2: #2c2c2e; --bg-input: #2c2c2e;
+    --bg-hover: rgba(255,255,255,.06); --bg-pressed: rgba(255,255,255,.12);
+    --separator: rgba(255,255,255,.12); --separator-opaque: #38383a;
+    --text: #ffffff; --text-secondary: rgba(235,235,245,.6);
+    --text-tertiary: rgba(235,235,245,.3); --text-quaternary: rgba(235,235,245,.18);
+    --accent: #0a84ff; --accent-hover: #409cff;
+    --accent-soft: rgba(10,132,255,.18); --accent-soft-hover: rgba(10,132,255,.28);
+    --green: #30d158; --green-soft: rgba(48,209,88,.18);
+    --orange: #ff9f0a; --orange-soft: rgba(255,159,10,.18);
+    --red: #ff453a; --red-soft: rgba(255,69,58,.18);
+    --blue: #0a84ff; --blue-soft: rgba(10,132,255,.18);
+    --shadow-1: 0 1px 2px rgba(0,0,0,.3), 0 0 0 .5px rgba(255,255,255,.06);
+    --shadow-2: 0 2px 8px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+    --shadow-3: 0 8px 24px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.3);
+    --shadow-4: 0 20px 48px rgba(0,0,0,.7), 0 4px 12px rgba(0,0,0,.4);
+    --glass-bg: rgba(28,28,30,.72);
+    --glass-border: rgba(255,255,255,.1);
+    --glass-highlight: rgba(255,255,255,.16);
+  }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,Arial,sans-serif;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;
   background:var(--bg);
-  background-image:radial-gradient(1200px 600px at 100% -10%,var(--bg-grad-1),transparent 60%),radial-gradient(900px 500px at -10% 100%,var(--bg-grad-2),transparent 55%);
-  background-attachment:fixed;color:var(--text);font-size:14px;line-height:1.55;
-  -webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom);overscroll-behavior-y:none;
+  background-image:
+    radial-gradient(1200px 700px at 100% -10%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%),
+    radial-gradient(900px 500px at -10% 100%, color-mix(in srgb, var(--red) 4%, transparent), transparent 55%);
+  background-attachment:fixed;
+  color:var(--text);
+  font-size:15px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+  -webkit-text-size-adjust:100%;
+  padding-bottom:env(safe-area-inset-bottom);
+  overscroll-behavior-y:none;
+  transition:background-color .3s, color .3s;
 }
-header{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--border);padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top))}
-.header-inner{max-width:1100px;margin:auto;display:flex;align-items:center;gap:12px}
-.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#818cf8 0%,#6366f1 50%,#4f46e5 100%);display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 auto;box-shadow:0 6px 18px rgba(99,102,241,.35);animation:float 4s ease-in-out infinite}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+
+/* ============================================================
+   HEADER — Dynamic Island style
+   ============================================================ */
+header{
+  position:sticky;top:0;z-index:100;
+  padding:10px 16px;
+  padding-top:calc(10px + env(safe-area-inset-top));
+  background:var(--glass-bg);
+  backdrop-filter:var(--blur);
+  -webkit-backdrop-filter:var(--blur);
+  border-bottom:.5px solid var(--glass-border);
+}
+.header-inner{
+  max-width:1100px;margin:auto;
+  display:flex;align-items:center;gap:12px;
+}
+.logo{
+  width:42px;height:42px;border-radius:13px;
+  background:linear-gradient(135deg, #0a84ff 0%, #0066d6 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-size:19px;font-weight:800;color:#fff;
+  letter-spacing:-1px;
+  box-shadow:
+    0 4px 14px rgba(10,132,255,.35),
+    inset 0 1px 0 rgba(255,255,255,.25);
+  flex:0 0 auto;
+  position:relative;
+  overflow:hidden;
+}
+.logo::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg, rgba(255,255,255,.25) 0%, transparent 50%);
+  pointer-events:none;
+}
+.logo-text{
+  font-size:17px;font-weight:800;letter-spacing:-.6px;
+  background:linear-gradient(135deg, var(--text) 0%, color-mix(in srgb, var(--text) 60%, var(--accent)) 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
 .header-text{flex:1;min-width:0}
-.header-text h1{font-size:16px;margin:0;font-weight:700;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(135deg,#0f172a 0%,#4f46e5 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-.header-text .sub{font-size:11.5px;color:var(--text-muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.autosave-badge{font-size:10.5px;padding:3px 8px;border-radius:999px;background:var(--success-soft);color:#065f46;font-weight:600;opacity:0;transition:opacity .3s;white-space:nowrap}
+.header-text h1{
+  font-size:17px;margin:0;font-weight:800;letter-spacing:-.5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.header-text .sub{
+  font-size:11.5px;color:var(--text-secondary);margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  letter-spacing:.01em;
+}
+.header-actions{display:flex;gap:6px;align-items:center}
+.theme-toggle{
+  width:38px;height:38px;border-radius:50%;
+  border:0;
+  background:var(--bg-input);
+  color:var(--text);
+  font-size:16px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .2s var(--spring), background .2s;
+  -webkit-user-select:none;user-select:none;
+  box-shadow:var(--shadow-1);
+}
+.theme-toggle:hover{background:var(--bg-hover);transform:scale(1.06)}
+.theme-toggle:active{transform:scale(.92);background:var(--bg-pressed)}
+.autosave-badge{
+  font-size:10.5px;padding:4px 10px;border-radius:999px;
+  background:var(--green-soft);color:var(--green);font-weight:700;
+  opacity:0;transition:opacity .3s;
+  white-space:nowrap;letter-spacing:.02em;
+}
 .autosave-badge.show{opacity:1}
-main{max-width:1100px;margin:auto;padding:16px 14px 60px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:var(--sh-2);transition:box-shadow var(--trans)}
-.card:hover{box-shadow:var(--sh-3)}
-.card h2{font-size:15.5px;font-weight:700;margin:0 0 6px;display:flex;align-items:center;gap:8px;color:var(--text);letter-spacing:-.01em}
-.card h2 .icon{width:26px;height:26px;border-radius:8px;background:var(--primary-soft);display:inline-flex;align-items:center;justify-content:center;font-size:14px}
-.card .hint{font-size:12.5px;color:var(--text-muted);margin:0 0 14px;line-height:1.5}
+
+/* ============================================================
+   MAIN
+   ============================================================ */
+main{max-width:1100px;margin:auto;padding:16px 14px 80px}
+
+/* ============================================================
+   CARD
+   ============================================================ */
+.card{
+  background:var(--bg-card);
+  border-radius:var(--r-lg);
+  padding:20px;margin-bottom:14px;
+  box-shadow:var(--shadow-2);
+  transition:box-shadow .3s var(--ease), transform .3s var(--ease);
+}
+@media(hover:hover){
+  .card:hover{box-shadow:var(--shadow-3);transform:translateY(-1px)}
+}
+.card h2{
+  font-size:16px;font-weight:700;margin:0 0 14px;
+  display:flex;align-items:center;gap:10px;letter-spacing:-.3px;
+}
+.card h2 .icon{
+  width:30px;height:30px;border-radius:9px;
+  background:var(--accent-soft);color:var(--accent);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:15px;flex:0 0 auto;
+}
+.card .hint{font-size:13px;color:var(--text-secondary);margin:0 0 14px;line-height:1.5}
 .card .hint b{color:var(--text);font-weight:600}
-label{display:block;font-size:11.5px;color:var(--text-muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
-input,button,select,textarea{font:inherit;outline:none}
-input[type=text],input[type=date],input[type=number],input[type=time],select{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--surface);color:var(--text);font-size:16px;transition:border-color var(--trans),box-shadow var(--trans),background var(--trans);-webkit-appearance:none;appearance:none;min-height:46px}
-input:focus,select:focus{border-color:var(--primary);box-shadow:var(--sh-focus);background:#fff}
-textarea{width:100%;padding:14px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--surface);color:var(--text);font-size:13px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.55;min-height:180px;resize:vertical;transition:border-color var(--trans),box-shadow var(--trans)}
-textarea:focus{border-color:var(--primary);box-shadow:var(--sh-focus);background:#fff}
-input::placeholder,textarea::placeholder{color:var(--text-light)}
+
+/* ============================================================
+   FORMS
+   ============================================================ */
+label{
+  display:block;font-size:11.5px;font-weight:600;
+  color:var(--text-secondary);margin-bottom:6px;
+  text-transform:uppercase;letter-spacing:.05em;
+}
+input,button,select,textarea{font:inherit;outline:none;font-family:inherit}
+input[type=text],input[type=date],input[type=number],input[type=time],select{
+  width:100%;padding:13px 15px;
+  border:1.5px solid var(--separator);
+  border-radius:var(--r-sm);
+  background:var(--bg-input);color:var(--text);
+  font-size:16px;
+  transition:border-color .2s var(--ease), box-shadow .2s var(--ease), background .2s;
+  -webkit-appearance:none;appearance:none;
+  min-height:48px;
+}
+input:focus,select:focus{
+  border-color:var(--accent);
+  background:var(--bg-card);
+  box-shadow:0 0 0 4px var(--accent-soft);
+}
+textarea{
+  width:100%;padding:14px 16px;
+  border:1.5px solid var(--separator);
+  border-radius:var(--r-sm);
+  background:var(--bg-input);color:var(--text);
+  font-size:13px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  line-height:1.55;min-height:180px;resize:vertical;
+  transition:border-color .2s var(--ease), box-shadow .2s var(--ease);
+}
+textarea:focus{
+  border-color:var(--accent);
+  background:var(--bg-card);
+  box-shadow:0 0 0 4px var(--accent-soft);
+}
+input::placeholder,textarea::placeholder{color:var(--text-tertiary)}
 .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 @media (max-width:640px){.grid-3{grid-template-columns:1fr}}
-button{border:0;border-radius:var(--r-sm);padding:12px 18px;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;font-weight:600;font-size:14px;cursor:pointer;transition:transform var(--trans),box-shadow var(--trans),opacity var(--trans),filter var(--trans);white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;user-select:none;position:relative;overflow:hidden;box-shadow:0 1px 2px rgba(15,23,42,.08)}
-button:hover{filter:brightness(1.08);box-shadow:0 4px 12px rgba(15,23,42,.12)}
-button:active{transform:scale(.97)}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+button{
+  border:0;border-radius:var(--r-sm);
+  padding:13px 20px;
+  background:var(--bg-elev-2);color:var(--text);
+  font-weight:600;font-size:15px;cursor:pointer;
+  transition:transform .18s var(--spring), box-shadow .2s var(--ease), opacity .2s, filter .2s, background .2s;
+  white-space:nowrap;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:48px;
+  user-select:none;-webkit-user-select:none;
+  position:relative;overflow:hidden;
+  letter-spacing:-.2px;
+}
+button:active{transform:scale(.96)}
 button:disabled{opacity:.5;cursor:not-allowed;transform:none}
-button.secondary{background:var(--surface);color:var(--text);border:1.5px solid var(--border-strong);box-shadow:none}
-button.secondary:hover{background:var(--surface-2);border-color:var(--primary);color:var(--primary)}
-button.primary{background:linear-gradient(135deg,#818cf8 0%,#6366f1 50%,#4f46e5 100%);box-shadow:0 4px 14px rgba(99,102,241,.28)}
-button.primary:hover{box-shadow:0 6px 20px rgba(99,102,241,.38)}
-button.success{background:linear-gradient(135deg,#34d399 0%,#10b981 50%,#059669 100%);box-shadow:0 4px 14px rgba(16,185,129,.28)}
-button.success:hover{box-shadow:0 6px 20px rgba(16,185,129,.38)}
-button.danger{background:linear-gradient(135deg,#f87171 0%,#ef4444 50%,#dc2626 100%)}
-button.info{background:linear-gradient(135deg,#38bdf8 0%,#0ea5e9 50%,#0284c7 100%);box-shadow:0 4px 14px rgba(14,165,233,.28)}
-button.info:hover{box-shadow:0 6px 20px rgba(14,165,233,.38)}
 button.block{width:100%}
-button.small{padding:9px 14px;font-size:12.5px;min-height:40px}
-button.busy{pointer-events:none;opacity:.75}
-button.busy::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:busy .8s linear infinite}
+button.small{padding:10px 14px;font-size:13.5px;min-height:42px}
+
+button.primary{
+  background:linear-gradient(135deg, #0a84ff 0%, #0066d6 100%);
+  color:#fff;
+  box-shadow:
+    0 4px 16px rgba(10,132,255,.28),
+    inset 0 1px 0 rgba(255,255,255,.2);
+}
+button.primary:hover{filter:brightness(1.06);box-shadow:0 6px 22px rgba(10,132,255,.4)}
+button.success{
+  background:linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%);
+  color:#fff;
+  box-shadow:0 4px 16px rgba(16,185,129,.28), inset 0 1px 0 rgba(255,255,255,.2);
+}
+button.success:hover{filter:brightness(1.06);box-shadow:0 6px 22px rgba(16,185,129,.4)}
+button.danger{background:linear-gradient(135deg,#f87171 0%,#ef4444 50%,#dc2626 100%);color:#fff}
+button.info{
+  background:linear-gradient(135deg, #38bdf8 0%, #0ea5e9 50%, #0284c7 100%);
+  color:#fff;box-shadow:0 4px 16px rgba(14,165,233,.28), inset 0 1px 0 rgba(255,255,255,.2);
+}
+button.info:hover{box-shadow:0 6px 22px rgba(14,165,233,.4)}
+button.secondary{
+  background:var(--bg-card);
+  color:var(--accent);
+  border:1.5px solid var(--separator);
+  box-shadow:var(--shadow-1);
+}
+button.secondary:hover{background:var(--accent-soft);border-color:var(--accent)}
+button.busy{pointer-events:none;opacity:.7}
+button.busy::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
+  animation:busy 1s linear infinite;
+}
 @keyframes busy{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
-.status{margin-top:12px;font-size:13px;padding:12px 14px;background:var(--surface-2);border-radius:var(--r-sm);border:1px solid var(--border);line-height:1.5;display:none;animation:fadeIn .25s ease-out}
+
+/* ============================================================
+   STATUS
+   ============================================================ */
+.status{
+  margin-top:12px;font-size:13.5px;
+  padding:13px 16px;
+  background:var(--bg-input);border-radius:var(--r-sm);
+  border:1px solid var(--separator);
+  line-height:1.5;display:none;
+  animation:fadeIn .3s var(--ease);
+}
 .status.show{display:block}
-.status.ok{background:var(--success-soft);border-color:#a7f3d0;color:#065f46}
-.status.err{background:var(--danger-soft);border-color:#fecaca;color:#991b1b}
-.status.info{background:var(--info-soft);border-color:#bae6fd;color:#075985}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-.table-wrap{overflow-x:auto;margin:0 -18px;padding:0 18px;-webkit-overflow-scrolling:touch;border-radius:var(--r-sm)}
-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;min-width:900px}
-th{font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;background:var(--surface-3);padding:11px 8px;text-align:left;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1}
+.status.ok{background:var(--green-soft);border-color:transparent;color:var(--green);font-weight:600}
+.status.err{background:var(--red-soft);border-color:transparent;color:var(--red);font-weight:600}
+.status.info{background:var(--blue-soft);border-color:transparent;color:var(--accent);font-weight:600}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+.table-wrap{
+  overflow-x:auto;margin:0 -20px;padding:0 20px;
+  -webkit-overflow-scrolling:touch;
+  border-radius:var(--r-md);
+}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;min-width:900px}
+th{
+  font-size:10.5px;font-weight:700;color:var(--text-secondary);
+  text-transform:uppercase;letter-spacing:.06em;
+  background:var(--bg-input);
+  padding:12px 10px;text-align:left;
+  border-bottom:1px solid var(--separator);
+  position:sticky;top:0;z-index:1;
+}
 th:first-child{border-top-left-radius:var(--r-sm)}
 th:last-child{border-top-right-radius:var(--r-sm)}
-td{padding:10px 8px;border-bottom:1px solid var(--border);vertical-align:middle;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-tbody tr:hover{background:var(--surface-2)}
+td{padding:12px 10px;border-bottom:1px solid var(--separator);vertical-align:middle;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tbody tr:hover{background:var(--bg-hover)}
 tbody tr:last-child td{border-bottom:none}
-tbody tr.row-fresh{background:linear-gradient(90deg,rgba(16,185,129,.06) 0%,rgba(16,185,129,.02) 100%)}
-tbody tr.row-fresh:hover{background:linear-gradient(90deg,rgba(16,185,129,.12) 0%,rgba(16,185,129,.05) 100%)}
-tbody tr.row-warn{background:linear-gradient(90deg,rgba(245,158,11,.08) 0%,rgba(245,158,11,.02) 100%)}
-tbody tr.row-warn:hover{background:linear-gradient(90deg,rgba(245,158,11,.16) 0%,rgba(245,158,11,.06) 100%)}
-tbody tr.row-danger{background:linear-gradient(90deg,rgba(239,68,68,.10) 0%,rgba(239,68,68,.03) 100%)}
-tbody tr.row-danger:hover{background:linear-gradient(90deg,rgba(239,68,68,.18) 0%,rgba(239,68,68,.07) 100%)}
+
+tbody tr.row-fresh{background: color-mix(in srgb, var(--green) 6%, transparent)}
+tbody tr.row-fresh:hover{background: color-mix(in srgb, var(--green) 12%, transparent)}
+tbody tr.row-warn{background: color-mix(in srgb, var(--orange) 8%, transparent)}
+tbody tr.row-warn:hover{background: color-mix(in srgb, var(--orange) 15%, transparent)}
+tbody tr.row-danger{background: color-mix(in srgb, var(--red) 9%, transparent)}
+tbody tr.row-danger:hover{background: color-mix(in srgb, var(--red) 17%, transparent)}
 tbody tr.row-unknown{background:transparent}
-tbody tr.row-unknown:hover{background:var(--surface-2)}
-tbody tr.row-info{background:linear-gradient(90deg,rgba(14,165,233,.07) 0%,rgba(14,165,233,.02) 100%)}
-tbody tr.row-info:hover{background:linear-gradient(90deg,rgba(14,165,233,.14) 0%,rgba(14,165,233,.05) 100%)}
-tbody tr.row-fresh td:first-child,tbody tr.row-warn td:first-child,tbody tr.row-danger td:first-child,tbody tr.row-unknown td:first-child,tbody tr.row-info td:first-child{position:relative}
-tbody tr.row-fresh td:first-child::before,tbody tr.row-warn td:first-child::before,tbody tr.row-danger td:first-child::before,tbody tr.row-info td:first-child::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:2px}
-tbody tr.row-fresh td:first-child::before{background:var(--success)}
-tbody tr.row-warn td:first-child::before{background:var(--warning)}
-tbody tr.row-danger td:first-child::before{background:var(--danger)}
-tbody tr.row-info td:first-child::before{background:var(--info)}
-.row-status{display:inline-block;width:18px;text-align:center;margin-right:4px;font-size:12px}
-.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;padding:12px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-sm);font-size:12px;color:var(--text-muted)}
+tbody tr.row-unknown:hover{background:var(--bg-hover)}
+tbody tr.row-info{background: color-mix(in srgb, var(--blue) 7%, transparent)}
+tbody tr.row-info:hover{background: color-mix(in srgb, var(--blue) 14%, transparent)}
+
+tbody tr.row-fresh td:first-child,
+tbody tr.row-warn td:first-child,
+tbody tr.row-danger td:first-child,
+tbody tr.row-unknown td:first-child,
+tbody tr.row-info td:first-child{position:relative}
+tbody tr.row-fresh td:first-child::before,
+tbody tr.row-warn td:first-child::before,
+tbody tr.row-danger td:first-child::before,
+tbody tr.row-info td:first-child::before{
+  content:'';position:absolute;left:0;top:6px;bottom:6px;width:3px;border-radius:2px;
+}
+tbody tr.row-fresh td:first-child::before{background:var(--green)}
+tbody tr.row-warn td:first-child::before{background:var(--orange)}
+tbody tr.row-danger td:first-child::before{background:var(--red)}
+tbody tr.row-info td:first-child::before{background:var(--blue)}
+
+.row-status{
+  display:inline-block;width:18px;text-align:center;
+  margin-right:5px;font-size:12px;
+}
+
+/* ============================================================
+   LEGEND + CHIPS
+   ============================================================ */
+.legend{
+  display:flex;flex-wrap:wrap;gap:10px;
+  margin-top:14px;padding:12px 14px;
+  background:var(--bg-input);border-radius:var(--r-sm);
+  font-size:12px;color:var(--text-secondary);
+}
 .legend-item{display:inline-flex;align-items:center;gap:6px}
 .legend-dot{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
-.legend-dot.fresh{background:var(--success)}
-.legend-dot.warn{background:var(--warning)}
-.legend-dot.danger{background:var(--danger)}
-.legend-dot.unknown{background:var(--border-strong)}
-.legend-dot.info{background:var(--info)}
-.status-summary{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-.status-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600}
-.status-chip.fresh{background:#d1fae5;color:#065f46}
-.status-chip.warn{background:#fef3c7;color:#92400e}
-.status-chip.danger{background:#fee2e2;color:#991b1b}
-.status-chip.unknown{background:#e2e8f0;color:#475569}
-.status-chip.info{background:#dbeafe;color:#1e40af}
-.filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-.filter-btn{padding:8px 14px;border-radius:999px;border:1.5px solid var(--border);background:var(--surface);color:var(--text-muted);font-size:12.5px;font-weight:600;cursor:pointer;transition:all var(--trans);min-height:36px;display:inline-flex;align-items:center;gap:6px;box-shadow:none;white-space:nowrap}
-.filter-btn:hover{border-color:var(--border-strong);color:var(--text);transform:none;filter:none;box-shadow:none}
-.filter-btn:active{transform:scale(.96)}
-.filter-btn.active{background:linear-gradient(135deg,#818cf8 0%,#6366f1 50%,#4f46e5 100%);color:#fff;border-color:transparent;box-shadow:0 3px 10px rgba(99,102,241,.28)}
-.filter-btn.active:hover{filter:brightness(1.06)}
-.filter-btn .filter-count{font-size:11px;opacity:.75;padding:1px 7px;border-radius:999px;background:rgba(0,0,0,.06)}
-.filter-btn.active .filter-count{background:rgba(255,255,255,.22);opacity:1}
-.filter-btn.filter-danger.active{background:linear-gradient(135deg,#f87171 0%,#ef4444 50%,#dc2626 100%);box-shadow:0 3px 10px rgba(239,68,68,.32)}
-.filter-btn.filter-warn.active{background:linear-gradient(135deg,#fbbf24 0%,#f59e0b 50%,#d97706 100%);box-shadow:0 3px 10px rgba(245,158,11,.32)}
-.filter-btn.filter-fresh.active{background:linear-gradient(135deg,#34d399 0%,#10b981 50%,#059669 100%);box-shadow:0 3px 10px rgba(16,185,129,.32)}
-.filter-btn.filter-unknown.active{background:linear-gradient(135deg,#94a3b8 0%,#64748b 100%);box-shadow:0 3px 10px rgba(100,116,139,.28)}
-.filter-btn.filter-info.active{background:linear-gradient(135deg,#38bdf8 0%,#0ea5e9 50%,#0284c7 100%);box-shadow:0 3px 10px rgba(14,165,233,.32)}
-.empty-state{text-align:center;padding:36px 20px;color:var(--text-muted);font-size:13.5px}
-.empty-state .em-icon{font-size:36px;display:block;margin-bottom:10px;opacity:.55}
-.empty-state .em-title{font-weight:700;color:var(--text);margin-bottom:6px;font-size:14.5px}
-.num{width:64px;min-width:60px;padding:8px 4px;border:1.5px solid var(--border-strong);border-radius:var(--r-xs);font-size:14px;text-align:center;background:#fff;font-weight:600;-webkit-appearance:none;appearance:none;min-height:40px;transition:border-color var(--trans),box-shadow var(--trans)}
-.num:focus{border-color:var(--primary);box-shadow:var(--sh-focus);outline:none}
-.num:disabled{background:var(--surface-3);cursor:not-allowed;color:var(--text-muted);opacity:.7}
-.income-cell{position:relative;padding:6px 4px !important;text-align:center}
-.income-cell .num{width:60px;min-width:56px;min-height:36px;padding:6px 4px;font-size:13px}
-.income-cell.edited .num{background:#fef3c7;border-color:#f59e0b}
-.income-cell .reset-btn{position:absolute;top:-6px;right:-4px;width:22px;height:22px;padding:0;border-radius:50%;background:var(--warning);color:#fff;font-size:11px;font-weight:700;box-shadow:0 2px 6px rgba(245,158,11,.4);display:none;z-index:2;min-height:auto;border:2px solid #fff;line-height:1}
-.income-cell .reset-btn:hover{background:var(--warning-soft);color:var(--warning)}
+.legend-dot.fresh{background:var(--green)}
+.legend-dot.warn{background:var(--orange)}
+.legend-dot.danger{background:var(--red)}
+.legend-dot.unknown{background:var(--text-tertiary)}
+.legend-dot.info{background:var(--blue)}
+
+.status-summary{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.status-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:999px;
+  font-size:12px;font-weight:700;
+  letter-spacing:.01em;
+}
+.status-chip.fresh{background:var(--green-soft);color:var(--green)}
+.status-chip.warn{background:var(--orange-soft);color:var(--orange)}
+.status-chip.danger{background:var(--red-soft);color:var(--red)}
+.status-chip.unknown{background:var(--bg-input);color:var(--text-secondary)}
+.status-chip.info{background:var(--blue-soft);color:var(--accent)}
+
+/* ============================================================
+   FILTERS
+   ============================================================ */
+.filter-bar{
+  display:flex;flex-wrap:wrap;gap:8px;
+  margin-bottom:14px;padding-bottom:14px;
+  border-bottom:1px solid var(--separator);
+}
+.filter-btn{
+  padding:9px 14px;border-radius:999px;
+  border:1.5px solid var(--separator);
+  background:var(--bg-card);color:var(--text-secondary);
+  font-size:12.5px;font-weight:600;cursor:pointer;
+  transition:all .2s var(--spring);
+  min-height:38px;
+  display:inline-flex;align-items:center;gap:6px;
+  box-shadow:none;white-space:nowrap;
+  letter-spacing:-.1px;
+}
+.filter-btn:hover{border-color:var(--separator-opaque);color:var(--text);transform:translateY(-1px)}
+.filter-btn:active{transform:scale(.95)}
+.filter-btn.active{
+  background:linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #4f46e5 100%);
+  color:#fff;border-color:transparent;
+  box-shadow:0 4px 12px rgba(99,102,241,.3), inset 0 1px 0 rgba(255,255,255,.2);
+}
+.filter-btn .filter-count{
+  font-size:11px;padding:1px 7px;border-radius:999px;
+  background:var(--bg-input);color:var(--text-secondary);
+}
+.filter-btn.active .filter-count{background:rgba(255,255,255,.25);color:#fff}
+.filter-btn.filter-danger.active{
+  background:linear-gradient(135deg, #ff453a 0%, #dc2626 100%);
+  box-shadow:0 4px 12px rgba(239,68,68,.35), inset 0 1px 0 rgba(255,255,255,.2);
+}
+.filter-btn.filter-warn.active{
+  background:linear-gradient(135deg, #ff9500 0%, #d97706 100%);
+  box-shadow:0 4px 12px rgba(245,158,11,.35), inset 0 1px 0 rgba(255,255,255,.2);
+}
+.filter-btn.filter-fresh.active{
+  background:linear-gradient(135deg, #30d158 0%, #059669 100%);
+  box-shadow:0 4px 12px rgba(16,185,129,.35), inset 0 1px 0 rgba(255,255,255,.2);
+}
+.filter-btn.filter-unknown.active{
+  background:linear-gradient(135deg, #8e8e93 0%, #475569 100%);
+  box-shadow:0 4px 12px rgba(100,116,139,.3);
+}
+.filter-btn.filter-info.active{
+  background:linear-gradient(135deg, #0a84ff 0%, #0284c7 100%);
+  box-shadow:0 4px 12px rgba(10,132,255,.35), inset 0 1px 0 rgba(255,255,255,.2);
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-secondary);font-size:13.5px}
+.empty-state .em-icon{font-size:40px;display:block;margin-bottom:12px;opacity:.5}
+.empty-state .em-title{font-weight:700;color:var(--text);margin-bottom:6px;font-size:15px}
+
+/* ============================================================
+   NUM INPUT (для таблицы)
+   ============================================================ */
+.num{
+  width:68px;min-width:64px;padding:8px 6px;
+  border:1.5px solid var(--separator);
+  border-radius:var(--r-xs);
+  font-size:14px;text-align:center;
+  background:var(--bg-card);color:var(--text);font-weight:600;
+  -webkit-appearance:none;appearance:none;min-height:42px;
+  transition:border-color .2s, box-shadow .2s, background .2s;
+  font-family:inherit;
+}
+.num:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);outline:none}
+.num:disabled{background:var(--bg-input);cursor:not-allowed;color:var(--text-tertiary);opacity:.7}
+
+.income-cell{position:relative;padding:8px 6px !important;text-align:center}
+.income-cell .num{width:62px;min-width:58px;min-height:38px;padding:6px 4px;font-size:13px}
+.income-cell.edited .num{
+  background:var(--orange-soft);
+  border-color:var(--orange);
+}
+.income-cell .reset-btn{
+  position:absolute;top:-6px;right:-4px;
+  width:22px;height:22px;padding:0;
+  border-radius:50%;background:var(--orange);color:#fff;
+  font-size:11px;font-weight:800;
+  box-shadow:0 2px 8px rgba(245,158,11,.5);
+  display:none;z-index:2;min-height:auto;
+  border:2px solid var(--bg-card);line-height:1;
+  transition:transform .15s var(--spring);
+}
+.income-cell .reset-btn:hover{transform:scale(1.1)}
 .income-cell.edited .reset-btn{display:inline-flex;align-items:center;justify-content:center}
+
 .calc-cell{text-align:center;font-weight:700}
-.calc-cell.zero{color:#94a3b8}
-.calc-cell.positive{color:#dc2626}
-.steps-hint{background:linear-gradient(135deg,#eef2ff 0%,#e0e7ff 100%);border:1px solid #c7d2fe;border-radius:var(--r-sm);padding:14px 16px;font-size:12.5px;line-height:1.6;color:#3730a3;margin-bottom:14px}
-.steps-hint b{color:#312e81;font-weight:700}
-.steps-hint ol{margin:6px 0 0 18px;padding:0}
-.steps-hint li{margin-bottom:4px}
-.ai-help{padding:12px 14px;border-radius:var(--r-sm);background:linear-gradient(135deg,#eef2ff 0%,#e0e7ff 100%);border:1px solid #c7d2fe;font-size:12px;line-height:1.55;color:#3730a3}
-.ai-help b{color:#312e81}
+.calc-cell.zero{color:var(--text-tertiary)}
+.calc-cell.positive{color:var(--red)}
+
+/* ============================================================
+   STEPS HINT
+   ============================================================ */
+.steps-hint{
+  background:linear-gradient(135deg, var(--accent-soft) 0%, color-mix(in srgb, var(--accent) 8%, transparent) 100%);
+  border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius:var(--r-sm);
+  padding:14px 16px;
+  font-size:13px;line-height:1.55;
+  color:var(--accent);
+  margin-bottom:14px;
+}
+.steps-hint b{color:var(--text);font-weight:700}
+.steps-hint ol{margin:6px 0 0 20px;padding:0}
+.steps-hint li{margin-bottom:5px}
+.ai-help{
+  padding:13px 15px;border-radius:var(--r-sm);
+  background:linear-gradient(135deg, var(--accent-soft) 0%, color-mix(in srgb, var(--accent) 8%, transparent) 100%);
+  border:1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  font-size:12.5px;line-height:1.55;color:var(--accent);
+}
+.ai-help b{color:var(--text)}
+
+/* ============================================================
+   ACTION GRID
+   ============================================================ */
 .action-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 @media (max-width:500px){.action-buttons{grid-template-columns:1fr}}
+
+/* ============================================================
+   PHOTOS
+   ============================================================ */
 .photo-queue{display:grid;gap:10px;margin-top:12px}
-.photo-item{display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--surface-2);transition:background var(--trans),border-color var(--trans)}
-.photo-item:hover{background:var(--surface-3);border-color:var(--border-strong)}
-.photo-thumb{width:56px;height:56px;object-fit:cover;border-radius:10px;background:#e2e8f0;box-shadow:var(--sh-1)}
+.photo-item{
+  display:grid;grid-template-columns:56px 1fr auto;gap:12px;
+  align-items:center;padding:12px;
+  border:1px solid var(--separator);border-radius:var(--r-sm);
+  background:var(--bg-input);
+  transition:background .2s, border-color .2s, transform .2s var(--spring);
+}
+.photo-item:hover{background:var(--bg-elev-2);border-color:var(--separator-opaque);transform:translateX(2px)}
+.photo-thumb{width:56px;height:56px;object-fit:cover;border-radius:12px;background:var(--bg-elev-2);box-shadow:var(--shadow-1)}
 .photo-meta{min-width:0}
-.photo-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.photo-type{font-size:11.5px;color:var(--text-muted);margin-top:3px}
+.photo-name{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.photo-type{font-size:11.5px;color:var(--text-secondary);margin-top:3px}
 .photo-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.photo-actions button{min-height:36px;padding:8px 12px;font-size:12px}
-.modal{position:fixed;inset:0;z-index:100;background:rgba(15,23,42,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;padding:0;animation:fadeIn .22s ease-out}
+.photo-actions button{min-height:38px;padding:8px 14px;font-size:13px}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.5);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:flex;align-items:flex-end;justify-content:center;
+  padding:0;animation:fadeIn .3s var(--ease);
+}
 .modal.hidden{display:none}
-.modal-content{background:var(--surface);border-radius:24px 24px 0 0;width:100%;max-width:820px;max-height:92vh;overflow:auto;padding:22px 20px;padding-bottom:calc(22px + env(safe-area-inset-bottom));box-shadow:var(--sh-4);animation:slideUp .3s cubic-bezier(.16,1,.3,1);-webkit-overflow-scrolling:touch}
+.modal-content{
+  background:var(--bg-card);
+  border-radius:24px 24px 0 0;
+  width:100%;max-width:820px;
+  max-height:92vh;overflow:auto;
+  padding:24px 20px;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom));
+  box-shadow:var(--shadow-4);
+  animation:slideUp .4s cubic-bezier(.16,1,.3,1);
+  -webkit-overflow-scrolling:touch;
+}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-content h3{margin:0 0 8px;font-size:18px;font-weight:700;letter-spacing:-.02em}
-.modal-handle{width:44px;height:5px;background:var(--border-strong);border-radius:3px;margin:0 auto 16px}
-pre.code{background:#0f172a;color:#a5f3fc;padding:16px;border-radius:var(--r-sm);font-size:11.5px;line-height:1.6;overflow:auto;max-height:60vh;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;-webkit-overflow-scrolling:touch;border:1px solid #1e293b}
+.modal-content h3{margin:0 0 10px;font-size:20px;font-weight:800;letter-spacing:-.4px}
+.modal-handle{
+  width:44px;height:5px;background:var(--text-quaternary);
+  border-radius:3px;margin:0 auto 18px;
+}
+pre.code{
+  background:#0f172a;color:#a5f3fc;
+  padding:16px;border-radius:var(--r-sm);
+  font-size:12px;line-height:1.6;
+  overflow:auto;max-height:60vh;
+  white-space:pre-wrap;word-break:break-word;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  -webkit-overflow-scrolling:touch;
+  border:1px solid #1e293b;
+}
+
+/* ============================================================
+   DESKTOP
+   ============================================================ */
 @media (min-width:641px){
   header{padding:14px 24px;padding-top:calc(14px + env(safe-area-inset-top))}
-  .header-text h1{font-size:17px}
-  .header-text .sub{font-size:12px}
-  .logo{width:44px;height:44px;font-size:22px;border-radius:14px}
-  main{padding:22px 24px 60px}
-  .card{padding:22px}
-  input[type=text],input[type=date],input[type=number],input[type=time],select{padding:11px 14px;font-size:14.5px;min-height:44px}
+  .header-text h1{font-size:19px}
+  .header-text .sub{font-size:12.5px}
+  .logo{width:46px;height:46px;font-size:20px;border-radius:14px}
+  .logo-text{font-size:19px}
+  main{padding:24px 24px 80px}
+  .card{padding:24px;border-radius:24px}
+  input[type=text],input[type=date],input[type=number],input[type=time],select{padding:12px 16px;font-size:15px;min-height:46px}
   textarea{font-size:13.5px;min-height:240px}
-  button{min-height:44px;padding:11px 18px;font-size:14px}
-  button.small{min-height:38px;padding:8px 14px;font-size:13px}
+  button{min-height:46px;padding:12px 22px;font-size:15px}
+  button.small{min-height:40px;padding:9px 15px;font-size:13.5px}
   .modal{align-items:center;padding:20px}
-  .modal-content{border-radius:20px;padding:28px;max-height:92vh;animation:modalIn .22s cubic-bezier(.16,1,.3,1)}
-  @keyframes modalIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal-content{border-radius:24px;padding:32px;max-height:92vh;animation:modalIn .3s cubic-bezier(.16,1,.3,1)}
+  @keyframes modalIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
   .modal-handle{display:none}
-  .table-wrap{margin:0 -22px;padding:0 22px}
-  table{font-size:13px;min-width:1000px}
-  th{font-size:11px;padding:12px 10px}
-  td{padding:11px 10px}
+  .table-wrap{margin:0 -24px;padding:0 24px}
+  table{font-size:13.5px;min-width:1000px}
+  th{font-size:11px;padding:14px 12px}
+  td{padding:13px 12px}
 }
-.cat-row{display:grid;grid-template-columns:1fr 90px 44px;gap:10px;align-items:center;padding:8px 10px;border-radius:var(--r-sm);transition:background var(--trans)}
-.cat-row:hover{background:var(--surface-2)}
-.cat-row input[type=text],.cat-row input[type=number]{padding:9px 12px;font-size:13px;border-radius:10px;min-height:40px}
-.cat-row input[type=number]{text-align:center;font-weight:700;color:var(--primary)}
-.cat-row .del-btn{min-height:40px;padding:0;background:var(--danger-soft);color:var(--danger);border:1px solid #fecaca;box-shadow:none;font-size:14px}
-.cat-row .del-btn:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
+
+/* ============================================================
+   CATALOG EDITOR
+   ============================================================ */
+.cat-row{
+  display:grid;grid-template-columns:1fr 90px 44px;
+  gap:10px;align-items:center;
+  padding:10px;border-radius:var(--r-sm);
+  transition:background .2s;
+}
+.cat-row:hover{background:var(--bg-hover)}
+.cat-row input[type=text],
+.cat-row input[type=number]{
+  padding:10px 12px;font-size:13.5px;
+  border-radius:10px;min-height:42px;
+}
+.cat-row input[type=number]{text-align:center;font-weight:700;color:var(--accent)}
+.cat-row .del-btn{
+  min-height:42px;padding:0;
+  background:var(--red-soft);color:var(--red);
+  border:1px solid color-mix(in srgb, var(--red) 30%, transparent);
+  box-shadow:none;font-size:15px;font-weight:800;
+}
+.cat-row .del-btn:hover{background:var(--red);color:#fff;border-color:var(--red)}
 </style>
 </head>
 <body>
 
 <header>
   <div class="header-inner">
-    <div class="logo">☕</div>
+    <div class="logo">FB</div>
     <div class="header-text">
-      <h1>Аудит сроков — Контроль кофейни</h1>
-      <div class="sub">Накладные · iiko · FIFO · Списание в 22:00 · Excel</div>
+      <h1>FB Audit</h1>
+      <div class="sub">Накладные · iiko · FIFO · Списание 22:00 · Excel</div>
     </div>
-    <div id="autosaveBadge" class="autosave-badge">💾 Сохранено</div>
+    <div class="header-actions">
+      <div id="autosaveBadge" class="autosave-badge">💾 Сохранено</div>
+      <button class="theme-toggle" id="themeToggle" title="Тема">🌗</button>
+    </div>
   </div>
 </header>
 
 <main>
 
+  <!-- ПАРАМЕТРЫ -->
   <div class="card">
     <h2><span class="icon">⚙️</span>Параметры проверки</h2>
     <div class="grid-3">
@@ -223,33 +698,35 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:16px;border-radius:var(--r-sm)
       <div><label>Точка</label><input id="point" type="text" placeholder="№037" autocomplete="off" maxlength="50"></div>
     </div>
     <div class="ai-help" style="margin-top:12px">
-      🕖 <b>Списание:</b> ≤24 ч — в день получения 22:00; ≤36 ч — на след. день 22:00; >36 ч — через (часы÷24−1) дней в 22:00. <br>
-      📊 <b>Логика:</b> свежие партии закрывают витрину первыми; всё, что «не влезло» — просрочка (на витрине или продано).
+      🕖 <b>Списание:</b> ≤24 ч — в день получения 22:00; ≤36 ч — на след. день 22:00; &gt;36 ч — через (часы÷24−1) дней в 22:00.<br>
+      📊 <b>Логика:</b> свежие партии закрывают витрину первыми; всё, что «не влезло» — просрочка.
     </div>
   </div>
 
+  <!-- ШАГ 1 -->
   <div class="card">
     <h2><span class="icon">📷</span>Шаг 1. Загрузка фото и PDF</h2>
-    <p class="hint">Загрузите накладные и чек iiko — <b>фото или PDF</b>. Файлы хранятся на устройстве.</p>
+    <p class="hint">Загрузите накладные и чек iiko — <b>фото или PDF</b>.</p>
     <div class="action-buttons">
-      <button id="uploadInvoicePhotosBtn" class="info">📷 Накладные (фото/PDF)</button>
-      <button id="uploadSalesPhotosBtn" class="secondary">🧾 iiko (фото/PDF)</button>
+      <button id="uploadInvoicePhotosBtn" class="info">📷 Накладные</button>
+      <button id="uploadSalesPhotosBtn" class="secondary">🧾 iiko</button>
     </div>
     <input id="invoicePhotoInput" type="file" accept="image/*,application/pdf" multiple hidden>
     <input id="salesPhotoInput" type="file" accept="image/*,application/pdf" multiple hidden>
     <div id="photoQueue" class="photo-queue"></div>
   </div>
 
+  <!-- ШАГ 2 -->
   <div class="card">
     <h2><span class="icon">📤</span>Шаг 2. Отправить в ИИ</h2>
     <div class="steps-hint">
       <b>Как это работает:</b>
       <ol>
-        <li>Нажмите «Поделиться в ИИ» — откроется системное меню «Поделиться».</li>
+        <li>Нажмите «Поделиться в ИИ» — откроется системное меню.</li>
         <li>Выберите ChatGPT / DeepSeek / другое приложение.</li>
-        <li>Приложение получит <b>исходные файлы</b> (фото и PDF) и готовый промпт.</li>
+        <li>Приложение получит <b>исходные файлы</b> и готовый промпт.</li>
         <li>ИИ вернёт <b>CSV-файл для скачивания</b>.</li>
-        <li>Скачайте CSV и загрузите его в приложение (Шаг 3).</li>
+        <li>Скачайте CSV и загрузите его в Шаг 3.</li>
       </ol>
     </div>
     <div class="action-buttons">
@@ -259,6 +736,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:16px;border-radius:var(--r-sm)
     <div id="shareStatus" class="status"></div>
   </div>
 
+  <!-- ШАГ 3 -->
   <div class="card">
     <h2><span class="icon">📥</span>Шаг 3. Импорт CSV от ИИ</h2>
     <p class="hint">Вставьте CSV, который вернул ИИ, или загрузите файл. <b>Строки будут отсортированы по алфавиту.</b></p>
@@ -274,21 +752,23 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:16px;border-radius:var(--r-sm)
     <div id="csvStatus" class="status"></div>
   </div>
 
+  <!-- СПРАВОЧНИК -->
   <div class="card">
     <h2><span class="icon">📚</span>Справочник сроков годности</h2>
     <p class="hint">Отредактируйте справочник: добавьте новые позиции, удалите ненужные, измените сроки.</p>
     <div class="action-buttons">
-      <button id="editCatalogBtn" class="info">✏️ Редактировать справочник</button>
+      <button id="editCatalogBtn" class="info">✏️ Редактировать</button>
       <button id="exportCatalogBtn" class="secondary">📤 Экспорт JSON</button>
     </div>
     <div class="action-buttons">
       <button id="importCatalogBtn" class="secondary">📥 Импорт JSON</button>
-      <button id="resetCatalogBtn" class="secondary">↺ Сбросить к заводским</button>
+      <button id="resetCatalogBtn" class="secondary">↺ Сбросить</button>
     </div>
     <input id="importCatalogFile" type="file" accept=".json,application/json" hidden>
     <div id="catalogStatus" class="status"></div>
   </div>
 
+  <!-- ШАГ 4 -->
   <div class="card">
     <h2><span class="icon">📈</span>Шаг 4. Результат</h2>
     <p id="summary" class="hint">Загрузите CSV и введите фактический остаток, чтобы увидеть результат.</p>
@@ -326,31 +806,35 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:16px;border-radius:var(--r-sm)
       <span class="legend-item"><span class="legend-dot danger"></span> Продавали просрочку</span>
       <span class="legend-item"><span class="legend-dot unknown"></span> Нет остатка</span>
       <span class="legend-item"><span class="legend-dot info"></span> Продажи без накладных</span>
-      <span class="legend-item"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:#fef3c7;border:1px solid #f59e0b"></span> Приход исправлен вручную</span>
+      <span class="legend-item"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--orange-soft);border:1px solid var(--orange)"></span> Приход исправлен</span>
     </div>
     <div id="statusSummary" class="status-summary"></div>
   </div>
 
+  <!-- СОХРАНЕНИЕ -->
   <div class="card">
     <h2><span class="icon">💾</span>Сохранение</h2>
     <button id="exportBtn" class="primary block">📥 Скачать Excel (.xlsx)</button>
-    <button id="restoreSessionBtn" class="secondary block" style="margin-top:10px">↺ Восстановить последнюю сессию</button>
+    <button id="restoreSessionBtn" class="secondary block" style="margin-top:10px">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block" style="margin-top:10px">↻ Сбросить данные</button>
-    <div class="hint" style="margin-top:12px;text-align:center">V36 · Новая логика расчёта · 7 уровней стресс-тестов пройдено</div>
+    <div class="hint" style="margin-top:14px;text-align:center;font-size:11.5px;color:var(--text-tertiary)">
+      FB Audit · iOS 27 Style · v36.2
+    </div>
   </div>
 
 </main>
 
+<!-- МОДАЛКА СПРАВОЧНИКА -->
 <div id="catalogModal" class="modal hidden">
   <div class="modal-content">
     <div class="modal-handle"></div>
     <h3>✏️ Справочник сроков</h3>
-    <p class="hint">Меняйте названия, сроки, добавляйте новые позиции. Всё сохранится на устройстве.</p>
+    <p class="hint">Меняйте названия, сроки, добавляйте новые позиции.</p>
     <div style="margin:14px 0">
-      <input id="catalogSearch" type="text" placeholder="🔍 Поиск по названию..." autocomplete="off" maxlength="100">
+      <input id="catalogSearch" type="text" placeholder="🔍 Поиск..." autocomplete="off" maxlength="100">
     </div>
     <div id="catalogList" style="max-height:50vh;overflow-y:auto;margin-bottom:16px;-webkit-overflow-scrolling:touch"></div>
-    <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:16px">
+    <div style="border-top:1px solid var(--separator);padding-top:16px;margin-top:16px">
       <label>➕ Новая позиция</label>
       <input id="newProdName" type="text" placeholder="Название" style="margin:8px 0" autocomplete="off" maxlength="100">
       <input id="newProdHours" type="number" placeholder="Срок, часов" style="margin-bottom:10px" min="1" max="10000" value="48">
@@ -360,11 +844,12 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:16px;border-radius:var(--r-sm)
   </div>
 </div>
 
+<!-- МОДАЛКА ПРОМПТА -->
 <div id="promptModal" class="modal hidden">
   <div class="modal-content">
     <div class="modal-handle"></div>
     <h3>📋 Промпт для ИИ</h3>
-    <p class="hint" style="margin-bottom:14px">Скопируйте текст и вставьте его в чат вместе с файлами.</p>
+    <p class="hint" style="margin-bottom:14px">Скопируйте текст и вставьте в чат вместе с файлами.</p>
     <pre class="code" id="promptContent"></pre>
     <button id="copyFromModalBtn" class="info block" style="margin-top:16px">📋 Скопировать промпт</button>
     <button id="closePromptModalBtn" class="secondary block" style="margin-top:10px">Закрыть</button>
@@ -443,12 +928,10 @@ const FACTORY_CATALOG = [
 ];
 
 const STORAGE_KEY_CATALOG = 'auditProducts';
-const STORAGE_KEY_SESSION = 'auditSessionV36';
-const SESSION_VERSION = 36;
+const STORAGE_KEY_SESSION = 'fbAuditSessionV362';
+const STORAGE_KEY_THEME = 'fbAuditTheme';
+const SESSION_VERSION = 362;
 
-/* ============================================================
-   ГЛОБАЛЬНОЕ СОСТОЯНИЕ
-   ============================================================ */
 let PRODUCTS = [];
 let tableRows = [];
 let currentFilter = 'all';
@@ -470,9 +953,7 @@ function clampNum(v, min, max, fallback) {
   if (!isFinite(n)) return fallback;
   return Math.min(max, Math.max(min, n));
 }
-function isValidDate(d) {
-  return d instanceof Date && !isNaN(d.getTime());
-}
+function isValidDate(d) { return d instanceof Date && !isNaN(d.getTime()); }
 function safeStr(s, maxLen = 200) {
   return String(s ?? '').replace(/[\u0000-\u001F\u007F\u2028\u2029]/g, '').slice(0, maxLen);
 }
@@ -538,11 +1019,10 @@ function loadCatalog() {
 PRODUCTS = loadCatalog();
 
 /* ============================================================
-   ДАТЫ И СПИСАНИЕ
+   ДАТЫ
    ============================================================ */
 function getCheckMoment() {
-  const cd = $('checkDate');
-  const ct = $('checkTime');
+  const cd = $('checkDate'), ct = $('checkTime');
   const dateVal = cd ? cd.value : '';
   const timeVal = ct ? ct.value : '';
   const dateStr = /^\d{4}-\d{2}-\d{2}$/.test(dateVal) ? dateVal : new Date().toISOString().slice(0, 10);
@@ -550,13 +1030,11 @@ function getCheckMoment() {
   const d = new Date(`${dateStr}T${timeStr}:00`);
   return isValidDate(d) ? d : new Date();
 }
-
 function getWriteOffMoment(partyDate, shelfLife) {
   const [y, m, day] = partyDate.split('-').map(Number);
   const check = new Date(y, m - 1, day);
   if (check.getFullYear() !== y || check.getMonth() !== m - 1 || check.getDate() !== day) return null;
   check.setHours(SHELF_LIFE_START_HOUR, 0, 0, 0);
-
   const h = clampNum(shelfLife, 1, 10000, 72);
   if (h <= 24) { check.setHours(WRITE_OFF_HOUR, 0, 0, 0); return check; }
   if (h <= 36) { check.setDate(check.getDate() + 1); check.setHours(WRITE_OFF_HOUR, 0, 0, 0); return check; }
@@ -565,17 +1043,19 @@ function getWriteOffMoment(partyDate, shelfLife) {
   check.setHours(WRITE_OFF_HOUR, 0, 0, 0);
   return check;
 }
-
 function parseDateRu(str, referenceDate) {
-  const m = String(str).match(/(\d{1,2})[.\/-](\d{1,2})(?:[.\/-](\d{2,4}))?/);
-  if (!m) return '';
-  const day = parseInt(m[1], 10);
-  const month = parseInt(m[2], 10);
+  const s = String(str).trim();
+  const iso = s.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+  if (iso) return safeDate(parseInt(iso[1],10), parseInt(iso[2],10), parseInt(iso[3],10)) || '';
+  const ru = s.match(/(\d{1,2})[.\/-](\d{1,2})(?:[.\/-](\d{2,4}))?/);
+  if (!ru) return '';
+  const day = parseInt(ru[1], 10);
+  const month = parseInt(ru[2], 10);
   if (day < 1 || day > 31 || month < 1 || month > 12) return '';
   let year;
-  if (m[3]) {
-    year = parseInt(m[3], 10);
-    if (m[3].length === 2) year = 2000 + year;
+  if (ru[3]) {
+    year = parseInt(ru[3], 10);
+    if (ru[3].length === 2) year = 2000 + year;
   } else {
     const ref = isValidDate(referenceDate) ? referenceDate : new Date();
     year = ref.getFullYear();
@@ -585,16 +1065,7 @@ function parseDateRu(str, referenceDate) {
 }
 
 /* ============================================================
-   🎯 НОВАЯ ЛОГИКА РАСЧЁТА
-   ============================================================
-   1. Найти свежие партии (списание > момент проверки)
-   2. Витрина ← свежим первым:
-      freshOnShelf = min(stock, freshIncoming)
-      expiredOnShelf = max(0, stock − freshIncoming)
-   3. Свежий остаток = freshIncoming − freshOnShelf
-   4. Продажи:
-      freshSold = min(sales, freshLeft)
-      expiredSold = sales − freshSold
+   ЛОГИКА РАСЧЁТА
    ============================================================ */
 function mergeIncomingByDate(incoming) {
   const map = new Map();
@@ -609,21 +1080,11 @@ function mergeIncomingByDate(incoming) {
   }
   return [...map.values()].sort((a, b) => a.date.localeCompare(b.date));
 }
-
 function computeFIFO(row) {
-  if (!row || typeof row !== 'object') {
-    return emptyResult();
-  }
-
-  // Режим «только продажи» — ничего не считаем
+  if (!row || typeof row !== 'object') return emptyResult();
   if (row.salesOnly) {
-    return {
-      soldExpired: null, expiredOnShelf: null,
-      freshOnShelf: null, freshSold: null,
-      isSalesOnly: true
-    };
+    return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null, isSalesOnly: true };
   }
-
   const hasStock = !(row.stock === '' || row.stock == null);
   if (!hasStock) return emptyResult();
 
@@ -632,45 +1093,26 @@ function computeFIFO(row) {
   const shelfLife = clampNum(row.shelfLife, 1, 10000, 72);
   const moment = getCheckMoment();
 
-  // 1. Объединяем партии по дате и считаем свежие
   const parties = mergeIncomingByDate(row.incoming);
   let freshIncoming = 0;
   for (const p of parties) {
     const writeOff = getWriteOffMoment(p.date, shelfLife);
-    if (writeOff && writeOff > moment) {
-      freshIncoming += p.qty;
-    }
+    if (writeOff && writeOff > moment) freshIncoming += p.qty;
   }
-
-  // 2. Витрина ← свежим первым
   const freshOnShelf = Math.min(stock, freshIncoming);
   const expiredOnShelf = Math.max(0, stock - freshIncoming);
-
-  // 3. Свежий остаток для продаж
   const freshLeft = Math.max(0, freshIncoming - freshOnShelf);
-
-  // 4. Распределяем продажи
   const freshSold = Math.min(sales, freshLeft);
   const expiredSold = Math.max(0, sales - freshSold);
 
-  return {
-    soldExpired: expiredSold,
-    expiredOnShelf: expiredOnShelf,
-    freshOnShelf: freshOnShelf,
-    freshSold: freshSold,
-    freshIncoming: freshIncoming
-  };
+  return { soldExpired: expiredSold, expiredOnShelf, freshOnShelf, freshSold };
 }
-
 function emptyResult() {
-  return {
-    soldExpired: null, expiredOnShelf: null,
-    freshOnShelf: null, freshSold: null
-  };
+  return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null };
 }
 
 /* ============================================================
-   СТАТУСЫ
+   СТАТУСЫ И ФИЛЬТРЫ
    ============================================================ */
 function getRowStatus(calc, row) {
   if (row && row.salesOnly) return { cls: 'row-info', icon: '🔵', label: 'info' };
@@ -679,7 +1121,6 @@ function getRowStatus(calc, row) {
   if (calc.expiredOnShelf > 0) return { cls: 'row-warn', icon: '🟡', label: 'warn' };
   return { cls: 'row-fresh', icon: '🟢', label: 'fresh' };
 }
-
 function computeStatusCounts() {
   const c = { all: tableRows.length, fresh: 0, warn: 0, danger: 0, unknown: 0, info: 0 };
   for (const row of tableRows) {
@@ -689,7 +1130,6 @@ function computeStatusCounts() {
   }
   return c;
 }
-
 function updateFilterCounts() {
   const bar = $('filterBar');
   if (!bar) return;
@@ -699,7 +1139,6 @@ function updateFilterCounts() {
     el.textContent = counts[key] ?? 0;
   });
 }
-
 function applyFilter() {
   const tbody = document.querySelector('#resultTable tbody');
   if (!tbody) return;
@@ -747,7 +1186,6 @@ function renderTable() {
       if (emptyEl) emptyEl.remove();
       return;
     }
-
     if (filterBar) filterBar.style.display = 'flex';
 
     const allDates = new Set();
@@ -776,7 +1214,6 @@ function renderTable() {
       tr.classList.add(status.cls);
       tr.dataset.status = status.label;
 
-      // Наименование
       const tdName = document.createElement('td');
       tdName.title = row.name;
       const statusIcon = document.createElement('span');
@@ -786,19 +1223,13 @@ function renderTable() {
       tdName.appendChild(document.createTextNode(row.name));
       tr.appendChild(tdName);
 
-      // Остаток
       const tdStock = document.createElement('td');
       const inputStock = document.createElement('input');
       inputStock.type = 'number';
-      inputStock.min = '0';
-      inputStock.max = String(MAX_NUM);
-      inputStock.step = '1';
+      inputStock.min = '0'; inputStock.max = String(MAX_NUM); inputStock.step = '1';
       inputStock.className = 'num';
-
       if (row.salesOnly) {
-        inputStock.value = '';
-        inputStock.placeholder = '—';
-        inputStock.disabled = true;
+        inputStock.value = ''; inputStock.placeholder = '—'; inputStock.disabled = true;
       } else {
         inputStock.value = row.stock === '' ? '' : row.stock;
         inputStock.placeholder = '—';
@@ -816,13 +1247,10 @@ function renderTable() {
       tdStock.appendChild(inputStock);
       tr.appendChild(tdStock);
 
-      // Продано сегодня
       const tdSales = document.createElement('td');
       const inputSales = document.createElement('input');
       inputSales.type = 'number';
-      inputSales.min = '0';
-      inputSales.max = String(MAX_NUM);
-      inputSales.step = '1';
+      inputSales.min = '0'; inputSales.max = String(MAX_NUM); inputSales.step = '1';
       inputSales.className = 'num';
       inputSales.value = row.sales || 0;
       inputSales.oninput = () => {
@@ -838,20 +1266,15 @@ function renderTable() {
       tdSales.appendChild(inputSales);
       tr.appendChild(tdSales);
 
-      // Приходы по датам — редактируемые
       dates.forEach(d => {
         const td = document.createElement('td');
         td.className = 'income-cell';
         const party = (row.incoming || []).find(p => p.date === d);
-
         const inp = document.createElement('input');
         inp.type = 'number';
-        inp.min = '0';
-        inp.max = String(MAX_NUM);
-        inp.step = '1';
+        inp.min = '0'; inp.max = String(MAX_NUM); inp.step = '1';
         inp.className = 'num';
         inp.value = party ? party.qty : 0;
-
         if (row.salesOnly) {
           inp.disabled = true;
         } else {
@@ -870,13 +1293,11 @@ function renderTable() {
             saveSession();
           });
         }
-
         const resetBtn = document.createElement('button');
         resetBtn.className = 'reset-btn';
         resetBtn.type = 'button';
-        resetBtn.title = 'Сбросить к исходному значению';
+        resetBtn.title = 'Сбросить';
         resetBtn.textContent = '↺';
-
         if (!row.salesOnly && party && party._originalQty != null && party._originalQty !== party.qty) {
           td.classList.add('edited');
         }
@@ -891,33 +1312,28 @@ function renderTable() {
             scheduleSessionSave();
           }
         };
-
         td.appendChild(inp);
         if (!row.salesOnly) td.appendChild(resetBtn);
         tr.appendChild(td);
       });
 
-      // Срок годности
       const tdShelf = document.createElement('td');
       tdShelf.style.textAlign = 'center';
       tdShelf.textContent = `${row.shelfLife} ч`;
       tr.appendChild(tdShelf);
 
-      // Свежих на витрине
       const tdFreshOnShelf = document.createElement('td');
       tdFreshOnShelf.className = 'calc-cell' + (calc.freshOnShelf === null ? ' zero' : '');
       tdFreshOnShelf.textContent = calc.freshOnShelf === null ? '—' : calc.freshOnShelf;
       tdFreshOnShelf.dataset.role = 'freshOnShelf';
       tr.appendChild(tdFreshOnShelf);
 
-      // Продано свежих
       const tdFreshSold = document.createElement('td');
       tdFreshSold.className = 'calc-cell' + (calc.freshSold === null ? ' zero' : '');
       tdFreshSold.textContent = calc.freshSold === null ? '—' : calc.freshSold;
       tdFreshSold.dataset.role = 'freshSold';
       tr.appendChild(tdFreshSold);
 
-      // Просрочено на витрине
       const tdExpiredShelf = document.createElement('td');
       tdExpiredShelf.className = 'calc-cell';
       tdExpiredShelf.textContent = calc.expiredOnShelf === null ? '—' : calc.expiredOnShelf;
@@ -926,7 +1342,6 @@ function renderTable() {
       tdExpiredShelf.dataset.role = 'expiredOnShelf';
       tr.appendChild(tdExpiredShelf);
 
-      // Продано просроченным
       const tdSoldExpired = document.createElement('td');
       tdSoldExpired.className = 'calc-cell';
       tdSoldExpired.textContent = calc.soldExpired === null ? '—' : calc.soldExpired;
@@ -952,7 +1367,6 @@ function markEdited(td, party, newQty) {
   if (orig != null && orig !== newQty) td.classList.add('edited');
   else td.classList.remove('edited');
 }
-
 function refreshRow(row, tr, statusIcon) {
   const calc = computeFIFO(row);
   const newStatus = getRowStatus(calc, row);
@@ -960,7 +1374,6 @@ function refreshRow(row, tr, statusIcon) {
   tr.classList.add(newStatus.cls);
   tr.dataset.status = newStatus.label;
   statusIcon.textContent = newStatus.icon;
-
   const setCell = (role, val) => {
     const el = tr.querySelector(`[data-role="${role}"]`);
     if (!el) return;
@@ -973,7 +1386,6 @@ function refreshRow(row, tr, statusIcon) {
   setCell('freshSold', calc.freshSold);
   setCell('expiredOnShelf', calc.expiredOnShelf);
   setCell('soldExpired', calc.soldExpired);
-
   updateTotals();
   if (currentFilter !== 'all' && currentFilter !== newStatus.label) applyFilter();
   else updateFilterCounts();
@@ -986,8 +1398,7 @@ function updateTotals() {
   const summary = $('summary');
   if (!summary) return;
   let totalFreshOnShelf = 0, totalFreshSold = 0;
-  let totalExpiredOnShelf = 0, totalSoldExpired = 0;
-  let totalIncoming = 0, totalSales = 0;
+  let totalExpiredOnShelf = 0, totalSoldExpired = 0, totalSales = 0;
   let hasAnyStock = false;
   let cntFresh = 0, cntWarn = 0, cntDanger = 0, cntUnknown = 0, cntInfo = 0;
 
@@ -1004,19 +1415,17 @@ function updateTotals() {
       else if (calc.expiredOnShelf > 0) cntWarn++;
       else cntFresh++;
     } else cntUnknown++;
-    totalIncoming += (row.incoming || []).reduce((s, p) => s + (p.qty || 0), 0);
     totalSales += Number(row.sales) || 0;
   }
 
   const isSalesOnlyMode = cntInfo > 0 && cntInfo === tableRows.length;
-
   if (isSalesOnlyMode) {
-    summary.textContent = `📋 Режим «только продажи»: ${tableRows.length} позиций. Накладные не загружены — расчёт просрочки невозможен.`;
+    summary.textContent = `📋 Режим «только продажи»: ${tableRows.length} позиций. Накладные не загружены.`;
   } else if (cntInfo > 0) {
-    summary.textContent = `Позиций: ${tableRows.length} (без накладных: ${cntInfo}). Момент проверки: ${getCheckMoment().toLocaleString('ru-RU')}.`;
+    summary.textContent = `Позиций: ${tableRows.length} (без накладных: ${cntInfo}). Момент: ${getCheckMoment().toLocaleString('ru-RU')}.`;
   } else {
     summary.textContent = hasAnyStock
-      ? `Позиций: ${tableRows.length}. Момент проверки: ${getCheckMoment().toLocaleString('ru-RU')}.`
+      ? `Позиций: ${tableRows.length}. Момент: ${getCheckMoment().toLocaleString('ru-RU')}.`
       : `Позиций: ${tableRows.length}. Введите остаток для расчёта.`;
   }
 
@@ -1025,8 +1434,8 @@ function updateTotals() {
     ss.innerHTML = '';
     const chips = [
       { cls: 'fresh', label: `🟢 Свежие: ${cntFresh}`, show: hasAnyStock && cntFresh > 0 },
-      { cls: 'warn', label: `🟡 Просрочка на витрине: ${cntWarn}`, show: cntWarn > 0 },
-      { cls: 'danger', label: `🔴 Продавали просрочку: ${cntDanger}`, show: cntDanger > 0 },
+      { cls: 'warn', label: `🟡 Просрочка: ${cntWarn}`, show: cntWarn > 0 },
+      { cls: 'danger', label: `🔴 Продавали: ${cntDanger}`, show: cntDanger > 0 },
       { cls: 'unknown', label: `⚪ Без остатка: ${cntUnknown}`, show: cntUnknown > 0 },
       { cls: 'info', label: `🔵 Только продажи: ${cntInfo}`, show: cntInfo > 0 }
     ];
@@ -1042,23 +1451,21 @@ function updateTotals() {
   const box = $('totals');
   if (!box) return;
   box.style.display = 'block';
-
   if (isSalesOnlyMode) {
-    box.innerHTML = `<b>🔵 Режим «только продажи»</b><br>Загружен только чек iiko. Накладные отсутствуют, определить просрочку невозможно.<br><br><b>Продано всего:</b> ${totalSales} шт.<br><b>Позиций:</b> ${tableRows.length}.`;
+    box.innerHTML = `<b>🔵 Режим «только продажи»</b><br>Накладные не загружены.<br><br><b>Продано всего:</b> ${totalSales} шт.`;
     return;
   }
   if (!hasAnyStock) {
     box.innerHTML = `<b>Введите фактический остаток</b>, чтобы увидеть итоги.`;
     return;
   }
-
   box.innerHTML = `
     <b>Итоги:</b><br>
     Свежих на витрине: <b>${totalFreshOnShelf}</b> шт ·
     Продано свежих: <b>${totalFreshSold}</b> шт ·
-    Продано просроченным: <b style="color:#dc2626">${totalSoldExpired}</b> шт ·
-    Просрочено на витрине: <b style="color:#dc2626">${totalExpiredOnShelf}</b> шт
-    ${cntInfo > 0 ? `<br><span style="color:#075985">🔵 Без накладных: <b>${cntInfo}</b> поз.</span>` : ''}
+    Продано просроченным: <b style="color:var(--red)">${totalSoldExpired}</b> шт ·
+    Просрочено на витрине: <b style="color:var(--red)">${totalExpiredOnShelf}</b> шт
+    ${cntInfo > 0 ? `<br><span style="color:var(--accent)">🔵 Без накладных: <b>${cntInfo}</b> поз.</span>` : ''}
   `;
 }
 
@@ -1070,13 +1477,10 @@ function scheduleSessionSave() {
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => { saveTimer = null; saveSession(); }, 400);
 }
-
 function saveSession() {
   try {
     const payload = {
-      version: SESSION_VERSION,
-      savedAt: Date.now(),
-      filter: currentFilter,
+      version: SESSION_VERSION, savedAt: Date.now(), filter: currentFilter,
       params: {
         checkDate: $('checkDate') ? $('checkDate').value : '',
         checkTime: $('checkTime') ? $('checkTime').value : '',
@@ -1084,13 +1488,9 @@ function saveSession() {
       },
       csvText: ($('csvInput') ? $('csvInput').value : '').slice(0, 500000),
       rows: tableRows.slice(0, MAX_ROWS).map(r => ({
-        name: r.name,
-        stock: r.stock,
-        sales: r.sales,
-        shelfLife: r.shelfLife,
+        name: r.name, stock: r.stock, sales: r.sales, shelfLife: r.shelfLife,
         incoming: (r.incoming || []).slice(0, MAX_DATES).map(p => ({
-          date: p.date,
-          qty: p.qty,
+          date: p.date, qty: p.qty,
           _originalQty: p._originalQty != null ? p._originalQty : p.qty
         })),
         salesOnly: !!r.salesOnly
@@ -1100,7 +1500,6 @@ function saveSession() {
     showAutosaveBadge();
   } catch (e) { console.warn(e); }
 }
-
 function showAutosaveBadge() {
   const b = $('autosaveBadge');
   if (!b) return;
@@ -1108,7 +1507,6 @@ function showAutosaveBadge() {
   clearTimeout(b._t);
   b._t = setTimeout(() => b.classList.remove('show'), 1400);
 }
-
 function loadSession() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_SESSION);
@@ -1118,21 +1516,17 @@ function loadSession() {
     return data;
   } catch (e) { return null; }
 }
-
 function applySession(data) {
   if (!data) return false;
   isRestoring = true;
   try {
-    if (data.filter && ['all','danger','warn','fresh','unknown','info'].includes(data.filter)) {
-      currentFilter = data.filter;
-    }
+    if (data.filter && ['all','danger','warn','fresh','unknown','info'].includes(data.filter)) currentFilter = data.filter;
     if (data.params) {
       if ($('checkDate') && data.params.checkDate) $('checkDate').value = data.params.checkDate;
       if ($('checkTime') && data.params.checkTime) $('checkTime').value = data.params.checkTime;
       if ($('point') && typeof data.params.point === 'string') $('point').value = data.params.point.slice(0, 50);
     }
     if ($('csvInput') && typeof data.csvText === 'string') $('csvInput').value = data.csvText.slice(0, 500000);
-
     if (Array.isArray(data.rows) && data.rows.length) {
       tableRows = data.rows.slice(0, MAX_ROWS).map(r => ({
         name: safeStr(r.name, MAX_NAME),
@@ -1148,9 +1542,7 @@ function applySession(data) {
           : [],
         salesOnly: !!r.salesOnly
       })).filter(r => r.name);
-    } else {
-      tableRows = [];
-    }
+    } else tableRows = [];
     setTimeout(() => {
       const bar = $('filterBar');
       if (bar) bar.querySelectorAll('.filter-btn').forEach(b => {
@@ -1158,9 +1550,7 @@ function applySession(data) {
       });
     }, 0);
     return true;
-  } finally {
-    isRestoring = false;
-  }
+  } finally { isRestoring = false; }
 }
 
 /* ============================================================
@@ -1239,7 +1629,6 @@ function parseCSV(text, referenceDate) {
 
   const maxCols = Math.min(matrix[0].length, 100);
   const header = matrix[0].slice(0, maxCols).map(h => safeStr(h, 100));
-
   const idxName = header.findIndex(h => /наимен|позиц|товар/i.test(h));
   const idxStock = header.findIndex(h => /факт|остаток/i.test(h));
   const idxSales = header.findIndex(h => /продано|продажи|к-во|кол-во|количество/i.test(h));
@@ -1248,17 +1637,17 @@ function parseCSV(text, referenceDate) {
   const dateCols = [];
   header.forEach((h, i) => {
     if (/получено за/i.test(h)) {
-      const m = h.match(/(\d{1,2}[.\/-]\d{1,2}(?:[.\/-]\d{2,4})?)/);
-      dateCols.push({ index: i, date: m ? parseDateRu(m[1], referenceDate) : '' });
+      const rest = h.replace(/.*получено\s+за\s*/i, '');
+      const parsed = parseDateRu(rest, referenceDate);
+      dateCols.push({ index: i, date: parsed });
     }
   });
 
   if (idxName < 0) throw new Error('Не найдена колонка «Наименование».');
   const salesOnlyMode = dateCols.length === 0 && idxSales >= 0;
-  if (!dateCols.length && !salesOnlyMode) {
-    throw new Error('Не найдены колонки «Получено за [дата]» и «Продано сегодня».');
-  }
+  if (!dateCols.length && !salesOnlyMode) throw new Error('Не найдены колонки «Получено за [дата]» и «Продано сегодня».');
 
+  const validDateCols = dateCols.filter(dc => dc.date);
   const rows = [];
   const maxRow = Math.min(matrix.length, MAX_ROWS + 1);
   for (let i = 1; i < maxRow; i++) {
@@ -1268,14 +1657,11 @@ function parseCSV(text, referenceDate) {
     if (!name) continue;
     const salesVal = idxSales >= 0 ? parseNum(vals[idxSales]) : 0;
     const shelfRaw = idxShelf >= 0 ? parseShelfLife(vals[idxShelf]) : null;
-
     const incoming = [];
-    dateCols.forEach(dc => {
-      if (!dc.date) return;
+    validDateCols.forEach(dc => {
       const q = parseNum(vals[dc.index]);
       incoming.push({ date: dc.date, qty: q === '' ? 0 : q });
     });
-
     rows.push({
       name,
       stock: idxStock >= 0 ? parseNum(vals[idxStock]) : (salesOnlyMode ? 0 : ''),
@@ -1289,7 +1675,6 @@ function parseCSV(text, referenceDate) {
   if (matrix.length - 1 > MAX_ROWS) rows._truncated = true;
   return rows;
 }
-
 function sortRowsAlphabetically(rows) {
   return [...rows].sort((a, b) =>
     String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' })
@@ -1299,9 +1684,8 @@ function sortRowsAlphabetically(rows) {
 /* ============================================================
    ФОТО / PDF
    ============================================================ */
-const PHOTO_DB = 'auditPhotoDB';
+const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
-
 function openPhotoDB() {
   return new Promise((resolve, reject) => {
     try {
@@ -1380,7 +1764,7 @@ async function renderPhotoQueue() {
     if (item.kind && item.kind.startsWith('image/')) {
       try { img.src = URL.createObjectURL(item.blob); } catch (e) { img.src = ''; }
     } else {
-      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56"><rect width="100%" height="100%" rx="10" fill="#e2e8f0"/><text x="50%" y="55%" text-anchor="middle" font-size="16" font-weight="600" fill="#475569">PDF</text></svg>');
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56"><rect width="100%" height="100%" rx="12" fill="#e2e8f0"/><text x="50%" y="55%" text-anchor="middle" font-size="16" font-weight="600" fill="#475569">PDF</text></svg>');
     }
     const meta = document.createElement('div');
     meta.className = 'photo-meta';
@@ -1399,7 +1783,31 @@ async function renderPhotoQueue() {
 }
 
 /* ============================================================
-   ОТПРАВКА В ИИ
+   ТЕМА
+   ============================================================ */
+function updateThemeIcon() {
+  const btn = $('themeToggle');
+  if (!btn) return;
+  const t = document.documentElement.dataset.theme;
+  btn.textContent = t === 'dark' ? '☀️' : t === 'light' ? '🌙' : '🌗';
+}
+function initTheme() {
+  let saved = 'auto';
+  try { saved = localStorage.getItem(STORAGE_KEY_THEME) || 'auto'; } catch (e) {}
+  document.documentElement.dataset.theme = saved;
+  updateThemeIcon();
+  const btn = $('themeToggle');
+  if (btn) btn.onclick = () => {
+    const cur = document.documentElement.dataset.theme;
+    const next = cur === 'auto' ? 'light' : cur === 'light' ? 'dark' : 'auto';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(STORAGE_KEY_THEME, next); } catch (e) {}
+    updateThemeIcon();
+  };
+}
+
+/* ============================================================
+   ИИ
    ============================================================ */
 let shareBusy = false;
 async function shareToAI() {
@@ -1431,11 +1839,8 @@ async function shareToAI() {
     const canShare = navigator.canShare && navigator.canShare({ files });
     if (canShare) {
       try {
-        await navigator.share({
-          files,
-          title: 'Аудит сроков — файлы',
-          text: promptCopied ? 'Промпт в буфере — вставьте в чат.' : ''
-        });
+        await navigator.share({ files, title: 'FB Audit — файлы',
+          text: promptCopied ? 'Промпт в буфере — вставьте в чат.' : '' });
         const el = $('shareStatus');
         if (el) { el.className = 'status show ok'; el.textContent = '✅ Файлы переданы.'; }
         return;
@@ -1451,14 +1856,13 @@ async function shareToAI() {
       } catch (e) {}
     }
     const el = $('shareStatus');
-    if (el) { el.className = 'status show info'; el.textContent = 'ℹ️ Файлы скачаны. Прикрепите их в чат.'; }
+    if (el) { el.className = 'status show info'; el.textContent = 'ℹ️ Файлы скачаны. Прикрепите в чат.'; }
     try { window.open('https://chat.openai.com/', '_blank'); } catch (e) {}
   } finally {
     shareBusy = false;
     if (btn) btn.classList.remove('busy');
   }
 }
-
 function buildPrompt() {
   const cd = $('checkDate'), ct = $('checkTime');
   const checkDate = (cd && cd.value) || new Date().toISOString().slice(0, 10);
@@ -1472,10 +1876,24 @@ function buildPrompt() {
 === ОПРЕДЕЛИ РЕЖИМ ===
 
 ВАРИАНТ A. Есть И накладные, И чек iiko:
-  Наименование;Получено за [дата 1];Получено за [дата 2];...;Продано сегодня;Срок годности
+  Наименование;Получено за ДД.ММ;Получено за ДД.ММ;...;Продано сегодня;Срок годности
 
 ВАРИАНТ B. Есть ТОЛЬКО чек iiko:
   Наименование;Продано сегодня;Срок годности
+
+=== 🔴 КРИТИЧНО: ФОРМАТ ДАТ ===
+Колонки приходов ОБЯЗАТЕЛЬНО именуй строго:
+  «Получено за ДД.ММ»  ← например: «Получено за 17.09»
+
+❌ ЗАПРЕЩЕНО:
+   «Получено за 2026-09-17»
+   «Получено за 2026/09/17»
+   «Получено за 17/09/2026»
+   «Получено за 17-09-2026»
+
+✅ РАЗРЕШЕНО ТОЛЬКО:
+   «Получено за 17.09»
+   «Получено за 18.09»
 
 === ПРАВИЛА ===
 1. Оставь только позиции из справочника (ниже).
@@ -1501,7 +1919,6 @@ function applyCSV() {
   if (btn) btn.classList.add('busy');
   const myToken = ++resetToken;
   setTimeout(() => { applyBusy = false; if (btn) btn.classList.remove('busy'); }, BTN_LOCK_MS);
-
   const statusEl = $('csvStatus');
   try {
     const csvInput = $('csvInput');
@@ -1509,42 +1926,36 @@ function applyCSV() {
     const text = csvInput.value.trim();
     if (!text) throw new Error('Поле пустое.');
     if (text.length > MAX_CSV_BYTES) throw new Error('CSV слишком большой (макс. 2 МБ).');
-
     const reference = getCheckMoment();
     const rows = parseCSV(text, reference);
     if (!rows.length) throw new Error('Не удалось распознать строки.');
     if (myToken !== resetToken) return;
-
     rows.forEach(r => {
       const p = PRODUCTS.find(x => x.name.toLowerCase() === r.name.toLowerCase());
       if (p) r.shelfLife = p.shelfLife;
       r.incoming.forEach(p => { p._originalQty = p.qty; });
     });
-
     const truncated = rows._truncated;
     delete rows._truncated;
-
     tableRows = sortRowsAlphabetically(rows);
     renderTable();
     scheduleSessionSave();
-
     const salesOnlyMode = rows.every(r => r.salesOnly);
     const hasMixed = rows.some(r => r.salesOnly) && !salesOnlyMode;
-
+    const validDates = new Set();
+    rows.forEach(r => r.incoming.forEach(p => validDates.add(p.date)));
     if (statusEl) {
       statusEl.className = 'status show ok';
       let msg = '';
       if (salesOnlyMode) msg = `✅ Загружено ${rows.length} позиций (только продажи).`;
       else if (hasMixed) msg = `✅ Загружено ${rows.length} позиций (часть — только продажи).`;
-      else msg = `✅ Загружено ${rows.length} позиций. Введите остаток для расчёта.`;
+      else msg = `✅ Загружено ${rows.length} позиций. Дат прихода: ${validDates.size}.`;
       if (truncated) msg += ` ⚠️ Первые ${MAX_ROWS} строк.`;
+      if (!salesOnlyMode && validDates.size === 0) msg += ` ⚠️ Даты приходов не распознаны.`;
       statusEl.textContent = msg;
     }
   } catch (e) {
-    if (statusEl) {
-      statusEl.className = 'status show err';
-      statusEl.textContent = '❌ ' + (e.message || 'Ошибка');
-    }
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = '❌ ' + (e.message || 'Ошибка'); }
   }
 }
 
@@ -1563,13 +1974,10 @@ function exportExcel() {
     tableRows.forEach(r => (r.incoming || []).forEach(p => { if (p.date) allDates.add(p.date); }));
     let dates = [...allDates].sort((a, b) => b.localeCompare(a));
     if (dates.length > MAX_DATES) dates = dates.slice(0, MAX_DATES);
-
     const header = ['Наименование', 'Остаток', 'Продано',
       ...dates.map(d => `Получено за ${fmtDateRu(d)}`),
-      'Срок', 'Свежих на витрине', 'Продано свежих',
-      'Просрочено на витрине', 'Продано просроченным'];
+      'Срок', 'Свежих на витрине', 'Продано свежих', 'Просрочено на витрине', 'Продано просроченным'];
     const data = [header.map(safeExcelCell)];
-
     tableRows.forEach(row => {
       const calc = computeFIFO(row);
       data.push([
@@ -1587,24 +1995,21 @@ function exportExcel() {
         calc.soldExpired === null ? '—' : calc.soldExpired
       ]);
     });
-
     const ws = XLSX.utils.aoa_to_sheet(data);
     ws['!cols'] = [{ wch: 35 }, { wch: 10 }, { wch: 10 },
       ...dates.map(() => ({ wch: 14 })),
       { wch: 8 }, { wch: 14 }, { wch: 14 }, { wch: 18 }, { wch: 18 }];
-
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Аудит сроков');
-
+    XLSX.utils.book_append_sheet(wb, ws, 'FB Audit');
     const date = ($('checkDate') && $('checkDate').value) || new Date().toISOString().slice(0, 10);
     const point = sanitizeFilename(($('point') && $('point').value.trim()) || 'точка');
-    XLSX.writeFile(wb, `audit_${point}_${date}.xlsx`);
+    XLSX.writeFile(wb, `FB_Audit_${point}_${date}.xlsx`);
   } catch (e) { alert('Ошибка экспорта: ' + (e.message || e)); }
   finally { setTimeout(() => { exportBusy = false; }, 500); }
 }
 
 /* ============================================================
-   СПРАВОЧНИК — UI
+   СПРАВОЧНИК UI
    ============================================================ */
 function saveCatalog() {
   try { localStorage.setItem(STORAGE_KEY_CATALOG, JSON.stringify(PRODUCTS)); } catch (e) {}
@@ -1725,9 +2130,8 @@ function bindUI() {
     if (!f) { e.target.value = ''; return; }
     if (f.size > MAX_CSV_BYTES) {
       const st = $('csvStatus');
-      if (st) { st.className = 'status show err'; st.textContent = '❌ Файл слишком большой (макс. 2 МБ).'; }
-      e.target.value = '';
-      return;
+      if (st) { st.className = 'status show err'; st.textContent = '❌ Файл слишком большой.'; }
+      e.target.value = ''; return;
     }
     try {
       const text = await f.text();
@@ -1820,7 +2224,7 @@ function bindUI() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `spravochnik_${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `fb_audit_catalog_${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) { alert('Ошибка: ' + e.message); }
@@ -1873,6 +2277,7 @@ function bindUI() {
 function init() {
   if (_initialized) return;
   _initialized = true;
+  initTheme();
   try {
     const cd = $('checkDate');
     if (cd) cd.valueAsDate = new Date();
@@ -1926,7 +2331,7 @@ function init() {
     saveSession();
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('✅ V36 загружен. Справочник:', PRODUCTS.length);
+  console.log('%c FB Audit ', 'background:linear-gradient(135deg,#0a84ff,#0066d6);color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v36.2 · iOS 27 Style · каталог:', PRODUCTS.length);
 }
 
 bindUI();
