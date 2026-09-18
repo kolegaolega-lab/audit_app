@@ -11,7 +11,7 @@
 <title>FB Audit</title>
 <style>
 /* ============================================================
-   FB Audit · iOS 27 Design System
+   FB Audit · iOS 27 Design System · v1.1
    ============================================================ */
 :root, [data-theme="light"]{
   --bg: #f2f2f7;
@@ -50,11 +50,9 @@
   --shadow-2: 0 2px 8px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
   --shadow-3: 0 8px 24px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.04);
   --shadow-4: 0 20px 48px rgba(0,0,0,.12), 0 4px 12px rgba(0,0,0,.06);
-  --glass-bg: rgba(255,255,255,.72);
   --glass-border: rgba(255,255,255,.6);
   --header-bg: rgba(242,242,247,.78);
   --r-lg: 22px; --r-md: 16px; --r-sm: 12px; --r-xs: 8px;
-  --blur: saturate(180%) blur(30px);
   --spring: cubic-bezier(.34, 1.56, .64, 1);
   --ease: cubic-bezier(.25, .1, .25, 1);
 }
@@ -95,7 +93,6 @@
   --shadow-2: 0 2px 8px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
   --shadow-3: 0 8px 24px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.3);
   --shadow-4: 0 20px 48px rgba(0,0,0,.7), 0 4px 12px rgba(0,0,0,.4);
-  --glass-bg: rgba(28,28,30,.72);
   --glass-border: rgba(255,255,255,.1);
   --header-bg: rgba(0,0,0,.78);
 }
@@ -120,7 +117,6 @@
     --shadow-2: 0 2px 8px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
     --shadow-3: 0 8px 24px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.3);
     --shadow-4: 0 20px 48px rgba(0,0,0,.7), 0 4px 12px rgba(0,0,0,.4);
-    --glass-bg: rgba(28,28,30,.72);
     --glass-border: rgba(255,255,255,.1);
     --header-bg: rgba(0,0,0,.78);
   }
@@ -143,9 +139,7 @@ body{
   transition:background-color .3s, color .3s;
 }
 
-/* ============================================================
-   HEADER
-   ============================================================ */
+/* HEADER */
 header{
   position:sticky;top:0;z-index:100;
   padding:10px 16px;
@@ -154,6 +148,8 @@ header{
   -webkit-backdrop-filter:saturate(180%) blur(30px);
   backdrop-filter:saturate(180%) blur(30px);
   border-bottom:.5px solid var(--glass-border);
+  height:62px;
+  box-sizing:content-box;
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
   header{background:var(--bg-card)}
@@ -198,14 +194,10 @@ header{
 }
 .autosave-badge.show{opacity:1}
 
-/* ============================================================
-   MAIN
-   ============================================================ */
+/* MAIN */
 main{max-width:1100px;margin:auto;padding:16px 14px 80px}
 
-/* ============================================================
-   CARD
-   ============================================================ */
+/* CARD */
 .card{
   background:var(--bg-card);border-radius:var(--r-lg);
   padding:20px;margin-bottom:14px;
@@ -228,9 +220,7 @@ main{max-width:1100px;margin:auto;padding:16px 14px 80px}
 .card .hint{font-size:13px;color:var(--text-secondary);margin:0 0 14px;line-height:1.5}
 .card .hint b{color:var(--text);font-weight:600}
 
-/* ============================================================
-   FORMS
-   ============================================================ */
+/* FORMS */
 label{
   display:block;font-size:11.5px;font-weight:600;
   color:var(--text-secondary);margin-bottom:6px;
@@ -265,9 +255,7 @@ input::placeholder,textarea::placeholder{color:var(--text-tertiary)}
 .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 @media (max-width:640px){.grid-3{grid-template-columns:1fr}}
 
-/* ============================================================
-   BUTTONS
-   ============================================================ */
+/* BUTTONS */
 button{
   border:0;border-radius:var(--r-sm);
   padding:13px 20px;
@@ -313,9 +301,7 @@ button.busy::before{
 }
 @keyframes busy{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
 
-/* ============================================================
-   STATUS
-   ============================================================ */
+/* STATUS */
 .status{
   margin-top:12px;font-size:13.5px;
   padding:13px 16px;background:var(--bg-input);
@@ -328,20 +314,38 @@ button.busy::before{
 .status.info{background:var(--blue-soft);border-color:transparent;color:var(--accent);font-weight:600}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 
-/* ============================================================
-   TABLE
-   ============================================================ */
+/* TABLE */
 .table-wrap{
-  overflow-x:auto;margin:0 -20px;padding:0 20px;
-  -webkit-overflow-scrolling:touch;border-radius:var(--r-md);
+  overflow-x:auto;
+  overflow-y:visible;
+  margin:0 -20px;padding:0 20px;
+  -webkit-overflow-scrolling:touch;
+  border-radius:var(--r-md);
 }
-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;min-width:900px}
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  font-size:13px;
+  min-width:900px;
+}
+thead{
+  position:sticky;
+  top:calc(62px + env(safe-area-inset-top));
+  z-index:10;
+}
 th{
   font-size:10.5px;font-weight:700;color:var(--text-secondary);
   text-transform:uppercase;letter-spacing:.06em;
-  background:var(--bg-input);padding:12px 10px;text-align:left;
+  background:var(--bg-input);
+  padding:12px 10px;text-align:left;
   border-bottom:1px solid var(--separator);
-  position:sticky;top:0;z-index:1;
+  position:sticky;
+  top:0;
+  z-index:5;
+  box-shadow:0 1px 0 var(--separator);
+  backdrop-filter:saturate(180%) blur(12px);
+  -webkit-backdrop-filter:saturate(180%) blur(12px);
 }
 th:first-child{border-top-left-radius:var(--r-sm)}
 th:last-child{border-top-right-radius:var(--r-sm)}
@@ -377,9 +381,7 @@ tbody tr.row-info td:first-child::before{background:var(--blue)}
 
 .row-status{display:inline-block;width:18px;text-align:center;margin-right:5px;font-size:12px}
 
-/* ============================================================
-   LEGEND
-   ============================================================ */
+/* LEGEND */
 .legend{
   display:flex;flex-wrap:wrap;gap:10px;
   margin-top:14px;padding:12px 14px;
@@ -406,9 +408,7 @@ tbody tr.row-info td:first-child::before{background:var(--blue)}
 .status-chip.unknown{background:var(--bg-input);color:var(--text-secondary)}
 .status-chip.info{background:var(--blue-soft);color:var(--accent)}
 
-/* ============================================================
-   FILTERS
-   ============================================================ */
+/* FILTERS */
 .filter-bar{
   display:flex;flex-wrap:wrap;gap:8px;
   margin-bottom:14px;padding-bottom:14px;
@@ -441,16 +441,12 @@ tbody tr.row-info td:first-child::before{background:var(--blue)}
 .filter-btn.filter-unknown.active{background:linear-gradient(135deg, #8e8e93 0%, #475569 100%);box-shadow:0 4px 12px rgba(100,116,139,.3)}
 .filter-btn.filter-info.active{background:linear-gradient(135deg, #0a84ff 0%, #0284c7 100%);box-shadow:0 4px 12px rgba(10,132,255,.35), inset 0 1px 0 rgba(255,255,255,.2)}
 
-/* ============================================================
-   EMPTY STATE
-   ============================================================ */
+/* EMPTY */
 .empty-state{text-align:center;padding:40px 20px;color:var(--text-secondary);font-size:13.5px}
 .empty-state .em-icon{font-size:40px;display:block;margin-bottom:12px;opacity:.5}
 .empty-state .em-title{font-weight:700;color:var(--text);margin-bottom:6px;font-size:15px}
 
-/* ============================================================
-   NUM INPUT
-   ============================================================ */
+/* NUM */
 .num{
   width:68px;min-width:64px;padding:8px 6px;
   border:1.5px solid var(--separator);border-radius:var(--r-xs);
@@ -461,7 +457,6 @@ tbody tr.row-info td:first-child::before{background:var(--blue)}
 }
 .num:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);outline:none}
 .num:disabled{background:var(--bg-input);cursor:not-allowed;color:var(--text-tertiary);opacity:.7}
-
 .income-cell{position:relative;padding:8px 6px !important;text-align:center}
 .income-cell .num{width:62px;min-width:58px;min-height:40px;padding:6px 4px;font-size:13px}
 .income-cell.edited .num{background:var(--orange-soft);border-color:var(--orange)}
@@ -476,14 +471,11 @@ tbody tr.row-info td:first-child::before{background:var(--blue)}
 }
 .income-cell .reset-btn:hover{transform:scale(1.1)}
 .income-cell.edited .reset-btn{display:inline-flex;align-items:center;justify-content:center}
-
 .calc-cell{text-align:center;font-weight:700}
 .calc-cell.zero{color:var(--text-tertiary)}
 .calc-cell.positive{color:var(--red)}
 
-/* ============================================================
-   HINTS
-   ============================================================ */
+/* HINTS */
 .steps-hint{
   background:linear-gradient(135deg, var(--accent-soft) 0%, transparent 100%);
   border:1px solid var(--accent-soft-hover);
@@ -502,15 +494,11 @@ tbody tr.row-info td:first-child::before{background:var(--blue)}
 }
 .ai-help b{color:var(--text)}
 
-/* ============================================================
-   ACTION GRID
-   ============================================================ */
+/* ACTIONS */
 .action-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 @media (max-width:500px){.action-buttons{grid-template-columns:1fr}}
 
-/* ============================================================
-   PHOTOS
-   ============================================================ */
+/* PHOTOS */
 .photo-queue{display:grid;gap:10px;margin-top:12px}
 .photo-item{
   display:grid;grid-template-columns:56px 1fr auto;gap:12px;
@@ -527,9 +515,7 @@ tbody tr.row-info td:first-child::before{background:var(--blue)}
 .photo-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .photo-actions button{min-height:40px;padding:8px 14px;font-size:13px}
 
-/* ============================================================
-   MODAL
-   ============================================================ */
+/* MODAL */
 .modal{
   position:fixed;inset:0;z-index:1000;
   background:rgba(0,0,0,.5);
@@ -550,10 +536,7 @@ tbody tr.row-info td:first-child::before{background:var(--blue)}
 }
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-content h3{margin:0 0 10px;font-size:20px;font-weight:800;letter-spacing:-.4px}
-.modal-handle{
-  width:44px;height:5px;background:var(--text-quaternary);
-  border-radius:3px;margin:0 auto 18px;
-}
+.modal-handle{width:44px;height:5px;background:var(--text-quaternary);border-radius:3px;margin:0 auto 18px}
 pre.code{
   background:#0f172a;color:#a5f3fc;
   padding:16px;border-radius:var(--r-sm);
@@ -564,9 +547,7 @@ pre.code{
   border:1px solid #1e293b;
 }
 
-/* ============================================================
-   ADAPTIVE
-   ============================================================ */
+/* ADAPTIVE */
 @media (min-width:641px){
   header{padding:14px 24px;padding-top:calc(14px + env(safe-area-inset-top))}
   .header-text h1{font-size:19px}
@@ -584,6 +565,7 @@ pre.code{
   .modal-handle{display:none}
   .table-wrap{margin:0 -24px;padding:0 24px}
   table{font-size:13.5px;min-width:1000px}
+  thead{top:calc(74px + env(safe-area-inset-top))}
   th{font-size:11px;padding:14px 12px}
   td{padding:13px 12px}
   .num{width:72px;min-height:42px}
@@ -609,9 +591,7 @@ pre.code{
   .header-text .sub{display:none}
 }
 
-/* ============================================================
-   CATALOG
-   ============================================================ */
+/* CATALOG */
 .cat-row{
   display:grid;grid-template-columns:1fr 90px 44px;
   gap:10px;align-items:center;
@@ -774,7 +754,7 @@ pre.code{
     <button id="restoreSessionBtn" class="secondary block" style="margin-top:10px">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block" style="margin-top:10px">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:14px;text-align:center;font-size:11.5px;color:var(--text-tertiary)">
-      FB Audit · iOS 27 Style · v36.2
+      FB Audit · iOS 27 · v1.1
     </div>
   </div>
 
@@ -875,9 +855,9 @@ const FACTORY_CATALOG = [
 ];
 
 const STORAGE_KEY_CATALOG = 'auditProducts';
-const STORAGE_KEY_SESSION = 'fbAuditSessionV362';
+const STORAGE_KEY_SESSION = 'fbAuditSessionV1';
 const STORAGE_KEY_THEME = 'fbAuditTheme';
-const SESSION_VERSION = 362;
+const SESSION_VERSION = 1;
 
 let PRODUCTS = [];
 let tableRows = [];
@@ -892,6 +872,7 @@ let _activeDeletes = new Set();
 let _fileBusy = false;
 const $ = id => document.getElementById(id);
 
+/* ========== УТИЛИТЫ ========== */
 function clampNum(v, min, max, fallback) {
   const n = Number(v);
   if (!isFinite(n)) return fallback;
@@ -956,6 +937,7 @@ function loadCatalog() {
 }
 PRODUCTS = loadCatalog();
 
+/* ========== ДАТЫ ========== */
 function getCheckMoment() {
   const cd = $('checkDate'), ct = $('checkTime');
   const dateVal = cd ? cd.value : '';
@@ -998,6 +980,8 @@ function parseDateRu(str, referenceDate) {
   }
   return safeDate(year, month, day) || '';
 }
+
+/* ========== ЛОГИКА ========== */
 function mergeIncomingByDate(incoming) {
   const map = new Map();
   for (const p of incoming || []) {
@@ -1362,6 +1346,8 @@ function updateTotals() {
     ${cntInfo > 0 ? `<br><span style="color:var(--accent)">🔵 Без накладных: <b>${cntInfo}</b> поз.</span>` : ''}
   `;
 }
+
+/* ========== АВТОСОХРАНЕНИЕ ========== */
 function scheduleSessionSave() {
   if (isRestoring) return;
   if (saveTimer) clearTimeout(saveTimer);
@@ -1442,6 +1428,8 @@ function applySession(data) {
     return true;
   } finally { isRestoring = false; }
 }
+
+/* ========== CSV ========== */
 function detectDelimiter(firstLine) {
   let semi = 0, comma = 0, inQ = false;
   for (let i = 0; i < firstLine.length; i++) {
@@ -1562,6 +1550,8 @@ function sortRowsAlphabetically(rows) {
     String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' })
   );
 }
+
+/* ========== ФОТО ========== */
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 function openPhotoDB() {
@@ -1659,6 +1649,8 @@ async function renderPhotoQueue() {
     box.appendChild(row);
   });
 }
+
+/* ========== ТЕМА ========== */
 function updateThemeIcon() {
   const btn = $('themeToggle');
   if (!btn) return;
@@ -1680,6 +1672,8 @@ function initTheme() {
     updateThemeIcon();
   };
 }
+
+/* ========== ИИ ========== */
 let shareBusy = false;
 async function shareToAI() {
   if (shareBusy) return;
@@ -1738,46 +1732,78 @@ function buildPrompt() {
   const cd = $('checkDate'), ct = $('checkTime');
   const checkDate = (cd && cd.value) || new Date().toISOString().slice(0, 10);
   const checkTime = (ct && ct.value) || '07:00';
-  return `Ты — ассистент по аудиту сроков годности в кондитерской.
+  const catalogList = PRODUCTS.map(p => `- ${p.name}: ${p.shelfLife}`).join('\n');
+  return `Ты — OCR-ассистент для аудита сроков годности в кондитерской.
 
-Я прикрепил файлы (возможны два варианта):
-— Накладные (ТОРГ-12) — фото или PDF
-— Чек продаж iiko — фото или PDF
+ЗАДАЧА: распознать накладные (ТОРГ-12) и чек iiko, вернуть CSV.
 
-=== ОПРЕДЕЛИ РЕЖИМ ===
+═══════════════════════════════════════════
+📥 ИСТОЧНИКИ
+═══════════════════════════════════════════
+1. НАКЛАДНЫЕ (ТОРГ-12) → колонки «Получено за ДД.ММ»
+2. ЧЕК IIKO → колонка «Продано сегодня» (берём только «К-во»)
 
-ВАРИАНТ A. Есть И накладные, И чек iiko:
-  Наименование;Получено за ДД.ММ;Получено за ДД.ММ;...;Продано сегодня;Срок годности
+ПРИОРИТЕТ: приход ← накладная, продажи ← iiko. Не суммировать.
 
-ВАРИАНТ B. Есть ТОЛЬКО чек iiko:
-  Наименование;Продано сегодня;Срок годности
+═══════════════════════════════════════════
+🔍 2 ЭТАПА РАБОТЫ
+═══════════════════════════════════════════
+ЭТАП 1. ЧЕРНОВИК
+Выпиши ВСЕ строки из каждого документа:
+[документ] | [название] | [количество] | [дата]
 
-=== 🔴 КРИТИЧНО: ФОРМАТ ДАТ ===
-Колонки приходов ОБЯЗАТЕЛЬНО именуй строго:
-  «Получено за ДД.ММ»  ← например: «Получено за 17.09»
+ЭТАП 2. СБОРКА CSV
+Собери таблицу. Перед отправкой сверь сумму приходов.
 
-❌ ЗАПРЕЩЕНО:
-   «Получено за 2026-09-17»
-   «Получено за 2026/09/17»
-   «Получено за 17/09/2026»
-   «Получено за 17-09-2026»
+═══════════════════════════════════════════
+⚠️ ЧАСТЫЕ ОШИБКИ OCR
+═══════════════════════════════════════════
+Символы: 0↔О, 1↔l, 5↔S, 8↔В, 6↔б, 3↔З
+Названия: «с ветчиной» ≠ «с курицей», «с сыром» ≠ «классический»
 
-✅ РАЗРЕШЕНО ТОЛЬКО:
-   «Получено за 17.09»
-   «Получено за 18.09»
+═══════════════════════════════════════════
+📋 ПРАВИЛА СБОРКИ
+═══════════════════════════════════════════
+1. Только позиции из справочника (ниже).
+2. Есть в накладной, нет в iiko → Продано = 0.
+3. Есть в iiko, нет в накладной → Получено = 0.
+4. Дубли в накладной → складывай.
+5. Рукописные галочки → подтверждение, но НЕ меняй печатное.
+6. Игнорируй в iiko: «Итого», «Скидка», «НДС», время, кассира.
+7. 🚫 НЕ ВЫДУМЫВАЙ. Нет на фото — не добавляй.
 
-=== ПРАВИЛА ===
-1. Оставь только позиции из справочника (ниже).
-2. Отсортируй по алфавиту.
-3. CSV, разделитель ';', UTF-8 с BOM.
-4. Имя файла: audit_${checkDate}.csv
-5. Если в названии есть ';', ',' или кавычки — оборачивай в "..." и удваивай кавычки.
+═══════════════════════════════════════════
+📅 ФОРМАТ ДАТ
+═══════════════════════════════════════════
+✅ «Получено за 17.09»  ✅ «Получено за 18.09»
+❌ «Получено за 2026-09-17», «17/09/2026», «17-09-2026»
 
-Справочник (часы):
-${PRODUCTS.map(p => `- ${p.name}: ${p.shelfLife} ч`).join('\n')}
+═══════════════════════════════════════════
+📤 ФОРМАТ CSV
+═══════════════════════════════════════════
+Разделитель: ;  Кодировка: UTF-8 с BOM
+Имя: audit_${checkDate}.csv
+Сортировка: по алфавиту (русский)
+Колонки: Наименование;Получено за ДД.ММ;...;Продано сегодня;Срок годности
+Кавычки: если есть ; , " → оберни в "..." и удваивай внутренние.
+Пример: "Сэндвич ""Дачный""; с ветчиной";0;1;24 ч
 
-Момент проверки: ${checkDate} ${checkTime}.`;
+После CSV выведи:
+1. Сомнительные строки: [название] | [что неясно] | [предположение]
+   Если нет → «Сомнительных строк нет».
+2. Проверка: строк N, из справочника N, вне N, дат приходов N.
+
+═══════════════════════════════════════════
+📚 СПРАВОЧНИК СРОКОВ (часы)
+═══════════════════════════════════════════
+${catalogList}
+
+Момент проверки: ${checkDate} ${checkTime}.
+
+Сейчас распознай файлы и выдай CSV по формату выше.`;
 }
+
+/* ========== ИМПОРТ CSV ========== */
 let applyBusy = false;
 function applyCSV() {
   if (applyBusy) return;
@@ -1825,6 +1851,8 @@ function applyCSV() {
     if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = '❌ ' + (e.message || 'Ошибка'); }
   }
 }
+
+/* ========== ЭКСПОРТ EXCEL ========== */
 let exportBusy = false;
 function exportExcel() {
   if (exportBusy) return;
@@ -1870,6 +1898,8 @@ function exportExcel() {
   } catch (e) { alert('Ошибка экспорта: ' + (e.message || e)); }
   finally { setTimeout(() => { exportBusy = false; }, 500); }
 }
+
+/* ========== СПРАВОЧНИК UI ========== */
 function saveCatalog() {
   try { localStorage.setItem(STORAGE_KEY_CATALOG, JSON.stringify(PRODUCTS)); } catch (e) {}
 }
@@ -1929,6 +1959,8 @@ function resetToFactory() {
   const el = $('catalogStatus');
   if (el) { el.className = 'status show ok'; el.textContent = `✅ Справочник восстановлен (${PRODUCTS.length}).`; }
 }
+
+/* ========== ОБРАБОТЧИКИ ========== */
 function bindUI() {
   const invBtn = $('uploadInvoicePhotosBtn'); if (invBtn) invBtn.onclick = () => $('invoicePhotoInput').click();
   const salBtn = $('uploadSalesPhotosBtn'); if (salBtn) salBtn.onclick = () => $('salesPhotoInput').click();
@@ -2125,6 +2157,8 @@ function bindUI() {
     const pm = $('promptModal'); if (pm) pm.classList.add('hidden');
   };
 }
+
+/* ========== ИНИЦИАЛИЗАЦИЯ ========== */
 function init() {
   if (_initialized) return;
   _initialized = true;
@@ -2187,8 +2221,9 @@ function init() {
     saveSession();
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c FB Audit ', 'background:linear-gradient(135deg,#0a84ff,#0066d6);color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v36.2 · iOS 27 Style · каталог:', PRODUCTS.length);
+  console.log('%c FB Audit ', 'background:linear-gradient(135deg,#0a84ff,#0066d6);color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v1.1 · iOS 27 · каталог:', PRODUCTS.length);
 }
+
 bindUI();
 init();
 </script>
