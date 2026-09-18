@@ -21,7 +21,6 @@
   --text: #000000;
   --text-secondary: rgba(0,0,0,.55);
   --text-tertiary: rgba(0,0,0,.3);
-  --text-quaternary: rgba(0,0,0,.15);
   --accent: #0a84ff;
   --accent-soft: rgba(10,132,255,.12);
   --green: #34c759;
@@ -43,7 +42,6 @@
   --r-lg: 20px; --r-md: 14px; --r-sm: 10px; --r-xs: 8px;
   --spring: cubic-bezier(.34, 1.56, .64, 1);
   --ease: cubic-bezier(.25, .1, .25, 1);
-  --header-h: 64px;
 }
 @media (prefers-color-scheme: dark){
   :root{
@@ -57,7 +55,6 @@
     --text: #ffffff;
     --text-secondary: rgba(255,255,255,.55);
     --text-tertiary: rgba(255,255,255,.3);
-    --text-quaternary: rgba(255,255,255,.15);
     --accent: #0a84ff;
     --accent-soft: rgba(10,132,255,.20);
     --green: #30d158;
@@ -88,12 +85,10 @@ body{
   -webkit-font-smoothing:antialiased;
   -webkit-text-size-adjust:100%;
   padding-bottom:env(safe-area-inset-bottom);
-  transition: background-color .25s var(--ease), color .25s var(--ease);
+  /* Убираем горизонтальный скролл страницы */
+  overflow-x: hidden;
 }
 
-/* ============================================================
-   HEADER
-   ============================================================ */
 header{
   position: sticky;
   top: 0;
@@ -122,24 +117,19 @@ header{
 }
 .header-text{flex: 1; min-width: 0}
 .header-text h1{
-  font-size: 17px;
-  margin: 0;
-  font-weight: 700;
-  letter-spacing: -.3px;
+  font-size: 17px; margin: 0;
+  font-weight: 700; letter-spacing: -.3px;
   line-height: 1.2;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  color: var(--text);
 }
 .header-text .sub{
   font-size: 12px;
   color: var(--text-secondary);
-  margin-top: 2px;
-  line-height: 1.3;
+  margin-top: 2px; line-height: 1.3;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .autosave-badge{
-  font-size: 11px;
-  padding: 4px 10px;
+  font-size: 11px; padding: 4px 10px;
   border-radius: 999px;
   background: var(--green-soft);
   color: var(--green);
@@ -153,9 +143,6 @@ header{
 
 main{max-width: 1100px; margin: auto; padding: 14px 14px 80px}
 
-/* ============================================================
-   CARD
-   ============================================================ */
 .card{
   background: var(--bg-card);
   border-radius: var(--r-lg);
@@ -180,17 +167,12 @@ main{max-width: 1100px; margin: auto; padding: 14px 14px 80px}
 .card .hint{font-size: 12.5px; color: var(--text-secondary); margin: 0 0 12px; line-height: 1.5}
 .card .hint b{color: var(--text); font-weight: 600}
 
-/* ============================================================
-   FORMS
-   ============================================================ */
 label{
   display: block; font-size: 11px; font-weight: 600;
   color: var(--text-secondary); margin-bottom: 5px;
   text-transform: uppercase; letter-spacing: .05em;
 }
-input, button, select, textarea{
-  font: inherit; outline: none; font-family: inherit;
-}
+input, button, select, textarea{font: inherit; outline: none; font-family: inherit}
 input[type=text], input[type=number], textarea{
   width: 100%; padding: 12px 14px;
   border: 1.5px solid var(--separator);
@@ -215,9 +197,6 @@ textarea{
 }
 input::placeholder, textarea::placeholder{color: var(--text-tertiary)}
 
-/* ============================================================
-   AUTO DATE/TIME
-   ============================================================ */
 .auto-datetime{
   display: grid;
   grid-template-columns: 1fr 1fr 1.5fr;
@@ -245,17 +224,13 @@ input::placeholder, textarea::placeholder{color: var(--text-tertiary)}
 }
 .auto-value .icon{font-size: 15px; flex: 0 0 auto}
 .auto-value .value{
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .auto-value .live-dot{
   width: 7px; height: 7px;
   border-radius: 50%;
   background: var(--green);
-  box-shadow: 0 0 0 0 var(--green);
   animation: pulse 2s infinite;
   flex: 0 0 auto;
 }
@@ -265,9 +240,6 @@ input::placeholder, textarea::placeholder{color: var(--text-tertiary)}
   100% { box-shadow: 0 0 0 0 rgba(52,199,89,0); }
 }
 
-/* ============================================================
-   BUTTONS
-   ============================================================ */
 button{
   border: 0;
   border-radius: var(--r-sm);
@@ -289,7 +261,6 @@ button:disabled{opacity: .5; cursor: not-allowed; transform: none}
 button.block{width: 100%}
 button.primary{background: #0a84ff; color: #fff}
 button.success{background: #10b981; color: #fff}
-button.danger{background: #ef4444; color: #fff}
 button.info{background: #0ea5e9; color: #fff}
 button.secondary{
   background: var(--bg-elev-2);
@@ -308,12 +279,8 @@ button.busy::before{
   to { transform: translateX(100%); }
 }
 
-/* ============================================================
-   STATUS
-   ============================================================ */
 .status{
-  margin-top: 10px;
-  font-size: 13px;
+  margin-top: 10px; font-size: 13px;
   padding: 12px 14px;
   background: var(--bg-input);
   border-radius: var(--r-sm);
@@ -326,9 +293,6 @@ button.busy::before{
 .status.err{background: var(--red-soft); border-color: transparent; color: var(--red); font-weight: 600}
 .status.info{background: var(--blue-soft); border-color: transparent; color: var(--accent); font-weight: 600}
 
-/* ============================================================
-   RESULT META
-   ============================================================ */
 .result-meta{
   display: flex;
   flex-wrap: wrap;
@@ -346,82 +310,47 @@ button.busy::before{
 .result-meta .item.empty b{color: var(--text-tertiary)}
 
 /* ============================================================
-   STATUS INDICATORS (без фильтров)
+   ✅ ТАБЛИЦА — sticky header + скролл ВНУТРИ контейнера
    ============================================================ */
-.status-indicators{
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
+.table-scroll{
+  max-height: 65vh;
+  overflow: auto;              /* ← и X, и Y скролл внутри */
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--r-md);
+  border: 1px solid var(--separator);
+  background: var(--bg-card);
+  position: relative;
+  scrollbar-width: thin;
+  scrollbar-color: var(--separator-opaque) transparent;
 }
-.status-indicator{
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: var(--bg-input);
-  font-size: 13px;
-  font-weight: 600;
-  border: 1.5px solid transparent;
-}
-.status-indicator .ind-count{
-  font-variant-numeric: tabular-nums;
-  min-width: 20px;
-  text-align: right;
-}
-.status-indicator.is-fresh{
-  background: var(--green-soft);
-  color: var(--green);
-}
-.status-indicator.is-warn{
-  background: var(--orange-soft);
-  color: var(--orange);
-}
-.status-indicator.is-danger{
-  background: var(--red-soft);
-  color: var(--red);
-}
-.status-indicator.is-unknown{
-  background: var(--bg-input);
-  color: var(--text-secondary);
-}
-.status-indicator.is-info{
-  background: var(--blue-soft);
-  color: var(--accent);
-}
-.status-indicator.is-zero{
-  opacity: .45;
+.table-scroll::-webkit-scrollbar{width: 8px; height: 8px}
+.table-scroll::-webkit-scrollbar-track{background: transparent}
+.table-scroll::-webkit-scrollbar-thumb{
+  background: var(--separator-opaque);
+  border-radius: 4px;
 }
 
-/* ============================================================
-   TABLE — Вариант A (sticky header + скролл страницы)
-   ============================================================ */
+/* Sticky header — внутри .table-scroll, прилипает к верху контейнера */
 .table-sticky-header{
   position: sticky;
-  top: calc(var(--header-h) + env(safe-area-inset-top) + 1px);
+  top: 0;
   z-index: 20;
   background: var(--bg-card);
-  margin: 0 -18px;
-  padding: 0 18px;
-  border-radius: var(--r-md) var(--r-md) 0 0;
   border-bottom: 1px solid var(--separator);
-  overflow: visible;
-  clip-path: inset(-1px 0 -100px 0);
-  transition: box-shadow .2s;
+  /* Никаких clip-path / overflow — браузер сам управляет */
 }
 .table-sticky-header.scrolled{
-  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,.06);
 }
 @media (prefers-color-scheme: dark){
   .table-sticky-header.scrolled{box-shadow: 0 4px 12px rgba(0,0,0,.4)}
 }
 .table-sticky-header table{
-  width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 13px;
-  min-width: 900px;
+  min-width: 1000px;
+  width: 100%;
 }
 .table-sticky-header th{
   font-size: 10.5px;
@@ -435,27 +364,15 @@ button.busy::before{
   white-space: nowrap;
 }
 
-.table-scroll-body{
-  overflow-x: auto;
-  overflow-y: visible;
-  -webkit-overflow-scrolling: touch;
-  margin: 0 -18px;
-  padding: 0 18px;
-  border-radius: 0 0 var(--r-md) var(--r-md);
-  scrollbar-width: thin;
-  scrollbar-color: var(--separator-opaque) transparent;
-}
-.table-scroll-body::-webkit-scrollbar{width: 8px; height: 8px}
-.table-scroll-body::-webkit-scrollbar-track{background: transparent}
-.table-scroll-body::-webkit-scrollbar-thumb{background: var(--separator-opaque); border-radius: 4px}
-.table-scroll-body table{
-  width: 100%;
+/* Тело таблицы — внутри того же .table-scroll */
+.table-scroll table.table-body{
   border-collapse: separate;
   border-spacing: 0;
   font-size: 13px;
-  min-width: 900px;
+  min-width: 1000px;
+  width: 100%;
 }
-.table-scroll-body td{
+.table-scroll table.table-body td{
   padding: 10px 8px;
   border-bottom: 1px solid var(--separator);
   vertical-align: middle;
@@ -463,33 +380,34 @@ button.busy::before{
   line-height: 1.2;
   background: var(--bg-card);
 }
-.table-scroll-body tbody tr:hover td{background: var(--bg-hover)}
-.table-scroll-body tbody tr:last-child td{border-bottom: none}
-.table-scroll-body tbody tr.row-fresh td{background: var(--green-row)}
-.table-scroll-body tbody tr.row-fresh:hover td{background: var(--green-row-hover)}
-.table-scroll-body tbody tr.row-warn td{background: var(--orange-row)}
-.table-scroll-body tbody tr.row-warn:hover td{background: var(--orange-row-hover)}
-.table-scroll-body tbody tr.row-danger td{background: var(--red-row)}
-.table-scroll-body tbody tr.row-danger:hover td{background: var(--red-row-hover)}
-.table-scroll-body tbody tr.row-unknown td{background: var(--bg-card)}
-.table-scroll-body tbody tr.row-unknown:hover td{background: var(--bg-hover)}
-.table-scroll-body tbody tr.row-info td{background: var(--blue-row)}
-.table-scroll-body tbody tr.row-info:hover td{background: var(--blue-row-hover)}
-.table-scroll-body tbody tr.row-fresh td:first-child,
-.table-scroll-body tbody tr.row-warn td:first-child,
-.table-scroll-body tbody tr.row-danger td:first-child,
-.table-scroll-body tbody tr.row-info td:first-child{position: relative}
-.table-scroll-body tbody tr.row-fresh td:first-child::before,
-.table-scroll-body tbody tr.row-warn td:first-child::before,
-.table-scroll-body tbody tr.row-danger td:first-child::before,
-.table-scroll-body tbody tr.row-info td:first-child::before{
+.table-scroll table.table-body tbody tr:hover td{background: var(--bg-hover)}
+.table-scroll table.table-body tbody tr:last-child td{border-bottom: none}
+.table-scroll table.table-body tbody tr.row-fresh td{background: var(--green-row)}
+.table-scroll table.table-body tbody tr.row-fresh:hover td{background: var(--green-row-hover)}
+.table-scroll table.table-body tbody tr.row-warn td{background: var(--orange-row)}
+.table-scroll table.table-body tbody tr.row-warn:hover td{background: var(--orange-row-hover)}
+.table-scroll table.table-body tbody tr.row-danger td{background: var(--red-row)}
+.table-scroll table.table-body tbody tr.row-danger:hover td{background: var(--red-row-hover)}
+.table-scroll table.table-body tbody tr.row-unknown td{background: var(--bg-card)}
+.table-scroll table.table-body tbody tr.row-unknown:hover td{background: var(--bg-hover)}
+.table-scroll table.table-body tbody tr.row-info td{background: var(--blue-row)}
+.table-scroll table.table-body tbody tr.row-info:hover td{background: var(--blue-row-hover)}
+.table-scroll table.table-body tbody tr.row-fresh td:first-child,
+.table-scroll table.table-body tbody tr.row-warn td:first-child,
+.table-scroll table.table-body tbody tr.row-danger td:first-child,
+.table-scroll table.table-body tbody tr.row-info td:first-child{position: relative}
+.table-scroll table.table-body tbody tr.row-fresh td:first-child::before,
+.table-scroll table.table-body tbody tr.row-warn td:first-child::before,
+.table-scroll table.table-body tbody tr.row-danger td:first-child::before,
+.table-scroll table.table-body tbody tr.row-info td:first-child::before{
   content: ''; position: absolute; left: 0; top: 6px; bottom: 6px;
   width: 3px; border-radius: 2px;
 }
-.table-scroll-body tbody tr.row-fresh td:first-child::before{background: var(--green)}
-.table-scroll-body tbody tr.row-warn td:first-child::before{background: var(--orange)}
-.table-scroll-body tbody tr.row-danger td:first-child::before{background: var(--red)}
-.table-scroll-body tbody tr.row-info td:first-child::before{background: var(--blue)}
+.table-scroll table.table-body tbody tr.row-fresh td:first-child::before{background: var(--green)}
+.table-scroll table.table-body tbody tr.row-warn td:first-child::before{background: var(--orange)}
+.table-scroll table.table-body tbody tr.row-danger td:first-child::before{background: var(--red)}
+.table-scroll table.table-body tbody tr.row-info td:first-child::before{background: var(--blue)}
+
 .row-status{display: inline-block; width: 18px; text-align: center; margin-right: 5px; font-size: 12px}
 
 /* ============================================================
@@ -511,16 +429,10 @@ button.busy::before{
 .legend-dot.info{background: var(--blue)}
 .legend-dot.edited{background: var(--orange); border: 1px solid var(--orange)}
 
-/* ============================================================
-   EMPTY STATE
-   ============================================================ */
 .empty-state{text-align: center; padding: 40px 20px; color: var(--text-secondary); font-size: 13.5px}
 .empty-state .em-icon{font-size: 36px; display: block; margin-bottom: 10px; opacity: .5}
 .empty-state .em-title{font-weight: 700; color: var(--text); margin-bottom: 5px; font-size: 15px}
 
-/* ============================================================
-   NUM INPUT
-   ============================================================ */
 .num{
   width: 68px; min-width: 64px;
   padding: 6px 6px;
@@ -533,7 +445,7 @@ button.busy::before{
   -webkit-appearance: none; appearance: none;
   height: 40px; line-height: 1;
   font-family: inherit;
-  transition: border-color .15s, background .15s;
+  transition: border-color .15s;
 }
 .num:focus{border-color: var(--accent); outline: none}
 .num:disabled{background: var(--bg-input); cursor: not-allowed; color: var(--text-tertiary); opacity: .7}
@@ -566,9 +478,6 @@ button.busy::before{
 .calc-cell.zero{color: var(--text-tertiary)}
 .calc-cell.positive{color: var(--red)}
 
-/* ============================================================
-   HINTS
-   ============================================================ */
 .steps-hint{
   background: var(--bg-input);
   border: 1px solid var(--separator);
@@ -591,9 +500,6 @@ button.busy::before{
 }
 .ai-help b{color: var(--text)}
 
-/* ============================================================
-   ACTION BUTTONS
-   ============================================================ */
 .action-buttons{
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -602,9 +508,6 @@ button.busy::before{
 }
 @media (max-width: 500px){.action-buttons{grid-template-columns: 1fr}}
 
-/* ============================================================
-   PHOTOS
-   ============================================================ */
 .photo-queue{display: grid; gap: 8px; margin-top: 10px}
 .photo-item{
   display: grid;
@@ -623,9 +526,6 @@ button.busy::before{
 .photo-actions{display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end}
 .photo-actions button{min-height: 36px; padding: 6px 12px; font-size: 12.5px}
 
-/* ============================================================
-   MODAL
-   ============================================================ */
 .modal{
   position: fixed; inset: 0; z-index: 1000;
   background: rgba(0,0,0,.5);
@@ -665,23 +565,11 @@ pre.code{
   border: 1px solid #1e293b;
 }
 
-/* ============================================================
-   SAVE CARD
-   ============================================================ */
-.save-card{
-  padding: 18px;
-}
-.save-card .save-btn{
-  min-height: 48px;
-  margin-bottom: 8px;
-}
+.save-card{padding: 18px}
+.save-card .save-btn{min-height: 48px; margin-bottom: 8px}
 .save-card .save-btn:last-of-type{margin-bottom: 0}
 
-/* ============================================================
-   ADAPTIVE
-   ============================================================ */
 @media (min-width: 641px){
-  :root{--header-h: 72px}
   header{padding: 14px 20px; padding-top: calc(14px + env(safe-area-inset-top))}
   .header-text h1{font-size: 19px}
   .header-text .sub{font-size: 12.5px; margin-top: 3px}
@@ -701,14 +589,16 @@ pre.code{
     to { transform: scale(1); opacity: 1; }
   }
   .modal-handle{display: none}
-  .table-sticky-header,
-  .table-scroll-body{margin: 0 -22px; padding: 0 22px}
   .table-sticky-header table,
-  .table-scroll-body table{font-size: 13.5px; min-width: 1000px}
+  .table-scroll table.table-body{font-size: 13.5px}
   .table-sticky-header th{font-size: 11px; padding: 12px 10px}
-  .table-scroll-body td{padding: 11px 10px}
+  .table-scroll table.table-body td{padding: 11px 10px}
   .num{width: 72px; min-width: 68px; height: 40px}
   .income-cell .num{width: 68px; min-width: 64px; height: 40px}
+  .table-scroll{max-height: 65vh}
+}
+@media (max-width: 640px){
+  .table-scroll{max-height: 55vh}
 }
 @media (max-width: 400px){
   .card{padding: 14px; border-radius: 16px}
@@ -720,16 +610,12 @@ pre.code{
   .action-buttons{gap: 8px}
   .num{width: 60px; min-width: 56px; height: 38px; font-size: 14px; padding: 4px 4px}
   .income-cell .num{width: 56px; min-width: 52px; height: 38px; font-size: 13px}
-  .status-indicator{font-size: 12px; padding: 6px 12px}
 }
 @media (max-width: 360px){
   .header-text .sub{display: none}
   .auto-datetime{grid-template-columns: 1fr}
 }
 
-/* ============================================================
-   CATALOG
-   ============================================================ */
 .cat-row{
   display: grid;
   grid-template-columns: 1fr 80px 40px;
@@ -774,7 +660,6 @@ pre.code{
 
 <main>
 
-  <!-- ПАРАМЕТРЫ -->
   <div class="card">
     <h2><span class="icon">⚙️</span>Параметры проверки</h2>
     <div class="auto-datetime">
@@ -804,7 +689,6 @@ pre.code{
     </div>
   </div>
 
-  <!-- ШАГ 1 -->
   <div class="card">
     <h2><span class="icon">📷</span>Шаг 1. Загрузка фото и PDF</h2>
     <p class="hint">Загрузите накладные и чек продаж — <b>фото или PDF</b>.</p>
@@ -817,7 +701,6 @@ pre.code{
     <div id="photoQueue" class="photo-queue"></div>
   </div>
 
-  <!-- ШАГ 2 -->
   <div class="card">
     <h2><span class="icon">📤</span>Шаг 2. Отправить в ИИ</h2>
     <div class="steps-hint">
@@ -837,7 +720,6 @@ pre.code{
     <div id="shareStatus" class="status"></div>
   </div>
 
-  <!-- ШАГ 3 -->
   <div class="card">
     <h2><span class="icon">📥</span>Шаг 3. Импорт CSV от ИИ</h2>
     <p class="hint">Вставьте CSV, который вернул ИИ, или загрузите файл. <b>Строки будут отсортированы по алфавиту.</b></p>
@@ -853,7 +735,6 @@ pre.code{
     <div id="csvStatus" class="status"></div>
   </div>
 
-  <!-- СПРАВОЧНИК -->
   <div class="card">
     <h2><span class="icon">📚</span>Справочник сроков годности</h2>
     <p class="hint">Отредактируйте справочник: добавьте новые позиции, удалите ненужные, измените сроки.</p>
@@ -869,7 +750,6 @@ pre.code{
     <div id="catalogStatus" class="status"></div>
   </div>
 
-  <!-- ШАГ 4 -->
   <div class="card">
     <h2><span class="icon">📈</span>Шаг 4. Результат</h2>
     <p id="summary" class="hint">Загрузите CSV и введите фактический остаток, чтобы увидеть результат.</p>
@@ -880,31 +760,14 @@ pre.code{
       <span class="item" id="metaPointWrap">📍 <b id="metaPoint">—</b></span>
     </div>
 
-    <div id="statusIndicators" class="status-indicators" style="display:none">
-      <span class="status-indicator is-fresh" data-status="fresh">
-        🟢 Свежие <span class="ind-count" data-count="fresh">0</span>
-      </span>
-      <span class="status-indicator is-warn" data-status="warn">
-        🟡 Просрочка на витрине <span class="ind-count" data-count="warn">0</span>
-      </span>
-      <span class="status-indicator is-danger" data-status="danger">
-        🔴 Продано просрочки <span class="ind-count" data-count="danger">0</span>
-      </span>
-      <span class="status-indicator is-unknown" data-status="unknown">
-        ⚪ Без остатка <span class="ind-count" data-count="unknown">0</span>
-      </span>
-      <span class="status-indicator is-info" data-status="info">
-        🔵 Только продажи <span class="ind-count" data-count="info">0</span>
-      </span>
-    </div>
-
-    <div class="table-sticky-header" id="tableStickyHeader" style="display:none">
-      <table id="resultTableHeader">
-        <thead><tr></tr></thead>
-      </table>
-    </div>
-    <div class="table-scroll-body" id="tableScrollBody" style="display:none">
-      <table id="resultTable">
+    <!-- ✅ Единый контейнер с обоими скроллами -->
+    <div class="table-scroll" id="tableScroll" style="display:none">
+      <div class="table-sticky-header" id="tableStickyHeader">
+        <table id="resultTableHeader">
+          <thead><tr></tr></thead>
+        </table>
+      </div>
+      <table id="resultTable" class="table-body">
         <tbody></tbody>
       </table>
     </div>
@@ -921,20 +784,18 @@ pre.code{
     </div>
   </div>
 
-  <!-- СОХРАНЕНИЕ -->
   <div class="card save-card">
     <h2><span class="icon">💾</span>Сохранение</h2>
     <button id="exportBtn" class="primary block save-btn">📥 Скачать Excel (.xlsx)</button>
     <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v4.0
+      French Bakery Аудит · v4.1
     </div>
   </div>
 
 </main>
 
-<!-- МОДАЛКА СПРАВОЧНИКА -->
 <div id="catalogModal" class="modal hidden">
   <div class="modal-content">
     <div class="modal-handle"></div>
@@ -954,7 +815,6 @@ pre.code{
   </div>
 </div>
 
-<!-- МОДАЛКА ПРОМПТА -->
 <div id="promptModal" class="modal hidden">
   <div class="modal-content">
     <div class="modal-handle"></div>
@@ -991,7 +851,6 @@ let _initialized = false;
 let _activeDeletes = new Set();
 let _fileBusy = false;
 let _timeUpdater = null;
-let _scrollSyncScheduled = false;
 const $ = id => {
   try { return document.getElementById(id); } catch (e) { return null; }
 };
@@ -1011,9 +870,6 @@ function initLogoFallback() {
   };
 }
 
-/* ============================================================
-   АВТО-ДАТА/ВРЕМЯ
-   ============================================================ */
 function getTodayStr() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -1051,9 +907,6 @@ function startAutoDateTime() {
   }, TIME_UPDATE_MS);
 }
 
-/* ============================================================
-   БЕЗОПАСНОСТЬ
-   ============================================================ */
 function clampNum(v, min, max, fallback) {
   const n = Number(v);
   if (!isFinite(n)) return fallback;
@@ -1254,30 +1107,6 @@ function getRowStatus(calc, row) {
   if (calc.expiredOnShelf > 0) return { cls: 'row-warn', icon: '🟡', label: 'warn' };
   return { cls: 'row-fresh', icon: '🟢', label: 'fresh' };
 }
-function computeStatusCounts() {
-  const c = { all: tableRows.length, fresh: 0, warn: 0, danger: 0, unknown: 0, info: 0 };
-  for (const row of tableRows) {
-    const calc = computeFIFO(row);
-    const st = getRowStatus(calc, row);
-    c[st.label] = (c[st.label] || 0) + 1;
-  }
-  return c;
-}
-function updateStatusIndicators() {
-  const box = $('statusIndicators');
-  if (!box) return;
-  const counts = computeStatusCounts();
-  box.querySelectorAll('.ind-count').forEach(el => {
-    const key = el.dataset.count;
-    el.textContent = counts[key] ?? 0;
-  });
-  box.querySelectorAll('.status-indicator').forEach(el => {
-    const status = el.dataset.status;
-    const count = counts[status] ?? 0;
-    if (count === 0) el.classList.add('is-zero');
-    else el.classList.remove('is-zero');
-  });
-}
 function updateResultMeta() {
   const box = $('resultMeta');
   if (!box) return;
@@ -1299,7 +1128,7 @@ function updateResultMeta() {
 
 function buildHeaderHTML(dates) {
   return `
-    <th style="width:24%">Наименование</th>
+    <th style="width:24%;min-width:240px">Наименование</th>
     <th style="width:90px;text-align:center">Остаток</th>
     <th style="width:80px;text-align:center">Продано</th>
     ${dates.map(d => `<th style="width:100px;text-align:center">Получено за ${fmtDateRuShort(d)}</th>`).join('')}
@@ -1311,24 +1140,6 @@ function buildHeaderHTML(dates) {
   `;
 }
 
-function syncScroll() {
-  const header = $('tableStickyHeader');
-  const body = $('tableScrollBody');
-  if (!header || !body) return;
-  const headerTable = header.querySelector('table');
-  if (headerTable) {
-    headerTable.style.transform = `translateX(${-body.scrollLeft}px)`;
-  }
-}
-function scheduleScrollSync() {
-  if (_scrollSyncScheduled) return;
-  _scrollSyncScheduled = true;
-  requestAnimationFrame(() => {
-    _scrollSyncScheduled = false;
-    syncScroll();
-  });
-}
-
 function renderTable() {
   if (isRendering) return;
   isRendering = true;
@@ -1336,22 +1147,16 @@ function renderTable() {
     const tbody = document.querySelector('#resultTable tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
-    const statusIndicators = $('statusIndicators');
-    const stickyHeader = $('tableStickyHeader');
-    const scrollBody = $('tableScrollBody');
+    const scrollBox = $('tableScroll');
 
     if (!Array.isArray(tableRows) || !tableRows.length) {
       if ($('summary')) $('summary').textContent = 'Загрузите CSV от ИИ, чтобы увидеть результат.';
       if ($('totals')) $('totals').style.display = 'none';
-      if (statusIndicators) statusIndicators.style.display = 'none';
-      if (stickyHeader) stickyHeader.style.display = 'none';
-      if (scrollBody) scrollBody.style.display = 'none';
+      if (scrollBox) scrollBox.style.display = 'none';
       updateResultMeta();
       return;
     }
-    if (statusIndicators) statusIndicators.style.display = 'flex';
-    if (stickyHeader) stickyHeader.style.display = 'block';
-    if (scrollBody) scrollBody.style.display = 'block';
+    if (scrollBox) scrollBox.style.display = 'block';
 
     const allDates = new Set();
     tableRows.forEach(r => (r.incoming || []).forEach(p => { if (p.date) allDates.add(p.date); }));
@@ -1507,9 +1312,7 @@ function renderTable() {
       tbody.appendChild(tr);
     });
     updateTotals();
-    updateStatusIndicators();
     updateResultMeta();
-    syncScroll();
   } finally {
     isRendering = false;
   }
@@ -1540,7 +1343,6 @@ function refreshRow(row, tr, statusIcon) {
   setCell('expiredOnShelf', calc.expiredOnShelf);
   setCell('soldExpired', calc.soldExpired);
   updateTotals();
-  updateStatusIndicators();
 }
 function updateTotals() {
   const summary = $('summary');
@@ -1969,9 +1771,6 @@ function buildPrompt() {
 Включай в CSV ТОЛЬКО те наименования, которые дословно (или с минимальной нормализацией) присутствуют в СПРАВОЧНИКЕ СРОКОВ.
 Всё, чего нет в справочнике, — игнорируй. Даже если это есть в чеке.
 
-Пример: если в чеке есть «Мохито 0,45», а в справочнике нет — НЕ добавляй.
-Пример: если в чеке есть «Каша ОВСЯНАЯ», а в справочнике нет — НЕ добавляй.
-
 ═══════════════════════════════════════════
 ⚠️ ЧАСТЫЕ ОШИБКИ OCR
 ═══════════════════════════════════════════
@@ -2003,11 +1802,9 @@ function buildPrompt() {
 Сортировка: по алфавиту (русский)
 Колонки: Наименование;Получено за ДД.ММ;...;Продано сегодня;Срок годности
 Кавычки: если есть ; , " → оберни в "..." и удваивай внутренние.
-Пример: "Сэндвич ""Дачный""; с ветчиной";0;1;24 ч
 
 После CSV выведи:
 1. Сомнительные строки: [название] | [что неясно] | [предположение]
-   Если нет → «Сомнительных строк нет».
 2. Проверка: строк N, из справочника N, вне N (должно быть 0), дат приходов N.
 
 ═══════════════════════════════════════════
@@ -2378,11 +2175,6 @@ function init() {
   initLogoFallback();
   startAutoDateTime();
 
-  const body = $('tableScrollBody');
-  if (body) {
-    body.addEventListener('scroll', scheduleScrollSync, { passive: true });
-  }
-
   const pt = $('point');
   if (pt) {
     pt.addEventListener('input', () => {
@@ -2426,10 +2218,9 @@ function init() {
     }
   });
 
-  window.addEventListener('resize', syncScroll);
   window.addEventListener('error', e => console.warn('Global error:', e.message));
 
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v4.0 · sticky header · индикаторы · каталог:', PRODUCTS.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v4.1 · таблица · каталог:', PRODUCTS.length);
 }
 
 bindUI();
