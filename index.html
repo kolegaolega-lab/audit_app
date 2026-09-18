@@ -1,0 +1,1385 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>☕ Аудит сроков</title>
+<style>
+:root{
+  --bg:#f5f7fb;
+  --bg-grad-1:#eef2ff;
+  --bg-grad-2:#faf5ff;
+  --surface:#ffffff;
+  --surface-2:#f8fafc;
+  --surface-3:#f1f5f9;
+  --border:#e5e7eb;
+  --border-strong:#cbd5e1;
+  --text:#0f172a;
+  --text-muted:#64748b;
+  --text-light:#94a3b8;
+  --primary:#6366f1;
+  --primary-hover:#4f46e5;
+  --primary-soft:#eef2ff;
+  --primary-ring:rgba(99,102,241,.18);
+  --success:#10b981;
+  --success-hover:#059669;
+  --success-soft:#ecfdf5;
+  --danger:#ef4444;
+  --danger-hover:#dc2626;
+  --danger-soft:#fef2f2;
+  --warning:#f59e0b;
+  --warning-soft:#fffbeb;
+  --info:#0ea5e9;
+  --info-soft:#f0f9ff;
+  --r:16px;
+  --r-sm:12px;
+  --r-xs:8px;
+  --sh-1:0 1px 2px rgba(15,23,42,.04);
+  --sh-2:0 2px 6px rgba(15,23,42,.06),0 1px 2px rgba(15,23,42,.04);
+  --sh-3:0 12px 28px rgba(15,23,42,.10),0 6px 12px rgba(15,23,42,.05);
+  --sh-4:0 24px 48px rgba(15,23,42,.16);
+  --sh-focus:0 0 0 4px var(--primary-ring);
+  --trans:.18s cubic-bezier(.4,0,.2,1);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,Arial,sans-serif;
+  background:var(--bg);
+  background-image:
+    radial-gradient(1200px 600px at 100% -10%,var(--bg-grad-1),transparent 60%),
+    radial-gradient(900px 500px at -10% 100%,var(--bg-grad-2),transparent 55%);
+  background-attachment:fixed;
+  color:var(--text);
+  font-size:14px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:env(safe-area-inset-bottom);
+  overscroll-behavior-y:none;
+}
+/* HEADER */
+header{
+  position:sticky;top:0;z-index:30;
+  background:rgba(255,255,255,.82);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:10px 16px;
+  padding-top:calc(10px + env(safe-area-inset-top));
+}
+.header-inner{max-width:1100px;margin:auto;display:flex;align-items:center;gap:12px}
+.logo{
+  width:40px;height:40px;border-radius:12px;
+  background:linear-gradient(135deg,#818cf8 0%,#6366f1 50%,#4f46e5 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex:0 0 auto;
+  box-shadow:0 6px 18px rgba(99,102,241,.35);
+  animation:float 4s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.header-text{flex:1;min-width:0}
+.header-text h1{font-size:16px;margin:0;font-weight:700;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:linear-gradient(135deg,#0f172a 0%,#4f46e5 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.header-text .sub{font-size:11.5px;color:var(--text-muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+main{max-width:1100px;margin:auto;padding:16px 14px 60px}
+/* CARDS */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:18px;
+  margin-bottom:14px;
+  box-shadow:var(--sh-2);
+  transition:box-shadow var(--trans);
+}
+.card:hover{box-shadow:var(--sh-3)}
+.card h2{
+  font-size:15.5px;font-weight:700;margin:0 0 6px;
+  display:flex;align-items:center;gap:8px;
+  color:var(--text);letter-spacing:-.01em;
+}
+.card h2 .icon{
+  width:26px;height:26px;border-radius:8px;
+  background:var(--primary-soft);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:14px;
+}
+.card .hint{font-size:12.5px;color:var(--text-muted);margin:0 0 14px;line-height:1.5}
+.card .hint b{color:var(--text);font-weight:600}
+/* FORMS */
+label{display:block;font-size:11.5px;color:var(--text-muted);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+input,button,select,textarea{font:inherit;outline:none}
+input[type=text],input[type=date],input[type=number],input[type=time],select{
+  width:100%;padding:12px 14px;
+  border:1.5px solid var(--border);
+  border-radius:var(--r-sm);
+  background:var(--surface);
+  color:var(--text);
+  font-size:16px;
+  transition:border-color var(--trans),box-shadow var(--trans),background var(--trans);
+  -webkit-appearance:none;appearance:none;
+  min-height:46px;
+}
+input:focus,select:focus{border-color:var(--primary);box-shadow:var(--sh-focus);background:#fff}
+textarea{
+  width:100%;padding:14px;
+  border:1.5px solid var(--border);
+  border-radius:var(--r-sm);
+  background:var(--surface);
+  color:var(--text);
+  font-size:13px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  line-height:1.55;
+  min-height:180px;resize:vertical;
+  transition:border-color var(--trans),box-shadow var(--trans);
+}
+textarea:focus{border-color:var(--primary);box-shadow:var(--sh-focus);background:#fff}
+input::placeholder,textarea::placeholder{color:var(--text-light)}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media (max-width:640px){.grid-3{grid-template-columns:1fr}}
+/* BUTTONS */
+button{
+  border:0;border-radius:var(--r-sm);
+  padding:12px 18px;
+  background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);
+  color:#fff;font-weight:600;font-size:14px;cursor:pointer;
+  transition:transform var(--trans),box-shadow var(--trans),opacity var(--trans),filter var(--trans);
+  white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:46px;user-select:none;
+  position:relative;overflow:hidden;
+  box-shadow:0 1px 2px rgba(15,23,42,.08);
+}
+button::after{
+  content:'';position:absolute;inset:0;background:rgba(255,255,255,0);
+  transition:background var(--trans);
+}
+button:hover{filter:brightness(1.08);box-shadow:0 4px 12px rgba(15,23,42,.12)}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+button.secondary{background:var(--surface);color:var(--text);border:1.5px solid var(--border-strong);box-shadow:none}
+button.secondary:hover{background:var(--surface-2);border-color:var(--primary);color:var(--primary)}
+button.primary{background:linear-gradient(135deg,#818cf8 0%,#6366f1 50%,#4f46e5 100%);box-shadow:0 4px 14px rgba(99,102,241,.28)}
+button.primary:hover{box-shadow:0 6px 20px rgba(99,102,241,.38)}
+button.success{background:linear-gradient(135deg,#34d399 0%,#10b981 50%,#059669 100%);box-shadow:0 4px 14px rgba(16,185,129,.28)}
+button.success:hover{box-shadow:0 6px 20px rgba(16,185,129,.38)}
+button.danger{background:linear-gradient(135deg,#f87171 0%,#ef4444 50%,#dc2626 100%)}
+button.info{background:linear-gradient(135deg,#38bdf8 0%,#0ea5e9 50%,#0284c7 100%);box-shadow:0 4px 14px rgba(14,165,233,.28)}
+button.info:hover{box-shadow:0 6px 20px rgba(14,165,233,.38)}
+button.block{width:100%}
+button.small{padding:9px 14px;font-size:12.5px;min-height:40px}
+/* STATUS */
+.status{
+  margin-top:12px;font-size:13px;
+  padding:12px 14px;
+  background:var(--surface-2);
+  border-radius:var(--r-sm);
+  border:1px solid var(--border);
+  line-height:1.5;
+  display:none;
+  animation:fadeIn .25s ease-out;
+}
+.status.show{display:block}
+.status.ok{background:var(--success-soft);border-color:#a7f3d0;color:#065f46}
+.status.err{background:var(--danger-soft);border-color:#fecaca;color:#991b1b}
+.status.info{background:var(--info-soft);border-color:#bae6fd;color:#075985}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+/* BADGES */
+.badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:999px;
+  font-size:11.5px;font-weight:600;
+  white-space:nowrap;line-height:1.4;
+}
+.bgreen{background:#d1fae5;color:#065f46}
+.bred{background:#fee2e2;color:#991b1b}
+.byellow{background:#fef3c7;color:#92400e}
+.bblue{background:#dbeafe;color:#1e40af}
+.bgray{background:#e2e8f0;color:#475569}
+/* TABLE */
+.table-wrap{
+  overflow-x:auto;margin:0 -18px;padding:0 18px;
+  -webkit-overflow-scrolling:touch;
+  border-radius:var(--r-sm);
+}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;min-width:820px}
+th{
+  font-size:10.5px;font-weight:700;color:var(--text-muted);
+  text-transform:uppercase;letter-spacing:.06em;
+  background:var(--surface-3);
+  padding:11px 8px;text-align:left;
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:1;
+}
+th:first-child{border-top-left-radius:var(--r-sm)}
+th:last-child{border-top-right-radius:var(--r-sm)}
+td{padding:10px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
+tbody tr:hover{background:var(--surface-2)}
+tbody tr:last-child td{border-bottom:none}
+.num{
+  width:64px;min-width:60px;padding:8px 4px;
+  border:1.5px solid var(--border-strong);
+  border-radius:var(--r-xs);
+  font-size:14px;text-align:center;
+  background:#fff;font-weight:600;
+  -webkit-appearance:none;appearance:none;
+  min-height:40px;
+  transition:border-color var(--trans),box-shadow var(--trans);
+}
+.num:focus{border-color:var(--primary);box-shadow:var(--sh-focus);outline:none}
+/* STEPS */
+.steps-hint{
+  background:linear-gradient(135deg,#eef2ff 0%,#e0e7ff 100%);
+  border:1px solid #c7d2fe;
+  border-radius:var(--r-sm);
+  padding:14px 16px;
+  font-size:12.5px;line-height:1.6;
+  color:#3730a3;
+  margin-bottom:14px;
+}
+.steps-hint b{color:#312e81;font-weight:700}
+.steps-hint ol{margin:6px 0 0 18px;padding:0}
+.steps-hint li{margin-bottom:4px}
+.ai-help{
+  padding:12px 14px;border-radius:var(--r-sm);
+  background:linear-gradient(135deg,#eef2ff 0%,#e0e7ff 100%);
+  border:1px solid #c7d2fe;
+  font-size:12px;line-height:1.55;color:#3730a3;
+}
+.ai-help b{color:#312e81}
+/* ACTION BUTTONS */
+.action-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+@media (max-width:500px){.action-buttons{grid-template-columns:1fr}}
+/* PHOTO QUEUE */
+.photo-queue{display:grid;gap:10px;margin-top:12px}
+.photo-item{
+  display:grid;grid-template-columns:56px 1fr auto;gap:12px;
+  align-items:center;padding:10px;
+  border:1px solid var(--border);border-radius:var(--r-sm);
+  background:var(--surface-2);
+  transition:background var(--trans),border-color var(--trans);
+}
+.photo-item:hover{background:var(--surface-3);border-color:var(--border-strong)}
+.photo-thumb{width:56px;height:56px;object-fit:cover;border-radius:10px;background:#e2e8f0;box-shadow:var(--sh-1)}
+.photo-meta{min-width:0}
+.photo-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.photo-type{font-size:11.5px;color:var(--text-muted);margin-top:3px}
+.photo-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.photo-actions button{min-height:36px;padding:8px 12px;font-size:12px}
+/* MODAL */
+.modal{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(15,23,42,.5);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:flex;align-items:flex-end;justify-content:center;
+  padding:0;animation:fadeIn .22s ease-out;
+}
+.modal.hidden{display:none}
+.modal-content{
+  background:var(--surface);
+  border-radius:24px 24px 0 0;
+  width:100%;max-width:820px;
+  max-height:92vh;overflow:auto;
+  padding:22px 20px;
+  padding-bottom:calc(22px + env(safe-area-inset-bottom));
+  box-shadow:var(--sh-4);
+  animation:slideUp .3s cubic-bezier(.16,1,.3,1);
+  -webkit-overflow-scrolling:touch;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-content h3{margin:0 0 8px;font-size:18px;font-weight:700;letter-spacing:-.02em}
+.modal-handle{
+  width:44px;height:5px;
+  background:var(--border-strong);
+  border-radius:3px;
+  margin:0 auto 16px;
+}
+pre.code{
+  background:#0f172a;color:#a5f3fc;
+  padding:16px;border-radius:var(--r-sm);
+  font-size:11.5px;line-height:1.6;
+  overflow:auto;max-height:60vh;
+  white-space:pre-wrap;word-break:break-word;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  -webkit-overflow-scrolling:touch;
+  border:1px solid #1e293b;
+}
+/* DESKTOP */
+@media (min-width:641px){
+  header{padding:14px 24px;padding-top:calc(14px + env(safe-area-inset-top))}
+  .header-text h1{font-size:17px}
+  .header-text .sub{font-size:12px}
+  .logo{width:44px;height:44px;font-size:22px;border-radius:14px}
+  main{padding:22px 24px 60px}
+  .card{padding:22px}
+  input[type=text],input[type=date],input[type=number],input[type=time],select{padding:11px 14px;font-size:14.5px;min-height:44px}
+  textarea{font-size:13.5px;min-height:240px}
+  button{min-height:44px;padding:11px 18px;font-size:14px}
+  button.small{min-height:38px;padding:8px 14px;font-size:13px}
+  .modal{align-items:center;padding:20px}
+  .modal-content{border-radius:20px;padding:28px;max-height:92vh;animation:modalIn .22s cubic-bezier(.16,1,.3,1)}
+  @keyframes modalIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal-handle{display:none}
+  .table-wrap{margin:0 -22px;padding:0 22px}
+  table{font-size:13px;min-width:920px}
+  th{font-size:11px;padding:12px 10px}
+  td{padding:11px 10px}
+}
+/* CATALOG EDITOR */
+.cat-row{
+  display:grid;
+  grid-template-columns:1fr 90px 44px;
+  gap:10px;align-items:center;
+  padding:8px 10px;
+  border-radius:var(--r-sm);
+  transition:background var(--trans);
+}
+.cat-row:hover{background:var(--surface-2)}
+.cat-row input[type=text],
+.cat-row input[type=number]{
+  padding:9px 12px;
+  font-size:13px;
+  border-radius:10px;
+  min-height:40px;
+}
+.cat-row input[type=number]{text-align:center;font-weight:700;color:var(--primary)}
+.cat-row .del-btn{
+  min-height:40px;padding:0;
+  background:var(--danger-soft);color:var(--danger);
+  border:1px solid #fecaca;
+  box-shadow:none;font-size:14px;
+}
+.cat-row .del-btn:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
+/* STEP BAR */
+.stepbar{
+  display:flex;gap:6px;margin-bottom:16px;align-items:center;
+}
+.stepbar .step{
+  flex:1;height:4px;border-radius:2px;background:var(--border);
+  transition:background var(--trans);
+  position:relative;
+}
+.stepbar .step.active{background:linear-gradient(90deg,#818cf8,#6366f1)}
+.stepbar .step.done{background:var(--success)}
+.stepbar-label{font-size:11px;color:var(--text-muted);text-align:center;margin-top:6px;letter-spacing:.02em}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">☕</div>
+    <div class="header-text">
+      <h1>Аудит сроков — Контроль кофейни</h1>
+      <div class="sub">Накладные · iiko · FIFO · Списание в 22:00 · Excel</div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ПАРАМЕТРЫ -->
+  <div class="card">
+    <h2><span class="icon">⚙️</span>Параметры проверки</h2>
+    <div class="grid-3">
+      <div><label>Дата проверки</label><input id="checkDate" type="date"></div>
+      <div><label>Время проверки</label><input id="checkTime" type="time" value="07:00"></div>
+      <div><label>Точка</label><input id="point" type="text" placeholder="№037" autocomplete="off"></div>
+    </div>
+    <div class="ai-help" style="margin-top:12px">
+      🕖 <b>Списание:</b> 24 ч — в день получения в 22:00; 36 и 48 ч — на следующий день в 22:00; 72 ч — через 2 дня в 22:00. <b>Пока факт. остаток не введён — расчёт не ведётся.</b>
+    </div>
+  </div>
+
+  <!-- ШАГ 1 -->
+  <div class="card">
+    <h2><span class="icon">📷</span>Шаг 1. Загрузка фото и PDF</h2>
+    <p class="hint">Загрузите накладные и чек iiko — <b>фото или PDF</b>. Файлы хранятся на устройстве.</p>
+    <div class="action-buttons">
+      <button id="uploadInvoicePhotosBtn" class="info">📷 Накладные (фото/PDF)</button>
+      <button id="uploadSalesPhotosBtn" class="secondary">🧾 iiko (фото/PDF)</button>
+    </div>
+    <input id="invoicePhotoInput" type="file" accept="image/*,application/pdf" multiple hidden>
+    <input id="salesPhotoInput" type="file" accept="image/*,application/pdf" multiple hidden>
+    <div id="photoQueue" class="photo-queue"></div>
+  </div>
+
+  <!-- ШАГ 2 -->
+  <div class="card">
+    <h2><span class="icon">📤</span>Шаг 2. Отправить в ИИ</h2>
+    <div class="steps-hint">
+      <b>Как это работает:</b>
+      <ol>
+        <li>Нажмите «Поделиться в ИИ» — откроется системное меню «Поделиться».</li>
+        <li>Выберите ChatGPT / DeepSeek / другое приложение.</li>
+        <li>Приложение получит <b>исходные файлы</b> (фото и PDF) и готовый промпт.</li>
+        <li>ИИ вернёт <b>CSV-файл для скачивания</b>.</li>
+        <li>Скачайте CSV и загрузите его в приложение (Шаг 3).</li>
+      </ol>
+    </div>
+    <div class="action-buttons">
+      <button id="shareToAIBtn" class="primary">📤 Поделиться в ИИ</button>
+      <button id="copyPromptBtn" class="info">📋 Скопировать промпт</button>
+    </div>
+    <div id="shareStatus" class="status"></div>
+  </div>
+
+  <!-- ШАГ 3 -->
+  <div class="card">
+    <h2><span class="icon">📥</span>Шаг 3. Импорт CSV от ИИ</h2>
+    <p class="hint">Вставьте CSV, который вернул ИИ, или загрузите файл. <b>Строки будут отсортированы по алфавиту.</b></p>
+    <div class="action-buttons">
+      <button id="pasteCsvBtn" class="secondary">📋 Вставить из буфера</button>
+      <button id="loadCsvFileBtn" class="secondary">📁 Загрузить CSV</button>
+    </div>
+    <input id="csvFileInput" type="file" accept=".csv,text/csv" hidden>
+    <textarea id="csvInput" placeholder="Наименование;Получено за 16.09;Получено за 17.09;Получено за 18.09;Продано сегодня;Срок годности
+Ром баба;2;2;2;2;48 часов"></textarea>
+    <button id="applyCsvBtn" class="success block" style="margin-top:12px">✅ Применить CSV</button>
+    <div id="csvStatus" class="status"></div>
+  </div>
+
+  <!-- СПРАВОЧНИК -->
+  <div class="card">
+    <h2><span class="icon">📚</span>Справочник сроков годности</h2>
+    <p class="hint">Отредактируйте справочник: добавьте новые позиции, удалите ненужные, измените сроки.</p>
+    <div class="action-buttons">
+      <button id="editCatalogBtn" class="info">✏️ Редактировать справочник</button>
+      <button id="exportCatalogBtn" class="secondary">📤 Экспорт JSON</button>
+    </div>
+    <div class="action-buttons">
+      <button id="importCatalogBtn" class="secondary">📥 Импорт JSON</button>
+      <button id="resetCatalogBtn" class="secondary">↺ Сбросить к заводским</button>
+    </div>
+    <input id="importCatalogFile" type="file" accept=".json,application/json" hidden>
+    <div id="catalogStatus" class="status"></div>
+  </div>
+
+  <!-- ШАГ 4 -->
+  <div class="card">
+    <h2><span class="icon">📈</span>Шаг 4. Результат</h2>
+    <p id="summary" class="hint">Загрузите CSV и введите фактический остаток, чтобы увидеть результат.</p>
+    <div class="table-wrap" style="margin-top:14px">
+      <table id="resultTable">
+        <thead><tr>
+          <th style="width:28%">Наименование</th>
+          <th style="width:110px;text-align:center">Факт. остаток</th>
+          <th style="width:100px;text-align:center">Получено за [дата]</th>
+          <th style="width:90px;text-align:center">Продано сегодня</th>
+          <th style="width:80px;text-align:center">Срок годности</th>
+          <th style="width:100px;text-align:center">Продано просроченным</th>
+          <th style="width:100px;text-align:center">Просрочено на витрине</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="totals" class="ai-help" style="margin-top:14px;display:none"></div>
+  </div>
+
+  <!-- СОХРАНЕНИЕ -->
+  <div class="card">
+    <h2><span class="icon">💾</span>Сохранение</h2>
+    <button id="exportBtn" class="primary block">📥 Скачать Excel (.xlsx)</button>
+    <button id="clearBtn" class="secondary block" style="margin-top:10px">↻ Сбросить данные</button>
+    <div class="hint" style="margin-top:12px;text-align:center">V29 · Списание в 22:00 · FIFO · Excel · Сортировка А-Я</div>
+  </div>
+
+</main>
+
+<!-- МОДАЛКА СПРАВОЧНИКА -->
+<div id="catalogModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-handle"></div>
+    <h3>✏️ Справочник сроков</h3>
+    <p class="hint">Меняйте названия, сроки, добавляйте новые позиции. Всё сохранится на устройстве.</p>
+
+    <div style="margin:14px 0">
+      <input id="catalogSearch" type="text" placeholder="🔍 Поиск по названию..." autocomplete="off">
+    </div>
+
+    <div id="catalogList" style="max-height:50vh;overflow-y:auto;margin-bottom:16px;-webkit-overflow-scrolling:touch"></div>
+
+    <div style="border-top:1px solid var(--border);padding-top:16px;margin-top:16px">
+      <label>➕ Новая позиция</label>
+      <input id="newProdName" type="text" placeholder="Название" style="margin:8px 0" autocomplete="off">
+      <input id="newProdHours" type="number" placeholder="Срок, часов" style="margin-bottom:10px" min="1" value="48">
+      <button id="addProdBtn" class="success block">Добавить</button>
+    </div>
+
+    <button id="closeCatalogBtn" class="secondary block" style="margin-top:16px">Закрыть</button>
+  </div>
+</div>
+
+<!-- МОДАЛКА ПРОМПТА -->
+<div id="promptModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-handle"></div>
+    <h3>📋 Промпт для ИИ</h3>
+    <p class="hint" style="margin-bottom:14px">Скопируйте текст и вставьте его в чат вместе с файлами.</p>
+    <pre class="code" id="promptContent"></pre>
+    <button id="copyFromModalBtn" class="info block" style="margin-top:16px">📋 Скопировать промпт</button>
+    <button id="closePromptModalBtn" class="secondary block" style="margin-top:10px">Закрыть</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+/* ============================================================
+   ЗАВОДСКОЙ СПРАВОЧНИК
+   ============================================================ */
+const FACTORY_CATALOG = [
+  ["Баушкин рецепт",24],["Хлеб Деревенский",24],["Хлеб ржаной 100%",48],["Хлеб зерновой",48],
+  ["Хлеб бородинский",48],["Батон деревенский",24],["Батон нарезной",24],["Багет французский",24],
+  ["Батон 8 злаков",48],["Зеленая гречка",48],["Чесночный",48],["Зерновой белый",24],["Багет на закваске",24],
+  ["Сосиска в тесте",36],["Сосиска с сыром в слойке",36],["Пирожок с луком и яйцом",36],
+  ["Пирожок с капустой",36],["Пирожок с картошкой",36],["Пирожок с курицей",36],["Пирожок с яблоком",36],
+  ["Грилата с картофелем и грибами",36],["Грилата с брынзой и зеленью",36],["Грилата с мясом",36],["Грилата с курицей",36],
+  ["Киш с курицей",48],["Киш с ветчиной и сыром",48],["Киш 4 сыра",48],["Багет с начинкой Ветчина",24],
+  ["Сэндвич с семгой",12],["Сэндвич с тунцом",24],["Чиабатта с начинкой индейка",24],["Сэндвич с рваной говядиной",24],
+  ["Сэндвич с куриными стрипсами",24],["Круассан с ветчиной и яйцом пашот",24],["Круассан с курицей",24],
+  ["Круассан с рыбой",12],["Круассан с моцареллой",24],["Круассан с ветчиной",24],
+  ["Лаваш ЦЕЗАРЬ",24],["Лаваш Шримп",24],["Лаваш Чикен",24],
+  ["Торт Наполеон",72],["Торт МЕДОВИК",72],["Торт ГЕРМАН",72],["Торт мини ФИСТАШКОВАЯ МЕРЕНГА",72],
+  ["Торт ШОКОЛАДНО-КЛУБНИЧНЫЙ",72],["Торт Красный Бархат",72],["Торт Фирменный",72],["Пирог вишневый",48],
+  ["Морковное печенье",120],["Печенье лимонное",240],["Печенье творожное (ушки)",120],
+  ["Печенье Фитнес с цельными злаками",360],["Амаретти",360],["Рогалики малина",360],["Печенье Венское",360],
+  ["Бискотти",360],["Макарун ваниль-клубника",96],["Макарун Сникерс",96],["Макарун Фисташка-Малина",96],
+  ["Макарун Лайм-вишня",96],["Апельсиновое печенье с шоколадом",240],["Мадлен",168],
+  ["Шоколадное печенье с фундуком",288],["Орешки",168],["Овсянное печенье с изюмом и кокосовой стружкой",288],
+  ["Безе мини",360],["Овсяное печенье с клюквой и шоколадом",288],["Брауни с вишней",72],
+  ["Борщ с говядиной",48],["Окрошка",24],["Суп том ям",48],["Свекольник",24],["Фирменный",48],
+  ["Суп пюре грибной",48],["Крем суп тыквенный",48],["Суп сырный с куриным филе и брокколи",48],
+  ["Индейка с рисом в кисло сладком соусе",48],["Куриный шашлычок с печеным картофелем",48],
+  ["Соба с индейкой",48],["Картофельное пюре с минтаем",48],["Пенне с куриным филе и фасолью",48],
+  ["Бефстроганов из говядины с картофельным пюре",48],["Терияки с курицей",48],["Чахохбили с гречкой и курицей",48],
+  ["Филе минтая с рисом и овощами",48],["Пюре с минтаем и соусом тар тар",48],["Спагетти карбонара",48],
+  ["Лингвини с жареными креветками",48],
+  ["Сырники со сметаной",24],["Сырники с ягодой",24],["Блины со сметаной",24],["Запеканка",24],
+  ["Цезарь",24],["Киноа с креветками",24],["Салат с говядиной",24],["Салат с Халуми",24],
+  ["Поке боул с куриным филе",24],["Поке боул с лососем",24],["Салат с тунцом",24],
+  ["Салат с тыквой и куриной грудкой",24],["Салат с печеной тыквой",24],
+  ["Круассан с сыром",24],["Круассан классический",24],["Круассан с ванильным кремом",12],
+  ["Круассан миндальный",12],["Круассан шоколадный",12],["Круассан с клубникой и шоколадом",12],
+  ["Круассан с творогом",12],["Круассан с абрикосом",12],["Бриошь с черной смородиной",36],
+  ["Улитка с изюмом",36],["Улитка яблочная",36],["Улитка с корицей",36],["Булочка с маком",36],
+  ["Косичка с шоколадом",36],["Маффин шоколадный",72],["Маффин классический",72],["Ромовая баба",48],
+  ["Сочник",48],["Шатель",36],["Донатс с малиной",48],["Донатс шоколадный",48],["Пончик фисташковый",48],
+  ["Бриошь с шоколадом",36],["Булочка с фисташкой",36],["Штрудель яблочный",36],["Шоссон с вишней",24],
+  ["Булочка с ванильным кремом и корицей",36],["Слойка со сливой",18],["Чизкейк тыквенный",72],["Пана-котта Пряная",72],
+  ["Трубочка с белковым кремом",48],["Эклер фисташковый",48],["Эклер шоколадный",48],
+  ["Тарталетка с малиной",48],["Тарталетка с голубикой",48],["Тарталетка с клубникой",48],
+  ["Тарталетка ассорти",48],["Тарталетка с белковым кремом",48],["Пирожное картошка",72],
+  ["Пирожное ГЕРМАН",72],["Пирожное Медовик (банка)",72],["Пирожное Наполеон(банка)",72],
+  ["Пирожное Чизкейк",72],["Профитроли со сливками",48],["Кольцо с творогом",24],["Соленая карамель",72],
+  ["Тирамису в стакане",72],["Морковное пирожное",72],["Десерт Сердце малина(банка)",72],
+  ["Пудинг Чиа Манго",48],["Десерт Манго-мята(банка)",72],["Десерт Роше",48],["Десерт Фисташковый",72],
+  ["Десерт 3 шоколада",72],["Кофейное зерно пирожное",48],["Чизкейк черная смородина",72],
+  ["Десерт Монастырская изба",48],["Чизкейк Орео",72],["Паннакотта шоколад-тропик",72],
+  ["Паннакотта ваниль-смородина",72],["Паннакотта кокос -ананас",72]
+];
+
+const STORAGE_KEY = 'auditProducts';
+
+let PRODUCTS = [];
+try {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    if (Array.isArray(parsed) && parsed.length) PRODUCTS = parsed;
+  }
+} catch (e) { console.warn('Не удалось загрузить справочник:', e); }
+
+if (!PRODUCTS.length) {
+  PRODUCTS = FACTORY_CATALOG.map(([name, hours]) => ({ name, shelfLife: hours }));
+}
+
+let tableRows = [];
+const $ = id => document.getElementById(id);
+
+/* ============================================================
+   УТИЛИТЫ
+   ============================================================ */
+function fmtDateRu(iso) {
+  if (!iso) return '';
+  const parts = String(iso).split('-');
+  if (parts.length !== 3) return iso;
+  return `${parts[2]}.${parts[1]}`;
+}
+function parseDateRu(str) {
+  const m = String(str).match(/(\d{1,2})[.\/-](\d{1,2})(?:[.\/-](\d{2,4}))?/);
+  if (!m) return '';
+  const d = m[1].padStart(2, '0');
+  const mo = m[2].padStart(2, '0');
+  const y = m[3] ? (m[3].length === 2 ? '20' + m[3] : m[3]) : new Date().getFullYear();
+  return `${y}-${mo}-${d}`;
+}
+function parseShelfLife(str) {
+  if (!str) return null;
+  const s = String(str).toLowerCase();
+  const hours = s.match(/(\d+)\s*час/);
+  if (hours) return Number(hours[1]);
+  const days = s.match(/(\d+)\s*(сут|дн|день|дня|дней)/);
+  if (days) return Number(days[1]) * 24;
+  const num = s.match(/(\d+)/);
+  return num ? Number(num[1]) : null;
+}
+function sortRowsAlphabetically(rows) {
+  return [...rows].sort((a, b) =>
+    String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' })
+  );
+}
+
+/* ============================================================
+   FIFO · Списание
+   ============================================================ */
+const SHELF_LIFE_START_HOUR = 7;
+
+function getCheckMoment() {
+  const date = $('checkDate').value || new Date().toISOString().slice(0, 10);
+  const time = $('checkTime').value || '07:00';
+  return new Date(`${date}T${time}:00`);
+}
+
+function getWriteOffMoment(partyDate, shelfLife) {
+  const d = new Date(partyDate + 'T00:00:00');
+  d.setHours(SHELF_LIFE_START_HOUR, 0, 0, 0);
+  const h = Number(shelfLife) || 0;
+  if (h <= 24) { d.setHours(22, 0, 0, 0); return d; }
+  if (h <= 36) { d.setDate(d.getDate() + 1); d.setHours(22, 0, 0, 0); return d; }
+  const days = Math.max(1, Math.floor(h / 24) - 1);
+  d.setDate(d.getDate() + days);
+  d.setHours(22, 0, 0, 0);
+  return d;
+}
+
+function computeFIFO(row) {
+  const stock = row.stock === '' || row.stock == null ? null : Math.max(0, Number(row.stock) || 0);
+
+  if (stock === null) return { soldExpired: null, expiredOnShelf: null };
+
+  const moment = getCheckMoment();
+  const shelfLife = row.shelfLife || 72;
+  const sales = Number(row.sales) || 0;
+
+  const allParties = (row.incoming || []).filter(p => p.qty > 0);
+  let incomingInShelfLife = 0;
+  for (const p of allParties) {
+    const writeOff = getWriteOffMoment(p.date, shelfLife);
+    if (writeOff > moment) incomingInShelfLife += p.qty;
+  }
+
+  const controlled = sales + stock;
+
+  if (incomingInShelfLife === 0 && sales > 0) {
+    return { soldExpired: sales, expiredOnShelf: stock };
+  }
+  if (incomingInShelfLife === 0 && sales === 0) {
+    return { soldExpired: 0, expiredOnShelf: stock };
+  }
+  if (controlled > incomingInShelfLife) {
+    const diff = controlled - incomingInShelfLife;
+    const soldExpired = Math.min(sales, diff);
+    return { soldExpired, expiredOnShelf: diff - soldExpired };
+  }
+  return { soldExpired: 0, expiredOnShelf: 0 };
+}
+
+/* ============================================================
+   CSV
+   ============================================================ */
+function parseCSV(text) {
+  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter(Boolean);
+  if (lines.length < 2) throw new Error('CSV пустой или содержит только заголовок.');
+  const sep = lines[0].includes(';') ? ';' : ',';
+  const header = lines[0].split(sep).map(h => h.replace(/^"|"$/g, '').trim());
+
+  const idxName = header.findIndex(h => /наимен|позиц|товар/i.test(h));
+  const idxStock = header.findIndex(h => /факт|остаток/i.test(h));
+  const idxSales = header.findIndex(h => /продано сегодня|продажи/i.test(h));
+  const idxShelf = header.findIndex(h => /срок/i.test(h));
+  const dateCols = [];
+  header.forEach((h, i) => {
+    if (/получено за/i.test(h)) {
+      const m = h.match(/(\d{1,2}[.\/-]\d{1,2})/);
+      dateCols.push({ index: i, date: m ? parseDateRu(m[1]) : '' });
+    }
+  });
+
+  if (idxName < 0) throw new Error('Не найдена колонка «Наименование».');
+  if (!dateCols.length) throw new Error('Не найдены колонки «Получено за [дата]».');
+
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const vals = lines[i].split(sep).map(v => v.replace(/^"|"$/g, '').trim());
+    const name = vals[idxName];
+    if (!name) continue;
+    rows.push({
+      name,
+      stock: idxStock >= 0 && vals[idxStock] !== '' ? Number(vals[idxStock]) : '',
+      sales: idxSales >= 0 ? Number(vals[idxSales]) || 0 : 0,
+      shelfLife: idxShelf >= 0 ? (parseShelfLife(vals[idxShelf]) || 72) : 72,
+      incoming: dateCols.map(dc => ({ date: dc.date, qty: Number(vals[dc.index]) || 0 }))
+    });
+  }
+  return rows;
+}
+
+/* ============================================================
+   ОТРИСОВКА ТАБЛИЦЫ
+   ============================================================ */
+function renderTable() {
+  const tbody = document.querySelector('#resultTable tbody');
+  tbody.innerHTML = '';
+
+  if (!tableRows.length) {
+    $('summary').textContent = 'Загрузите CSV от ИИ, чтобы увидеть результат.';
+    $('totals').style.display = 'none';
+    return;
+  }
+
+  const allDates = new Set();
+  tableRows.forEach(r => r.incoming.forEach(p => { if (p.date) allDates.add(p.date); }));
+  const dates = [...allDates].sort((a, b) => b.localeCompare(a));
+
+  const thead = document.querySelector('#resultTable thead tr');
+  thead.innerHTML = `
+    <th style="width:28%">Наименование</th>
+    <th style="width:110px;text-align:center">Факт. остаток</th>
+    ${dates.map(d => `<th style="width:100px;text-align:center">Получено за ${fmtDateRu(d)}</th>`).join('')}
+    <th style="width:90px;text-align:center">Продано сегодня</th>
+    <th style="width:80px;text-align:center">Срок годности</th>
+    <th style="width:100px;text-align:center">Продано просроченным</th>
+    <th style="width:100px;text-align:center">Просрочено на витрине</th>
+  `;
+
+  tableRows.forEach(row => {
+    const { soldExpired, expiredOnShelf } = computeFIFO(row);
+    const tr = document.createElement('tr');
+
+    const tdName = document.createElement('td');
+    tdName.textContent = row.name;
+    tr.appendChild(tdName);
+
+    const tdStock = document.createElement('td');
+    const inputStock = document.createElement('input');
+    inputStock.type = 'number';
+    inputStock.min = '0';
+    inputStock.step = '1';
+    inputStock.className = 'num';
+    inputStock.value = row.stock === '' ? '' : row.stock;
+    inputStock.placeholder = '—';
+    inputStock.oninput = () => {
+      row.stock = inputStock.value === '' ? '' : Math.max(0, Number(inputStock.value) || 0);
+      const newCalc = computeFIFO(row);
+      const soldCell = tr.querySelector('[data-role="soldExpired"]');
+      const shelfCell = tr.querySelector('[data-role="expiredOnShelf"]');
+      if (soldCell) {
+        soldCell.textContent = newCalc.soldExpired === null ? '—' : newCalc.soldExpired;
+        soldCell.style.color = newCalc.soldExpired > 0 ? '#dc2626'
+                            : newCalc.soldExpired === null ? '#94a3b8' : '';
+      }
+      if (shelfCell) {
+        shelfCell.textContent = newCalc.expiredOnShelf === null ? '—' : newCalc.expiredOnShelf;
+        shelfCell.style.color = newCalc.expiredOnShelf > 0 ? '#dc2626'
+                            : newCalc.expiredOnShelf === null ? '#94a3b8' : '';
+      }
+      updateTotals();
+    };
+    tdStock.appendChild(inputStock);
+    tr.appendChild(tdStock);
+
+    dates.forEach(d => {
+      const td = document.createElement('td');
+      td.style.textAlign = 'center';
+      const party = row.incoming.find(p => p.date === d);
+      td.textContent = party ? party.qty : 0;
+      tr.appendChild(td);
+    });
+
+    const tdSales = document.createElement('td');
+    tdSales.style.textAlign = 'center';
+    tdSales.textContent = row.sales || 0;
+    tr.appendChild(tdSales);
+
+    const tdShelf = document.createElement('td');
+    tdShelf.style.textAlign = 'center';
+    tdShelf.textContent = `${row.shelfLife} ч`;
+    tr.appendChild(tdShelf);
+
+    const tdSoldExpired = document.createElement('td');
+    tdSoldExpired.style.textAlign = 'center';
+    tdSoldExpired.style.fontWeight = '700';
+    tdSoldExpired.textContent = soldExpired === null ? '—' : soldExpired;
+    if (soldExpired > 0) tdSoldExpired.style.color = '#dc2626';
+    else if (soldExpired === null) tdSoldExpired.style.color = '#94a3b8';
+    tdSoldExpired.dataset.role = 'soldExpired';
+    tr.appendChild(tdSoldExpired);
+
+    const tdExpiredShelf = document.createElement('td');
+    tdExpiredShelf.style.textAlign = 'center';
+    tdExpiredShelf.style.fontWeight = '700';
+    tdExpiredShelf.textContent = expiredOnShelf === null ? '—' : expiredOnShelf;
+    if (expiredOnShelf > 0) tdExpiredShelf.style.color = '#dc2626';
+    else if (expiredOnShelf === null) tdExpiredShelf.style.color = '#94a3b8';
+    tdExpiredShelf.dataset.role = 'expiredOnShelf';
+    tr.appendChild(tdExpiredShelf);
+
+    tbody.appendChild(tr);
+  });
+
+  updateTotals();
+}
+
+function updateTotals() {
+  let totalSoldExpired = 0;
+  let totalExpiredOnShelf = 0;
+  let totalIncoming = 0;
+  let totalSales = 0;
+  let hasAnyStock = false;
+
+  tableRows.forEach(row => {
+    const { soldExpired, expiredOnShelf } = computeFIFO(row);
+    if (soldExpired !== null) {
+      totalSoldExpired += soldExpired;
+      totalExpiredOnShelf += expiredOnShelf;
+      hasAnyStock = true;
+    }
+    totalIncoming += (row.incoming || []).reduce((s, p) => s + p.qty, 0);
+    totalSales += Number(row.sales) || 0;
+  });
+
+  $('summary').textContent = hasAnyStock
+    ? `Позиций: ${tableRows.length}. Момент проверки: ${getCheckMoment().toLocaleString('ru-RU')}.`
+    : `Позиций: ${tableRows.length}. Введите фактический остаток для расчёта.`;
+
+  const box = $('totals');
+  box.style.display = 'block';
+  if (!hasAnyStock) {
+    box.innerHTML = `<b>Введите фактический остаток</b>, чтобы увидеть итоги по просрочке.`;
+    return;
+  }
+  box.innerHTML = `
+    <b>Итоги по всем позициям:</b><br>
+    Приход всего: <b>${totalIncoming}</b> шт ·
+    Продано всего: <b>${totalSales}</b> шт ·
+    Продано просроченным: <b style="color:#dc2626">${totalSoldExpired}</b> шт ·
+    Просрочено на витрине: <b style="color:#dc2626">${totalExpiredOnShelf}</b> шт
+  `;
+}
+
+/* ============================================================
+   ФОТО / PDF (IndexedDB)
+   ============================================================ */
+const PHOTO_DB = 'auditPhotoDB';
+const PHOTO_STORE = 'photos';
+
+function openPhotoDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(PHOTO_DB, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(PHOTO_STORE, { keyPath: 'id', autoIncrement: true });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function addPhotos(files, type) {
+  const db = await openPhotoDB();
+  await Promise.all([...files].map(file => new Promise((resolve, reject) => {
+    const tx = db.transaction(PHOTO_STORE, 'readwrite');
+    tx.objectStore(PHOTO_STORE).add({
+      name: file.name, type, kind: file.type || '',
+      size: file.size, createdAt: Date.now(), blob: file
+    });
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  })));
+  await renderPhotoQueue();
+}
+async function getPhotos() {
+  const db = await openPhotoDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(PHOTO_STORE, 'readonly');
+    const req = tx.objectStore(PHOTO_STORE).getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function deletePhoto(id) {
+  const db = await openPhotoDB();
+  const tx = db.transaction(PHOTO_STORE, 'readwrite');
+  tx.objectStore(PHOTO_STORE).delete(id);
+  tx.oncomplete = renderPhotoQueue;
+}
+async function clearAllPhotos() {
+  const db = await openPhotoDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(PHOTO_STORE, 'readwrite');
+    tx.objectStore(PHOTO_STORE).clear();
+    tx.oncomplete = resolve;
+    tx.onerror = () => reject(tx.error);
+  });
+}
+async function renderPhotoQueue() {
+  const box = $('photoQueue');
+  const items = await getPhotos();
+  if (!items.length) {
+    box.innerHTML = '<div class="hint">Пока нет загруженных файлов.</div>';
+    return;
+  }
+  box.innerHTML = '';
+  items.sort((a, b) => b.createdAt - a.createdAt).forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'photo-item';
+
+    const img = document.createElement('img');
+    img.className = 'photo-thumb';
+    if (item.kind.startsWith('image/')) {
+      img.src = URL.createObjectURL(item.blob);
+    } else {
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56"><rect width="100%" height="100%" rx="10" fill="#e2e8f0"/><text x="50%" y="55%" text-anchor="middle" font-size="16" font-weight="600" fill="#475569">PDF</text></svg>');
+    }
+
+    const meta = document.createElement('div');
+    meta.className = 'photo-meta';
+    const isPdf = item.kind === 'application/pdf';
+    meta.innerHTML = `<div class="photo-name">${escapeHtml(item.name)}</div><div class="photo-type">${item.type === 'invoice' ? '📋 Накладная' : '🧾 iiko'} · ${isPdf ? 'PDF' : 'Фото'} · ${Math.round(item.size / 1024)} КБ</div>`;
+
+    const acts = document.createElement('div');
+    acts.className = 'photo-actions';
+    const del = document.createElement('button');
+    del.className = 'secondary';
+    del.textContent = 'Удалить';
+    del.onclick = () => deletePhoto(item.id);
+    acts.append(del);
+    row.append(img, meta, acts);
+    box.appendChild(row);
+  });
+}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+/* ============================================================
+   ОТПРАВКА В ИИ
+   ============================================================ */
+async function shareToAI() {
+  const items = await getPhotos();
+  if (!items.length) { alert('Сначала загрузите файлы.'); return; }
+
+  const files = items.map(item => new File([item.blob], item.name, {
+    type: item.kind || item.blob.type || 'application/octet-stream'
+  }));
+  const prompt = buildPrompt();
+
+  let promptCopied = false;
+  try {
+    await navigator.clipboard.writeText(prompt);
+    promptCopied = true;
+  } catch (e) {
+    $('promptContent').textContent = prompt;
+    $('promptModal').classList.remove('hidden');
+  }
+
+  const canShare = navigator.canShare && navigator.canShare({ files });
+  if (canShare) {
+    try {
+      await navigator.share({
+        files,
+        title: 'Аудит сроков — файлы',
+        text: promptCopied ? 'Промпт уже в буфере обмена — вставьте его в чат.' : ''
+      });
+      $('shareStatus').className = 'status show ok';
+      $('shareStatus').textContent = '✅ Файлы переданы в выбранное приложение.' + (promptCopied ? ' Промпт в буфере — вставьте его в чат.' : '');
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+    }
+  }
+
+  for (const file of files) {
+    const url = URL.createObjectURL(file);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.name;
+    a.click();
+    URL.revokeObjectURL(url);
+    await new Promise(r => setTimeout(r, 300));
+  }
+
+  $('shareStatus').className = 'status show info';
+  $('shareStatus').textContent = 'ℹ️ Файлы скачаны по одному' + (promptCopied ? ', промпт скопирован в буфер' : ', промпт открыт в модальном окне') + '. Откройте ChatGPT / DeepSeek и прикрепите файлы, затем вставьте промпт.';
+  window.open('https://chat.openai.com/', '_blank');
+}
+
+function buildPrompt() {
+  const checkDate = $('checkDate').value || new Date().toISOString().slice(0, 10);
+  const checkTime = $('checkTime').value || '07:00';
+  return `Ты — ассистент по аудиту сроков годности в кондитерской.
+
+Я прикрепил файлы:
+- Накладные (ТОРГ-12) — фото или PDF
+- Чек продаж iiko — фото или PDF
+
+Твоя задача:
+1. Распознай все накладные. Для каждой определи дату составления.
+2. Распознай чек iiko. Возьми ТОЛЬКО количество (колонка «К-во»), сумму игнорируй.
+3. Оставь только те позиции, которые есть в справочнике сроков годности (ниже).
+4. Собери таблицу со следующими колонками:
+
+Наименование;Получено за [дата 1];Получено за [дата 2];...;Продано сегодня;Срок годности
+
+5. Позиции, которых нет в справочнике, игнорируй.
+
+6. Отсортируй строки в алфавитном порядке по наименованию.
+
+7. ВАЖНО: верни результат в виде ГОТОВОГО ФАЙЛА ДЛЯ СКАЧИВАНИЯ.
+   - Формат: CSV
+   - Разделитель: точка с запятой (;)
+   - Кодировка: UTF-8 с BOM
+   - Имя файла: audit_${checkDate}.csv
+   - В ChatGPT используй Code Interpreter и дай ссылку на скачивание.
+   - В DeepSeek сгенерируй файл и дай ссылку на скачивание.
+   - Если файл сгенерировать невозможно — верни CSV текстом в блоке кода.
+
+Справочник сроков годности (часы):
+${PRODUCTS.map(p => `- ${p.name}: ${p.shelfLife} ч`).join('\n')}
+
+Момент проверки: ${checkDate} ${checkTime}.`;
+}
+
+/* ============================================================
+   CSV ИМПОРТ
+   ============================================================ */
+function applyCSV() {
+  const statusEl = $('csvStatus');
+  try {
+    const text = $('csvInput').value.trim();
+    if (!text) throw new Error('Поле пустое.');
+    const rows = parseCSV(text);
+    if (!rows.length) throw new Error('Не удалось распознать строки.');
+    rows.forEach(r => {
+      const p = PRODUCTS.find(x => x.name.toLowerCase() === r.name.toLowerCase());
+      if (p) r.shelfLife = p.shelfLife;
+    });
+    tableRows = sortRowsAlphabetically(rows);
+    renderTable();
+    statusEl.className = 'status show ok';
+    statusEl.textContent = `✅ Загружено ${rows.length} позиций (отсортировано по алфавиту). Введите фактический остаток и проверьте результат.`;
+  } catch (e) {
+    statusEl.className = 'status show err';
+    statusEl.textContent = '❌ ' + e.message;
+  }
+}
+
+/* ============================================================
+   ЭКСПОРТ В EXCEL
+   ============================================================ */
+function exportExcel() {
+  if (!tableRows.length) { alert('Нет данных для экспорта.'); return; }
+
+  const allDates = new Set();
+  tableRows.forEach(r => r.incoming.forEach(p => { if (p.date) allDates.add(p.date); }));
+  const dates = [...allDates].sort((a, b) => b.localeCompare(a));
+
+  const header = ['Наименование', 'Факт. остаток',
+    ...dates.map(d => `Получено за ${fmtDateRu(d)}`),
+    'Продано сегодня', 'Срок годности', 'Продано просроченным', 'Просрочено на витрине'];
+
+  const data = [header];
+
+  tableRows.forEach(row => {
+    const { soldExpired, expiredOnShelf } = computeFIFO(row);
+    const vals = [
+      row.name,
+      row.stock === '' ? '' : row.stock,
+      ...dates.map(d => {
+        const p = row.incoming.find(x => x.date === d);
+        return p ? p.qty : 0;
+      }),
+      row.sales || 0,
+      `${row.shelfLife} ч`,
+      soldExpired === null ? '' : soldExpired,
+      expiredOnShelf === null ? '' : expiredOnShelf
+    ];
+    data.push(vals);
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [
+    { wch: 40 }, { wch: 14 },
+    ...dates.map(() => ({ wch: 14 })),
+    { wch: 14 }, { wch: 14 }, { wch: 18 }, { wch: 18 }
+  ];
+
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let c = range.s.c; c <= range.e.c; c++) {
+    const addr = XLSX.utils.encode_cell({ r: 0, c });
+    if (ws[addr]) ws[addr].s = { font: { bold: true } };
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Аудит сроков');
+
+  const date = $('checkDate').value || new Date().toISOString().slice(0, 10);
+  const point = $('point').value || 'точка';
+  XLSX.writeFile(wb, `audit_${point}_${date}.xlsx`);
+}
+
+/* ============================================================
+   РЕДАКТОР СПРАВОЧНИКА
+   ============================================================ */
+function saveCatalog() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(PRODUCTS));
+  } catch (e) {
+    console.warn('Не удалось сохранить справочник:', e);
+  }
+}
+
+function renderCatalogList() {
+  const list = $('catalogList');
+  const query = ($('catalogSearch').value || '').toLowerCase().trim();
+  list.innerHTML = '';
+
+  const filtered = PRODUCTS
+    .map((p, idx) => ({ ...p, _idx: idx }))
+    .filter(p => !query || p.name.toLowerCase().includes(query))
+    .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Ничего не найдено.</div>';
+    return;
+  }
+
+  filtered.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'cat-row';
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.value = p.name;
+    nameInput.onchange = () => {
+      const oldName = PRODUCTS[p._idx].name;
+      const newName = nameInput.value.trim();
+      if (!newName) { nameInput.value = oldName; return; }
+      PRODUCTS[p._idx].name = newName;
+      tableRows.forEach(r => { if (r.name === oldName) r.name = newName; });
+      saveCatalog();
+    };
+
+    const hoursInput = document.createElement('input');
+    hoursInput.type = 'number';
+    hoursInput.min = '1';
+    hoursInput.value = p.shelfLife;
+    hoursInput.onchange = () => {
+      PRODUCTS[p._idx].shelfLife = Math.max(1, Number(hoursInput.value) || 1);
+      tableRows.forEach(r => {
+        if (r.name === PRODUCTS[p._idx].name) r.shelfLife = PRODUCTS[p._idx].shelfLife;
+      });
+      saveCatalog();
+    };
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'del-btn';
+    delBtn.textContent = '✕';
+    delBtn.onclick = () => {
+      if (!confirm(`Удалить "${PRODUCTS[p._idx].name}" из справочника?`)) return;
+      PRODUCTS.splice(p._idx, 1);
+      saveCatalog();
+      renderCatalogList();
+    };
+
+    row.append(nameInput, hoursInput, delBtn);
+    list.appendChild(row);
+  });
+}
+
+function resetToFactory() {
+  if (!confirm('Сбросить справочник к заводскому? Все ваши изменения будут потеряны.')) return;
+  PRODUCTS = FACTORY_CATALOG.map(([name, hours]) => ({ name, shelfLife: hours }));
+  saveCatalog();
+  renderCatalogList();
+  const statusEl = $('catalogStatus');
+  statusEl.className = 'status show ok';
+  statusEl.textContent = `✅ Справочник восстановлен к заводскому (${PRODUCTS.length} позиций).`;
+}
+
+/* ============================================================
+   ОБРАБОТЧИКИ
+   ============================================================ */
+$('uploadInvoicePhotosBtn').onclick = () => $('invoicePhotoInput').click();
+$('uploadSalesPhotosBtn').onclick = () => $('salesPhotoInput').click();
+$('invoicePhotoInput').onchange = async e => {
+  if (e.target.files.length) await addPhotos(e.target.files, 'invoice');
+  e.target.value = '';
+};
+$('salesPhotoInput').onchange = async e => {
+  if (e.target.files.length) await addPhotos(e.target.files, 'sales');
+  e.target.value = '';
+};
+$('shareToAIBtn').onclick = shareToAI;
+
+$('copyPromptBtn').onclick = async () => {
+  const prompt = buildPrompt();
+  try {
+    await navigator.clipboard.writeText(prompt);
+    $('shareStatus').className = 'status show ok';
+    $('shareStatus').textContent = '✅ Промпт скопирован. Вставьте его в чат вместе с файлами.';
+  } catch (e) {
+    $('promptContent').textContent = prompt;
+    $('promptModal').classList.remove('hidden');
+  }
+};
+
+$('pasteCsvBtn').onclick = async () => {
+  try {
+    if (navigator.clipboard && navigator.clipboard.readText) {
+      const text = await navigator.clipboard.readText();
+      $('csvInput').value = text;
+      $('csvStatus').className = 'status show ok';
+      $('csvStatus').textContent = '✅ Вставлено из буфера.';
+    } else {
+      $('csvStatus').className = 'status show';
+      $('csvStatus').textContent = 'Вставьте CSV вручную (Cmd+V).';
+    }
+  } catch (e) {
+    $('csvStatus').className = 'status show';
+    $('csvStatus').textContent = 'Вставьте CSV вручную (Cmd+V).';
+  }
+};
+
+$('loadCsvFileBtn').onclick = () => $('csvFileInput').click();
+$('csvFileInput').onchange = async e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const text = await f.text();
+  $('csvInput').value = text;
+  $('csvStatus').className = 'status show ok';
+  $('csvStatus').textContent = '✅ Файл загружен.';
+  e.target.value = '';
+};
+
+$('applyCsvBtn').onclick = applyCSV;
+$('exportBtn').onclick = exportExcel;
+
+$('clearBtn').onclick = async () => {
+  if (!confirm('Сбросить все данные? Будут удалены таблица и все загруженные фото/PDF.')) return;
+
+  tableRows = [];
+  $('csvInput').value = '';
+  $('csvStatus').className = 'status';
+  $('csvStatus').textContent = '';
+  $('shareStatus').className = 'status';
+  $('shareStatus').textContent = '';
+
+  try { await clearAllPhotos(); } catch (e) { console.error(e); }
+
+  renderTable();
+  await renderPhotoQueue();
+
+  $('csvStatus').className = 'status show ok';
+  $('csvStatus').textContent = '✅ Данные и фото очищены.';
+};
+
+/* Справочник */
+$('editCatalogBtn').onclick = () => {
+  renderCatalogList();
+  $('catalogModal').classList.remove('hidden');
+};
+
+$('closeCatalogBtn').onclick = () => {
+  saveCatalog();
+  $('catalogModal').classList.add('hidden');
+  if (tableRows.length) {
+    tableRows.forEach(r => {
+      const p = PRODUCTS.find(x => x.name.toLowerCase() === r.name.toLowerCase());
+      if (p) r.shelfLife = p.shelfLife;
+    });
+    renderTable();
+  }
+};
+
+$('catalogSearch').oninput = renderCatalogList;
+
+$('addProdBtn').onclick = () => {
+  const name = $('newProdName').value.trim();
+  const hours = Math.max(1, Number($('newProdHours').value) || 48);
+  if (!name) { alert('Введите название.'); return; }
+  if (PRODUCTS.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+    alert('Такая позиция уже есть в справочнике.');
+    return;
+  }
+  PRODUCTS.push({ name, shelfLife: hours });
+  saveCatalog();
+  $('newProdName').value = '';
+  $('newProdHours').value = '48';
+  renderCatalogList();
+};
+
+$('resetCatalogBtn').onclick = resetToFactory;
+
+$('exportCatalogBtn').onclick = () => {
+  const data = JSON.stringify({ version: 1, products: PRODUCTS }, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `spravochnik_${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+$('importCatalogBtn').onclick = () => $('importCatalogFile').click();
+$('importCatalogFile').onchange = async e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  try {
+    const text = await f.text();
+    const data = JSON.parse(text);
+    const products = Array.isArray(data) ? data : (data.products || []);
+    if (!products.length) throw new Error('Файл не содержит позиций.');
+    const cleaned = products
+      .map(p => ({ name: String(p.name || '').trim(), shelfLife: Math.max(1, Number(p.shelfLife) || 1) }))
+      .filter(p => p.name);
+    if (!cleaned.length) throw new Error('Не найдено корректных позиций.');
+    if (!confirm(`Импортировать ${cleaned.length} позиций? Текущий справочник будет заменён.`)) {
+      e.target.value = '';
+      return;
+    }
+    PRODUCTS = cleaned;
+    saveCatalog();
+    renderCatalogList();
+    $('catalogStatus').className = 'status show ok';
+    $('catalogStatus').textContent = `✅ Импортировано ${cleaned.length} позиций.`;
+  } catch (err) {
+    $('catalogStatus').className = 'status show err';
+    $('catalogStatus').textContent = '❌ ' + err.message;
+  }
+  e.target.value = '';
+};
+
+/* Промпт-модалка */
+$('copyFromModalBtn').onclick = async () => {
+  try {
+    await navigator.clipboard.writeText($('promptContent').textContent);
+    $('copyFromModalBtn').textContent = '✅ Скопировано!';
+    setTimeout(() => { $('copyFromModalBtn').textContent = '📋 Скопировать промпт'; }, 2000);
+  } catch (e) {
+    alert('Выделите текст вручную.');
+  }
+};
+$('closePromptModalBtn').onclick = () => $('promptModal').classList.add('hidden');
+
+/* ============================================================
+   ИНИЦИАЛИЗАЦИЯ
+   ============================================================ */
+$('checkDate').valueAsDate = new Date();
+renderTable();
+renderPhotoQueue();
+
+console.log('✅ Аудит сроков V29 загружен. Справочник:', PRODUCTS.length, 'позиций. Стиль: modern.');
+</script>
+</body>
+</html>
