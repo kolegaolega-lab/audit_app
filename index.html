@@ -210,7 +210,7 @@ button{
   padding:13px 20px;
   background:var(--bg-elev-2);color:var(--text);
   font-weight:600;font-size:15px;cursor:pointer;
-  transition:transform .18s var(--spring), box-shadow .2s var(--ease), opacity .2s, filter .2s, background .2s;
+  transition:transform .18s var(--spring), box-shadow .2s var(--ease), opacity .2s, filter .2s, background .2s, border-color .2s, color .2s;
   white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:8px;
   min-height:48px;user-select:none;-webkit-user-select:none;
   position:relative;overflow:hidden;letter-spacing:-.2px;
@@ -238,10 +238,19 @@ button.info{
 }
 button.info:hover{box-shadow:0 6px 22px rgba(14,165,233,.4)}
 button.secondary{
-  background:var(--bg-card);color:var(--accent);
-  border:1.5px solid var(--separator);box-shadow:var(--shadow-1);
+  background:var(--bg-elev-2);
+  color:var(--text);
+  border:1.5px solid var(--separator-opaque);
+  box-shadow:none;
 }
-button.secondary:hover{background:var(--accent-soft);border-color:var(--accent)}
+button.secondary:hover{
+  background:var(--bg-hover);
+  border-color:var(--accent);
+  color:var(--accent);
+}
+button.secondary:active{
+  background:var(--bg-pressed);
+}
 button.busy{pointer-events:none;opacity:.7}
 button.busy::before{
   content:'';position:absolute;inset:0;
@@ -377,6 +386,7 @@ tbody tr.row-info td:first-child::before{background:var(--blue)}
   padding-bottom:14px;
   border-bottom:1px solid var(--separator);
   align-items:center;
+  min-height:44px;
 }
 .filter-btn{
   padding:9px 14px;border-radius:999px;
@@ -730,7 +740,7 @@ pre.code{
     <button id="restoreSessionBtn" class="secondary block" style="margin-top:10px">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block" style="margin-top:10px">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:14px;text-align:center;font-size:11.5px;color:var(--text-tertiary)">
-      FB Audit · iOS 27 · v1.3
+      FB Audit · iOS 27 · v1.4
     </div>
   </div>
 
@@ -1059,7 +1069,10 @@ function renderTable() {
       if (emptyEl) emptyEl.remove();
       return;
     }
-    if (filterBar) filterBar.style.display = 'flex';
+    if (filterBar) {
+      filterBar.style.display = 'flex';
+      filterBar.style.alignItems = 'center';
+    }
     const allDates = new Set();
     tableRows.forEach(r => (r.incoming || []).forEach(p => { if (p.date) allDates.add(p.date); }));
     let dates = [...allDates].sort((a, b) => b.localeCompare(a));
@@ -2197,7 +2210,7 @@ function init() {
     saveSession();
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c FB Audit ', 'background:linear-gradient(135deg,#0a84ff,#0066d6);color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v1.3 · iOS 27 · каталог:', PRODUCTS.length);
+  console.log('%c FB Audit ', 'background:linear-gradient(135deg,#0a84ff,#0066d6);color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v1.4 · iOS 27 · каталог:', PRODUCTS.length);
 }
 
 bindUI();
