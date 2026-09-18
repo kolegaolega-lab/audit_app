@@ -16,7 +16,6 @@
   --bg-elev-2: #f2f2f7;
   --bg-input: #f2f2f7;
   --bg-hover: rgba(0,0,0,.04);
-  --bg-pressed: rgba(0,0,0,.08);
   --separator: rgba(0,0,0,.08);
   --separator-opaque: #d1d1d6;
   --text: #000000;
@@ -41,9 +40,6 @@
   --blue-soft: rgba(10,132,255,.14);
   --blue-row: rgba(10,132,255,.10);
   --blue-row-hover: rgba(10,132,255,.18);
-  --shadow-1: 0 1px 2px rgba(0,0,0,.04);
-  --shadow-2: 0 1px 3px rgba(0,0,0,.06);
-  --shadow-3: 0 4px 12px rgba(0,0,0,.08);
   --r-lg: 20px; --r-md: 14px; --r-sm: 10px; --r-xs: 8px;
   --spring: cubic-bezier(.34, 1.56, .64, 1);
   --ease: cubic-bezier(.25, .1, .25, 1);
@@ -56,7 +52,6 @@
     --bg-elev-2: #2c2c2e;
     --bg-input: #2c2c2e;
     --bg-hover: rgba(255,255,255,.06);
-    --bg-pressed: rgba(255,255,255,.12);
     --separator: rgba(255,255,255,.10);
     --separator-opaque: #38383a;
     --text: #ffffff;
@@ -81,16 +76,11 @@
     --blue-soft: rgba(10,132,255,.20);
     --blue-row: rgba(10,132,255,.14);
     --blue-row-hover: rgba(10,132,255,.22);
-    --shadow-1: 0 1px 2px rgba(0,0,0,.4);
-    --shadow-2: 0 1px 3px rgba(0,0,0,.5);
-    --shadow-3: 0 4px 12px rgba(0,0,0,.6);
   }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
-html{min-height:100vh}
 body{
-  min-height:100vh;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;
   background:var(--bg);
   color:var(--text);
@@ -102,7 +92,7 @@ body{
 }
 
 /* ============================================================
-   HEADER — единый стиль с фоном
+   HEADER
    ============================================================ */
 header{
   position: sticky;
@@ -112,7 +102,6 @@ header{
   padding-top: calc(12px + env(safe-area-inset-top));
   background: var(--bg);
   border-bottom: 1px solid var(--separator);
-  transition: background-color .25s var(--ease), border-color .25s var(--ease);
 }
 .header-inner{
   max-width: 1100px;
@@ -122,29 +111,23 @@ header{
   gap: 12px;
 }
 .logo{
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   background: #FFE600;
-  object-fit: contain;
-  padding: 2px;
+  object-fit: cover;
   flex: 0 0 auto;
   display: block;
-  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  border: 1px solid var(--separator);
 }
-.header-text{
-  flex: 1;
-  min-width: 0;
-}
+.header-text{flex: 1; min-width: 0}
 .header-text h1{
   font-size: 17px;
   margin: 0;
   font-weight: 700;
   letter-spacing: -.3px;
   line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   color: var(--text);
 }
 .header-text .sub{
@@ -152,9 +135,7 @@ header{
   color: var(--text-secondary);
   margin-top: 2px;
   line-height: 1.3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .autosave-badge{
   font-size: 11px;
@@ -355,81 +336,78 @@ button.busy::before{
   font-size: 12px;
   color: var(--text-secondary);
   padding: 10px 12px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   background: var(--bg-input);
   border-radius: var(--r-sm);
   align-items: center;
 }
 .result-meta .item{display: inline-flex; align-items: center; gap: 5px}
 .result-meta .item b{color: var(--text); font-weight: 700}
+.result-meta .item.empty b{color: var(--text-tertiary)}
 
 /* ============================================================
-   FILTERS
+   STATUS INDICATORS (без фильтров)
    ============================================================ */
-.filter-bar{
+.status-indicators{
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--separator);
-  align-items: center;
+  margin-bottom: 14px;
 }
-.filter-btn{
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: 1.5px solid var(--separator);
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .18s var(--spring);
-  min-height: 38px;
+.status-indicator{
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  white-space: nowrap;
-  user-select: none;
-  -webkit-user-select: none;
-}
-.filter-btn:hover{border-color: var(--separator-opaque); color: var(--text)}
-.filter-btn:active{transform: scale(.95)}
-.filter-btn.active{color: #fff; border-color: transparent; transform: scale(1.02)}
-.filter-btn.active[data-filter="all"]{background: var(--text); color: var(--bg-card)}
-.filter-btn.active[data-filter="danger"]{background: var(--red); box-shadow: 0 0 0 3px var(--red-soft)}
-.filter-btn.active[data-filter="warn"]{background: var(--orange); box-shadow: 0 0 0 3px var(--orange-soft)}
-.filter-btn.active[data-filter="fresh"]{background: var(--green); box-shadow: 0 0 0 3px var(--green-soft)}
-.filter-btn.active[data-filter="unknown"]{background: var(--text-secondary)}
-.filter-btn.active[data-filter="info"]{background: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft)}
-.filter-btn .filter-count{
-  font-size: 11px;
-  padding: 1px 7px;
+  padding: 8px 14px;
   border-radius: 999px;
   background: var(--bg-input);
-  color: var(--text-secondary);
-  min-width: 24px;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1.5px solid transparent;
 }
-.filter-btn.active .filter-count{background: rgba(255,255,255,.25); color: #fff}
-.filter-btn.active[data-filter="all"] .filter-count{background: var(--bg-input); color: var(--text)}
-.filter-btn.filter-empty{opacity: .4}
-.filter-btn.filter-empty:hover{opacity: .7}
+.status-indicator .ind-count{
+  font-variant-numeric: tabular-nums;
+  min-width: 20px;
+  text-align: right;
+}
+.status-indicator.is-fresh{
+  background: var(--green-soft);
+  color: var(--green);
+}
+.status-indicator.is-warn{
+  background: var(--orange-soft);
+  color: var(--orange);
+}
+.status-indicator.is-danger{
+  background: var(--red-soft);
+  color: var(--red);
+}
+.status-indicator.is-unknown{
+  background: var(--bg-input);
+  color: var(--text-secondary);
+}
+.status-indicator.is-info{
+  background: var(--blue-soft);
+  color: var(--accent);
+}
+.status-indicator.is-zero{
+  opacity: .45;
+}
 
 /* ============================================================
-   TABLE — Sticky header + body scroll
+   TABLE — Вариант A (sticky header + скролл страницы)
    ============================================================ */
 .table-sticky-header{
   position: sticky;
   top: calc(var(--header-h) + env(safe-area-inset-top) + 1px);
   z-index: 20;
-  overflow: hidden;
   background: var(--bg-card);
   margin: 0 -18px;
   padding: 0 18px;
   border-radius: var(--r-md) var(--r-md) 0 0;
   border-bottom: 1px solid var(--separator);
+  overflow: visible;
+  clip-path: inset(-1px 0 -100px 0);
   transition: box-shadow .2s;
 }
 .table-sticky-header.scrolled{
@@ -456,9 +434,10 @@ button.busy::before{
   text-align: left;
   white-space: nowrap;
 }
+
 .table-scroll-body{
-  max-height: 60vh;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: visible;
   -webkit-overflow-scrolling: touch;
   margin: 0 -18px;
   padding: 0 18px;
@@ -687,6 +666,18 @@ pre.code{
 }
 
 /* ============================================================
+   SAVE CARD
+   ============================================================ */
+.save-card{
+  padding: 18px;
+}
+.save-card .save-btn{
+  min-height: 48px;
+  margin-bottom: 8px;
+}
+.save-card .save-btn:last-of-type{margin-bottom: 0}
+
+/* ============================================================
    ADAPTIVE
    ============================================================ */
 @media (min-width: 641px){
@@ -694,7 +685,7 @@ pre.code{
   header{padding: 14px 20px; padding-top: calc(14px + env(safe-area-inset-top))}
   .header-text h1{font-size: 19px}
   .header-text .sub{font-size: 12.5px; margin-top: 3px}
-  .logo{width: 44px; height: 44px}
+  .logo{width: 46px; height: 46px}
   main{padding: 20px 20px 60px}
   .card{padding: 22px; border-radius: 22px}
   input[type=text], input[type=number], textarea{padding: 11px 14px; font-size: 15px; min-height: 44px}
@@ -718,8 +709,6 @@ pre.code{
   .table-scroll-body td{padding: 11px 10px}
   .num{width: 72px; min-width: 68px; height: 40px}
   .income-cell .num{width: 68px; min-width: 64px; height: 40px}
-  .table-scroll-body{max-height: 65vh}
-  .filter-btn{font-size: 13.5px; padding: 9px 16px}
 }
 @media (max-width: 400px){
   .card{padding: 14px; border-radius: 16px}
@@ -731,8 +720,7 @@ pre.code{
   .action-buttons{gap: 8px}
   .num{width: 60px; min-width: 56px; height: 38px; font-size: 14px; padding: 4px 4px}
   .income-cell .num{width: 56px; min-width: 52px; height: 38px; font-size: 13px}
-  .filter-btn{font-size: 12px; padding: 7px 12px; min-height: 34px}
-  .filter-btn .filter-count{font-size: 10px; padding: 1px 6px; min-width: 22px}
+  .status-indicator{font-size: 12px; padding: 6px 12px}
 }
 @media (max-width: 360px){
   .header-text .sub{display: none}
@@ -889,16 +877,25 @@ pre.code{
     <div id="resultMeta" class="result-meta" style="display:none">
       <span class="item">📅 <b id="metaDate">—</b></span>
       <span class="item">🕐 <b id="metaTime">—</b></span>
-      <span class="item">📍 <b id="metaPoint">—</b></span>
+      <span class="item" id="metaPointWrap">📍 <b id="metaPoint">—</b></span>
     </div>
 
-    <div id="filterBar" class="filter-bar" style="display:none">
-      <button class="filter-btn active" data-filter="all">Все <span class="filter-count" data-count="all">0</span></button>
-      <button class="filter-btn" data-filter="danger">🔴 Просрочка продана <span class="filter-count" data-count="danger">0</span></button>
-      <button class="filter-btn" data-filter="warn">🟡 Просрочка на витрине <span class="filter-count" data-count="warn">0</span></button>
-      <button class="filter-btn" data-filter="fresh">🟢 Свежие <span class="filter-count" data-count="fresh">0</span></button>
-      <button class="filter-btn" data-filter="unknown">⚪ Без остатка <span class="filter-count" data-count="unknown">0</span></button>
-      <button class="filter-btn" data-filter="info">🔵 Только продажи <span class="filter-count" data-count="info">0</span></button>
+    <div id="statusIndicators" class="status-indicators" style="display:none">
+      <span class="status-indicator is-fresh" data-status="fresh">
+        🟢 Свежие <span class="ind-count" data-count="fresh">0</span>
+      </span>
+      <span class="status-indicator is-warn" data-status="warn">
+        🟡 Просрочка на витрине <span class="ind-count" data-count="warn">0</span>
+      </span>
+      <span class="status-indicator is-danger" data-status="danger">
+        🔴 Продано просрочки <span class="ind-count" data-count="danger">0</span>
+      </span>
+      <span class="status-indicator is-unknown" data-status="unknown">
+        ⚪ Без остатка <span class="ind-count" data-count="unknown">0</span>
+      </span>
+      <span class="status-indicator is-info" data-status="info">
+        🔵 Только продажи <span class="ind-count" data-count="info">0</span>
+      </span>
     </div>
 
     <div class="table-sticky-header" id="tableStickyHeader" style="display:none">
@@ -912,7 +909,7 @@ pre.code{
       </table>
     </div>
 
-    <div id="totals" class="ai-help" style="margin-top:12px;display:none"></div>
+    <div id="totals" class="ai-help" style="margin-top:14px;display:none"></div>
 
     <div class="legend">
       <span class="legend-item"><span class="legend-dot fresh"></span> Свежие</span>
@@ -922,17 +919,16 @@ pre.code{
       <span class="legend-item"><span class="legend-dot info"></span> Только продажи</span>
       <span class="legend-item"><span class="legend-dot edited"></span> Приход исправлен</span>
     </div>
-    <div id="statusSummary" class="status-summary"></div>
   </div>
 
   <!-- СОХРАНЕНИЕ -->
-  <div class="card">
+  <div class="card save-card">
     <h2><span class="icon">💾</span>Сохранение</h2>
-    <button id="exportBtn" class="primary block">📥 Скачать Excel (.xlsx)</button>
-    <button id="restoreSessionBtn" class="secondary block" style="margin-top:10px">↺ Восстановить сессию</button>
-    <button id="clearBtn" class="secondary block" style="margin-top:10px">↻ Сбросить данные</button>
+    <button id="exportBtn" class="primary block save-btn">📥 Скачать Excel (.xlsx)</button>
+    <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
+    <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v3.1
+      French Bakery Аудит · v4.0
     </div>
   </div>
 
@@ -982,11 +978,10 @@ const BTN_LOCK_MS = 300;
 const WRITE_OFF_HOUR = 22;
 const SHELF_LIFE_START_HOUR = 7;
 const MAX_NAME = 100;
-const TIME_UPDATE_MS = 60 * 1000;
+const TIME_UPDATE_MS = 30 * 1000;
 
 let PRODUCTS = [];
 let tableRows = [];
-let currentFilter = 'all';
 let isRestoring = false;
 let saveTimer = null;
 let isRendering = false;
@@ -996,11 +991,11 @@ let _initialized = false;
 let _activeDeletes = new Set();
 let _fileBusy = false;
 let _timeUpdater = null;
+let _scrollSyncScheduled = false;
 const $ = id => {
   try { return document.getElementById(id); } catch (e) { return null; }
 };
 
-/* Fallback если логотип не загрузился */
 function initLogoFallback() {
   const logo = $('appLogo');
   if (!logo) return;
@@ -1268,45 +1263,20 @@ function computeStatusCounts() {
   }
   return c;
 }
-function updateFilterCounts() {
-  const bar = $('filterBar');
-  if (!bar) return;
+function updateStatusIndicators() {
+  const box = $('statusIndicators');
+  if (!box) return;
   const counts = computeStatusCounts();
-  bar.querySelectorAll('.filter-btn').forEach(btn => {
-    const filter = btn.dataset.filter;
-    const countEl = btn.querySelector('.filter-count');
-    const count = counts[filter] ?? 0;
-    if (countEl) countEl.textContent = count;
-    if (filter !== 'all' && count === 0) {
-      btn.classList.add('filter-empty');
-    } else {
-      btn.classList.remove('filter-empty');
-    }
+  box.querySelectorAll('.ind-count').forEach(el => {
+    const key = el.dataset.count;
+    el.textContent = counts[key] ?? 0;
   });
-}
-function applyFilter() {
-  const tbody = document.querySelector('#resultTable tbody');
-  if (!tbody) return;
-  const rows = tbody.querySelectorAll('tr');
-  let visible = 0;
-  rows.forEach(tr => {
-    const label = tr.dataset.status || 'unknown';
-    const show = currentFilter === 'all' || currentFilter === label;
-    tr.style.display = show ? '' : 'none';
-    if (show) visible++;
+  box.querySelectorAll('.status-indicator').forEach(el => {
+    const status = el.dataset.status;
+    const count = counts[status] ?? 0;
+    if (count === 0) el.classList.add('is-zero');
+    else el.classList.remove('is-zero');
   });
-  const wrap = document.querySelector('.table-scroll-body');
-  if (!wrap) return;
-  let emptyEl = wrap.querySelector('.empty-state');
-  if (visible === 0 && rows.length > 0) {
-    if (!emptyEl) {
-      emptyEl = document.createElement('div');
-      emptyEl.className = 'empty-state';
-      emptyEl.innerHTML = `<span class="em-icon">🔍</span><div class="em-title">Под этот фильтр ничего не попало</div><div>Нажмите на активный фильтр, чтобы сбросить</div>`;
-      wrap.appendChild(emptyEl);
-    }
-    emptyEl.style.display = 'block';
-  } else if (emptyEl) emptyEl.style.display = 'none';
 }
 function updateResultMeta() {
   const box = $('resultMeta');
@@ -1320,6 +1290,11 @@ function updateResultMeta() {
   const t = $('metaTime'); if (t) t.textContent = getCurrentTimeStr();
   const pt = $('point');
   const p = $('metaPoint'); if (p) p.textContent = (pt && pt.value.trim()) ? pt.value.trim() : '—';
+  const wrap = $('metaPointWrap');
+  if (wrap) {
+    if (pt && pt.value.trim()) wrap.classList.remove('empty');
+    else wrap.classList.add('empty');
+  }
 }
 
 function buildHeaderHTML(dates) {
@@ -1344,11 +1319,14 @@ function syncScroll() {
   if (headerTable) {
     headerTable.style.transform = `translateX(${-body.scrollLeft}px)`;
   }
-  if (body.scrollTop > 4) {
-    header.classList.add('scrolled');
-  } else {
-    header.classList.remove('scrolled');
-  }
+}
+function scheduleScrollSync() {
+  if (_scrollSyncScheduled) return;
+  _scrollSyncScheduled = true;
+  requestAnimationFrame(() => {
+    _scrollSyncScheduled = false;
+    syncScroll();
+  });
 }
 
 function renderTable() {
@@ -1358,21 +1336,20 @@ function renderTable() {
     const tbody = document.querySelector('#resultTable tbody');
     if (!tbody) return;
     tbody.innerHTML = '';
-    const filterBar = $('filterBar');
+    const statusIndicators = $('statusIndicators');
     const stickyHeader = $('tableStickyHeader');
     const scrollBody = $('tableScrollBody');
 
     if (!Array.isArray(tableRows) || !tableRows.length) {
       if ($('summary')) $('summary').textContent = 'Загрузите CSV от ИИ, чтобы увидеть результат.';
       if ($('totals')) $('totals').style.display = 'none';
-      if (filterBar) filterBar.style.display = 'none';
+      if (statusIndicators) statusIndicators.style.display = 'none';
       if (stickyHeader) stickyHeader.style.display = 'none';
       if (scrollBody) scrollBody.style.display = 'none';
-      if ($('statusSummary')) $('statusSummary').innerHTML = '';
       updateResultMeta();
       return;
     }
-    if (filterBar) filterBar.style.display = 'flex';
+    if (statusIndicators) statusIndicators.style.display = 'flex';
     if (stickyHeader) stickyHeader.style.display = 'block';
     if (scrollBody) scrollBody.style.display = 'block';
 
@@ -1530,8 +1507,7 @@ function renderTable() {
       tbody.appendChild(tr);
     });
     updateTotals();
-    updateFilterCounts();
-    applyFilter();
+    updateStatusIndicators();
     updateResultMeta();
     syncScroll();
   } finally {
@@ -1564,8 +1540,7 @@ function refreshRow(row, tr, statusIcon) {
   setCell('expiredOnShelf', calc.expiredOnShelf);
   setCell('soldExpired', calc.soldExpired);
   updateTotals();
-  if (currentFilter !== 'all' && currentFilter !== newStatus.label) applyFilter();
-  else updateFilterCounts();
+  updateStatusIndicators();
 }
 function updateTotals() {
   const summary = $('summary');
@@ -1573,7 +1548,7 @@ function updateTotals() {
   let totalFreshOnShelf = 0, totalFreshSold = 0;
   let totalExpiredOnShelf = 0, totalSoldExpired = 0, totalSales = 0;
   let hasAnyStock = false;
-  let cntFresh = 0, cntWarn = 0, cntDanger = 0, cntUnknown = 0, cntInfo = 0;
+  let cntInfo = 0;
   for (const row of tableRows) {
     const calc = computeFIFO(row);
     if (row.salesOnly) cntInfo++;
@@ -1583,10 +1558,7 @@ function updateTotals() {
       totalExpiredOnShelf += calc.expiredOnShelf;
       totalSoldExpired += calc.soldExpired;
       hasAnyStock = true;
-      if (calc.soldExpired > 0) cntDanger++;
-      else if (calc.expiredOnShelf > 0) cntWarn++;
-      else cntFresh++;
-    } else cntUnknown++;
+    }
     totalSales += Number(row.sales) || 0;
   }
   const isSalesOnlyMode = cntInfo > 0 && cntInfo === tableRows.length;
@@ -1598,24 +1570,6 @@ function updateTotals() {
     summary.textContent = hasAnyStock
       ? `Позиций: ${tableRows.length}.`
       : `Позиций: ${tableRows.length}. Введите остаток для расчёта.`;
-  }
-  const ss = $('statusSummary');
-  if (ss) {
-    ss.innerHTML = '';
-    const chips = [
-      { cls: 'fresh', label: `🟢 Свежие: ${cntFresh}`, show: hasAnyStock && cntFresh > 0 },
-      { cls: 'warn', label: `🟡 Просрочка: ${cntWarn}`, show: cntWarn > 0 },
-      { cls: 'danger', label: `🔴 Продавали: ${cntDanger}`, show: cntDanger > 0 },
-      { cls: 'unknown', label: `⚪ Без остатка: ${cntUnknown}`, show: cntUnknown > 0 },
-      { cls: 'info', label: `🔵 Только продажи: ${cntInfo}`, show: cntInfo > 0 }
-    ];
-    chips.forEach(c => {
-      if (!c.show) return;
-      const el = document.createElement('span');
-      el.className = 'status-chip ' + c.cls;
-      el.textContent = c.label;
-      ss.appendChild(el);
-    });
   }
   const box = $('totals');
   if (!box) return;
@@ -1645,9 +1599,8 @@ function scheduleSessionSave() {
 function saveSession() {
   try {
     const payload = {
-      version: 3,
+      version: 4,
       savedAt: Date.now(),
-      filter: currentFilter,
       point: $('point') ? $('point').value.slice(0, 50) : '',
       csvText: ($('csvInput') ? $('csvInput').value : '').slice(0, 500000),
       rows: tableRows.slice(0, MAX_ROWS).map(r => ({
@@ -1659,7 +1612,7 @@ function saveSession() {
         salesOnly: !!r.salesOnly
       }))
     };
-    localStorage.setItem('fbAuditSessionV3', JSON.stringify(payload));
+    localStorage.setItem('fbAuditSessionV4', JSON.stringify(payload));
     showAutosaveBadge();
   } catch (e) { console.warn(e); }
 }
@@ -1672,10 +1625,10 @@ function showAutosaveBadge() {
 }
 function loadSession() {
   try {
-    const raw = localStorage.getItem('fbAuditSessionV3');
+    const raw = localStorage.getItem('fbAuditSessionV4');
     if (!raw) return null;
     const data = JSON.parse(raw);
-    if (!data || data.version !== 3) return null;
+    if (!data || data.version !== 4) return null;
     return data;
   } catch (e) { return null; }
 }
@@ -1683,7 +1636,6 @@ function applySession(data) {
   if (!data) return false;
   isRestoring = true;
   try {
-    if (data.filter && ['all','danger','warn','fresh','unknown','info'].includes(data.filter)) currentFilter = data.filter;
     if ($('point') && typeof data.point === 'string') $('point').value = data.point.slice(0, 50);
     if ($('csvInput') && typeof data.csvText === 'string') $('csvInput').value = data.csvText.slice(0, 500000);
     if (Array.isArray(data.rows) && data.rows.length) {
@@ -1702,12 +1654,6 @@ function applySession(data) {
         salesOnly: !!r.salesOnly
       })).filter(r => r.name);
     } else tableRows = [];
-    setTimeout(() => {
-      const bar = $('filterBar');
-      if (bar) bar.querySelectorAll('.filter-btn').forEach(b => {
-        b.classList.toggle('active', b.dataset.filter === currentFilter);
-      });
-    }, 0);
     return true;
   } finally { isRestoring = false; }
 }
@@ -2324,13 +2270,10 @@ function bindUI() {
     resetToken++;
     try {
       tableRows = [];
-      currentFilter = 'all';
       const ci = $('csvInput'); if (ci) ci.value = '';
       const cs = $('csvStatus'); if (cs) { cs.className = 'status'; cs.textContent = ''; }
       const ss = $('shareStatus'); if (ss) { ss.className = 'status'; ss.textContent = ''; }
-      const bar = $('filterBar');
-      if (bar) bar.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === 'all'));
-      try { localStorage.removeItem('fbAuditSessionV3'); } catch (e) {}
+      try { localStorage.removeItem('fbAuditSessionV4'); } catch (e) {}
       try { await clearAllPhotos(); } catch (e) {}
       renderTable();
       await renderPhotoQueue();
@@ -2435,28 +2378,9 @@ function init() {
   initLogoFallback();
   startAutoDateTime();
 
-  const bar = $('filterBar');
-  if (bar) {
-    bar.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.onclick = () => {
-        const filter = btn.dataset.filter || 'all';
-        if (currentFilter === filter && filter !== 'all') {
-          currentFilter = 'all';
-        } else {
-          currentFilter = filter;
-        }
-        bar.querySelectorAll('.filter-btn').forEach(b => {
-          b.classList.toggle('active', b.dataset.filter === currentFilter);
-        });
-        applyFilter();
-        scheduleSessionSave();
-      };
-    });
-  }
-
   const body = $('tableScrollBody');
   if (body) {
-    body.addEventListener('scroll', syncScroll, { passive: true });
+    body.addEventListener('scroll', scheduleScrollSync, { passive: true });
   }
 
   const pt = $('point');
@@ -2485,7 +2409,7 @@ function init() {
   });
 
   window.addEventListener('storage', e => {
-    if (e.key === 'fbAuditSessionV3' && !isRestoring) {
+    if (e.key === 'fbAuditSessionV4' && !isRestoring) {
       const data = loadSession();
       if (data) { applySession(data); renderTable(); }
     }
@@ -2505,7 +2429,7 @@ function init() {
   window.addEventListener('resize', syncScroll);
   window.addEventListener('error', e => console.warn('Global error:', e.message));
 
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v3.1 · логотип · каталог:', PRODUCTS.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v4.0 · sticky header · индикаторы · каталог:', PRODUCTS.length);
 }
 
 bindUI();
