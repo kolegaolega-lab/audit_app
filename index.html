@@ -196,23 +196,47 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .pf-commit{background:#0a84ff;color:#fff}
 #catalogModalContent{display:flex;flex-direction:column;max-height:88vh;overflow:hidden}
 #catalogList{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
-#unknownModalContent{display:flex;flex-direction:column;max-height:88vh;overflow:hidden}
-#unknownBody{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
-.unknown-item{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input);margin-bottom:8px}
-.unknown-item input[type=checkbox]{width:22px;height:22px;margin-top:4px;accent-color:var(--accent);cursor:pointer;flex:0 0 auto}
+
+/* Компактный модал «Не в справочнике» */
+#unknownModalContent{
+  display:flex;flex-direction:column;
+  max-height:80vh;
+  max-width:420px;
+  padding:20px;
+  overflow:hidden;
+}
+@media (max-width:640px){
+  #unknownModalContent{max-height:85vh;max-width:100%}
+}
+#unknownBody{
+  flex:1 1 auto;min-height:0;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  margin-bottom:12px;
+  padding-right:4px;
+}
+.unknown-item{
+  display:grid;grid-template-columns:auto 1fr;
+  gap:8px;align-items:start;
+  padding:8px 10px;
+  border:1px solid var(--separator);
+  border-radius:var(--r-sm);
+  background:var(--bg-input);
+  margin-bottom:6px;
+}
+.unknown-item input[type=checkbox]{width:20px;height:20px;margin-top:3px;accent-color:var(--accent);cursor:pointer;flex:0 0 auto}
 .unknown-body{min-width:0}
-.unknown-name{font-size:14px;font-weight:600;word-break:break-word;margin-bottom:6px}
-.unknown-info{font-size:12.5px;color:var(--text-secondary);line-height:1.5;margin-bottom:6px}
-.unknown-info .kv{display:inline-block;margin-right:12px;white-space:nowrap}
+.unknown-name{font-size:13.5px;font-weight:600;word-break:break-word;margin-bottom:4px}
+.unknown-info{font-size:12px;color:var(--text-secondary);line-height:1.4;margin-bottom:4px}
+.unknown-info .kv{display:inline-block;margin-right:10px;white-space:nowrap}
 .unknown-info .kv b{color:var(--text);font-weight:600}
-.unknown-shelf{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary)}
-.unknown-shelf input[type=number]{width:80px;min-height:36px;height:36px;padding:0 8px;font-size:14px;font-weight:600;text-align:center}
-.unknown-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.unknown-shelf{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-secondary)}
+.unknown-shelf input[type=number]{width:70px;min-height:32px;height:32px;padding:0 6px;font-size:13px;font-weight:600;text-align:center}
+.unknown-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:0}
 .unknown-actions .full{grid-column:1 / -1}
-.unknown-search{margin-bottom:10px}
-.unknown-search input{min-height:40px;padding:8px 12px;font-size:14px}
-.unknown-counter{font-size:12px;color:var(--text-secondary);margin-bottom:10px}
-.unknown-load-more{padding:10px;text-align:center;color:var(--accent);font-weight:600;font-size:13px;cursor:pointer;user-select:none}
+.unknown-search{margin-bottom:8px}
+.unknown-search input{min-height:36px;padding:6px 10px;font-size:13px}
+.unknown-counter{font-size:11.5px;color:var(--text-secondary);margin-bottom:8px}
+.unknown-load-more{padding:8px;text-align:center;color:var(--accent);font-weight:600;font-size:12.5px;cursor:pointer;user-select:none}
 .unknown-load-more:active{opacity:.6}
 #ignoredModalContent{display:flex;flex-direction:column;max-height:88vh;overflow:hidden}
 #ignoredList{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
@@ -432,7 +456,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v7.2
+      French Bakery Аудит · v7.3
     </div>
   </div>
 
@@ -509,16 +533,16 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 <div id="unknownModal" class="modal hidden">
   <div class="modal-content" id="unknownModalContent">
     <div class="modal-handle"></div>
-    <h3>⚠️ Не в справочнике</h3>
-    <p class="hint">Позиции из CSV, которых нет в справочнике. Отметьте те, что нужно добавить, или проигнорируйте.</p>
+    <h3>Не в справочнике</h3>
+    <p class="hint">Позиции из CSV, которых нет в справочнике.</p>
     <div id="unknownCounter" class="unknown-counter"></div>
     <div class="unknown-search" id="unknownSearchWrap" style="display:none">
-      <input id="unknownSearch" type="text" placeholder="🔍 Поиск по названию..." autocomplete="off" maxlength="100">
+      <input id="unknownSearch" type="text" placeholder="Поиск по названию..." autocomplete="off" maxlength="100">
     </div>
     <div id="unknownBody"></div>
     <div class="unknown-actions">
-      <button id="unknownAddBtn" class="success">➕ Добавить выбранные</button>
-      <button id="unknownIgnoreBtn" class="warn">🚫 Игнорировать все</button>
+      <button id="unknownAddBtn" class="success">Добавить выбранные</button>
+      <button id="unknownIgnoreBtn" class="warn">Игнорировать все</button>
       <button id="unknownCloseBtn" class="secondary full">Закрыть</button>
     </div>
   </div>
@@ -1741,7 +1765,7 @@ function addSelectedUnknown() {
   scheduleSessionSave();
   if (!unknownRows.filter(r => !isIgnored(r.name)).length) closeModal('unknownModal');
   else renderUnknownModal();
-  showToast(`✅ Добавлено в справочник: ${added.length}`);
+  showToast(`Добавлено в справочник: ${added.length}`);
 }
 function ignoreAllUnknown() {
   if (!unknownRows.length) return;
@@ -1755,7 +1779,7 @@ function ignoreAllUnknown() {
   scheduleSessionSave();
   updateUnknownBanner();
   closeModal('unknownModal');
-  showToast(`🚫 Игнорировано: позиций ${count}`);
+  showToast(`Игнорировано: позиций ${count}`);
 }
 
 let applyBusy = false;
@@ -2445,7 +2469,7 @@ function bindUI() {
     IGNORED = [];
     saveIgnored();
     updateUnknownBanner();
-    showToast('✅ Игнор-лист очищен');
+    showToast('Игнор-лист очищен');
   };
   const openUnknownBtn = $('openUnknownBtn');
   if (openUnknownBtn) openUnknownBtn.onclick = () => openUnknownModal();
@@ -2564,7 +2588,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v7.2 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v7.3 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
