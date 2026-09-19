@@ -19,8 +19,8 @@
   --orange:#ff9500;--orange-soft:rgba(255,149,0,.14);--orange-row:rgba(255,149,0,.12);--orange-row-hover:rgba(255,149,0,.20);
   --red:#ff3b30;--red-soft:rgba(255,59,48,.14);--red-row:rgba(255,59,48,.12);--red-row-hover:rgba(255,59,48,.22);
   --blue:#0a84ff;--blue-soft:rgba(10,132,255,.14);--blue-row:rgba(10,132,255,.10);--blue-row-hover:rgba(10,132,255,.18);
-  --r-lg:20px;--r-md:14px;--r-sm:10px;--r-xs:8px;
-  --spring:cubic-bezier(.34,1.56,.64,1);--ease:cubic-bezier(.25,.1,.25,1);
+  --r-lg:20px;--r-md:14px;--r-sm:10px;
+  --spring:cubic-bezier(.34,1.56,.64,1);
 }
 @media (prefers-color-scheme:dark){
   :root{
@@ -156,6 +156,8 @@ button.busy::before{
 .result-meta .item{display:inline-flex;align-items:center;gap:5px}
 .result-meta .item b{color:var(--text);font-weight:700}
 .result-meta .item.empty b{color:var(--text-tertiary)}
+
+/* TABLE */
 .table-wrap{
   border-radius:var(--r-md);border:1px solid var(--separator);
   background:var(--bg-card);overflow:hidden;margin-bottom:4px;
@@ -198,34 +200,59 @@ button.busy::before{
   position:sticky;left:0;z-index:15;background:var(--bg-card);
   text-align:left;white-space:normal;word-break:break-word;
   padding:8px 10px 8px 14px;transform:translateZ(0);isolation:isolate;
+  cursor:pointer;
 }
 .table-scroll tbody td:first-child::after{
   content:'';position:absolute;right:0;top:0;bottom:0;width:1px;
   background:var(--separator);pointer-events:none;
 }
 .table-scroll tbody tr:last-child td{border-bottom:none}
-.table-scroll tbody tr:hover td{background:var(--bg-hover)}
-.table-scroll tbody tr:hover td:first-child{background:var(--bg-hover)}
+.table-scroll tbody tr{cursor:pointer}
+
 .table-scroll tbody tr.row-fresh td{background:var(--green-row)}
-.table-scroll tbody tr.row-fresh td:first-child{background:var(--green-row)}
-.table-scroll tbody tr.row-fresh:hover td{background:var(--green-row-hover)}
-.table-scroll tbody tr.row-fresh:hover td:first-child{background:var(--green-row-hover)}
 .table-scroll tbody tr.row-warn td{background:var(--orange-row)}
-.table-scroll tbody tr.row-warn td:first-child{background:var(--orange-row)}
-.table-scroll tbody tr.row-warn:hover td{background:var(--orange-row-hover)}
-.table-scroll tbody tr.row-warn:hover td:first-child{background:var(--orange-row-hover)}
 .table-scroll tbody tr.row-danger td{background:var(--red-row)}
-.table-scroll tbody tr.row-danger td:first-child{background:var(--red-row)}
-.table-scroll tbody tr.row-danger:hover td{background:var(--red-row-hover)}
-.table-scroll tbody tr.row-danger:hover td:first-child{background:var(--red-row-hover)}
 .table-scroll tbody tr.row-info td{background:var(--blue-row)}
-.table-scroll tbody tr.row-info td:first-child{background:var(--blue-row)}
-.table-scroll tbody tr.row-info:hover td{background:var(--blue-row-hover)}
-.table-scroll tbody tr.row-info:hover td:first-child{background:var(--blue-row-hover)}
 .table-scroll tbody tr.row-unknown td{background:var(--bg-card)}
+
+.table-scroll tbody tr.row-fresh td:first-child{
+  background:linear-gradient(var(--green-row),var(--green-row)),var(--bg-card);
+}
+.table-scroll tbody tr.row-warn td:first-child{
+  background:linear-gradient(var(--orange-row),var(--orange-row)),var(--bg-card);
+}
+.table-scroll tbody tr.row-danger td:first-child{
+  background:linear-gradient(var(--red-row),var(--red-row)),var(--bg-card);
+}
+.table-scroll tbody tr.row-info td:first-child{
+  background:linear-gradient(var(--blue-row),var(--blue-row)),var(--bg-card);
+}
 .table-scroll tbody tr.row-unknown td:first-child{background:var(--bg-card)}
+
+.table-scroll tbody tr:hover td:first-child{
+  background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card);
+}
+.table-scroll tbody tr.row-fresh:hover td:first-child{
+  background:linear-gradient(var(--green-row-hover),var(--green-row-hover)),var(--bg-card);
+}
+.table-scroll tbody tr.row-warn:hover td:first-child{
+  background:linear-gradient(var(--orange-row-hover),var(--orange-row-hover)),var(--bg-card);
+}
+.table-scroll tbody tr.row-danger:hover td:first-child{
+  background:linear-gradient(var(--red-row-hover),var(--red-row-hover)),var(--bg-card);
+}
+.table-scroll tbody tr.row-info:hover td:first-child{
+  background:linear-gradient(var(--blue-row-hover),var(--blue-row-hover)),var(--bg-card);
+}
+.table-scroll tbody tr.row-unknown:hover td:first-child{
+  background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card);
+}
+.table-scroll tbody tr.row-fresh:hover td{background:var(--green-row-hover)}
+.table-scroll tbody tr.row-warn:hover td{background:var(--orange-row-hover)}
+.table-scroll tbody tr.row-danger:hover td{background:var(--red-row-hover)}
+.table-scroll tbody tr.row-info:hover td{background:var(--blue-row-hover)}
 .table-scroll tbody tr.row-unknown:hover td{background:var(--bg-hover)}
-.table-scroll tbody tr.row-unknown:hover td:first-child{background:var(--bg-hover)}
+
 .table-scroll tbody tr.row-fresh td:first-child::before,
 .table-scroll tbody tr.row-warn td:first-child::before,
 .table-scroll tbody tr.row-danger td:first-child::before,
@@ -236,6 +263,12 @@ button.busy::before{
 .table-scroll tbody tr.row-warn td:first-child::before{background:var(--orange)}
 .table-scroll tbody tr.row-danger td:first-child::before{background:var(--red)}
 .table-scroll tbody tr.row-info td:first-child::before{background:var(--blue)}
+
+.name-cell{display:flex;align-items:flex-start;gap:8px;min-width:0}
+.name-cell .name-text{flex:1 1 auto;min-width:0;word-break:break-word}
+.name-cell .edit-hint{flex:0 0 auto;font-size:14px;opacity:.35;margin-top:1px;display:none}
+@media (max-width:640px){.name-cell .edit-hint{display:inline-block}}
+
 .num{
   width:60px;min-width:60px;max-width:60px;height:38px;padding:0 4px;
   border:0;border-radius:10px;font-size:15px;text-align:center;
@@ -264,11 +297,136 @@ button.busy::before{
 .income-cell.edited .reset-btn{display:inline-flex}
 .calc-cell{text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
 .calc-cell.zero{color:var(--text-tertiary)}
-.calc-cell.positive{color:var(--red)}
+.calc-cell[data-role="expiredOnShelf"].positive,
+.calc-cell[data-role="soldExpired"].positive{color:var(--red)}
+
+@media (max-width:640px){
+  .table-scroll thead th:nth-child(2),
+  .table-scroll tbody td:nth-child(2){
+    position:sticky;left:160px;z-index:14;
+    transform:translateZ(0);isolation:isolate;
+    box-shadow:4px 0 8px -4px rgba(0,0,0,.06);
+  }
+  .table-scroll thead th:nth-child(2){z-index:24;background:var(--bg-card)}
+  .table-scroll tbody tr.row-fresh td:nth-child(2){
+    background:linear-gradient(var(--green-row),var(--green-row)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-warn td:nth-child(2){
+    background:linear-gradient(var(--orange-row),var(--orange-row)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-danger td:nth-child(2){
+    background:linear-gradient(var(--red-row),var(--red-row)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-info td:nth-child(2){
+    background:linear-gradient(var(--blue-row),var(--blue-row)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-unknown td:nth-child(2){background:var(--bg-card)}
+  .table-scroll tbody tr:hover td:nth-child(2){
+    background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-fresh:hover td:nth-child(2){
+    background:linear-gradient(var(--green-row-hover),var(--green-row-hover)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-warn:hover td:nth-child(2){
+    background:linear-gradient(var(--orange-row-hover),var(--orange-row-hover)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-danger:hover td:nth-child(2){
+    background:linear-gradient(var(--red-row-hover),var(--red-row-hover)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-info:hover td:nth-child(2){
+    background:linear-gradient(var(--blue-row-hover),var(--blue-row-hover)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-unknown:hover td:nth-child(2){
+    background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card);
+  }
+}
+
+/* PRODUCT MODAL */
+.modal{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.5);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+.modal.hidden{display:none}
+.modal-content{
+  background:var(--bg-card);border-radius:16px;
+  width:100%;max-width:520px;max-height:88vh;overflow:auto;
+  padding:24px;animation:modalIn .2s cubic-bezier(.16,1,.3,1);
+  -webkit-overflow-scrolling:touch;
+}
+@keyframes modalIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-handle{display:none}
+.modal-content h3{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.25}
+.modal-content .product-shelf{font-size:12px;color:var(--text-secondary);margin-bottom:14px}
+.product-form{display:flex;flex-direction:column;gap:14px}
+.pf-section-title{
+  font-size:10.5px;font-weight:700;color:var(--text-secondary);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;
+}
+.pf-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
+.pf-row-dates{display:flex;flex-direction:column;gap:8px}
+.pf-date-row{display:grid;grid-template-columns:70px 1fr;gap:8px;align-items:center}
+.pf-date-label{font-size:13px;font-weight:600;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+.pf-num{
+  width:100%;height:44px;padding:0 12px;border:0;border-radius:12px;
+  background:var(--bg-input);color:var(--text);
+  font-size:17px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;
+  -webkit-appearance:none;appearance:none;font-family:inherit;line-height:44px;
+  transition:box-shadow .15s,background .15s;
+}
+.pf-num:focus{outline:none;box-shadow:0 0 0 2.5px var(--accent);background:var(--bg-card)}
+.pf-num::-webkit-outer-spin-button,
+.pf-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.pf-num[type=number]{-moz-appearance:textfield}
+.pf-btn{
+  width:44px;height:44px;padding:0;border-radius:12px;
+  background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator);
+  font-size:18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;
+  user-select:none;-webkit-user-select:none;cursor:pointer;
+  transition:transform .12s var(--spring),background .12s;
+}
+.pf-btn:active{transform:scale(.94);background:var(--bg-hover)}
+.pf-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.pf-actions button{
+  min-height:44px;border:0;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;font-family:inherit;
+  transition:transform .12s var(--spring),background .12s;
+}
+.pf-actions button:active{transform:scale(.97)}
+.pf-cancel{background:var(--bg-elev-2);color:var(--text);border:1.5px solid var(--separator-opaque)!important}
+.pf-commit{background:#0a84ff;color:#fff}
+
+@media (max-width:640px){
+  .modal{align-items:flex-end;padding:0}
+  .modal-content{
+    border-radius:20px 20px 0 0;max-width:none;max-height:92vh;padding:20px;
+    padding-bottom:calc(20px + env(safe-area-inset-bottom));
+    animation:slideUp .3s cubic-bezier(.16,1,.3,1);
+  }
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .modal-handle{
+    display:block;width:40px;height:4px;
+    background:var(--separator-opaque);border-radius:2px;margin:0 auto 16px;
+  }
+  .modal-content h3{font-size:19px}
+  .modal-content .product-shelf{font-size:13px;margin-bottom:18px}
+  .product-form{gap:18px}
+  .pf-section-title{font-size:11px;margin-bottom:8px}
+  .pf-row{gap:10px}
+  .pf-row-dates{gap:10px}
+  .pf-date-row{grid-template-columns:80px 1fr;gap:10px}
+  .pf-date-label{font-size:14px}
+  .pf-num{height:54px;font-size:22px;line-height:54px;border-radius:14px;padding:0 14px}
+  .pf-btn{width:54px;height:54px;font-size:22px;border-radius:14px}
+  .pf-actions{gap:10px;margin-top:8px}
+  .pf-actions button{min-height:54px;font-size:16px;border-radius:14px}
+}
+
+/* MISC */
 .legend{
   display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:14px;padding:12px 14px;
-  background:var(--bg-input);border-radius:var(--r-sm);
-  font-size:12px;color:var(--text-secondary);
+  background:var(--bg-input);border-radius:var(--r-sm);font-size:12px;color:var(--text-secondary);
 }
 .legend-item{display:inline-flex;align-items:center;gap:5px}
 .legend-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
@@ -278,6 +436,7 @@ button.busy::before{
 .legend-dot.unknown{background:var(--text-tertiary)}
 .legend-dot.info{background:var(--blue)}
 .legend-dot.edited{background:var(--orange);border:1px solid var(--orange)}
+
 .steps-hint{
   background:var(--bg-input);border:1px solid var(--separator);border-radius:var(--r-sm);
   padding:12px 14px;font-size:13px;line-height:1.55;color:var(--text-secondary);margin-bottom:12px;
@@ -303,19 +462,6 @@ button.busy::before{
 .photo-type{font-size:11px;color:var(--text-secondary);margin-top:2px}
 .photo-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .photo-actions button{min-height:36px;padding:6px 12px;font-size:12.5px}
-.modal{
-  position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.5);
-  display:flex;align-items:flex-end;justify-content:center;padding:0;
-}
-.modal.hidden{display:none}
-.modal-content{
-  background:var(--bg-card);border-radius:20px 20px 0 0;width:100%;max-width:820px;
-  max-height:92vh;overflow:auto;padding:20px;padding-bottom:calc(20px + env(safe-area-inset-bottom));
-  animation:slideUp .3s cubic-bezier(.16,1,.3,1);-webkit-overflow-scrolling:touch;
-}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.modal-content h3{margin:0 0 8px;font-size:18px;font-weight:700}
-.modal-handle{width:40px;height:4px;background:var(--separator-opaque);border-radius:2px;margin:0 auto 16px}
 pre.code{
   background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm);
   font-size:11.5px;line-height:1.55;overflow:auto;max-height:60vh;
@@ -335,14 +481,9 @@ pre.code{
   input[type=text],input[type=number],textarea{padding:11px 14px;font-size:15px;min-height:44px}
   textarea{font-size:13px;min-height:200px}
   button{min-height:44px;padding:11px 18px}
-  .modal{align-items:center;padding:20px}
-  .modal-content{border-radius:18px;padding:28px;animation:modalIn .2s cubic-bezier(.16,1,.3,1)}
-  @keyframes modalIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
-  .modal-handle{display:none}
   .table-scroll table.table-body{font-size:13.5px}
   .table-scroll thead th{font-size:11px;padding:9px 7px}
   .table-scroll tbody td{padding:9px 7px}
-  .table-scroll{max-height:65vh}
 }
 @media (max-width:640px){.table-scroll{max-height:55vh}}
 @media (max-width:400px){
@@ -517,7 +658,7 @@ pre.code{
     <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v5.1
+      French Bakery Аудит · v5.3
     </div>
   </div>
 
@@ -553,9 +694,48 @@ pre.code{
   </div>
 </div>
 
+<div id="productModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-handle"></div>
+    <h3 id="pmName">—</h3>
+    <div class="product-shelf" id="pmShelf">Срок: —</div>
+
+    <div class="product-form">
+      <div>
+        <div class="pf-section-title">Остаток</div>
+        <div class="pf-row">
+          <input type="number" class="pf-num" id="pmStock" inputmode="numeric" min="0" placeholder="—">
+          <button type="button" class="pf-btn" data-target="pmStock" data-step="-1">−</button>
+          <button type="button" class="pf-btn" data-target="pmStock" data-step="1">+</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="pf-section-title">Продано</div>
+        <div class="pf-row">
+          <input type="number" class="pf-num" id="pmSales" inputmode="numeric" min="0">
+          <button type="button" class="pf-btn" data-target="pmSales" data-step="-1">−</button>
+          <button type="button" class="pf-btn" data-target="pmSales" data-step="1">+</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="pf-section-title">Приходы по датам</div>
+        <div class="pf-row-dates" id="pmIncoming"></div>
+      </div>
+
+      <div class="pf-actions">
+        <button type="button" class="pf-cancel" id="pmCancel">Отмена</button>
+        <button type="button" class="pf-commit" id="pmCommit">Готово</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 'use strict';
+
 /* ============================================================
    КОНСТАНТЫ
    ============================================================ */
@@ -590,6 +770,9 @@ let _initialized = false;
 const _activeDeletes = new Set();
 let _fileBusy = false;
 let _timeUpdater = null;
+let openIdx = -1;
+let openTr = null;
+let openSnapshot = null;
 
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
 
@@ -758,32 +941,13 @@ function getCheckMoment() {
   const d = new Date(`${dateStr}T${timeStr}:00`);
   return isValidDate(d) ? d : new Date();
 }
-/**
- * Момент списания партии.
- * Старт отсчёта — 07:00 дня получения.
- * Списание — всегда 22:00.
- * День списания: h ≤ 24 → день получения; h > 24 → ceil(h/24) − 1 дней после дня получения.
- *
- * Примеры (получено 17.09):
- *   24 ч → 17.09 22:00
- *   36 ч → 18.09 22:00
- *   48 ч → 18.09 22:00
- *   72 ч → 19.09 22:00
- *   96 ч → 20.09 22:00
- *  120 ч → 21.09 22:00
- *  240 ч → 26.09 22:00
- *  360 ч → 01.10 22:00
- */
 function getWriteOffMoment(partyDate, shelfLife) {
   const [y, m, day] = partyDate.split('-').map(Number);
   const check = new Date(y, m - 1, day);
   if (check.getFullYear() !== y || check.getMonth() !== m - 1 || check.getDate() !== day) return null;
   check.setHours(SHELF_LIFE_START_HOUR, 0, 0, 0);
   const h = clampNum(shelfLife, 1, 10000, 72);
-  if (h <= 24) {
-    check.setHours(WRITE_OFF_HOUR, 0, 0, 0);
-    return check;
-  }
+  if (h <= 24) { check.setHours(WRITE_OFF_HOUR, 0, 0, 0); return check; }
   const days = Math.ceil(h / 24) - 1;
   check.setDate(check.getDate() + days);
   check.setHours(WRITE_OFF_HOUR, 0, 0, 0);
@@ -980,7 +1144,7 @@ function sortRowsAlphabetically(rows) {
 }
 
 /* ============================================================
-   PHOTO DB (IndexedDB)
+   PHOTO DB
    ============================================================ */
 function openPhotoDB() {
   return new Promise((resolve, reject) => {
@@ -1177,6 +1341,49 @@ function updateResultMeta() {
 }
 
 /* ============================================================
+   НАВИГАЦИЯ ПО ТАБЛИЦЕ
+   ============================================================ */
+function focusEl(el) {
+  el.focus({ preventScroll: true });
+  el.select();
+  try { el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' }); }
+  catch (e) { el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+}
+function tableNav(input, key) {
+  const td = input.closest('td');
+  const tr = input.closest('tr');
+  if (!td || !tr) return;
+  if (key === 'ArrowLeft' || key === 'ArrowRight') {
+    const list = [...tr.querySelectorAll('input.num:not([disabled])')];
+    const i = list.indexOf(input);
+    if (i < 0) return;
+    const j = key === 'ArrowRight' ? i + 1 : i - 1;
+    if (j < 0 || j >= list.length) return;
+    focusEl(list[j]);
+    return;
+  }
+  const tbody = tr.parentElement;
+  const allTr = [...tbody.children];
+  const rIdx = allTr.indexOf(tr);
+  const cIdx = [...tr.children].indexOf(td);
+  if (rIdx < 0 || cIdx < 0) return;
+  const step = key === 'ArrowDown' ? 1 : -1;
+  for (let i = rIdx + step; i >= 0 && i < allTr.length; i += step) {
+    const cTd = allTr[i].children[cIdx];
+    if (!cTd) continue;
+    const next = cTd.querySelector('input.num:not([disabled])');
+    if (next) { focusEl(next); return; }
+  }
+}
+function tableKey(e) {
+  const k = e.key;
+  if (k !== 'ArrowLeft' && k !== 'ArrowRight' && k !== 'ArrowUp' && k !== 'ArrowDown') return;
+  if (e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return;
+  e.preventDefault();
+  tableNav(e.target, k);
+}
+
+/* ============================================================
    ТАБЛИЦА
    ============================================================ */
 function buildColgroupHTML(dates) {
@@ -1206,6 +1413,7 @@ function buildTheadHTML(dates) {
     <th>Продано просроченным</th>
   `;
 }
+
 function renderTable() {
   if (isRendering) return;
   isRendering = true;
@@ -1230,6 +1438,7 @@ function renderTable() {
     if (dates.length > MAX_DATES) dates = dates.slice(0, MAX_DATES);
     colgroup.innerHTML = buildColgroupHTML(dates);
     theadTr.innerHTML = buildTheadHTML(dates);
+
     const fragment = document.createDocumentFragment();
     tableRows.forEach(row => {
       const calc = computeFIFO(row);
@@ -1240,7 +1449,17 @@ function renderTable() {
 
       const tdName = document.createElement('td');
       tdName.title = row.name;
-      tdName.textContent = row.name;
+      const nameCell = document.createElement('div');
+      nameCell.className = 'name-cell';
+      const nameText = document.createElement('span');
+      nameText.className = 'name-text';
+      nameText.textContent = row.name;
+      const editHint = document.createElement('span');
+      editHint.className = 'edit-hint';
+      editHint.textContent = '✏️';
+      nameCell.appendChild(nameText);
+      nameCell.appendChild(editHint);
+      tdName.appendChild(nameCell);
       tr.appendChild(tdName);
 
       const tdStock = document.createElement('td');
@@ -1252,21 +1471,24 @@ function renderTable() {
       } else {
         const inputStock = document.createElement('input');
         inputStock.type = 'number';
-        inputStock.min = '0'; inputStock.max = String(MAX_NUM); inputStock.step = '1';
+        inputStock.min = '0'; inputStock.max = String(MAX_NUM);
         inputStock.className = 'num';
         inputStock.inputMode = 'numeric';
         inputStock.value = row.stock === '' ? '' : row.stock;
         inputStock.placeholder = '—';
-        inputStock.oninput = () => {
+        inputStock.addEventListener('input', () => {
           const v = inputStock.value;
           row.stock = v === '' ? '' : clampNum(v, 0, MAX_NUM, 0);
           refreshRow(row, tr);
           scheduleSessionSave();
-        };
+        });
         inputStock.addEventListener('change', () => {
           if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
           saveSession();
         });
+        inputStock.addEventListener('click', e => e.stopPropagation());
+        inputStock.addEventListener('focus', e => e.stopPropagation());
+        inputStock.addEventListener('keydown', tableKey);
         tdStock.appendChild(inputStock);
       }
       tr.appendChild(tdStock);
@@ -1274,20 +1496,23 @@ function renderTable() {
       const tdSales = document.createElement('td');
       const inputSales = document.createElement('input');
       inputSales.type = 'number';
-      inputSales.min = '0'; inputSales.max = String(MAX_NUM); inputSales.step = '1';
+      inputSales.min = '0'; inputSales.max = String(MAX_NUM);
       inputSales.className = 'num';
       inputSales.inputMode = 'numeric';
       inputSales.value = row.sales || 0;
-      inputSales.oninput = () => {
+      inputSales.addEventListener('input', () => {
         const v = inputSales.value;
         row.sales = v === '' ? 0 : clampNum(v, 0, MAX_NUM, 0);
         refreshRow(row, tr);
         scheduleSessionSave();
-      };
+      });
       inputSales.addEventListener('change', () => {
         if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
         saveSession();
       });
+      inputSales.addEventListener('click', e => e.stopPropagation());
+      inputSales.addEventListener('focus', e => e.stopPropagation());
+      inputSales.addEventListener('keydown', tableKey);
       tdSales.appendChild(inputSales);
       tr.appendChild(tdSales);
 
@@ -1303,11 +1528,11 @@ function renderTable() {
         } else {
           const inp = document.createElement('input');
           inp.type = 'number';
-          inp.min = '0'; inp.max = String(MAX_NUM); inp.step = '1';
+          inp.min = '0'; inp.max = String(MAX_NUM);
           inp.className = 'num';
           inp.inputMode = 'numeric';
           inp.value = party ? party.qty : 0;
-          inp.oninput = () => {
+          inp.addEventListener('input', () => {
             const v = inp.value;
             const newQty = v === '' ? 0 : clampNum(v, 0, MAX_NUM, 0);
             if (party) party.qty = newQty;
@@ -1315,12 +1540,15 @@ function renderTable() {
             markEdited(td, party, newQty);
             refreshRow(row, tr);
             scheduleSessionSave();
-          };
-          inp.onblur = () => { if (inp.value === '') inp.value = '0'; };
+          });
+          inp.addEventListener('blur', () => { if (inp.value === '') inp.value = '0'; });
           inp.addEventListener('change', () => {
             if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
             saveSession();
           });
+          inp.addEventListener('click', e => e.stopPropagation());
+          inp.addEventListener('focus', e => e.stopPropagation());
+          inp.addEventListener('keydown', tableKey);
           td.appendChild(inp);
 
           const resetBtn = document.createElement('button');
@@ -1331,7 +1559,7 @@ function renderTable() {
           if (party && party._originalQty != null && party._originalQty !== party.qty) {
             td.classList.add('edited');
           }
-          resetBtn.onclick = (e) => {
+          resetBtn.addEventListener('click', e => {
             e.stopPropagation();
             if (!party) return;
             if (party._originalQty != null) {
@@ -1341,7 +1569,7 @@ function renderTable() {
               refreshRow(row, tr);
               scheduleSessionSave();
             }
-          };
+          });
           td.appendChild(resetBtn);
         }
         tr.appendChild(td);
@@ -1351,11 +1579,11 @@ function renderTable() {
       tdShelf.textContent = `${row.shelfLife} ч`;
       tr.appendChild(tdShelf);
 
-      const tdFreshOnShelf = document.createElement('td');
-      tdFreshOnShelf.className = 'calc-cell' + (calc.freshOnShelf === null ? ' zero' : '');
-      tdFreshOnShelf.textContent = calc.freshOnShelf === null ? '—' : calc.freshOnShelf;
-      tdFreshOnShelf.dataset.role = 'freshOnShelf';
-      tr.appendChild(tdFreshOnShelf);
+      const tdFresh = document.createElement('td');
+      tdFresh.className = 'calc-cell' + (calc.freshOnShelf === null ? ' zero' : '');
+      tdFresh.textContent = calc.freshOnShelf === null ? '—' : calc.freshOnShelf;
+      tdFresh.dataset.role = 'freshOnShelf';
+      tr.appendChild(tdFresh);
 
       const tdFreshSold = document.createElement('td');
       tdFreshSold.className = 'calc-cell' + (calc.freshSold === null ? ' zero' : '');
@@ -1363,21 +1591,27 @@ function renderTable() {
       tdFreshSold.dataset.role = 'freshSold';
       tr.appendChild(tdFreshSold);
 
-      const tdExpiredShelf = document.createElement('td');
-      tdExpiredShelf.className = 'calc-cell';
-      tdExpiredShelf.textContent = calc.expiredOnShelf === null ? '—' : calc.expiredOnShelf;
-      if (calc.expiredOnShelf > 0) tdExpiredShelf.classList.add('positive');
-      else if (calc.expiredOnShelf === null) tdExpiredShelf.classList.add('zero');
-      tdExpiredShelf.dataset.role = 'expiredOnShelf';
-      tr.appendChild(tdExpiredShelf);
+      const tdExp = document.createElement('td');
+      tdExp.className = 'calc-cell';
+      tdExp.textContent = calc.expiredOnShelf === null ? '—' : calc.expiredOnShelf;
+      if (calc.expiredOnShelf === null) tdExp.classList.add('zero');
+      else if (calc.expiredOnShelf > 0) tdExp.classList.add('positive');
+      tdExp.dataset.role = 'expiredOnShelf';
+      tr.appendChild(tdExp);
 
-      const tdSoldExpired = document.createElement('td');
-      tdSoldExpired.className = 'calc-cell';
-      tdSoldExpired.textContent = calc.soldExpired === null ? '—' : calc.soldExpired;
-      if (calc.soldExpired > 0) tdSoldExpired.classList.add('positive');
-      else if (calc.soldExpired === null) tdSoldExpired.classList.add('zero');
-      tdSoldExpired.dataset.role = 'soldExpired';
-      tr.appendChild(tdSoldExpired);
+      const tdSoldExp = document.createElement('td');
+      tdSoldExp.className = 'calc-cell';
+      tdSoldExp.textContent = calc.soldExpired === null ? '—' : calc.soldExpired;
+      if (calc.soldExpired === null) tdSoldExp.classList.add('zero');
+      else if (calc.soldExpired > 0) tdSoldExp.classList.add('positive');
+      tdSoldExp.dataset.role = 'soldExpired';
+      tr.appendChild(tdSoldExp);
+
+      tr.addEventListener('click', e => {
+        if (e.target.closest('input')) return;
+        if (e.target.closest('button')) return;
+        openProduct(row, tr);
+      });
 
       fragment.appendChild(tr);
     });
@@ -1400,18 +1634,18 @@ function refreshRow(row, tr) {
   tr.classList.remove('row-fresh', 'row-warn', 'row-danger', 'row-unknown', 'row-info');
   tr.classList.add(newStatus.cls);
   tr.dataset.status = newStatus.label;
-  const setCell = (role, val) => {
+  const setCell = (role, val, markPositive) => {
     const el = tr.querySelector(`[data-role="${role}"]`);
     if (!el) return;
     el.classList.remove('positive', 'zero');
     el.textContent = val === null ? '—' : val;
-    if (val > 0) el.classList.add('positive');
-    else if (val === null) el.classList.add('zero');
+    if (val === null) el.classList.add('zero');
+    else if (val > 0 && markPositive) el.classList.add('positive');
   };
-  setCell('freshOnShelf', calc.freshOnShelf);
-  setCell('freshSold', calc.freshSold);
-  setCell('expiredOnShelf', calc.expiredOnShelf);
-  setCell('soldExpired', calc.soldExpired);
+  setCell('freshOnShelf', calc.freshOnShelf, false);
+  setCell('freshSold', calc.freshSold, false);
+  setCell('expiredOnShelf', calc.expiredOnShelf, true);
+  setCell('soldExpired', calc.soldExpired, true);
   updateTotals();
 }
 function updateTotals() {
@@ -1455,6 +1689,122 @@ function updateTotals() {
     Просрочено на витрине: <b style="color:var(--red)">${totalExpiredOnShelf}</b> шт
     ${cntInfo > 0 ? `<br><span style="color:var(--accent)">🔵 Без накладных: <b>${cntInfo}</b> поз.</span>` : ''}
   `;
+}
+
+/* ============================================================
+   НАВИГАЦИЯ ПО КАРТОЧКЕ
+   ============================================================ */
+function productInputs() {
+  const list = [];
+  const s = $('pmStock'), sl = $('pmSales');
+  if (s) list.push(s);
+  if (sl) list.push(sl);
+  const box = $('pmIncoming');
+  if (box) box.querySelectorAll('input.pf-num').forEach(i => list.push(i));
+  return list;
+}
+function productNav(input, dir) {
+  const list = productInputs();
+  const i = list.indexOf(input);
+  if (i < 0) return;
+  const j = i + dir;
+  if (j < 0 || j >= list.length) return;
+  const t = list[j];
+  t.focus();
+  t.select();
+}
+function productKey(e) {
+  const k = e.key;
+  if (k !== 'ArrowUp' && k !== 'ArrowDown' && k !== 'ArrowLeft' && k !== 'ArrowRight') return;
+  if (e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return;
+  e.preventDefault();
+  productNav(e.target, (k === 'ArrowDown' || k === 'ArrowRight') ? 1 : -1);
+}
+
+/* ============================================================
+   КАРТОЧКА ТОВАРА
+   ============================================================ */
+function openProduct(row, tr) {
+  if (!row) return;
+  openIdx = tableRows.indexOf(row);
+  openTr = tr;
+  openSnapshot = {
+    stock: row.stock,
+    sales: row.sales,
+    incoming: (row.incoming || []).map(p => ({ date: p.date, qty: p.qty, _originalQty: p._originalQty }))
+  };
+  $('pmName').textContent = row.name;
+  $('pmShelf').textContent = `Срок годности: ${row.shelfLife} ч`;
+  $('pmStock').value = row.stock === '' ? '' : row.stock;
+  $('pmSales').value = row.sales || 0;
+
+  const box = $('pmIncoming');
+  box.innerHTML = '';
+  const dates = [...new Set((row.incoming || []).map(p => p.date))].sort((a, b) => b.localeCompare(a));
+  if (!dates.length) {
+    const empty = document.createElement('div');
+    empty.className = 'pf-date-label';
+    empty.textContent = 'Нет накладных по этой позиции';
+    box.appendChild(empty);
+  } else {
+    dates.forEach(d => {
+      const party = row.incoming.find(p => p.date === d);
+      const dateRow = document.createElement('div');
+      dateRow.className = 'pf-date-row';
+      const lbl = document.createElement('div');
+      lbl.className = 'pf-date-label';
+      lbl.textContent = fmtDateRuShort(d);
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.className = 'pf-num';
+      inp.inputMode = 'numeric';
+      inp.min = '0';
+      inp.value = party ? (party.qty || 0) : 0;
+      inp.dataset.date = d;
+      inp.addEventListener('keydown', productKey);
+      dateRow.appendChild(lbl);
+      dateRow.appendChild(inp);
+      box.appendChild(dateRow);
+    });
+  }
+  $('productModal').classList.remove('hidden');
+  setTimeout(() => $('pmStock').focus(), 100);
+}
+function closeProduct() {
+  $('productModal').classList.add('hidden');
+  openIdx = -1;
+  openTr = null;
+  openSnapshot = null;
+}
+function commitProduct() {
+  if (openIdx < 0) { closeProduct(); return; }
+  const row = tableRows[openIdx];
+  if (!row) { closeProduct(); return; }
+  const vStock = $('pmStock').value;
+  row.stock = vStock === '' ? '' : clampNum(vStock, 0, MAX_NUM, 0);
+  row.sales = clampNum($('pmSales').value, 0, MAX_NUM, 0);
+  $('pmIncoming').querySelectorAll('input.pf-num').forEach(inp => {
+    const d = inp.dataset.date;
+    if (!d) return;
+    const party = (row.incoming || []).find(p => p.date === d);
+    const q = clampNum(inp.value, 0, MAX_NUM, 0);
+    if (party) party.qty = q;
+    else row.incoming.push({ date: d, qty: q, _originalQty: 0 });
+  });
+  if (openTr) refreshRow(row, openTr);
+  scheduleSessionSave();
+  closeProduct();
+}
+function cancelProduct() {
+  if (openIdx < 0 || !openSnapshot) { closeProduct(); return; }
+  const row = tableRows[openIdx];
+  if (row) {
+    row.stock = openSnapshot.stock;
+    row.sales = openSnapshot.sales;
+    row.incoming = openSnapshot.incoming.map(p => ({ date: p.date, qty: p.qty, _originalQty: p._originalQty }));
+    if (openTr) refreshRow(row, openTr);
+  }
+  closeProduct();
 }
 
 /* ============================================================
@@ -1627,54 +1977,190 @@ function buildPrompt() {
   const catalogList = PRODUCTS.map(p => `- ${p.name}: ${p.shelfLife}`).join('\n');
   return `Ты — OCR-ассистент для аудита сроков годности в кондитерской French Bakery.
 
-ЗАДАЧА: распознать накладные (ТОРГ-12) и чек продаж, вернуть CSV.
+ЗАДАЧА: распознать накладные (ТОРГ-12/УПД) и чеки продаж, вернуть единый CSV.
 
 ═══════════════════════════════════════════
 📥 ИСТОЧНИКИ
 ═══════════════════════════════════════════
-1. НАКЛАДНЫЕ (ТОРГ-12) → колонки «Получено за ДД.ММ»
-2. ЧЕК ПРОДАЖ → колонка «Продано сегодня» (берём только «К-во»)
+1. НАКЛАДНЫЕ (ТОРГ-12 / УПД) → приход товара за конкретную дату
+2. ЧЕКИ ПРОДАЖ → продажи за день
 
-ПРИОРИТЕТ: приход ← накладная, продажи ← чек продаж. Не суммировать.
-
-═══════════════════════════════════════════
-🔍 3 ЭТАПА РАБОТЫ (СТРОГО ПО ПОРЯДКУ)
-═══════════════════════════════════════════
-
-ЭТАП 1. ЧЕРНОВИК
-Выпиши ВСЕ строки из каждого документа:
-[документ] | [название] | [количество] | [дата]
-
-ЭТАП 2. ФИЛЬТРАЦИЯ (КРИТИЧЕСКИЙ ШАГ)
-Из черновика оставь ТОЛЬКО те позиции, которые есть в СПРАВОЧНИКЕ СРОКОВ (ниже).
-Всё остальное — напитки, кофе, блюда, десерты, не указанные в справочнике — ИГНОРИРУЙ ПОЛНОСТЬЮ.
-Если позиция есть в чеке, но её нет в справочнике — НЕ добавляй её в CSV и НЕ упоминай в сомнительных строках.
-
-ЭТАП 3. СБОРКА CSV
-Собери таблицу ТОЛЬКО из отфильтрованных позиций. Перед отправкой сверь сумму приходов.
+ПРИОРИТЕТ:
+- приход ← только из накладной
+- продажи ← только из чека
+- НЕ суммировать приход и продажи между собой
 
 ═══════════════════════════════════════════
-🚫 ЖЁСТКИЙ ФИЛЬТР (ГЛАВНОЕ ПРАВИЛО)
+🧾 РАСПОЗНАВАНИЕ ЧЕКА ПРОДАЖ
 ═══════════════════════════════════════════
-Включай в CSV ТОЛЬКО те наименования, которые дословно (или с минимальной нормализацией) присутствуют в СПРАВОЧНИКЕ СРОКОВ.
-Всё, чего нет в справочнике, — игнорируй. Даже если это есть в чеке.
+Чек продаж — это НЕ накладная. Структура чека:
+[№] [Наименование] [К-во] [Цена] [Сумма] [Скидка]
+
+⚠️ ГЛАВНОЕ ПРАВИЛО: бери из чека колонку «К-во» (количество штук),
+НЕ «Сумма» (рубли), НЕ «Цена», НЕ «Скидка».
+
+Пример строки чека:
+  1. Эклер шоколадный   2   150.00   300.00
+     ↑ название         ↑ К-во (берём это)   ↑ сумма (НЕ берём)
+
+Из этой строки в CSV: Эклер шоколадный = 2 (продано сегодня).
+
+═══════════════════════════════════════════
+🧩 СКЛЕЙКА НЕСКОЛЬКИХ ФОТО ОДНОГО ЧЕКА
+═══════════════════════════════════════════
+Длинный чек часто фотографируют НЕСКОЛЬКИМИ кадрами. Между кадрами есть
+ПЕРЕКРЫТИЕ — несколько строк в конце одного фото повторяются в начале
+следующего. Это делается, чтобы не потерять строки на стыке.
+
+⚠️ ГЛАВНАЯ ЗАДАЧА: склеить фото в ОДИН непрерывный список БЕЗ дублей.
+
+ПРИЗНАК ДУБЛЯ — НЕ складывать, взять ОДИН раз:
+- Одна и та же позиция идёт в КОНЦЕ фото 1 и в НАЧАЛЕ фото 2.
+- Совпадает название, К-во и цена.
+- Совпадает порядок следования соседних строк.
+
+ПРИЗНАК РЕАЛЬНОЙ ВТОРОЙ ПРОДАЖИ — складывать:
+- Позиция встречается дважды ВНУТРИ одного фото с разными № строк.
+- Между повторами есть другие строки.
+
+ПРИМЕР:
+  Фото 1 (конец):
+    Пуддинг Манго Чиа  1
+    Ром баба          13
+    Салат цезарь       4
+  Фото 2 (начало):
+    Пуддинг Манго Чиа  1   ← дубль (то же, что в конце фото 1)
+    Ром баба          13   ← дубль
+    Салат цезарь       4   ← дубль
+    Сосиска ...        3   ← новая строка
+
+  ✅ ПРАВИЛЬНО:
+    Пуддинг Манго Чиа = 1
+    Ром баба = 13
+    Салат цезарь = 4
+    Сосиска = 3
+
+  ❌ НЕПРАВИЛЬНО:
+    Ром баба = 26 (дубль посчитан дважды)
+    Салат цезарь = 8 (дубль посчитан дважды)
+
+АЛГОРИТМ СКЛЕЙКИ:
+1. Для каждого фото выпиши строки в порядке следования.
+2. Найди перекрытие: сравни конец фото N с началом фото N+1.
+3. Совпадающие строки — бери ОДИН раз (из того фото, где они полнее).
+4. Если позиция встречается в разных частях чека с разными соседями —
+   это ДВА разных пробития, К-во складывай.
+
+═══════════════════════════════════════════
+📋 ОБЪЕДИНЕНИЕ ДУБЛЕЙ ВНУТРИ ЧЕКА
+═══════════════════════════════════════════
+Если одна позиция пробита НЕСКОЛЬКО РАЗ в течение дня (не на стыке фото,
+а в разных частях чека) — К-во СКЛАДЫВАЙ.
+
+Пример:
+  Круассан классический  1  (утро)
+  Круассан классический  2  (день)
+  Круассан классический  1  (вечер)
+  → В CSV: Круассан классический = 4
+
+═══════════════════════════════════════════
+🚫 ЧТО ИГНОРИРОВАТЬ В ЧЕКЕ
+═══════════════════════════════════════════
+НЕ включай в CSV:
+- «Итого», «Всего», «К оплате», «Сумма чека»
+- «Скидка», «Скидка %», «Наценка», «НДС»
+- «Наличные», «Безнал», «Карта», «Бонусы», «Сдача»
+- время, дату, № смены, № чека, № кассы
+- ФИО кассира, ИНН, адрес, телефон, QR-код, штрих-код
+- любые служебные строки без названия товара
+
+Если строка не содержит НАЗВАНИЕ ТОВАРА — пропускай её.
+
+═══════════════════════════════════════════
+↩️ ВОЗВРАТЫ И ОТРИЦАТЕЛЬНЫЕ КОЛИЧЕСТВА
+═══════════════════════════════════════════
+Если в чеке позиция идёт со знаком минус (−1, −2) — это ВОЗВРАТ.
+Вычитай его из общего количества.
+
+Пример:
+  Эклер фисташковый   3
+  Эклер фисташковый  -1
+  → В CSV: Эклер фисташковый = 2
+
+Если после вычитания 0 или меньше — НЕ включай позицию (продано = 0).
+
+═══════════════════════════════════════════
+🗂 ГРУППИРОВКА СТРАНИЦ ПО НАКЛАДНЫМ
+═══════════════════════════════════════════
+⚠️ Файлы могут быть загружены в ПРОИЗВОЛЬНОМ порядке.
+
+ПРИЗНАКИ ПРИНАДЛЕЖНОСТИ НАКЛАДНОЙ:
+1. НОМЕР (ТОРГ-12 №…, УПД №…). Одинаковый номер = одна накладная.
+2. ДАТА + ПОСТАВЩИК. Совпадают = вероятно, одна накладная.
+3. НЕПРЕРЫВНОСТЬ № СТРОК. Страницы одной накладной имеют непрерывную
+   нумерацию (1–15, 16–30…).
+4. ПРОДОЛЖЕНИЕ ТАБЛИЦЫ. Страница без заголовка с середины списка —
+   продолжение предыдущей.
+5. ИТОГОВАЯ СТРОКА. Страница с «Итого» / «Всего» — последняя.
+
+🚫 ЗАПРЕЩЕНО: смешивать позиции из разных накладных в одну группу.
+
+═══════════════════════════════════════════
+🔍 4 ЭТАПА РАБОТЫ (СТРОГО ПО ПОРЯДКУ)
+═══════════════════════════════════════════
+
+ЭТАП 1. ГРУППИРОВКА
+[файл №] | [тип: накладная / чек] | [№ документа] | [дата] | [поставщик] | [страница N из M]
+
+ЭТАП 2. ЧЕРНОВИК ПО КАЖДОМУ ДОКУМЕНТУ
+Для накладных — строки: [№] | [название] | [кол-во]
+Для чека — строки: [№] | [название] | [К-во] | [цена]
+
+ЭТАП 3. ПРОВЕРКА
+- Сумма количеств по позициям = итогу документа? Если нет — перечитай числа.
+- Все ли строки попали в черновик?
+- Есть ли неоднозначные цифры (6/9, 1/7, 0/О)? Помечай.
+
+ЭТАП 4. СБОРКА CSV
+Объедини все документы в одну таблицу. Даты получения — из заголовков
+«Получено за ДД.ММ» или из даты накладной.
+
+═══════════════════════════════════════════
+🚫 ЖЁСТКИЙ ФИЛЬТР ПО СПРАВОЧНИКУ
+═══════════════════════════════════════════
+Включай в CSV ТОЛЬКО позиции из СПРАВОЧНИКА СРОКОВ (ниже).
+Всё остальное — напитки, кофе, блюда, услуги — ИГНОРИРУЙ.
 
 ═══════════════════════════════════════════
 ⚠️ ЧАСТЫЕ ОШИБКИ OCR
 ═══════════════════════════════════════════
-Символы: 0↔О, 1↔l, 5↔S, 8↔В, 6↔б, 3↔З
+Символы: 0↔О, 1↔l↔7, 5↔S, 8↔В, 6↔б↔9, 3↔З
 Названия: «с ветчиной» ≠ «с курицей», «с сыром» ≠ «классический»
 
+НЕОДНОЗНАЧНЫЕ ЦИФРЫ: если не можешь уверенно прочитать цифру
+(например, «6» или «9»), НЕ выбирай «наиболее вероятную».
+Добавь строку в раздел «Сомнительные» с пометкой.
+
 ═══════════════════════════════════════════
-📋 ПРАВИЛА СБОРКИ
+📋 ПРАВИЛА СБОРКИ CSV
 ═══════════════════════════════════════════
-1. Только позиции из справочника (ниже).
+1. Только позиции из справочника.
 2. Есть в накладной, нет в чеке → Продано = 0.
 3. Есть в чеке, нет в накладной → Получено = 0.
-4. Дубли в накладной → складывай.
-5. Рукописные галочки → подтверждение, но НЕ меняй печатное.
-6. Игнорируй в чеке: «Итого», «Скидка», «НДС», время, кассира.
-7. 🚫 НЕ ВЫДУМЫВАЙ. Нет на фото — не добавляй.
+4. Дубли в накладной → складывай. Разные накладные — не путай.
+5. Перекрытие фото чека → бери ОДИН раз.
+6. Дубли внутри чека с разными № строк → складывай.
+7. Возвраты (−N) → вычитай.
+8. Рукописные пометки → подтверждение, но печатное значение приоритетно.
+9. 🚫 НЕ ВЫДУМЫВАЙ. Нет в документе — не добавляй.
+
+═══════════════════════════════════════════
+🔢 ПРАВИЛА ДЛЯ ЧИСЕЛ
+═══════════════════════════════════════════
+- Количество товаров — ВСЕГДА ЦЕЛОЕ число.
+- Точки и запятые в колонке «К-во» — разделители тысяч, а не десятичные.
+  «1.234» = 1234, «1,234» = 1234.
+- НЕ добавляй знак «+», пробелы, символы валют в количества.
 
 ═══════════════════════════════════════════
 📅 ФОРМАТ ДАТ
@@ -1685,15 +2171,36 @@ function buildPrompt() {
 ═══════════════════════════════════════════
 📤 ФОРМАТ CSV
 ═══════════════════════════════════════════
-Разделитель: ;  Кодировка: UTF-8 с BOM
+Разделитель: ;
+Кодировка: UTF-8 с BOM
 Имя: audit_${checkDate}.csv
 Сортировка: по алфавиту (русский)
 Колонки: Наименование;Получено за ДД.ММ;...;Продано сегодня;Срок годности
 Кавычки: если есть ; , " → оберни в "..." и удваивай внутренние.
 
-После CSV выведи:
-1. Сомнительные строки: [название] | [что неясно] | [предположение]
-2. Проверка: строк N, из справочника N, вне N (должно быть 0), дат приходов N.
+═══════════════════════════════════════════
+📊 ПОСЛЕ CSV ВЫВЕДИ ОТЧЁТ
+═══════════════════════════════════════════
+1. ДОКУМЕНТЫ:
+   [файл №] | [тип] | [№ документа] | [дата] | [страница N из M]
+
+2. СКЛЕЙКА ЧЕКА:
+   [фото №] | [строки] | [перекрытие с предыдущим]
+   Пример:
+   - Фото 1: строки 1–15
+   - Фото 2: строки 10–25 (перекрытие 10–15, дублей отброшено: 6)
+   - Фото 3: строки 20–30 (перекрытие 20–25, дублей отброшено: 6)
+
+3. СОМНИТЕЛЬНЫЕ СТРОКИ:
+   [название] | [что неясно] | [предположение]
+
+4. ПРОВЕРКА:
+   - Накладных распознано: N
+   - Чеков распознано: N
+   - Строк в CSV: N (из справочника: N, вне: 0)
+   - Дат приходов: N
+   - Сумма по каждой накладной = её итогу? Да / Нет
+   - Сумма по чеку = итогу чека? Да / Нет
 
 ═══════════════════════════════════════════
 📚 СПРАВОЧНИК СРОКОВ (часы)
@@ -1702,11 +2209,12 @@ ${catalogList}
 
 Момент проверки: ${checkDate} ${checkTime}.
 
-Сейчас распознай файлы и выдай CSV по формату выше.`;
+Сейчас определи принадлежность файлов, распознай накладные и чеки,
+склей фото чека без дублей и выдай CSV строго по формату выше.`;
 }
 
 /* ============================================================
-   SHARE TO AI
+   SHARE
    ============================================================ */
 let shareBusy = false;
 async function shareToAI() {
@@ -1963,6 +2471,42 @@ function bindUI() {
 }
 
 /* ============================================================
+   PRODUCT MODAL BINDING
+   ============================================================ */
+function bindProductModal() {
+  const cancel = $('pmCancel'); if (cancel) cancel.onclick = cancelProduct;
+  const commit = $('pmCommit'); if (commit) commit.onclick = commitProduct;
+  const stock = $('pmStock'); if (stock) stock.addEventListener('keydown', productKey);
+  const sales = $('pmSales'); if (sales) sales.addEventListener('keydown', productKey);
+
+  document.querySelectorAll('.pf-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = $(btn.dataset.target);
+      if (!target) return;
+      const step = Number(btn.dataset.step) || 1;
+      const cur = target.value === '' ? 0 : Number(target.value);
+      const next = Math.max(0, Math.min(MAX_NUM, (isFinite(cur) ? cur : 0) + step));
+      target.value = next;
+      target.focus();
+      target.select();
+    });
+  });
+
+  const modal = $('productModal');
+  if (modal) {
+    modal.addEventListener('click', e => {
+      if (e.target === modal) cancelProduct();
+    });
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !$('productModal').classList.contains('hidden')) {
+      cancelProduct();
+    }
+  });
+}
+
+/* ============================================================
    LOGO FALLBACK
    ============================================================ */
 function initLogoFallback() {
@@ -2021,11 +2565,12 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v5.1 · clean · catalog:', PRODUCTS.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v5.3 · catalog:', PRODUCTS.length);
 }
 
 PRODUCTS = loadCatalog();
 bindUI();
+bindProductModal();
 init();
 </script>
 </body>
