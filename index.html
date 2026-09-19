@@ -21,6 +21,7 @@
   --blue:#0a84ff;--blue-soft:rgba(10,132,255,.14);--blue-row:rgba(10,132,255,.10);--blue-row-hover:rgba(10,132,255,.18);
   --r-lg:20px;--r-md:14px;--r-sm:10px;
   --spring:cubic-bezier(.34,1.56,.64,1);
+  --header-h: 70px;
 }
 @media (prefers-color-scheme:dark){
   :root{
@@ -51,14 +52,14 @@ body.modal-open{
   left:0;
   right:0;
 }
-.header-sticky{
-  position:sticky;
-  top:0;
-  z-index:100;
-  background:var(--bg);
-}
+
+/* FIXED HEADER — не sticky, чтобы Safari PWA не блюрил */
 .app-header{
-  position:relative;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:100;
   padding:12px 16px;
   padding-top:calc(12px + env(safe-area-inset-top));
   background:var(--bg);
@@ -86,7 +87,13 @@ body.modal-open{
   opacity:0;transition:opacity .25s;white-space:nowrap;flex-shrink:0;
 }
 .autosave-badge.show{opacity:1}
-main{max-width:1100px;margin:auto;padding:14px 14px 80px}
+
+main{
+  max-width:1100px;margin:auto;
+  padding:14px 14px 80px;
+  padding-top:calc(var(--header-h) + env(safe-area-inset-top));
+}
+
 .card{
   background:var(--bg-card);border-radius:var(--r-lg);padding:18px;
   margin-bottom:12px;border:1px solid var(--separator);
@@ -504,11 +511,12 @@ pre.code{
 .save-card .save-btn{min-height:48px;margin-bottom:8px}
 .save-card .save-btn:last-of-type{margin-bottom:0}
 @media (min-width:641px){
+  :root{--header-h: 78px}
   .app-header{padding:14px 20px;padding-top:calc(14px + env(safe-area-inset-top))}
   .header-text h1{font-size:19px}
   .header-text .sub{font-size:12.5px;margin-top:3px}
   .logo{width:46px;height:46px}
-  main{padding:20px 20px 60px}
+  main{padding:20px 20px 60px;padding-top:calc(var(--header-h) + env(safe-area-inset-top))}
   .card{padding:22px;border-radius:22px}
   input[type=text],input[type=number],textarea{padding:11px 14px;font-size:15px;min-height:44px}
   textarea{font-size:13px;min-height:200px}
@@ -519,16 +527,18 @@ pre.code{
 }
 @media (max-width:640px){.table-scroll{max-height:55vh}}
 @media (max-width:400px){
+  :root{--header-h: 66px}
   .card{padding:14px;border-radius:16px}
   .card h2{font-size:14px}
   .logo{width:36px;height:36px}
   .header-text h1{font-size:15px}
   .header-text .sub{font-size:10.5px}
-  main{padding:10px 10px 80px}
+  main{padding:10px 10px 80px;padding-top:calc(var(--header-h) + env(safe-area-inset-top))}
   .action-buttons{gap:8px}
 }
 @media (max-width:360px){
   .header-text .sub{display:none}
+  :root{--header-h: 60px}
   .auto-datetime{grid-template-columns:1fr}
 }
 .cat-row{
@@ -549,16 +559,14 @@ pre.code{
 </head>
 <body>
 
-<div class="header-sticky">
-  <div class="app-header">
-    <div class="header-inner">
-      <img src="logo.png" alt="French Bakery" class="logo" id="appLogo">
-      <div class="header-text">
-        <h1>French Bakery Аудит</h1>
-        <div class="sub">Накладные · Чек продаж · FIFO · Списание 22:00 · Excel</div>
-      </div>
-      <div id="autosaveBadge" class="autosave-badge">💾 Сохранено</div>
+<div class="app-header">
+  <div class="header-inner">
+    <img src="logo.png" alt="French Bakery" class="logo" id="appLogo">
+    <div class="header-text">
+      <h1>French Bakery Аудит</h1>
+      <div class="sub">Накладные · Чек продаж · FIFO · Списание 22:00 · Excel</div>
     </div>
+    <div id="autosaveBadge" class="autosave-badge">💾 Сохранено</div>
   </div>
 </div>
 
@@ -692,7 +700,7 @@ pre.code{
     <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v6.0
+      French Bakery Аудит · v6.1
     </div>
   </div>
 
@@ -2625,7 +2633,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v6.0 · catalog:', PRODUCTS.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v6.1 · catalog:', PRODUCTS.length);
 }
 
 PRODUCTS = loadCatalog();
