@@ -55,6 +55,13 @@ header{
   position:sticky;top:0;z-index:100;
   padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top));
   background:var(--bg);border-bottom:1px solid var(--separator);
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+  isolation:isolate;
+}
+header::before{
+  content:'';position:absolute;inset:0;
+  background:var(--bg);z-index:-1;pointer-events:none;
 }
 .header-inner{max-width:1100px;margin:auto;display:flex;align-items:center;gap:12px}
 .logo{
@@ -406,7 +413,6 @@ button.busy::before{
 .pf-cancel{background:var(--bg-elev-2);color:var(--text);border:1.5px solid var(--separator-opaque)!important}
 .pf-commit{background:#0a84ff;color:#fff}
 
-/* Модалка справочника — flex-колонка с фиксированной высотой */
 #catalogModalContent{
   display:flex;flex-direction:column;
   max-height:88vh;overflow:hidden;
@@ -681,7 +687,7 @@ pre.code{
     <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v5.4
+      French Bakery Аудит · v5.5
     </div>
   </div>
 
@@ -803,7 +809,7 @@ let _modalCount = 0;
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
 
 /* ============================================================
-   МОДАЛКИ — блокировка скролла фона
+   МОДАЛКИ
    ============================================================ */
 function openModal(id) {
   const el = $(id);
@@ -2615,7 +2621,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v5.4 · catalog:', PRODUCTS.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v5.5 · catalog:', PRODUCTS.length);
 }
 
 PRODUCTS = loadCatalog();
