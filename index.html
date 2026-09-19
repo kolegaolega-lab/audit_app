@@ -57,12 +57,14 @@ body.modal-open{
   z-index:100;
   background:var(--bg);
 }
-header{
+.app-header{
   position:relative;
   padding:12px 16px;
   padding-top:calc(12px + env(safe-area-inset-top));
   background:var(--bg);
   border-bottom:1px solid var(--separator);
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
 }
 .header-inner{max-width:1100px;margin:auto;display:flex;align-items:center;gap:12px}
 .logo{
@@ -502,7 +504,7 @@ pre.code{
 .save-card .save-btn{min-height:48px;margin-bottom:8px}
 .save-card .save-btn:last-of-type{margin-bottom:0}
 @media (min-width:641px){
-  header{padding:14px 20px;padding-top:calc(14px + env(safe-area-inset-top))}
+  .app-header{padding:14px 20px;padding-top:calc(14px + env(safe-area-inset-top))}
   .header-text h1{font-size:19px}
   .header-text .sub{font-size:12.5px;margin-top:3px}
   .logo{width:46px;height:46px}
@@ -548,7 +550,7 @@ pre.code{
 <body>
 
 <div class="header-sticky">
-  <header>
+  <div class="app-header">
     <div class="header-inner">
       <img src="logo.png" alt="French Bakery" class="logo" id="appLogo">
       <div class="header-text">
@@ -557,7 +559,7 @@ pre.code{
       </div>
       <div id="autosaveBadge" class="autosave-badge">💾 Сохранено</div>
     </div>
-  </header>
+  </div>
 </div>
 
 <main>
@@ -690,7 +692,7 @@ pre.code{
     <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v5.6
+      French Bakery Аудит · v6.0
     </div>
   </div>
 
@@ -805,7 +807,6 @@ let _timeUpdater = null;
 let openIdx = -1;
 let openTr = null;
 let openSnapshot = null;
-
 let _scrollY = 0;
 let _modalCount = 0;
 
@@ -2624,7 +2625,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v5.6 · catalog:', PRODUCTS.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v6.0 · catalog:', PRODUCTS.length);
 }
 
 PRODUCTS = loadCatalog();
