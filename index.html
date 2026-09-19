@@ -3,251 +3,2551 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Тест блюра">
-<title>Тест блюра в PWA</title>
+<meta name="apple-mobile-web-app-title" content="French Bakery Аудит">
+<title>French Bakery Аудит</title>
 <style>
 :root{
-  --bg:#000000;
-  --bg-card:#1c1c1e;
-  --text:#ffffff;
-  --text-secondary:rgba(255,255,255,.55);
-  --separator:rgba(255,255,255,.10);
+  --bg:#f5f5f7;--bg-card:#ffffff;--bg-elev-2:#f2f2f7;--bg-input:#f2f2f7;
+  --bg-hover:rgba(0,0,0,.04);--separator:rgba(0,0,0,.08);--separator-opaque:#d1d1d6;
+  --text:#000000;--text-secondary:rgba(0,0,0,.55);--text-tertiary:rgba(0,0,0,.3);
+  --accent:#0a84ff;--accent-soft:rgba(10,132,255,.12);
+  --green:#34c759;--green-soft:rgba(52,199,89,.14);--green-row:rgba(52,199,89,.10);--green-row-hover:rgba(52,199,89,.18);
+  --orange:#ff9500;--orange-soft:rgba(255,149,0,.14);--orange-row:rgba(255,149,0,.12);--orange-row-hover:rgba(255,149,0,.20);
+  --red:#ff3b30;--red-soft:rgba(255,59,48,.14);--red-row:rgba(255,59,48,.12);--red-row-hover:rgba(255,59,48,.22);
+  --blue:#0a84ff;--blue-soft:rgba(10,132,255,.14);--blue-row:rgba(10,132,255,.10);--blue-row-hover:rgba(10,132,255,.18);
+  --r-lg:20px;--r-md:14px;--r-sm:10px;
+  --spring:cubic-bezier(.34,1.56,.64,1);
+  --header-h: 70px;
 }
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--text)}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#000000;--bg-card:#1c1c1e;--bg-elev-2:#2c2c2e;--bg-input:#2c2c2e;
+    --bg-hover:rgba(255,255,255,.06);--separator:rgba(255,255,255,.10);--separator-opaque:#38383a;
+    --text:#ffffff;--text-secondary:rgba(255,255,255,.55);--text-tertiary:rgba(255,255,255,.3);
+    --accent:#0a84ff;--accent-soft:rgba(10,132,255,.20);
+    --green:#30d158;--green-soft:rgba(48,209,88,.20);--green-row:rgba(48,209,88,.14);--green-row-hover:rgba(48,209,88,.22);
+    --orange:#ff9f0a;--orange-soft:rgba(255,159,10,.20);--orange-row:rgba(255,159,10,.16);--orange-row-hover:rgba(255,159,10,.24);
+    --red:#ff453a;--red-soft:rgba(255,69,58,.20);--red-row:rgba(255,69,58,.16);--red-row-hover:rgba(255,69,58,.26);
+    --blue:#0a84ff;--blue-soft:rgba(10,132,255,.20);--blue-row:rgba(10,132,255,.14);--blue-row-hover:rgba(10,132,255,.22);
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;
-  font-size:15px;line-height:1.45;
-  -webkit-font-smoothing:antialiased;
-  -webkit-text-size-adjust:100%;
-  overflow-x:hidden;
+  background:var(--bg);color:var(--text);font-size:15px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
+  padding-bottom:env(safe-area-inset-bottom);overflow-x:hidden;
 }
-
-/* ---------- ОБЩИЙ ПЕРЕКЛЮЧАТЕЛЬ ---------- */
-.tabs{
-  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-  z-index:2000;
-  display:flex;gap:6px;
-  background:rgba(255,255,255,.1);
-  padding:6px;border-radius:999px;
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-}
-.tabs button{
-  border:0;border-radius:999px;
-  padding:10px 16px;
-  font-size:14px;font-weight:700;
-  background:transparent;color:#fff;
-  font-family:inherit;cursor:pointer;
-  min-width:44px;
-}
-.tabs button.active{
-  background:#0a84ff;color:#fff;
-}
-
-/* ---------- КОНТЕНТ ПОД ШАПКОЙ ---------- */
-.content{
-  padding:20px 20px 120px;
-  padding-top:calc(90px + env(safe-area-inset-top));
-}
-.content h1{font-size:22px;margin:0 0 8px;font-weight:800}
-.content p{color:var(--text-secondary);margin:0 0 20px;font-size:14px}
-.block{
-  background:var(--bg-card);
-  border:1px solid var(--separator);
-  border-radius:16px;
-  padding:20px;margin-bottom:14px;
-  min-height:120px;
-}
-.block h2{font-size:16px;margin:0 0 6px;font-weight:700}
-.block .desc{font-size:13px;color:var(--text-secondary);line-height:1.5}
-
-/* ============================================================
-   ВАРИАНТ A — fixed, фон --bg
-   ============================================================ */
-.header-a{
+body.modal-open{
+  overflow:hidden;
   position:fixed;
-  top:0;left:0;right:0;
+  width:100%;
+  height:100%;
+  top:0;
+  left:0;
+  right:0;
+}
+.app-header{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
   z-index:100;
   padding:12px 16px;
   padding-top:calc(12px + env(safe-area-inset-top));
   background:var(--bg);
   border-bottom:1px solid var(--separator);
-}
-.header-a .logo{
-  width:42px;height:42px;border-radius:50%;
-  background:#FFE600;flex:0 0 auto;
-  display:inline-flex;align-items:center;justify-content:center;
-  font-weight:800;color:#000;font-size:14px;
-}
-.header-a .inner{
-  display:flex;align-items:center;gap:12px;
-  max-width:600px;margin:auto;
-}
-.header-a .text h1{font-size:17px;margin:0;font-weight:700;line-height:1.2}
-.header-a .text .sub{font-size:12px;color:var(--text-secondary);margin-top:2px}
-
-/* ============================================================
-   ВАРИАНТ B — fixed + непрозрачная «заглушка» сверху
-   ============================================================ */
-.header-b-wrap{
-  position:fixed;
-  top:0;left:0;right:0;
-  z-index:100;
-}
-.header-b-cap{
-  /* непрозрачная заглушка в зоне статус-бара */
-  height:env(safe-area-inset-top);
-  background:#000000;
   -webkit-backdrop-filter:none;
   backdrop-filter:none;
 }
-.header-b{
-  padding:12px 16px;
-  background:var(--bg);
-  border-bottom:1px solid var(--separator);
-  -webkit-backdrop-filter:none;
-  backdrop-filter:none;
+.header-inner{max-width:1100px;margin:auto;display:flex;align-items:center;gap:12px}
+.logo{
+  width:42px;height:42px;border-radius:50%;background:#FFE600;object-fit:cover;
+  flex:0 0 auto;display:block;border:1px solid var(--separator);
 }
-.header-b .logo{
-  width:42px;height:42px;border-radius:50%;
-  background:#FFE600;flex:0 0 auto;
+.header-text{flex:1;min-width:0}
+.header-text h1{
+  font-size:17px;margin:0;font-weight:700;letter-spacing:-.3px;line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.header-text .sub{
+  font-size:12px;color:var(--text-secondary);margin-top:2px;line-height:1.3;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.autosave-badge{
+  font-size:11px;padding:4px 10px;border-radius:999px;
+  background:var(--green-soft);color:var(--green);font-weight:600;
+  opacity:0;transition:opacity .25s;white-space:nowrap;flex-shrink:0;
+}
+.autosave-badge.show{opacity:1}
+main{
+  max-width:1100px;margin:auto;
+  padding:14px 14px 80px;
+  padding-top:calc(var(--header-h) + env(safe-area-inset-top));
+}
+.card{
+  background:var(--bg-card);border-radius:var(--r-lg);padding:18px;
+  margin-bottom:12px;border:1px solid var(--separator);
+}
+.card h2{
+  font-size:15px;font-weight:700;margin:0 0 12px;
+  display:flex;align-items:center;gap:8px;letter-spacing:-.2px;
+}
+.card h2 .icon{
+  width:26px;height:26px;border-radius:7px;background:var(--accent-soft);color:var(--accent);
+  display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:0 0 auto;
+}
+.card .hint{font-size:12.5px;color:var(--text-secondary);margin:0 0 12px;line-height:1.5}
+.card .hint b{color:var(--text);font-weight:600}
+label{
+  display:block;font-size:11px;font-weight:600;color:var(--text-secondary);
+  margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;
+}
+input,button,select,textarea{font:inherit;outline:none;font-family:inherit}
+input[type=text],input[type=number],textarea{
+  width:100%;padding:12px 14px;border:1.5px solid var(--separator);border-radius:var(--r-sm);
+  background:var(--bg-input);color:var(--text);font-size:16px;
+  transition:border-color .15s,background .15s;-webkit-appearance:none;appearance:none;min-height:46px;
+}
+input:focus,textarea:focus{border-color:var(--accent);background:var(--bg-card)}
+textarea{
+  font-size:13px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  line-height:1.5;min-height:160px;resize:vertical;
+}
+input::placeholder,textarea::placeholder{color:var(--text-tertiary)}
+.auto-datetime{display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:10px;align-items:end}
+@media (max-width:640px){
+  .auto-datetime{grid-template-columns:1fr 1fr}
+  .auto-datetime .point-field{grid-column:1 / -1}
+}
+.auto-field{position:relative}
+.auto-value{
+  display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--bg-input);
+  border:1.5px solid var(--separator);border-radius:var(--r-sm);min-height:46px;
+  font-size:16px;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums;
+}
+.auto-value .icon{font-size:15px;flex:0 0 auto}
+.auto-value .value{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.auto-value .live-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--green);
+  animation:pulse 2s infinite;flex:0 0 auto;
+}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(52,199,89,.5)}
+  70%{box-shadow:0 0 0 6px rgba(52,199,89,0)}
+  100%{box-shadow:0 0 0 0 rgba(52,199,89,0)}
+}
+button{
+  border:0;border-radius:var(--r-sm);padding:12px 18px;background:var(--bg-elev-2);
+  color:var(--text);font-weight:600;font-size:15px;cursor:pointer;
+  transition:transform .15s var(--spring),opacity .15s,background .15s;
+  white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:46px;user-select:none;-webkit-user-select:none;position:relative;overflow:hidden;
+}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+button.block{width:100%}
+button.primary{background:#0a84ff;color:#fff}
+button.success{background:#10b981;color:#fff}
+button.info{background:#0ea5e9;color:#fff}
+button.secondary{background:var(--bg-elev-2);color:var(--text);border:1.5px solid var(--separator-opaque)}
+button.busy{pointer-events:none;opacity:.7}
+button.busy::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
+  animation:busy 1s linear infinite;
+}
+@keyframes busy{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.status{
+  margin-top:10px;font-size:13px;padding:12px 14px;background:var(--bg-input);
+  border-radius:var(--r-sm);border:1px solid var(--separator);line-height:1.5;display:none;
+}
+.status.show{display:block}
+.status.ok{background:var(--green-soft);border-color:transparent;color:var(--green);font-weight:600}
+.status.err{background:var(--red-soft);border-color:transparent;color:var(--red);font-weight:600}
+.status.info{background:var(--blue-soft);border-color:transparent;color:var(--accent);font-weight:600}
+.result-meta{
+  display:flex;flex-wrap:wrap;gap:12px 18px;font-size:12px;color:var(--text-secondary);
+  padding:10px 12px;margin-bottom:12px;background:var(--bg-input);border-radius:var(--r-sm);align-items:center;
+}
+.result-meta .item{display:inline-flex;align-items:center;gap:5px}
+.result-meta .item b{color:var(--text);font-weight:700}
+.result-meta .item.empty b{color:var(--text-tertiary)}
+.table-wrap{
+  border-radius:var(--r-md);border:1px solid var(--separator);
+  background:var(--bg-card);overflow:hidden;margin-bottom:4px;
+}
+.table-scroll{
+  max-height:65vh;overflow:auto;-webkit-overflow-scrolling:touch;
+  background:var(--bg-card);position:relative;
+  scrollbar-width:thin;scrollbar-color:var(--separator-opaque) transparent;
+}
+.table-scroll::-webkit-scrollbar{width:8px;height:8px}
+.table-scroll::-webkit-scrollbar-track{background:transparent}
+.table-scroll::-webkit-scrollbar-thumb{background:var(--separator-opaque);border-radius:4px}
+.table-scroll table.table-body{
+  table-layout:fixed;border-collapse:separate;border-spacing:0;
+  font-size:13px;width:max-content;min-width:100%;
+}
+.table-scroll thead th{
+  position:sticky;top:0;z-index:20;
+  font-size:10.5px;font-weight:700;color:var(--text-secondary);
+  text-transform:uppercase;letter-spacing:.04em;
+  background:var(--bg-card);padding:8px 6px;text-align:center;vertical-align:middle;
+  line-height:1.25;white-space:normal;word-wrap:break-word;overflow-wrap:anywhere;
+  border-bottom:1px solid var(--separator);transform:translateZ(0);
+}
+.table-scroll thead th.col-name{text-align:left;padding-left:14px;padding-right:8px}
+.table-scroll thead th:first-child{
+  position:sticky;left:0;z-index:25;background:var(--bg-card);
+  transform:translateZ(0);isolation:isolate;
+}
+.table-scroll thead th:first-child::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:1px;
+  background:var(--separator);pointer-events:none;
+}
+.table-scroll tbody td{
+  padding:8px 6px;border-bottom:1px solid var(--separator);
+  vertical-align:middle;white-space:nowrap;line-height:1.2;
+  background:var(--bg-card);text-align:center;
+}
+.table-scroll tbody td:first-child{
+  position:sticky;left:0;z-index:15;background:var(--bg-card);
+  text-align:left;white-space:normal;word-break:break-word;
+  padding:8px 10px 8px 14px;transform:translateZ(0);isolation:isolate;
+  cursor:pointer;
+}
+.table-scroll tbody td:first-child::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:1px;
+  background:var(--separator);pointer-events:none;
+}
+.table-scroll tbody tr:last-child td{border-bottom:none}
+.table-scroll tbody tr{cursor:pointer}
+.table-scroll tbody tr.row-fresh td{background:var(--green-row)}
+.table-scroll tbody tr.row-warn td{background:var(--orange-row)}
+.table-scroll tbody tr.row-danger td{background:var(--red-row)}
+.table-scroll tbody tr.row-info td{background:var(--blue-row)}
+.table-scroll tbody tr.row-unknown td{background:var(--bg-card)}
+.table-scroll tbody tr.row-fresh td:first-child{
+  background:linear-gradient(var(--green-row),var(--green-row)),var(--bg-card);
+}
+.table-scroll tbody tr.row-warn td:first-child{
+  background:linear-gradient(var(--orange-row),var(--orange-row)),var(--bg-card);
+}
+.table-scroll tbody tr.row-danger td:first-child{
+  background:linear-gradient(var(--red-row),var(--red-row)),var(--bg-card);
+}
+.table-scroll tbody tr.row-info td:first-child{
+  background:linear-gradient(var(--blue-row),var(--blue-row)),var(--bg-card);
+}
+.table-scroll tbody tr.row-unknown td:first-child{background:var(--bg-card)}
+.table-scroll tbody tr:hover td:first-child{
+  background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card);
+}
+.table-scroll tbody tr.row-fresh:hover td:first-child{
+  background:linear-gradient(var(--green-row-hover),var(--green-row-hover)),var(--bg-card);
+}
+.table-scroll tbody tr.row-warn:hover td:first-child{
+  background:linear-gradient(var(--orange-row-hover),var(--orange-row-hover)),var(--bg-card);
+}
+.table-scroll tbody tr.row-danger:hover td:first-child{
+  background:linear-gradient(var(--red-row-hover),var(--red-row-hover)),var(--bg-card);
+}
+.table-scroll tbody tr.row-info:hover td:first-child{
+  background:linear-gradient(var(--blue-row-hover),var(--blue-row-hover)),var(--bg-card);
+}
+.table-scroll tbody tr.row-unknown:hover td:first-child{
+  background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card);
+}
+.table-scroll tbody tr.row-fresh:hover td{background:var(--green-row-hover)}
+.table-scroll tbody tr.row-warn:hover td{background:var(--orange-row-hover)}
+.table-scroll tbody tr.row-danger:hover td{background:var(--red-row-hover)}
+.table-scroll tbody tr.row-info:hover td{background:var(--blue-row-hover)}
+.table-scroll tbody tr.row-unknown:hover td{background:var(--bg-hover)}
+.table-scroll tbody tr.row-fresh td:first-child::before,
+.table-scroll tbody tr.row-warn td:first-child::before,
+.table-scroll tbody tr.row-danger td:first-child::before,
+.table-scroll tbody tr.row-info td:first-child::before{
+  content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:2px;
+}
+.table-scroll tbody tr.row-fresh td:first-child::before{background:var(--green)}
+.table-scroll tbody tr.row-warn td:first-child::before{background:var(--orange)}
+.table-scroll tbody tr.row-danger td:first-child::before{background:var(--red)}
+.table-scroll tbody tr.row-info td:first-child::before{background:var(--blue)}
+.name-cell{display:flex;align-items:flex-start;gap:8px;min-width:0}
+.name-cell .name-text{flex:1 1 auto;min-width:0;word-break:break-word}
+.name-cell .edit-hint{flex:0 0 auto;font-size:14px;opacity:.35;margin-top:1px;display:none}
+@media (max-width:640px){.name-cell .edit-hint{display:inline-block}}
+.num{
+  width:60px;min-width:60px;max-width:60px;height:38px;padding:0 4px;
+  border:0;border-radius:10px;font-size:15px;text-align:center;
+  background:var(--bg-input);color:var(--text);font-weight:600;
+  -webkit-appearance:none;appearance:none;line-height:38px;font-family:inherit;
+  transition:box-shadow .15s,background .15s;margin:0;display:inline-block;vertical-align:middle;
+}
+.num:focus{outline:none;box-shadow:0 0 0 2px var(--accent);background:var(--bg-card)}
+.num::-webkit-outer-spin-button,
+.num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.num[type=number]{-moz-appearance:textfield}
+.num-disabled{
   display:inline-flex;align-items:center;justify-content:center;
-  font-weight:800;color:#000;font-size:14px;
+  width:60px;min-width:60px;height:38px;
+  color:var(--text-tertiary);font-weight:600;font-size:15px;
+  user-select:none;vertical-align:middle;
 }
-.header-b .inner{
-  display:flex;align-items:center;gap:12px;
-  max-width:600px;margin:auto;
+.income-cell{position:relative;padding:8px 4px !important;text-align:center}
+.income-cell.edited .num{background:var(--orange-soft);box-shadow:0 0 0 1.5px var(--orange)}
+.income-cell .reset-btn{
+  position:absolute;top:0;right:4px;width:20px;height:20px;padding:0;
+  border-radius:50%;background:var(--orange);color:#fff;font-size:11px;font-weight:800;
+  display:none;z-index:3;min-height:auto;border:2px solid var(--bg-card);
+  line-height:1;align-items:center;justify-content:center;
 }
-.header-b .text h1{font-size:17px;margin:0;font-weight:700;line-height:1.2}
-.header-b .text .sub{font-size:12px;color:var(--text-secondary);margin-top:2px}
-
-/* ============================================================
-   ВАРИАНТ C — sticky + непрозрачный фон
-   ============================================================ */
-.header-c-wrap{
-  position:sticky;
-  top:0;z-index:100;
-  background:var(--bg);
+.income-cell.edited .reset-btn{display:inline-flex}
+.calc-cell{text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.calc-cell.zero{color:var(--text-tertiary)}
+.calc-cell[data-role="expiredOnShelf"].positive,
+.calc-cell[data-role="soldExpired"].positive{color:var(--red)}
+@media (max-width:640px){
+  .table-scroll thead th:nth-child(2),
+  .table-scroll tbody td:nth-child(2){
+    position:sticky;left:160px;z-index:14;
+    transform:translateZ(0);isolation:isolate;
+    box-shadow:4px 0 8px -4px rgba(0,0,0,.06);
+  }
+  .table-scroll thead th:nth-child(2){z-index:24;background:var(--bg-card)}
+  .table-scroll tbody tr.row-fresh td:nth-child(2){
+    background:linear-gradient(var(--green-row),var(--green-row)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-warn td:nth-child(2){
+    background:linear-gradient(var(--orange-row),var(--orange-row)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-danger td:nth-child(2){
+    background:linear-gradient(var(--red-row),var(--red-row)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-info td:nth-child(2){
+    background:linear-gradient(var(--blue-row),var(--blue-row)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-unknown td:nth-child(2){background:var(--bg-card)}
+  .table-scroll tbody tr:hover td:nth-child(2){
+    background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-fresh:hover td:nth-child(2){
+    background:linear-gradient(var(--green-row-hover),var(--green-row-hover)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-warn:hover td:nth-child(2){
+    background:linear-gradient(var(--orange-row-hover),var(--orange-row-hover)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-danger:hover td:nth-child(2){
+    background:linear-gradient(var(--red-row-hover),var(--red-row-hover)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-info:hover td:nth-child(2){
+    background:linear-gradient(var(--blue-row-hover),var(--blue-row-hover)),var(--bg-card);
+  }
+  .table-scroll tbody tr.row-unknown:hover td:nth-child(2){
+    background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card);
+  }
 }
-.header-c{
-  padding:12px 16px;
-  padding-top:calc(12px + env(safe-area-inset-top));
-  background:var(--bg);
-  border-bottom:1px solid var(--separator);
+.modal{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,.5);
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
 }
-.header-c .logo{
-  width:42px;height:42px;border-radius:50%;
-  background:#FFE600;flex:0 0 auto;
-  display:inline-flex;align-items:center;justify-content:center;
-  font-weight:800;color:#000;font-size:14px;
+.modal.hidden{display:none}
+.modal-content{
+  background:var(--bg-card);border-radius:16px;
+  width:100%;max-width:520px;max-height:88vh;overflow:auto;
+  padding:24px;animation:modalIn .2s cubic-bezier(.16,1,.3,1);
+  -webkit-overflow-scrolling:touch;
 }
-.header-c .inner{
-  display:flex;align-items:center;gap:12px;
-  max-width:600px;margin:auto;
+@keyframes modalIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-handle{display:none}
+.modal-content h3{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.25}
+.modal-content .product-shelf{font-size:12px;color:var(--text-secondary);margin-bottom:14px}
+.product-form{display:flex;flex-direction:column;gap:14px}
+.pf-section-title{
+  font-size:10.5px;font-weight:700;color:var(--text-secondary);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;
 }
-.header-c .text h1{font-size:17px;margin:0;font-weight:700;line-height:1.2}
-.header-c .text .sub{font-size:12px;color:var(--text-secondary);margin-top:2px}
-
-.hidden{display:none !important}
+.pf-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
+.pf-row-dates{display:flex;flex-direction:column;gap:8px}
+.pf-date-row{display:grid;grid-template-columns:70px 1fr;gap:8px;align-items:center}
+.pf-date-label{font-size:13px;font-weight:600;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+.pf-num{
+  width:100%;height:44px;padding:0 12px;border:0;border-radius:12px;
+  background:var(--bg-input);color:var(--text);
+  font-size:17px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;
+  -webkit-appearance:none;appearance:none;font-family:inherit;line-height:44px;
+  transition:box-shadow .15s,background .15s;
+}
+.pf-num:focus{outline:none;box-shadow:0 0 0 2.5px var(--accent);background:var(--bg-card)}
+.pf-num::-webkit-outer-spin-button,
+.pf-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.pf-num[type=number]{-moz-appearance:textfield}
+.pf-btn{
+  width:44px;height:44px;padding:0;border-radius:12px;
+  background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator);
+  font-size:18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;
+  user-select:none;-webkit-user-select:none;cursor:pointer;
+  transition:transform .12s var(--spring),background .12s;
+}
+.pf-btn:active{transform:scale(.94);background:var(--bg-hover)}
+.pf-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.pf-actions button{
+  min-height:44px;border:0;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;font-family:inherit;
+  transition:transform .12s var(--spring),background .12s;
+}
+.pf-actions button:active{transform:scale(.97)}
+.pf-cancel{background:var(--bg-elev-2);color:var(--text);border:1.5px solid var(--separator-opaque)!important}
+.pf-commit{background:#0a84ff;color:#fff}
+#catalogModalContent{
+  display:flex;flex-direction:column;
+  max-height:88vh;overflow:hidden;
+}
+#catalogList{
+  flex:1 1 auto;min-height:0;
+  max-height:none;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  margin-bottom:14px;
+}
+@media (max-width:640px){
+  .modal{align-items:flex-end;padding:0}
+  .modal-content{
+    border-radius:20px 20px 0 0;max-width:none;max-height:92vh;padding:20px;
+    padding-bottom:calc(20px + env(safe-area-inset-bottom));
+    animation:slideUp .3s cubic-bezier(.16,1,.3,1);
+  }
+  #catalogModalContent{max-height:92vh}
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .modal-handle{
+    display:block;width:40px;height:4px;
+    background:var(--separator-opaque);border-radius:2px;margin:0 auto 16px;
+  }
+  .modal-content h3{font-size:19px}
+  .modal-content .product-shelf{font-size:13px;margin-bottom:18px}
+  .product-form{gap:18px}
+  .pf-section-title{font-size:11px;margin-bottom:8px}
+  .pf-row{gap:10px}
+  .pf-row-dates{gap:10px}
+  .pf-date-row{grid-template-columns:80px 1fr;gap:10px}
+  .pf-date-label{font-size:14px}
+  .pf-num{height:54px;font-size:22px;line-height:54px;border-radius:14px;padding:0 14px}
+  .pf-btn{width:54px;height:54px;font-size:22px;border-radius:14px}
+  .pf-actions{gap:10px;margin-top:8px}
+  .pf-actions button{min-height:54px;font-size:16px;border-radius:14px}
+}
+.legend{
+  display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:14px;padding:12px 14px;
+  background:var(--bg-input);border-radius:var(--r-sm);font-size:12px;color:var(--text-secondary);
+}
+.legend-item{display:inline-flex;align-items:center;gap:5px}
+.legend-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.legend-dot.fresh{background:var(--green)}
+.legend-dot.warn{background:var(--orange)}
+.legend-dot.danger{background:var(--red)}
+.legend-dot.unknown{background:var(--text-tertiary)}
+.legend-dot.info{background:var(--blue)}
+.legend-dot.edited{background:var(--orange);border:1px solid var(--orange)}
+.steps-hint{
+  background:var(--bg-input);border:1px solid var(--separator);border-radius:var(--r-sm);
+  padding:12px 14px;font-size:13px;line-height:1.55;color:var(--text-secondary);margin-bottom:12px;
+}
+.steps-hint b{color:var(--text);font-weight:700}
+.steps-hint ol{margin:5px 0 0 18px;padding:0}
+.steps-hint li{margin-bottom:4px}
+.ai-help{
+  padding:12px 14px;border-radius:var(--r-sm);background:var(--bg-input);
+  border:1px solid var(--separator);font-size:12.5px;line-height:1.5;color:var(--text-secondary);
+}
+.ai-help b{color:var(--text)}
+.action-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+@media (max-width:500px){.action-buttons{grid-template-columns:1fr}}
+.photo-queue{display:grid;gap:8px;margin-top:10px}
+.photo-item{
+  display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;
+  padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input);
+}
+.photo-thumb{width:48px;height:48px;object-fit:cover;border-radius:10px;background:var(--bg-elev-2)}
+.photo-meta{min-width:0}
+.photo-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.photo-type{font-size:11px;color:var(--text-secondary);margin-top:2px}
+.photo-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.photo-actions button{min-height:36px;padding:6px 12px;font-size:12.5px}
+pre.code{
+  background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm);
+  font-size:11.5px;line-height:1.55;overflow:auto;max-height:60vh;
+  white-space:pre-wrap;word-break:break-word;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #1e293b;
+}
+.save-card{padding:18px}
+.save-card .save-btn{min-height:48px;margin-bottom:8px}
+.save-card .save-btn:last-of-type{margin-bottom:0}
+@media (min-width:641px){
+  :root{--header-h: 78px}
+  .app-header{padding:14px 20px;padding-top:calc(14px + env(safe-area-inset-top))}
+  .header-text h1{font-size:19px}
+  .header-text .sub{font-size:12.5px;margin-top:3px}
+  .logo{width:46px;height:46px}
+  main{padding:20px 20px 60px;padding-top:calc(var(--header-h) + env(safe-area-inset-top))}
+  .card{padding:22px;border-radius:22px}
+  input[type=text],input[type=number],textarea{padding:11px 14px;font-size:15px;min-height:44px}
+  textarea{font-size:13px;min-height:200px}
+  button{min-height:44px;padding:11px 18px}
+  .table-scroll table.table-body{font-size:13.5px}
+  .table-scroll thead th{font-size:11px;padding:9px 7px}
+  .table-scroll tbody td{padding:9px 7px}
+}
+@media (max-width:640px){.table-scroll{max-height:55vh}}
+@media (max-width:400px){
+  :root{--header-h: 66px}
+  .card{padding:14px;border-radius:16px}
+  .card h2{font-size:14px}
+  .logo{width:36px;height:36px}
+  .header-text h1{font-size:15px}
+  .header-text .sub{font-size:10.5px}
+  main{padding:10px 10px 80px;padding-top:calc(var(--header-h) + env(safe-area-inset-top))}
+  .action-buttons{gap:8px}
+}
+@media (max-width:360px){
+  .header-text .sub{display:none}
+  :root{--header-h: 60px}
+  .auto-datetime{grid-template-columns:1fr}
+}
+.cat-row{
+  display:grid;grid-template-columns:1fr 80px 40px;gap:8px;align-items:center;
+  padding:8px;border-radius:var(--r-sm);
+}
+.cat-row:hover{background:var(--bg-hover)}
+.cat-row input[type=text],.cat-row input[type=number]{
+  padding:8px 10px;font-size:13px;min-height:38px;border-radius:8px;
+}
+.cat-row input[type=number]{text-align:center;font-weight:700;color:var(--accent)}
+.cat-row .del-btn{
+  min-height:38px;padding:0;background:var(--red-soft);color:var(--red);
+  border:1px solid var(--red-soft);font-size:14px;font-weight:800;
+}
+.cat-row .del-btn:hover{background:var(--red);color:#fff;border-color:var(--red)}
 </style>
 </head>
 <body>
 
-<!-- ============================== A ============================== -->
-<div class="header-a" id="headerA">
-  <div class="inner">
-    <div class="logo">FB</div>
-    <div class="text">
-      <h1>Вариант A — fixed</h1>
-      <div class="sub">position: fixed, фон --bg</div>
+<div class="app-header">
+  <div class="header-inner">
+    <img src="logo.png" alt="French Bakery" class="logo" id="appLogo">
+    <div class="header-text">
+      <h1>French Bakery Аудит</h1>
+      <div class="sub">Накладные · Чек продаж · FIFO · Списание 22:00 · Excel</div>
     </div>
+    <div id="autosaveBadge" class="autosave-badge">💾 Сохранено</div>
   </div>
 </div>
 
-<!-- ============================== B ============================== -->
-<div class="header-b-wrap hidden" id="headerB">
-  <div class="header-b-cap"></div>
-  <div class="header-b">
-    <div class="inner">
-      <div class="logo">FB</div>
-      <div class="text">
-        <h1>Вариант B — fixed + заглушка</h1>
-        <div class="sub">непрозрачная заглушка над safe-area</div>
+<main>
+
+  <div class="card">
+    <h2><span class="icon">⚙️</span>Параметры проверки</h2>
+    <div class="auto-datetime">
+      <div class="auto-field">
+        <label>Дата</label>
+        <div class="auto-value">
+          <span class="icon">📅</span>
+          <span class="value" id="autoDate">—</span>
+          <span class="live-dot"></span>
+        </div>
+      </div>
+      <div class="auto-field">
+        <label>Время</label>
+        <div class="auto-value">
+          <span class="icon">🕐</span>
+          <span class="value" id="autoTime">—</span>
+        </div>
+      </div>
+      <div class="auto-field point-field">
+        <label>Точка <span style="text-transform:none;font-weight:400;color:var(--text-tertiary)">(введите вручную)</span></label>
+        <input id="point" type="text" placeholder="№037" autocomplete="off" maxlength="50">
+      </div>
+    </div>
+    <div class="ai-help" style="margin-top:12px">
+      🕖 <b>Списание:</b> ≤24 ч — в день получения 22:00; &gt;24 ч — через <b>ceil(часы ÷ 24) − 1</b> дней в 22:00.<br>
+      📊 <b>Логика:</b> свежие партии закрывают витрину первыми; всё, что «не влезло» — просрочка.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">📷</span>Шаг 1. Загрузка фото и PDF</h2>
+    <p class="hint">Загрузите накладные и чек продаж — <b>фото или PDF</b>.</p>
+    <div class="action-buttons">
+      <button id="uploadInvoicePhotosBtn" class="info">📷 Накладные</button>
+      <button id="uploadSalesPhotosBtn" class="secondary">🧾 Чек продаж</button>
+    </div>
+    <input id="invoicePhotoInput" type="file" accept="image/*,application/pdf" multiple hidden>
+    <input id="salesPhotoInput" type="file" accept="image/*,application/pdf" multiple hidden>
+    <div id="photoQueue" class="photo-queue"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">📤</span>Шаг 2. Отправить в ИИ</h2>
+    <div class="steps-hint">
+      <b>Как это работает:</b>
+      <ol>
+        <li>Нажмите «Поделиться в ИИ» — откроется системное меню.</li>
+        <li>Выберите ChatGPT / DeepSeek / другое приложение.</li>
+        <li>Приложение получит <b>исходные файлы</b> и готовый промпт.</li>
+        <li>ИИ вернёт <b>CSV-файл для скачивания</b>.</li>
+        <li>Скачайте CSV и загрузите его в Шаг 3.</li>
+      </ol>
+    </div>
+    <div class="action-buttons">
+      <button id="shareToAIBtn" class="primary">📤 Поделиться в ИИ</button>
+      <button id="copyPromptBtn" class="info">📋 Скопировать промпт</button>
+    </div>
+    <div id="shareStatus" class="status"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">📥</span>Шаг 3. Импорт CSV от ИИ</h2>
+    <p class="hint">Вставьте CSV, который вернул ИИ, или загрузите файл. <b>Строки будут отсортированы по алфавиту.</b></p>
+    <div class="action-buttons">
+      <button id="pasteCsvBtn" class="secondary">📋 Вставить из буфера</button>
+      <button id="loadCsvFileBtn" class="secondary">📁 Загрузить CSV</button>
+    </div>
+    <input id="csvFileInput" type="file" accept=".csv,text/csv" hidden>
+    <textarea id="csvInput" maxlength="2000000" placeholder="Наименование;Получено за 17.09;Получено за 18.09;Продано сегодня;Срок годности
+Слойка со сливой;4;2;0;18 часов
+Шатель;3;3;5;36 часов"></textarea>
+    <button id="applyCsvBtn" class="success block" style="margin-top:12px">✅ Применить CSV</button>
+    <div id="csvStatus" class="status"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">📚</span>Справочник сроков годности</h2>
+    <p class="hint">Отредактируйте справочник: добавьте новые позиции, удалите ненужные, измените сроки.</p>
+    <div class="action-buttons">
+      <button id="editCatalogBtn" class="info">✏️ Редактировать</button>
+      <button id="exportCatalogBtn" class="secondary">📤 Экспорт JSON</button>
+    </div>
+    <div class="action-buttons">
+      <button id="importCatalogBtn" class="secondary">📥 Импорт JSON</button>
+      <button id="resetCatalogBtn" class="secondary">↺ Сбросить</button>
+    </div>
+    <input id="importCatalogFile" type="file" accept=".json,application/json" hidden>
+    <div id="catalogStatus" class="status"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="icon">📈</span>Шаг 4. Результат</h2>
+    <p id="summary" class="hint">Загрузите CSV и введите фактический остаток, чтобы увидеть результат.</p>
+
+    <div id="resultMeta" class="result-meta" style="display:none">
+      <span class="item">📅 <b id="metaDate">—</b></span>
+      <span class="item">🕐 <b id="metaTime">—</b></span>
+      <span class="item" id="metaPointWrap">📍 <b id="metaPoint">—</b></span>
+    </div>
+
+    <div class="table-wrap" id="tableWrap" style="display:none">
+      <div class="table-scroll" id="tableScroll">
+        <table id="resultTable" class="table-body">
+          <colgroup id="resultColgroup"></colgroup>
+          <thead id="resultThead"><tr></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="totals" class="ai-help" style="margin-top:14px;display:none"></div>
+
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot fresh"></span> Свежие</span>
+      <span class="legend-item"><span class="legend-dot warn"></span> Просрочка на витрине</span>
+      <span class="legend-item"><span class="legend-dot danger"></span> Продано просрочки</span>
+      <span class="legend-item"><span class="legend-dot unknown"></span> Без остатка</span>
+      <span class="legend-item"><span class="legend-dot info"></span> Только продажи</span>
+      <span class="legend-item"><span class="legend-dot edited"></span> Приход исправлен</span>
+    </div>
+  </div>
+
+  <div class="card save-card">
+    <h2><span class="icon">💾</span>Сохранение</h2>
+    <button id="exportBtn" class="primary block save-btn">📥 Скачать Excel (.xlsx)</button>
+    <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
+    <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
+    <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
+      French Bakery Аудит · v6.2
+    </div>
+  </div>
+
+</main>
+
+<div id="catalogModal" class="modal hidden">
+  <div class="modal-content" id="catalogModalContent">
+    <div class="modal-handle"></div>
+    <h3>✏️ Справочник сроков</h3>
+    <p class="hint">Меняйте названия, сроки, добавляйте новые позиции.</p>
+    <div style="margin:12px 0">
+      <input id="catalogSearch" type="text" placeholder="🔍 Поиск..." autocomplete="off" maxlength="100">
+    </div>
+    <div id="catalogList"></div>
+    <div style="border-top:1px solid var(--separator);padding-top:14px;margin-top:14px">
+      <label>➕ Новая позиция</label>
+      <input id="newProdName" type="text" placeholder="Название" style="margin:6px 0" autocomplete="off" maxlength="100">
+      <input id="newProdHours" type="number" placeholder="Срок, часов" style="margin-bottom:8px" min="1" max="10000" value="48">
+      <button id="addProdBtn" class="success block">Добавить</button>
+    </div>
+    <button id="closeCatalogBtn" class="secondary block" style="margin-top:14px">Закрыть</button>
+  </div>
+</div>
+
+<div id="promptModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-handle"></div>
+    <h3>📋 Промпт для ИИ</h3>
+    <p class="hint" style="margin-bottom:12px">Скопируйте текст и вставьте в чат вместе с файлами.</p>
+    <pre class="code" id="promptContent"></pre>
+    <button id="copyFromModalBtn" class="info block" style="margin-top:14px">📋 Скопировать промпт</button>
+    <button id="closePromptModalBtn" class="secondary block" style="margin-top:8px">Закрыть</button>
+  </div>
+</div>
+
+<div id="productModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-handle"></div>
+    <h3 id="pmName">—</h3>
+    <div class="product-shelf" id="pmShelf">Срок: —</div>
+
+    <div class="product-form">
+      <div>
+        <div class="pf-section-title">Остаток</div>
+        <div class="pf-row">
+          <input type="number" class="pf-num" id="pmStock" inputmode="numeric" min="0" placeholder="—">
+          <button type="button" class="pf-btn" data-target="pmStock" data-step="-1">−</button>
+          <button type="button" class="pf-btn" data-target="pmStock" data-step="1">+</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="pf-section-title">Продано</div>
+        <div class="pf-row">
+          <input type="number" class="pf-num" id="pmSales" inputmode="numeric" min="0">
+          <button type="button" class="pf-btn" data-target="pmSales" data-step="-1">−</button>
+          <button type="button" class="pf-btn" data-target="pmSales" data-step="1">+</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="pf-section-title">Приходы по датам</div>
+        <div class="pf-row-dates" id="pmIncoming"></div>
+      </div>
+
+      <div class="pf-actions">
+        <button type="button" class="pf-cancel" id="pmCancel">Отмена</button>
+        <button type="button" class="pf-commit" id="pmCommit">Готово</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ============================== C ============================== -->
-<div class="header-c-wrap hidden" id="headerC">
-  <div class="header-c">
-    <div class="inner">
-      <div class="logo">FB</div>
-      <div class="text">
-        <h1>Вариант C — sticky</h1>
-        <div class="sub">position: sticky, непрозрачный фон</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ============================== КОНТЕНТ ============================== -->
-<div class="content">
-  <h1 id="titleA">Тест блюра в PWA</h1>
-  <p>Переключайте варианты внизу и смотрите, есть ли блюр на шапке при скролле. Обратите внимание на логотип «FB» и текст — они должны остаться резкими.</p>
-
-  <div class="block"><h2>Блок 1</h2><div class="desc">Прокрутите страницу вниз и обратите внимание на шапку.</div></div>
-  <div class="block"><h2>Блок 2</h2><div class="desc">Если шапка блюрится — фон размывается, логотип теряет чёткость.</div></div>
-  <div class="block"><h2>Блок 3</h2><div class="desc">Если блюра нет — все элементы шапки остаются резкими.</div></div>
-  <div class="block"><h2>Блок 4</h2><div class="desc">Сравните три варианта между собой.</div></div>
-  <div class="block"><h2>Блок 5</h2><div class="desc">Обычно вариант B работает лучше всего в PWA.</div></div>
-  <div class="block"><h2>Блок 6</h2><div class="desc">Вариант C — sticky, как в v6.0.</div></div>
-  <div class="block"><h2>Блок 7</h2><div class="desc">Проверьте каждый вариант отдельно.</div></div>
-  <div class="block"><h2>Блок 8</h2><div class="desc">Скролльте медленно, чтобы увидеть момент появления блюра.</div></div>
-  <div class="block"><h2>Блок 9</h2><div class="desc">На iPhone Safari в PWA это поведение системное.</div></div>
-  <div class="block"><h2>Блок 10</h2><div class="desc">Оставьте тот вариант, где блюр минимален или отсутствует.</div></div>
-  <div class="block"><h2>Блок 11</h2><div class="desc">Продолжаем скроллить.</div></div>
-  <div class="block"><h2>Блок 12</h2><div class="desc">Ещё немного контента для скролла.</div></div>
-  <div class="block"><h2>Блок 13</h2><div class="desc">Тест завершается здесь.</div></div>
-  <div class="block"><h2>Блок 14</h2><div class="desc">Внизу — переключатель вариантов.</div></div>
-  <div class="block"><h2>Блок 15</h2><div class="desc">Конец списка.</div></div>
-</div>
-
-<!-- ============================== ПЕРЕКЛЮЧАТЕЛЬ ============================== -->
-<div class="tabs" role="tablist">
-  <button id="tabA" class="active" type="button">A</button>
-  <button id="tabB" type="button">B</button>
-  <button id="tabC" type="button">C</button>
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 'use strict';
-(function(){
-  const $ = id => document.getElementById(id);
-  const tabs = [
-    { btn: $('tabA'), header: $('headerA'), title: 'Вариант A — fixed' },
-    { btn: $('tabB'), header: $('headerB'), title: 'Вариант B — fixed + заглушка' },
-    { btn: $('tabC'), header: $('headerC'), title: 'Вариант C — sticky' }
-  ];
-  tabs.forEach((t, i) => {
-    t.btn.addEventListener('click', () => {
-      tabs.forEach(x => {
-        x.btn.classList.remove('active');
-        x.header.classList.add('hidden');
+
+const MAX_ROWS = 2000;
+const MAX_DATES = 30;
+const MAX_NUM = 100000;
+const MAX_CSV_BYTES = 2 * 1024 * 1024;
+const MAX_CATALOG = 5000;
+const MAX_PHOTOS = 200;
+const MAX_NAME = 100;
+const WRITE_OFF_HOUR = 22;
+const SHELF_LIFE_START_HOUR = 7;
+const BTN_LOCK_MS = 300;
+const TIME_UPDATE_MS = 30 * 1000;
+const SESSION_KEY = 'fbAuditSessionV5';
+const SESSION_VERSION = 5;
+const CATALOG_KEY = 'fbAuditProducts';
+const PHOTO_DB = 'fbAuditPhotoDB';
+const PHOTO_STORE = 'photos';
+
+let PRODUCTS = [];
+let tableRows = [];
+let isRestoring = false;
+let saveTimer = null;
+let isRendering = false;
+let pendingSessionReset = false;
+let resetToken = 0;
+let _initialized = false;
+const _activeDeletes = new Set();
+let _fileBusy = false;
+let _timeUpdater = null;
+let openIdx = -1;
+let openTr = null;
+let openSnapshot = null;
+let _scrollY = 0;
+let _modalCount = 0;
+
+const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
+
+function openModal(id) {
+  const el = $(id);
+  if (!el) return;
+  if (_modalCount === 0) {
+    _scrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.style.top = `-${_scrollY}px`;
+    document.body.classList.add('modal-open');
+  }
+  _modalCount++;
+  el.classList.remove('hidden');
+}
+function closeModal(id) {
+  const el = $(id);
+  if (!el) return;
+  el.classList.add('hidden');
+  _modalCount = Math.max(0, _modalCount - 1);
+  if (_modalCount === 0) {
+    document.body.classList.remove('modal-open');
+    document.body.style.top = '';
+    window.scrollTo(0, _scrollY);
+  }
+}
+
+function clampNum(v, min, max, fallback) {
+  const n = Number(v);
+  if (!isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+function isValidDate(d) { return d instanceof Date && !isNaN(d.getTime()); }
+function safeStr(s, maxLen = 200) {
+  return String(s ?? '').replace(/[\u0000-\u001F\u007F\u2028\u2029]/g, '').slice(0, maxLen);
+}
+function safeDate(y, m, d) {
+  y = Number(y); m = Number(m); d = Number(d);
+  if (!isFinite(y) || !isFinite(m) || !isFinite(d)) return null;
+  if (y < 1900 || y > 2200 || m < 1 || m > 12 || d < 1 || d > 31) return null;
+  const date = new Date(y, m - 1, d);
+  if (date.getFullYear() !== y || date.getMonth() !== m - 1 || date.getDate() !== d) return null;
+  return `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+function sanitizeFilename(s) {
+  return String(s || 'file').replace(/[^a-zA-Z0-9а-яА-ЯёЁ_-]/g, '_').slice(0, 50);
+}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function safeExcelCell(v) {
+  if (typeof v !== 'string') return v;
+  if (/^[=+\-@\t\r]/.test(v)) return "'" + v;
+  return v;
+}
+function fmtDateRuShort(iso) {
+  if (!iso) return '';
+  const parts = String(iso).split('-');
+  if (parts.length !== 3) return iso;
+  return `${parts[2]}.${parts[1]}`;
+}
+function getTodayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getCurrentTimeStr() {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function formatDateRu(iso) {
+  if (!iso) return '—';
+  const parts = String(iso).split('-');
+  if (parts.length !== 3) return iso;
+  const months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  const day = parseInt(parts[2], 10);
+  const monthIdx = parseInt(parts[1], 10) - 1;
+  const year = parts[0];
+  const weekday = ['вс','пн','вт','ср','чт','пт','сб'][new Date(iso + 'T00:00:00').getDay()];
+  return `${day} ${months[monthIdx]} ${year}, ${weekday}`;
+}
+
+function updateAutoDate() { const el = $('autoDate'); if (el) el.textContent = formatDateRu(getTodayStr()); }
+function updateAutoTime() { const el = $('autoTime'); if (el) el.textContent = getCurrentTimeStr(); }
+function startAutoDateTime() {
+  updateAutoDate();
+  updateAutoTime();
+  if (_timeUpdater) clearInterval(_timeUpdater);
+  _timeUpdater = setInterval(() => { updateAutoDate(); updateAutoTime(); }, TIME_UPDATE_MS);
+}
+
+const FACTORY_CATALOG = [
+  ["Баушкин рецепт",24],["Хлеб Деревенский",24],["Хлеб ржаной 100%",48],["Хлеб зерновой",48],
+  ["Хлеб бородинский",48],["Батон деревенский",24],["Батон нарезной",24],["Багет французский",24],
+  ["Батон 8 злаков",48],["Зеленая гречка",48],["Чесночный",48],["Зерновой белый",24],["Багет на закваске",24],
+  ["Сосиска в тесте",36],["Сосиска с сыром в слойке",36],["Пирожок с луком и яйцом",36],
+  ["Пирожок с капустой",36],["Пирожок с картошкой",36],["Пирожок с курицей",36],["Пирожок с яблоком",36],
+  ["Грилата с картофелем и грибами",36],["Грилата с брынзой и зеленью",36],["Грилата с мясом",36],["Грилата с курицей",36],
+  ["Киш с курицей",48],["Киш с ветчиной и сыром",48],["Киш 4 сыра",48],["Багет с начинкой Ветчина",24],
+  ["Сэндвич с семгой",12],["Сэндвич с тунцом",24],["Чиабатта с начинкой индейка",24],["Сэндвич с рваной говядиной",24],
+  ["Сэндвич с куриными стрипсами",24],["Круассан с ветчиной и яйцом пашот",24],["Круассан с курицей",24],
+  ["Круассан с рыбой",12],["Круассан с моцареллой",24],["Круассан с ветчиной",24],
+  ["Лаваш ЦЕЗАРЬ",24],["Лаваш Шримп",24],["Лаваш Чикен",24],
+  ["Торт Наполеон",72],["Торт МЕДОВИК",72],["Торт ГЕРМАН",72],["Торт мини ФИСТАШКОВАЯ МЕРЕНГА",72],
+  ["Торт ШОКОЛАДНО-КЛУБНИЧНЫЙ",72],["Торт Красный Бархат",72],["Торт Фирменный",72],["Пирог вишневый",48],
+  ["Морковное печенье",120],["Печенье лимонное",240],["Печенье творожное (ушки)",120],
+  ["Печенье Фитнес с цельными злаками",360],["Амаретти",360],["Рогалики малина",360],["Печенье Венское",360],
+  ["Бискотти",360],["Макарун ваниль-клубника",96],["Макарун Сникерс",96],["Макарун Фисташка-Малина",96],
+  ["Макарун Лайм-вишня",96],["Апельсиновое печенье с шоколадом",240],["Мадлен",168],
+  ["Шоколадное печенье с фундуком",288],["Орешки",168],["Овсянное печенье с изюмом и кокосовой стружкой",288],
+  ["Безе мини",360],["Овсяное печенье с клюквой и шоколадом",288],["Брауни с вишней",72],
+  ["Борщ с говядиной",48],["Окрошка",24],["Суп том ям",48],["Свекольник",24],["Фирменный",48],
+  ["Суп пюре грибной",48],["Крем суп тыквенный",48],["Суп сырный с куриным филе и брокколи",48],
+  ["Индейка с рисом в кисло сладком соусе",48],["Куриный шашлычок с печеным картофелем",48],
+  ["Соба с индейкой",48],["Картофельное пюре с минтаем",48],["Пенне с куриным филе и фасолью",48],
+  ["Бефстроганов из говядины с картофельным пюре",48],["Терияки с курицей",48],["Чахохбили с гречкой и курицей",48],
+  ["Филе минтая с рисом и овощами",48],["Пюре с минтаем и соусом тар тар",48],["Спагетти карбонара",48],
+  ["Лингуини с жареными креветками",48],
+  ["Сырники со сметаной",24],["Сырники с ягодой",24],["Блины со сметаной",24],["Запеканка",24],
+  ["Цезарь",24],["Киноа с креветками",24],["Салат с говядиной",24],["Салат с Халуми",24],
+  ["Поке боул с куриным филе",24],["Поке боул с лососем",24],["Салат с тунцом",24],
+  ["Салат с тыквой и куриной грудкой",24],["Салат с печеной тыквой",24],
+  ["Круассан с сыром",24],["Круассан классический",24],["Круассан с ванильным кремом",12],
+  ["Круассан миндальный",12],["Круассан шоколадный",12],["Круассан с клубникой и шоколадом",12],
+  ["Круассан с творогом",12],["Круассан с абрикосом",12],["Бриошь с черной смородиной",36],
+  ["Улитка с изюмом",36],["Улитка яблочная",36],["Улитка с корицей",36],["Булочка с маком",36],
+  ["Косичка с шоколадом",36],["Маффин шоколадный",72],["Маффин классический",72],["Ромовая баба",48],
+  ["Сочник",48],["Шатель",36],["Донатс с малиной",48],["Донатс шоколадный",48],["Пончик фисташковый",48],
+  ["Бриошь с шоколадом",36],["Булочка с фисташкой",36],["Штрудель яблочный",36],["Шоссон с вишней",24],
+  ["Булочка с ванильным кремом и корицей",36],["Слойка со сливой",18],["Чизкейк тыквенный",72],["Пана-котта Пряная",72],
+  ["Трубочка с белковым кремом",48],["Эклер фисташковый",48],["Эклер шоколадный",48],
+  ["Тарталетка с малиной",48],["Тарталетка с голубикой",48],["Тарталетка с клубникой",48],
+  ["Тарталетка ассорти",48],["Тарталетка с белковым кремом",48],["Пирожное картошка",72],
+  ["Пирожное ГЕРМАН",72],["Пирожное Медовик (банка)",72],["Пирожное Наполеон(банка)",72],
+  ["Пирожное Чизкейк",72],["Профитроли со сливками",48],["Кольцо с творогом",24],["Соленая карамель",72],
+  ["Тирамису в стакане",72],["Морковное пирожное",72],["Десерт Сердце малина(банка)",72],
+  ["Пудинг Чиа Манго",48],["Десерт Манго-мята(банка)",72],["Десерт Роше",48],["Десерт Фисташковый",72],
+  ["Десерт 3 шоколада",72],["Кофейное зерно пирожное",48],["Чизкейк черная смородина",72],
+  ["Десерт Монастырская изба",48],["Чизкейк Орео",72],["Паннакотта шоколад-тропик",72],
+  ["Паннакотта ваниль-смородина",72],["Паннакотта кокос -ананас",72]
+];
+
+function sanitizeProducts(arr) {
+  if (!Array.isArray(arr)) return [];
+  const seen = new Set();
+  const out = [];
+  const limit = Math.min(arr.length, MAX_CATALOG);
+  for (let i = 0; i < limit; i++) {
+    const p = arr[i];
+    if (!p || typeof p !== 'object') continue;
+    if (typeof p.name !== 'string') continue;
+    const name = p.name.trim().slice(0, MAX_NAME);
+    if (!name) continue;
+    const key = name.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ name, shelfLife: clampNum(p.shelfLife, 1, 10000, 48) });
+  }
+  return out;
+}
+function loadCatalog() {
+  try {
+    const saved = localStorage.getItem(CATALOG_KEY);
+    if (saved) {
+      const cleaned = sanitizeProducts(JSON.parse(saved));
+      if (cleaned.length) return cleaned;
+    }
+  } catch (e) { console.warn('loadCatalog:', e); }
+  return FACTORY_CATALOG.map(([name, hours]) => ({ name, shelfLife: hours }));
+}
+function saveCatalog() {
+  try { localStorage.setItem(CATALOG_KEY, JSON.stringify(PRODUCTS)); }
+  catch (e) { console.warn('saveCatalog:', e); }
+}
+
+function getCheckMoment() {
+  const dateStr = getTodayStr();
+  const timeStr = getCurrentTimeStr();
+  const d = new Date(`${dateStr}T${timeStr}:00`);
+  return isValidDate(d) ? d : new Date();
+}
+function getWriteOffMoment(partyDate, shelfLife) {
+  const [y, m, day] = partyDate.split('-').map(Number);
+  const check = new Date(y, m - 1, day);
+  if (check.getFullYear() !== y || check.getMonth() !== m - 1 || check.getDate() !== day) return null;
+  check.setHours(SHELF_LIFE_START_HOUR, 0, 0, 0);
+  const h = clampNum(shelfLife, 1, 10000, 72);
+  if (h <= 24) { check.setHours(WRITE_OFF_HOUR, 0, 0, 0); return check; }
+  const days = Math.ceil(h / 24) - 1;
+  check.setDate(check.getDate() + days);
+  check.setHours(WRITE_OFF_HOUR, 0, 0, 0);
+  return check;
+}
+function parseDateRu(str, referenceDate) {
+  const s = String(str).trim();
+  const iso = s.match(/(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+  if (iso) return safeDate(parseInt(iso[1],10), parseInt(iso[2],10), parseInt(iso[3],10)) || '';
+  const ru = s.match(/(\d{1,2})[.\/-](\d{1,2})(?:[.\/-](\d{2,4}))?/);
+  if (!ru) return '';
+  const day = parseInt(ru[1], 10);
+  const month = parseInt(ru[2], 10);
+  if (day < 1 || day > 31 || month < 1 || month > 12) return '';
+  let year;
+  if (ru[3]) {
+    year = parseInt(ru[3], 10);
+    if (ru[3].length === 2) year = 2000 + year;
+  } else {
+    const ref = isValidDate(referenceDate) ? referenceDate : new Date();
+    year = ref.getFullYear();
+    if (month > ref.getMonth() + 1) year -= 1;
+  }
+  return safeDate(year, month, day) || '';
+}
+function mergeIncomingByDate(incoming) {
+  const map = new Map();
+  for (const p of incoming || []) {
+    if (!p || !p.date || !/^\d{4}-\d{2}-\d{2}$/.test(p.date)) continue;
+    const qty = clampNum(p.qty, 0, MAX_NUM, 0);
+    if (!map.has(p.date)) {
+      map.set(p.date, { date: p.date, qty: 0, _originalQty: p._originalQty != null ? p._originalQty : qty });
+    }
+    const entry = map.get(p.date);
+    entry.qty += qty;
+  }
+  return [...map.values()].sort((a, b) => a.date.localeCompare(b.date));
+}
+function computeFIFO(row) {
+  if (!row || typeof row !== 'object') return emptyResult();
+  if (row.salesOnly) return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null, isSalesOnly: true };
+  const hasStock = !(row.stock === '' || row.stock == null);
+  if (!hasStock) return emptyResult();
+  const stock = clampNum(row.stock, 0, MAX_NUM, 0);
+  const sales = clampNum(row.sales, 0, MAX_NUM, 0);
+  const shelfLife = clampNum(row.shelfLife, 1, 10000, 72);
+  const moment = getCheckMoment();
+  const parties = mergeIncomingByDate(row.incoming);
+  let freshIncoming = 0;
+  for (const p of parties) {
+    const writeOff = getWriteOffMoment(p.date, shelfLife);
+    if (writeOff && writeOff > moment) freshIncoming += p.qty;
+  }
+  const freshOnShelf = Math.min(stock, freshIncoming);
+  const expiredOnShelf = Math.max(0, stock - freshIncoming);
+  const freshLeft = Math.max(0, freshIncoming - freshOnShelf);
+  const freshSold = Math.min(sales, freshLeft);
+  const expiredSold = Math.max(0, sales - freshSold);
+  return { soldExpired: expiredSold, expiredOnShelf, freshOnShelf, freshSold };
+}
+function emptyResult() {
+  return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null };
+}
+function getRowStatus(calc, row) {
+  if (row && row.salesOnly) return { cls: 'row-info', label: 'info' };
+  if (!calc || calc.soldExpired === null) return { cls: 'row-unknown', label: 'unknown' };
+  if (calc.soldExpired > 0) return { cls: 'row-danger', label: 'danger' };
+  if (calc.expiredOnShelf > 0) return { cls: 'row-warn', label: 'warn' };
+  return { cls: 'row-fresh', label: 'fresh' };
+}
+
+function detectDelimiter(firstLine) {
+  let semi = 0, comma = 0, inQ = false;
+  for (let i = 0; i < firstLine.length; i++) {
+    const ch = firstLine[i];
+    if (ch === '"') {
+      if (inQ && firstLine[i + 1] === '"') { i++; continue; }
+      inQ = !inQ;
+    } else if (!inQ) {
+      if (ch === ';') semi++;
+      else if (ch === ',') comma++;
+    }
+  }
+  return semi >= comma ? ';' : ',';
+}
+function parseCSVtoArray(text, delimiter) {
+  const rows = [];
+  let row = [], field = '', inQ = false, i = 0;
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  while (i < text.length) {
+    const ch = text[i];
+    if (inQ) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+        inQ = false; i++; continue;
+      }
+      field += ch; i++; continue;
+    }
+    if (ch === '"') { inQ = true; i++; continue; }
+    if (ch === delimiter) { row.push(field); field = ''; i++; continue; }
+    if (ch === '\r') { i++; continue; }
+    if (ch === '\n') { row.push(field); field = ''; rows.push(row); row = []; i++; continue; }
+    field += ch; i++;
+  }
+  if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
+  return rows.filter(r => r.length > 1 || (r.length === 1 && r[0].trim() !== ''));
+}
+function parseNum(v) {
+  if (v === '' || v == null) return '';
+  let s = String(v).trim().replace(/[^\d.,\-]/g, '');
+  if (!s) return '';
+  const commas = (s.match(/,/g) || []).length;
+  const dots = (s.match(/\./g) || []).length;
+  if (commas > 1) s = s.replace(/,/g, '');
+  else if (dots > 1) s = s.replace(/\./g, '');
+  else if (commas === 1 && dots === 1) {
+    if (s.lastIndexOf(',') > s.lastIndexOf('.')) s = s.replace(/\./g, '').replace(',', '.');
+    else s = s.replace(/,/g, '');
+  } else if (commas === 1) s = s.replace(',', '.');
+  const n = Number(s);
+  if (!isFinite(n)) return '';
+  return Math.min(MAX_NUM, Math.max(0, Math.round(n)));
+}
+function parseShelfLife(str) {
+  if (!str) return null;
+  const s = String(str).toLowerCase();
+  const hours = s.match(/(\d+)\s*час/);
+  if (hours) return clampNum(hours[1], 1, 10000, null);
+  const days = s.match(/(\d+)\s*(сут|дн|день|дня|дней)/);
+  if (days) return clampNum(Number(days[1]) * 24, 1, 10000, null);
+  const num = s.match(/(\d+)/);
+  return num ? clampNum(num[1], 1, 10000, null) : null;
+}
+function parseCSV(text, referenceDate) {
+  const raw = String(text || '').replace(/^\uFEFF/, '').slice(0, MAX_CSV_BYTES);
+  if (!raw.trim()) throw new Error('CSV пустой.');
+  const firstLine = raw.split(/\r?\n/).find(l => l.trim()) || '';
+  if (!firstLine) throw new Error('CSV пустой.');
+  const sep = detectDelimiter(firstLine);
+  const matrix = parseCSVtoArray(raw, sep);
+  if (matrix.length < 2) throw new Error('CSV содержит только заголовок.');
+  const maxCols = Math.min(matrix[0].length, 100);
+  const header = matrix[0].slice(0, maxCols).map(h => safeStr(h, 100));
+  const idxName = header.findIndex(h => /наимен|позиц|товар/i.test(h));
+  const idxStock = header.findIndex(h => /факт|остаток/i.test(h));
+  const idxSales = header.findIndex(h => /продано|продажи|к-во|кол-во|количество/i.test(h));
+  const idxShelf = header.findIndex(h => /срок/i.test(h));
+  const dateCols = [];
+  header.forEach((h, i) => {
+    if (/получено за/i.test(h)) {
+      const rest = h.replace(/.*получено\s+за\s*/i, '');
+      const parsed = parseDateRu(rest, referenceDate);
+      dateCols.push({ index: i, date: parsed });
+    }
+  });
+  if (idxName < 0) throw new Error('Не найдена колонка «Наименование».');
+  const salesOnlyMode = dateCols.length === 0 && idxSales >= 0;
+  if (!dateCols.length && !salesOnlyMode) throw new Error('Не найдены колонки «Получено за [дата]» и «Продано сегодня».');
+  const validDateCols = dateCols.filter(dc => dc.date);
+  const rows = [];
+  const maxRow = Math.min(matrix.length, MAX_ROWS + 1);
+  for (let i = 1; i < maxRow; i++) {
+    const vals = matrix[i].slice(0, maxCols).map(v => String(v ?? '').trim());
+    if (!vals.some(v => v !== '')) continue;
+    const name = safeStr(vals[idxName], MAX_NAME);
+    if (!name) continue;
+    const salesVal = idxSales >= 0 ? parseNum(vals[idxSales]) : 0;
+    const shelfRaw = idxShelf >= 0 ? parseShelfLife(vals[idxShelf]) : null;
+    const incoming = [];
+    validDateCols.forEach(dc => {
+      const q = parseNum(vals[dc.index]);
+      incoming.push({ date: dc.date, qty: q === '' ? 0 : q });
+    });
+    rows.push({
+      name,
+      stock: idxStock >= 0 ? parseNum(vals[idxStock]) : (salesOnlyMode ? 0 : ''),
+      sales: salesVal === '' ? 0 : salesVal,
+      shelfLife: shelfRaw && shelfRaw > 0 ? shelfRaw : 72,
+      incoming,
+      salesOnly: salesOnlyMode
+    });
+  }
+  if (!rows.length) throw new Error('Не удалось распознать ни одной строки.');
+  const truncated = matrix.length - 1 > MAX_ROWS;
+  return { rows, truncated };
+}
+function sortRowsAlphabetically(rows) {
+  return [...rows].sort((a, b) =>
+    String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' })
+  );
+}
+
+function openPhotoDB() {
+  return new Promise((resolve, reject) => {
+    try {
+      const req = indexedDB.open(PHOTO_DB, 1);
+      req.onupgradeneeded = () => {
+        if (!req.result.objectStoreNames.contains(PHOTO_STORE)) {
+          req.result.createObjectStore(PHOTO_STORE, { keyPath: 'id', autoIncrement: true });
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    } catch (e) { reject(e); }
+  });
+}
+async function addPhotos(files, type) {
+  if (!files || !files.length) return;
+  try {
+    const existing = await getPhotos();
+    if (existing.length + files.length > MAX_PHOTOS) {
+      alert(`Максимум ${MAX_PHOTOS} файлов.`);
+      return;
+    }
+    const db = await openPhotoDB();
+    await Promise.all([...files].map(file => new Promise((resolve, reject) => {
+      const tx = db.transaction(PHOTO_STORE, 'readwrite');
+      tx.objectStore(PHOTO_STORE).add({
+        name: safeStr(file.name, 200), type, kind: file.type || '',
+        size: file.size, createdAt: Date.now(), blob: file
       });
-      t.btn.classList.add('active');
-      t.header.classList.remove('hidden');
-      const titleEl = $('titleA');
-      if (titleEl) titleEl.textContent = t.title;
-      window.scrollTo(0, 0);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    })));
+    await renderPhotoQueue();
+  } catch (e) { console.warn('addPhotos:', e); }
+}
+async function getPhotos() {
+  try {
+    const db = await openPhotoDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(PHOTO_STORE, 'readonly');
+      const req = tx.objectStore(PHOTO_STORE).getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (e) { return []; }
+}
+async function deletePhoto(id) {
+  if (_activeDeletes.has(id)) return;
+  _activeDeletes.add(id);
+  try {
+    const db = await openPhotoDB();
+    const tx = db.transaction(PHOTO_STORE, 'readwrite');
+    tx.objectStore(PHOTO_STORE).delete(id);
+    tx.oncomplete = () => renderPhotoQueue();
+  } catch (e) { console.warn('deletePhoto:', e); }
+  finally { setTimeout(() => _activeDeletes.delete(id), 500); }
+}
+async function clearAllPhotos() {
+  try {
+    const db = await openPhotoDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(PHOTO_STORE, 'readwrite');
+      tx.objectStore(PHOTO_STORE).clear();
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (e) { console.warn('clearAllPhotos:', e); }
+}
+async function renderPhotoQueue() {
+  const box = $('photoQueue');
+  if (!box) return;
+  const items = await getPhotos();
+  if (!items.length) { box.innerHTML = '<div class="hint">Пока нет загруженных файлов.</div>'; return; }
+  box.innerHTML = '';
+  items.sort((a, b) => b.createdAt - a.createdAt).forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'photo-item';
+    const img = document.createElement('img');
+    img.className = 'photo-thumb';
+    if (item.kind && item.kind.startsWith('image/')) {
+      try {
+        const url = URL.createObjectURL(item.blob);
+        img.src = url;
+        img.onload = () => URL.revokeObjectURL(url);
+      } catch (e) { img.src = ''; }
+    } else {
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect width="100%" height="100%" rx="10" fill="#e2e8f0"/><text x="50%" y="55%" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">PDF</text></svg>');
+    }
+    const meta = document.createElement('div');
+    meta.className = 'photo-meta';
+    const isPdf = item.kind === 'application/pdf';
+    meta.innerHTML = `<div class="photo-name">${escapeHtml(item.name)}</div><div class="photo-type">${item.type === 'invoice' ? '📋 Накладная' : '🧾 Чек продаж'} · ${isPdf ? 'PDF' : 'Фото'} · ${Math.round(item.size / 1024)} КБ</div>`;
+    const acts = document.createElement('div');
+    acts.className = 'photo-actions';
+    const del = document.createElement('button');
+    del.className = 'secondary';
+    del.textContent = 'Удалить';
+    del.onclick = () => deletePhoto(item.id);
+    acts.append(del);
+    row.append(img, meta, acts);
+    box.appendChild(row);
+  });
+}
+
+function scheduleSessionSave() {
+  if (isRestoring || pendingSessionReset) return;
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { saveTimer = null; saveSession(); }, 400);
+}
+function saveSession() {
+  if (pendingSessionReset) return;
+  try {
+    const payload = {
+      version: SESSION_VERSION,
+      savedAt: Date.now(),
+      point: $('point') ? $('point').value.slice(0, 50) : '',
+      csvText: ($('csvInput') ? $('csvInput').value : '').slice(0, 500000),
+      rows: tableRows.slice(0, MAX_ROWS).map(r => ({
+        name: r.name, stock: r.stock, sales: r.sales, shelfLife: r.shelfLife,
+        incoming: (r.incoming || []).slice(0, MAX_DATES).map(p => ({
+          date: p.date, qty: p.qty,
+          _originalQty: p._originalQty != null ? p._originalQty : p.qty
+        })),
+        salesOnly: !!r.salesOnly
+      }))
+    };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
+    showAutosaveBadge();
+  } catch (e) { console.warn('saveSession:', e); }
+}
+function showAutosaveBadge() {
+  const b = $('autosaveBadge');
+  if (!b) return;
+  b.classList.add('show');
+  clearTimeout(b._t);
+  b._t = setTimeout(() => b.classList.remove('show'), 1400);
+}
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || data.version !== SESSION_VERSION) return null;
+    return data;
+  } catch (e) { return null; }
+}
+function applySession(data) {
+  if (!data) return false;
+  isRestoring = true;
+  try {
+    if ($('point') && typeof data.point === 'string') $('point').value = data.point.slice(0, 50);
+    if ($('csvInput') && typeof data.csvText === 'string') $('csvInput').value = data.csvText.slice(0, 500000);
+    if (Array.isArray(data.rows) && data.rows.length) {
+      tableRows = data.rows.slice(0, MAX_ROWS).map(r => ({
+        name: safeStr(r.name, MAX_NAME),
+        stock: r.stock === '' || r.stock == null ? '' : clampNum(r.stock, 0, MAX_NUM, 0),
+        sales: clampNum(r.sales, 0, MAX_NUM, 0),
+        shelfLife: clampNum(r.shelfLife, 1, 10000, 72),
+        incoming: Array.isArray(r.incoming)
+          ? r.incoming.slice(0, MAX_DATES).map(p => {
+              const qty = clampNum(p.qty, 0, MAX_NUM, 0);
+              const orig = p._originalQty != null ? clampNum(p._originalQty, 0, MAX_NUM, qty) : qty;
+              return { date: typeof p.date === 'string' ? p.date : '', qty, _originalQty: orig };
+            }).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date))
+          : [],
+        salesOnly: !!r.salesOnly
+      })).filter(r => r.name);
+    } else tableRows = [];
+    return true;
+  } finally { isRestoring = false; }
+}
+
+function updateResultMeta() {
+  const box = $('resultMeta');
+  if (!box) return;
+  if (!Array.isArray(tableRows) || !tableRows.length) { box.style.display = 'none'; return; }
+  box.style.display = 'flex';
+  const d = $('metaDate'); if (d) d.textContent = formatDateRu(getTodayStr());
+  const t = $('metaTime'); if (t) t.textContent = getCurrentTimeStr();
+  const pt = $('point');
+  const p = $('metaPoint'); if (p) p.textContent = (pt && pt.value.trim()) ? pt.value.trim() : '—';
+  const wrap = $('metaPointWrap');
+  if (wrap) {
+    if (pt && pt.value.trim()) wrap.classList.remove('empty');
+    else wrap.classList.add('empty');
+  }
+}
+
+function focusEl(el) {
+  el.focus({ preventScroll: true });
+  el.select();
+  try { el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' }); }
+  catch (e) { el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+}
+function tableNav(input, key) {
+  const td = input.closest('td');
+  const tr = input.closest('tr');
+  if (!td || !tr) return;
+  if (key === 'ArrowLeft' || key === 'ArrowRight') {
+    const list = [...tr.querySelectorAll('input.num:not([disabled])')];
+    const i = list.indexOf(input);
+    if (i < 0) return;
+    const j = key === 'ArrowRight' ? i + 1 : i - 1;
+    if (j < 0 || j >= list.length) return;
+    focusEl(list[j]);
+    return;
+  }
+  const tbody = tr.parentElement;
+  const allTr = [...tbody.children];
+  const rIdx = allTr.indexOf(tr);
+  const cIdx = [...tr.children].indexOf(td);
+  if (rIdx < 0 || cIdx < 0) return;
+  const step = key === 'ArrowDown' ? 1 : -1;
+  for (let i = rIdx + step; i >= 0 && i < allTr.length; i += step) {
+    const cTd = allTr[i].children[cIdx];
+    if (!cTd) continue;
+    const next = cTd.querySelector('input.num:not([disabled])');
+    if (next) { focusEl(next); return; }
+  }
+}
+function tableKey(e) {
+  const k = e.key;
+  if (k !== 'ArrowLeft' && k !== 'ArrowRight' && k !== 'ArrowUp' && k !== 'ArrowDown') return;
+  if (e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return;
+  e.preventDefault();
+  tableNav(e.target, k);
+}
+
+function buildColgroupHTML(dates) {
+  const cols = [
+    '<col style="width:220px">',
+    '<col style="width:76px">',
+    '<col style="width:76px">',
+    ...dates.map(() => '<col style="width:84px">'),
+    '<col style="width:60px">',
+    '<col style="width:92px">',
+    '<col style="width:92px">',
+    '<col style="width:96px">',
+    '<col style="width:96px">'
+  ];
+  return cols.join('');
+}
+function buildTheadHTML(dates) {
+  return `
+    <th class="col-name">Наименование</th>
+    <th>Остаток</th>
+    <th>Продано</th>
+    ${dates.map(d => `<th>Получено за ${fmtDateRuShort(d)}</th>`).join('')}
+    <th>Срок</th>
+    <th>Свежих на витрине</th>
+    <th>Продано свежих</th>
+    <th>Просрочено на витрине</th>
+    <th>Продано просроченным</th>
+  `;
+}
+
+function renderTable() {
+  if (isRendering) return;
+  isRendering = true;
+  try {
+    const tbody = document.querySelector('#resultTable tbody');
+    const colgroup = $('resultColgroup');
+    const theadTr = document.querySelector('#resultThead tr');
+    const wrap = $('tableWrap');
+    if (!tbody || !colgroup || !theadTr || !wrap) return;
+    tbody.innerHTML = '';
+    if (!Array.isArray(tableRows) || !tableRows.length) {
+      if ($('summary')) $('summary').textContent = 'Загрузите CSV от ИИ, чтобы увидеть результат.';
+      if ($('totals')) $('totals').style.display = 'none';
+      wrap.style.display = 'none';
+      updateResultMeta();
+      return;
+    }
+    wrap.style.display = 'block';
+    const allDates = new Set();
+    tableRows.forEach(r => (r.incoming || []).forEach(p => { if (p.date) allDates.add(p.date); }));
+    let dates = [...allDates].sort((a, b) => b.localeCompare(a));
+    if (dates.length > MAX_DATES) dates = dates.slice(0, MAX_DATES);
+    colgroup.innerHTML = buildColgroupHTML(dates);
+    theadTr.innerHTML = buildTheadHTML(dates);
+
+    const fragment = document.createDocumentFragment();
+    tableRows.forEach(row => {
+      const calc = computeFIFO(row);
+      const status = getRowStatus(calc, row);
+      const tr = document.createElement('tr');
+      tr.classList.add(status.cls);
+      tr.dataset.status = status.label;
+
+      const tdName = document.createElement('td');
+      tdName.title = row.name;
+      const nameCell = document.createElement('div');
+      nameCell.className = 'name-cell';
+      const nameText = document.createElement('span');
+      nameText.className = 'name-text';
+      nameText.textContent = row.name;
+      const editHint = document.createElement('span');
+      editHint.className = 'edit-hint';
+      editHint.textContent = '✏️';
+      nameCell.appendChild(nameText);
+      nameCell.appendChild(editHint);
+      tdName.appendChild(nameCell);
+      tr.appendChild(tdName);
+
+      const tdStock = document.createElement('td');
+      if (row.salesOnly) {
+        const span = document.createElement('span');
+        span.className = 'num-disabled';
+        span.textContent = '—';
+        tdStock.appendChild(span);
+      } else {
+        const inputStock = document.createElement('input');
+        inputStock.type = 'number';
+        inputStock.min = '0'; inputStock.max = String(MAX_NUM);
+        inputStock.className = 'num';
+        inputStock.inputMode = 'numeric';
+        inputStock.value = row.stock === '' ? '' : row.stock;
+        inputStock.placeholder = '—';
+        inputStock.addEventListener('input', () => {
+          const v = inputStock.value;
+          row.stock = v === '' ? '' : clampNum(v, 0, MAX_NUM, 0);
+          refreshRow(row, tr);
+          scheduleSessionSave();
+        });
+        inputStock.addEventListener('change', () => {
+          if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+          saveSession();
+        });
+        inputStock.addEventListener('click', e => e.stopPropagation());
+        inputStock.addEventListener('focus', e => e.stopPropagation());
+        inputStock.addEventListener('keydown', tableKey);
+        tdStock.appendChild(inputStock);
+      }
+      tr.appendChild(tdStock);
+
+      const tdSales = document.createElement('td');
+      const inputSales = document.createElement('input');
+      inputSales.type = 'number';
+      inputSales.min = '0'; inputSales.max = String(MAX_NUM);
+      inputSales.className = 'num';
+      inputSales.inputMode = 'numeric';
+      inputSales.value = row.sales || 0;
+      inputSales.addEventListener('input', () => {
+        const v = inputSales.value;
+        row.sales = v === '' ? 0 : clampNum(v, 0, MAX_NUM, 0);
+        refreshRow(row, tr);
+        scheduleSessionSave();
+      });
+      inputSales.addEventListener('change', () => {
+        if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+        saveSession();
+      });
+      inputSales.addEventListener('click', e => e.stopPropagation());
+      inputSales.addEventListener('focus', e => e.stopPropagation());
+      inputSales.addEventListener('keydown', tableKey);
+      tdSales.appendChild(inputSales);
+      tr.appendChild(tdSales);
+
+      dates.forEach(d => {
+        const td = document.createElement('td');
+        td.className = 'income-cell';
+        const party = (row.incoming || []).find(p => p.date === d);
+        if (row.salesOnly) {
+          const span = document.createElement('span');
+          span.className = 'num-disabled';
+          span.textContent = '—';
+          td.appendChild(span);
+        } else {
+          const inp = document.createElement('input');
+          inp.type = 'number';
+          inp.min = '0'; inp.max = String(MAX_NUM);
+          inp.className = 'num';
+          inp.inputMode = 'numeric';
+          inp.value = party ? party.qty : 0;
+          inp.addEventListener('input', () => {
+            const v = inp.value;
+            const newQty = v === '' ? 0 : clampNum(v, 0, MAX_NUM, 0);
+            if (party) party.qty = newQty;
+            else row.incoming.push({ date: d, qty: newQty, _originalQty: 0 });
+            markEdited(td, party, newQty);
+            refreshRow(row, tr);
+            scheduleSessionSave();
+          });
+          inp.addEventListener('blur', () => { if (inp.value === '') inp.value = '0'; });
+          inp.addEventListener('change', () => {
+            if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+            saveSession();
+          });
+          inp.addEventListener('click', e => e.stopPropagation());
+          inp.addEventListener('focus', e => e.stopPropagation());
+          inp.addEventListener('keydown', tableKey);
+          td.appendChild(inp);
+
+          const resetBtn = document.createElement('button');
+          resetBtn.className = 'reset-btn';
+          resetBtn.type = 'button';
+          resetBtn.title = 'Сбросить';
+          resetBtn.textContent = '↺';
+          if (party && party._originalQty != null && party._originalQty !== party.qty) {
+            td.classList.add('edited');
+          }
+          resetBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            if (!party) return;
+            if (party._originalQty != null) {
+              party.qty = party._originalQty;
+              inp.value = party._originalQty;
+              markEdited(td, party, party.qty);
+              refreshRow(row, tr);
+              scheduleSessionSave();
+            }
+          });
+          td.appendChild(resetBtn);
+        }
+        tr.appendChild(td);
+      });
+
+      const tdShelf = document.createElement('td');
+      tdShelf.textContent = `${row.shelfLife} ч`;
+      tr.appendChild(tdShelf);
+
+      const tdFresh = document.createElement('td');
+      tdFresh.className = 'calc-cell' + (calc.freshOnShelf === null ? ' zero' : '');
+      tdFresh.textContent = calc.freshOnShelf === null ? '—' : calc.freshOnShelf;
+      tdFresh.dataset.role = 'freshOnShelf';
+      tr.appendChild(tdFresh);
+
+      const tdFreshSold = document.createElement('td');
+      tdFreshSold.className = 'calc-cell' + (calc.freshSold === null ? ' zero' : '');
+      tdFreshSold.textContent = calc.freshSold === null ? '—' : calc.freshSold;
+      tdFreshSold.dataset.role = 'freshSold';
+      tr.appendChild(tdFreshSold);
+
+      const tdExp = document.createElement('td');
+      tdExp.className = 'calc-cell';
+      tdExp.textContent = calc.expiredOnShelf === null ? '—' : calc.expiredOnShelf;
+      if (calc.expiredOnShelf === null) tdExp.classList.add('zero');
+      else if (calc.expiredOnShelf > 0) tdExp.classList.add('positive');
+      tdExp.dataset.role = 'expiredOnShelf';
+      tr.appendChild(tdExp);
+
+      const tdSoldExp = document.createElement('td');
+      tdSoldExp.className = 'calc-cell';
+      tdSoldExp.textContent = calc.soldExpired === null ? '—' : calc.soldExpired;
+      if (calc.soldExpired === null) tdSoldExp.classList.add('zero');
+      else if (calc.soldExpired > 0) tdSoldExp.classList.add('positive');
+      tdSoldExp.dataset.role = 'soldExpired';
+      tr.appendChild(tdSoldExp);
+
+      tr.addEventListener('click', e => {
+        if (e.target.closest('input')) return;
+        if (e.target.closest('button')) return;
+        openProduct(row, tr);
+      });
+
+      fragment.appendChild(tr);
+    });
+    tbody.appendChild(fragment);
+    updateTotals();
+    updateResultMeta();
+  } finally {
+    isRendering = false;
+  }
+}
+function markEdited(td, party, newQty) {
+  if (!party) return;
+  const orig = party._originalQty;
+  if (orig != null && orig !== newQty) td.classList.add('edited');
+  else td.classList.remove('edited');
+}
+function refreshRow(row, tr) {
+  const calc = computeFIFO(row);
+  const newStatus = getRowStatus(calc, row);
+  tr.classList.remove('row-fresh', 'row-warn', 'row-danger', 'row-unknown', 'row-info');
+  tr.classList.add(newStatus.cls);
+  tr.dataset.status = newStatus.label;
+  const setCell = (role, val, markPositive) => {
+    const el = tr.querySelector(`[data-role="${role}"]`);
+    if (!el) return;
+    el.classList.remove('positive', 'zero');
+    el.textContent = val === null ? '—' : val;
+    if (val === null) el.classList.add('zero');
+    else if (val > 0 && markPositive) el.classList.add('positive');
+  };
+  setCell('freshOnShelf', calc.freshOnShelf, false);
+  setCell('freshSold', calc.freshSold, false);
+  setCell('expiredOnShelf', calc.expiredOnShelf, true);
+  setCell('soldExpired', calc.soldExpired, true);
+  updateTotals();
+}
+function updateTotals() {
+  const summary = $('summary');
+  if (!summary) return;
+  let totalFreshOnShelf = 0, totalFreshSold = 0;
+  let totalExpiredOnShelf = 0, totalSoldExpired = 0, totalSales = 0;
+  let hasAnyStock = false, cntInfo = 0;
+  for (const row of tableRows) {
+    const calc = computeFIFO(row);
+    if (row.salesOnly) cntInfo++;
+    else if (calc.soldExpired !== null) {
+      totalFreshOnShelf += calc.freshOnShelf;
+      totalFreshSold += calc.freshSold;
+      totalExpiredOnShelf += calc.expiredOnShelf;
+      totalSoldExpired += calc.soldExpired;
+      hasAnyStock = true;
+    }
+    totalSales += Number(row.sales) || 0;
+  }
+  const isSalesOnlyMode = cntInfo > 0 && cntInfo === tableRows.length;
+  if (isSalesOnlyMode) summary.textContent = `📋 Режим «только продажи»: ${tableRows.length} позиций. Накладные не загружены.`;
+  else if (cntInfo > 0) summary.textContent = `Позиций: ${tableRows.length} (без накладных: ${cntInfo}).`;
+  else summary.textContent = hasAnyStock ? `Позиций: ${tableRows.length}.` : `Позиций: ${tableRows.length}. Введите остаток для расчёта.`;
+  const box = $('totals');
+  if (!box) return;
+  box.style.display = 'block';
+  if (isSalesOnlyMode) {
+    box.innerHTML = `<b>🔵 Режим «только продажи»</b><br>Накладные не загружены.<br><br><b>Продано всего:</b> ${totalSales} шт.`;
+    return;
+  }
+  if (!hasAnyStock) {
+    box.innerHTML = `<b>Введите фактический остаток</b>, чтобы увидеть итоги.`;
+    return;
+  }
+  box.innerHTML = `
+    <b>Итоги:</b><br>
+    Свежих на витрине: <b>${totalFreshOnShelf}</b> шт ·
+    Продано свежих: <b>${totalFreshSold}</b> шт ·
+    Продано просроченным: <b style="color:var(--red)">${totalSoldExpired}</b> шт ·
+    Просрочено на витрине: <b style="color:var(--red)">${totalExpiredOnShelf}</b> шт
+    ${cntInfo > 0 ? `<br><span style="color:var(--accent)">🔵 Без накладных: <b>${cntInfo}</b> поз.</span>` : ''}
+  `;
+}
+
+function productInputs() {
+  const list = [];
+  const s = $('pmStock'), sl = $('pmSales');
+  if (s) list.push(s);
+  if (sl) list.push(sl);
+  const box = $('pmIncoming');
+  if (box) box.querySelectorAll('input.pf-num').forEach(i => list.push(i));
+  return list;
+}
+function productNav(input, dir) {
+  const list = productInputs();
+  const i = list.indexOf(input);
+  if (i < 0) return;
+  const j = i + dir;
+  if (j < 0 || j >= list.length) return;
+  const t = list[j];
+  t.focus();
+  t.select();
+}
+function productKey(e) {
+  const k = e.key;
+  if (k !== 'ArrowUp' && k !== 'ArrowDown' && k !== 'ArrowLeft' && k !== 'ArrowRight') return;
+  if (e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return;
+  e.preventDefault();
+  productNav(e.target, (k === 'ArrowDown' || k === 'ArrowRight') ? 1 : -1);
+}
+
+function openProduct(row, tr) {
+  if (!row) return;
+  openIdx = tableRows.indexOf(row);
+  openTr = tr;
+  openSnapshot = {
+    stock: row.stock,
+    sales: row.sales,
+    incoming: (row.incoming || []).map(p => ({ date: p.date, qty: p.qty, _originalQty: p._originalQty }))
+  };
+  $('pmName').textContent = row.name;
+  $('pmShelf').textContent = `Срок годности: ${row.shelfLife} ч`;
+  $('pmStock').value = row.stock === '' ? '' : row.stock;
+  $('pmSales').value = row.sales || 0;
+
+  const box = $('pmIncoming');
+  box.innerHTML = '';
+  const dates = [...new Set((row.incoming || []).map(p => p.date))].sort((a, b) => b.localeCompare(a));
+  if (!dates.length) {
+    const empty = document.createElement('div');
+    empty.className = 'pf-date-label';
+    empty.textContent = 'Нет накладных по этой позиции';
+    box.appendChild(empty);
+  } else {
+    dates.forEach(d => {
+      const party = row.incoming.find(p => p.date === d);
+      const dateRow = document.createElement('div');
+      dateRow.className = 'pf-date-row';
+      const lbl = document.createElement('div');
+      lbl.className = 'pf-date-label';
+      lbl.textContent = fmtDateRuShort(d);
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.className = 'pf-num';
+      inp.inputMode = 'numeric';
+      inp.min = '0';
+      inp.value = party ? (party.qty || 0) : 0;
+      inp.dataset.date = d;
+      inp.addEventListener('keydown', productKey);
+      dateRow.appendChild(lbl);
+      dateRow.appendChild(inp);
+      box.appendChild(dateRow);
+    });
+  }
+  openModal('productModal');
+  setTimeout(() => $('pmStock').focus(), 100);
+}
+function closeProduct() {
+  closeModal('productModal');
+  openIdx = -1;
+  openTr = null;
+  openSnapshot = null;
+}
+function commitProduct() {
+  if (openIdx < 0) { closeProduct(); return; }
+  const row = tableRows[openIdx];
+  if (!row) { closeProduct(); return; }
+  const vStock = $('pmStock').value;
+  row.stock = vStock === '' ? '' : clampNum(vStock, 0, MAX_NUM, 0);
+  row.sales = clampNum($('pmSales').value, 0, MAX_NUM, 0);
+  $('pmIncoming').querySelectorAll('input.pf-num').forEach(inp => {
+    const d = inp.dataset.date;
+    if (!d) return;
+    const party = (row.incoming || []).find(p => p.date === d);
+    const q = clampNum(inp.value, 0, MAX_NUM, 0);
+    if (party) party.qty = q;
+    else row.incoming.push({ date: d, qty: q, _originalQty: 0 });
+  });
+  if (openTr) refreshRow(row, openTr);
+  scheduleSessionSave();
+  closeProduct();
+}
+function cancelProduct() {
+  if (openIdx < 0 || !openSnapshot) { closeProduct(); return; }
+  const row = tableRows[openIdx];
+  if (row) {
+    row.stock = openSnapshot.stock;
+    row.sales = openSnapshot.sales;
+    row.incoming = openSnapshot.incoming.map(p => ({ date: p.date, qty: p.qty, _originalQty: p._originalQty }));
+    if (openTr) refreshRow(row, openTr);
+  }
+  closeProduct();
+}
+
+let applyBusy = false;
+function applyCSV() {
+  if (applyBusy) return;
+  applyBusy = true;
+  const btn = $('applyCsvBtn');
+  if (btn) btn.classList.add('busy');
+  const myToken = ++resetToken;
+  setTimeout(() => { applyBusy = false; if (btn) btn.classList.remove('busy'); }, BTN_LOCK_MS);
+  const statusEl = $('csvStatus');
+  try {
+    const csvInput = $('csvInput');
+    if (!csvInput) throw new Error('Поле ввода не найдено.');
+    const text = csvInput.value.trim();
+    if (!text) throw new Error('Поле пустое.');
+    if (text.length > MAX_CSV_BYTES) throw new Error('CSV слишком большой (макс. 2 МБ).');
+    const reference = getCheckMoment();
+    const { rows, truncated } = parseCSV(text, reference);
+    if (!rows.length) throw new Error('Не удалось распознать строки.');
+    if (myToken !== resetToken) return;
+    rows.forEach(r => {
+      const p = PRODUCTS.find(x => x.name.toLowerCase() === r.name.toLowerCase());
+      if (p) r.shelfLife = p.shelfLife;
+      r.incoming.forEach(p => { p._originalQty = p.qty; });
+    });
+    tableRows = sortRowsAlphabetically(rows);
+    renderTable();
+    scheduleSessionSave();
+    const salesOnlyMode = rows.every(r => r.salesOnly);
+    const hasMixed = rows.some(r => r.salesOnly) && !salesOnlyMode;
+    const validDates = new Set();
+    rows.forEach(r => r.incoming.forEach(p => validDates.add(p.date)));
+    if (statusEl) {
+      statusEl.className = 'status show ok';
+      let msg = '';
+      if (salesOnlyMode) msg = `✅ Загружено ${rows.length} позиций (только продажи).`;
+      else if (hasMixed) msg = `✅ Загружено ${rows.length} позиций (часть — только продажи).`;
+      else msg = `✅ Загружено ${rows.length} позиций. Дат прихода: ${validDates.size}.`;
+      if (truncated) msg += ` ⚠️ Первые ${MAX_ROWS} строк.`;
+      if (!salesOnlyMode && validDates.size === 0) msg += ` ⚠️ Даты приходов не распознаны.`;
+      statusEl.textContent = msg;
+    }
+  } catch (e) {
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = '❌ ' + (e.message || 'Ошибка'); }
+  }
+}
+
+let exportBusy = false;
+function exportExcel() {
+  if (exportBusy) return;
+  if (typeof XLSX === 'undefined') { alert('Библиотека Excel не загружена.'); return; }
+  if (!Array.isArray(tableRows) || !tableRows.length) { alert('Нет данных.'); return; }
+  exportBusy = true;
+  if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+  try {
+    const allDates = new Set();
+    tableRows.forEach(r => (r.incoming || []).forEach(p => { if (p.date) allDates.add(p.date); }));
+    let dates = [...allDates].sort((a, b) => b.localeCompare(a));
+    if (dates.length > MAX_DATES) dates = dates.slice(0, MAX_DATES);
+    const header = ['Наименование', 'Остаток', 'Продано',
+      ...dates.map(d => `Получено за ${fmtDateRuShort(d)}`),
+      'Срок', 'Свежих на витрине', 'Продано свежих', 'Просрочено на витрине', 'Продано просроченным'];
+    const data = [header.map(safeExcelCell)];
+    tableRows.forEach(row => {
+      const calc = computeFIFO(row);
+      data.push([
+        safeExcelCell(row.name),
+        row.salesOnly ? '—' : (row.stock === '' ? '' : row.stock),
+        row.sales || 0,
+        ...dates.map(d => {
+          const p = (row.incoming || []).find(x => x.date === d);
+          return p ? p.qty : 0;
+        }),
+        `${row.shelfLife} ч`,
+        calc.freshOnShelf === null ? '—' : calc.freshOnShelf,
+        calc.freshSold === null ? '—' : calc.freshSold,
+        calc.expiredOnShelf === null ? '—' : calc.expiredOnShelf,
+        calc.soldExpired === null ? '—' : calc.soldExpired
+      ]);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    ws['!cols'] = [{ wch: 35 }, { wch: 10 }, { wch: 10 },
+      ...dates.map(() => ({ wch: 14 })),
+      { wch: 8 }, { wch: 14 }, { wch: 14 }, { wch: 18 }, { wch: 18 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'FB Аудит');
+    const date = getTodayStr();
+    const pt = $('point');
+    const point = sanitizeFilename((pt && pt.value.trim()) || 'точка');
+    XLSX.writeFile(wb, `FB_Audit_${point}_${date}.xlsx`);
+  } catch (e) { alert('Ошибка экспорта: ' + (e.message || e)); }
+  finally { setTimeout(() => { exportBusy = false; }, 500); }
+}
+
+function renderCatalogList() {
+  const list = $('catalogList');
+  if (!list) return;
+  const searchEl = $('catalogSearch');
+  const query = (searchEl && searchEl.value || '').toLowerCase().trim().slice(0, 100);
+  list.innerHTML = '';
+  if (!PRODUCTS.length) { list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Справочник пуст.</div>'; return; }
+  const filtered = PRODUCTS.map((p, idx) => ({ ...p, _idx: idx }))
+    .filter(p => !query || p.name.toLowerCase().includes(query))
+    .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+  if (!filtered.length) { list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Ничего не найдено.</div>'; return; }
+  const fragment = document.createDocumentFragment();
+  filtered.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'cat-row';
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text'; nameInput.value = p.name; nameInput.maxLength = 100;
+    nameInput.onchange = () => {
+      const oldName = PRODUCTS[p._idx].name;
+      const newName = safeStr(nameInput.value.trim(), MAX_NAME);
+      if (!newName) { nameInput.value = oldName; return; }
+      const dup = PRODUCTS.findIndex((x, i) => i !== p._idx && x.name.toLowerCase() === newName.toLowerCase());
+      if (dup >= 0) { alert('Такая позиция уже есть.'); nameInput.value = oldName; return; }
+      PRODUCTS[p._idx].name = newName;
+      tableRows.forEach(r => { if (r.name === oldName) r.name = newName; });
+      saveCatalog();
+      scheduleSessionSave();
+    };
+    const hoursInput = document.createElement('input');
+    hoursInput.type = 'number'; hoursInput.min = '1'; hoursInput.max = '10000'; hoursInput.value = p.shelfLife;
+    hoursInput.onchange = () => {
+      PRODUCTS[p._idx].shelfLife = clampNum(hoursInput.value, 1, 10000, 48);
+      hoursInput.value = PRODUCTS[p._idx].shelfLife;
+      tableRows.forEach(r => { if (r.name === PRODUCTS[p._idx].name) r.shelfLife = PRODUCTS[p._idx].shelfLife; });
+      saveCatalog();
+      scheduleSessionSave();
+    };
+    const delBtn = document.createElement('button');
+    delBtn.className = 'del-btn'; delBtn.textContent = '✕';
+    delBtn.onclick = () => {
+      if (!confirm(`Удалить "${PRODUCTS[p._idx].name}"?`)) return;
+      PRODUCTS.splice(p._idx, 1);
+      saveCatalog();
+      renderCatalogList();
+    };
+    row.append(nameInput, hoursInput, delBtn);
+    fragment.appendChild(row);
+  });
+  list.appendChild(fragment);
+}
+function resetToFactory() {
+  if (!confirm('Сбросить справочник к заводскому?')) return;
+  PRODUCTS = FACTORY_CATALOG.map(([name, hours]) => ({ name, shelfLife: hours }));
+  saveCatalog();
+  renderCatalogList();
+  const el = $('catalogStatus');
+  if (el) { el.className = 'status show ok'; el.textContent = `✅ Справочник восстановлен (${PRODUCTS.length}).`; }
+}
+
+function buildPrompt() {
+  const checkDate = getTodayStr();
+  const checkTime = getCurrentTimeStr();
+  const catalogList = PRODUCTS.map(p => `- ${p.name}: ${p.shelfLife}`).join('\n');
+  return `Ты — OCR-ассистент для аудита сроков годности в кондитерской French Bakery.
+
+ЗАДАЧА: распознать накладные (ТОРГ-12/УПД) и чеки продаж, вернуть единый CSV.
+
+═══════════════════════════════════════════
+📥 ИСТОЧНИКИ
+═══════════════════════════════════════════
+1. НАКЛАДНЫЕ (ТОРГ-12 / УПД) → приход товара за конкретную дату
+2. ЧЕКИ ПРОДАЖ → продажи за день
+
+ПРИОРИТЕТ:
+- приход ← только из накладной
+- продажи ← только из чека
+- НЕ суммировать приход и продажи между собой
+
+═══════════════════════════════════════════
+🧾 РАСПОЗНАВАНИЕ ЧЕКА ПРОДАЖ
+═══════════════════════════════════════════
+Чек продаж — это НЕ накладная. Структура чека:
+[№] [Наименование] [К-во] [Цена] [Сумма] [Скидка]
+
+⚠️ ГЛАВНОЕ ПРАВИЛО: бери из чека колонку «К-во» (количество штук),
+НЕ «Сумма» (рубли), НЕ «Цена», НЕ «Скидка».
+
+Пример строки чека:
+  1. Эклер шоколадный   2   150.00   300.00
+     ↑ название         ↑ К-во (берём это)   ↑ сумма (НЕ берём)
+
+Из этой строки в CSV: Эклер шоколадный = 2 (продано сегодня).
+
+═══════════════════════════════════════════
+🧩 СКЛЕЙКА НЕСКОЛЬКИХ ФОТО ОДНОГО ЧЕКА
+═══════════════════════════════════════════
+Длинный чек часто фотографируют НЕСКОЛЬКИМИ кадрами. Между кадрами есть
+ПЕРЕКРЫТИЕ — несколько строк в конце одного фото повторяются в начале
+следующего. Это делается, чтобы не потерять строки на стыке.
+
+⚠️ ГЛАВНАЯ ЗАДАЧА: склеить фото в ОДИН непрерывный список БЕЗ дублей.
+
+ПРИЗНАК ДУБЛЯ — НЕ складывать, взять ОДИН раз:
+- Одна и та же позиция идёт в КОНЦЕ фото 1 и в НАЧАЛЕ фото 2.
+- Совпадает название, К-во и цена.
+- Совпадает порядок следования соседних строк.
+
+ПРИЗНАК РЕАЛЬНОЙ ВТОРОЙ ПРОДАЖИ — складывать:
+- Позиция встречается дважды ВНУТРИ одного фото с разными № строк.
+- Между повторами есть другие строки.
+
+ПРИМЕР:
+  Фото 1 (конец):
+    Пуддинг Манго Чиа  1
+    Ром баба          13
+    Салат цезарь       4
+  Фото 2 (начало):
+    Пуддинг Манго Чиа  1   ← дубль (то же, что в конце фото 1)
+    Ром баба          13   ← дубль
+    Салат цезарь       4   ← дубль
+    Сосиска ...        3   ← новая строка
+
+  ✅ ПРАВИЛЬНО:
+    Пуддинг Манго Чиа = 1
+    Ром баба = 13
+    Салат цезарь = 4
+    Сосиска = 3
+
+  ❌ НЕПРАВИЛЬНО:
+    Ром баба = 26 (дубль посчитан дважды)
+    Салат цезарь = 8 (дубль посчитан дважды)
+
+АЛГОРИТМ СКЛЕЙКИ:
+1. Для каждого фото выпиши строки в порядке следования.
+2. Найди перекрытие: сравни конец фото N с началом фото N+1.
+3. Совпадающие строки — бери ОДИН раз (из того фото, где они полнее).
+4. Если позиция встречается в разных частях чека с разными соседями —
+   это ДВА разных пробития, К-во складывай.
+
+═══════════════════════════════════════════
+📋 ОБЪЕДИНЕНИЕ ДУБЛЕЙ ВНУТРИ ЧЕКА
+═══════════════════════════════════════════
+Если одна позиция пробита НЕСКОЛЬКО РАЗ в течение дня (не на стыке фото,
+а в разных частях чека) — К-во СКЛАДЫВАЙ.
+
+Пример:
+  Круассан классический  1  (утро)
+  Круассан классический  2  (день)
+  Круассан классический  1  (вечер)
+  → В CSV: Круассан классический = 4
+
+═══════════════════════════════════════════
+🚫 ЧТО ИГНОРИРОВАТЬ В ЧЕКЕ
+═══════════════════════════════════════════
+НЕ включай в CSV:
+- «Итого», «Всего», «К оплате», «Сумма чека»
+- «Скидка», «Скидка %», «Наценка», «НДС»
+- «Наличные», «Безнал», «Карта», «Бонусы», «Сдача»
+- время, дату, № смены, № чека, № кассы
+- ФИО кассира, ИНН, адрес, телефон, QR-код, штрих-код
+- любые служебные строки без названия товара
+
+Если строка не содержит НАЗВАНИЕ ТОВАРА — пропускай её.
+
+═══════════════════════════════════════════
+↩️ ВОЗВРАТЫ И ОТРИЦАТЕЛЬНЫЕ КОЛИЧЕСТВА
+═══════════════════════════════════════════
+Если в чеке позиция идёт со знаком минус (−1, −2) — это ВОЗВРАТ.
+Вычитай его из общего количества.
+
+Пример:
+  Эклер фисташковый   3
+  Эклер фисташковый  -1
+  → В CSV: Эклер фисташковый = 2
+
+Если после вычитания 0 или меньше — НЕ включай позицию (продано = 0).
+
+═══════════════════════════════════════════
+🗂 ГРУППИРОВКА СТРАНИЦ ПО НАКЛАДНЫМ
+═══════════════════════════════════════════
+⚠️ Файлы могут быть загружены в ПРОИЗВОЛЬНОМ порядке.
+
+ПРИЗНАКИ ПРИНАДЛЕЖНОСТИ НАКЛАДНОЙ:
+1. НОМЕР (ТОРГ-12 №…, УПД №…). Одинаковый номер = одна накладная.
+2. ДАТА + ПОСТАВЩИК. Совпадают = вероятно, одна накладная.
+3. НЕПРЕРЫВНОСТЬ № СТРОК. Страницы одной накладной имеют непрерывную
+   нумерацию (1–15, 16–30…).
+4. ПРОДОЛЖЕНИЕ ТАБЛИЦЫ. Страница без заголовка с середины списка —
+   продолжение предыдущей.
+5. ИТОГОВАЯ СТРОКА. Страница с «Итого» / «Всего» — последняя.
+
+🚫 ЗАПРЕЩЕНО: смешивать позиции из разных накладных в одну группу.
+
+═══════════════════════════════════════════
+🔍 4 ЭТАПА РАБОТЫ (СТРОГО ПО ПОРЯДКУ)
+═══════════════════════════════════════════
+
+ЭТАП 1. ГРУППИРОВКА
+[файл №] | [тип: накладная / чек] | [№ документа] | [дата] | [поставщик] | [страница N из M]
+
+ЭТАП 2. ЧЕРНОВИК ПО КАЖДОМУ ДОКУМЕНТУ
+Для накладных — строки: [№] | [название] | [кол-во]
+Для чека — строки: [№] | [название] | [К-во] | [цена]
+
+ЭТАП 3. ПРОВЕРКА
+- Сумма количеств по позициям = итогу документа? Если нет — перечитай числа.
+- Все ли строки попали в черновик?
+- Есть ли неоднозначные цифры (6/9, 1/7, 0/О)? Помечай.
+
+ЭТАП 4. СБОРКА CSV
+Объедини все документы в одну таблицу. Даты получения — из заголовков
+«Получено за ДД.ММ» или из даты накладной.
+
+═══════════════════════════════════════════
+🚫 ЖЁСТКИЙ ФИЛЬТР ПО СПРАВОЧНИКУ
+═══════════════════════════════════════════
+Включай в CSV ТОЛЬКО позиции из СПРАВОЧНИКА СРОКОВ (ниже).
+Всё остальное — напитки, кофе, блюда, услуги — ИГНОРИРУЙ.
+
+═══════════════════════════════════════════
+⚠️ ЧАСТЫЕ ОШИБКИ OCR
+═══════════════════════════════════════════
+Символы: 0↔О, 1↔l↔7, 5↔S, 8↔В, 6↔б↔9, 3↔З
+Названия: «с ветчиной» ≠ «с курицей», «с сыром» ≠ «классический»
+
+НЕОДНОЗНАЧНЫЕ ЦИФРЫ: если не можешь уверенно прочитать цифру
+(например, «6» или «9»), НЕ выбирай «наиболее вероятную».
+Добавь строку в раздел «Сомнительные» с пометкой.
+
+═══════════════════════════════════════════
+📋 ПРАВИЛА СБОРКИ CSV
+═══════════════════════════════════════════
+1. Только позиции из справочника.
+2. Есть в накладной, нет в чеке → Продано = 0.
+3. Есть в чеке, нет в накладной → Получено = 0.
+4. Дубли в накладной → складывай. Разные накладные — не путай.
+5. Перекрытие фото чека → бери ОДИН раз.
+6. Дубли внутри чека с разными № строк → складывай.
+7. Возвраты (−N) → вычитай.
+8. Рукописные пометки → подтверждение, но печатное значение приоритетно.
+9. 🚫 НЕ ВЫДУМЫВАЙ. Нет в документе — не добавляй.
+
+═══════════════════════════════════════════
+🔢 ПРАВИЛА ДЛЯ ЧИСЕЛ
+═══════════════════════════════════════════
+- Количество товаров — ВСЕГДА ЦЕЛОЕ число.
+- Точки и запятые в колонке «К-во» — разделители тысяч, а не десятичные.
+  «1.234» = 1234, «1,234» = 1234.
+- НЕ добавляй знак «+», пробелы, символы валют в количества.
+
+═══════════════════════════════════════════
+📅 ФОРМАТ ДАТ
+═══════════════════════════════════════════
+✅ «Получено за 17.09»  ✅ «Получено за 18.09»
+❌ «Получено за 2026-09-17», «17/09/2026», «17-09-2026»
+
+═══════════════════════════════════════════
+📤 ФОРМАТ CSV
+═══════════════════════════════════════════
+Разделитель: ;
+Кодировка: UTF-8 с BOM
+Имя: audit_${checkDate}.csv
+Сортировка: по алфавиту (русский)
+Колонки: Наименование;Получено за ДД.ММ;...;Продано сегодня;Срок годности
+Кавычки: если есть ; , " → оберни в "..." и удваивай внутренние.
+
+═══════════════════════════════════════════
+📊 ПОСЛЕ CSV ВЫВЕДИ ОТЧЁТ
+═══════════════════════════════════════════
+1. ДОКУМЕНТЫ:
+   [файл №] | [тип] | [№ документа] | [дата] | [страница N из M]
+
+2. СКЛЕЙКА ЧЕКА:
+   [фото №] | [строки] | [перекрытие с предыдущим]
+   Пример:
+   - Фото 1: строки 1–15
+   - Фото 2: строки 10–25 (перекрытие 10–15, дублей отброшено: 6)
+   - Фото 3: строки 20–30 (перекрытие 20–25, дублей отброшено: 6)
+
+3. СОМНИТЕЛЬНЫЕ СТРОКИ:
+   [название] | [что неясно] | [предположение]
+
+4. ПРОВЕРКА:
+   - Накладных распознано: N
+   - Чеков распознано: N
+   - Строк в CSV: N (из справочника: N, вне: 0)
+   - Дат приходов: N
+   - Сумма по каждой накладной = её итогу? Да / Нет
+   - Сумма по чеку = итогу чека? Да / Нет
+
+═══════════════════════════════════════════
+📚 СПРАВОЧНИК СРОКОВ (часы)
+═══════════════════════════════════════════
+${catalogList}
+
+Момент проверки: ${checkDate} ${checkTime}.
+
+Сейчас определи принадлежность файлов, распознай накладные и чеки,
+склей фото чека без дублей и выдай CSV строго по формату выше.`;
+}
+
+let shareBusy = false;
+async function shareToAI() {
+  if (shareBusy) return;
+  const items = await getPhotos();
+  if (!items.length) {
+    const el = $('shareStatus');
+    if (el) { el.className = 'status show info'; el.textContent = 'ℹ️ Сначала загрузите файлы.'; }
+    return;
+  }
+  shareBusy = true;
+  const btn = $('shareToAIBtn');
+  if (btn) btn.classList.add('busy');
+  try {
+    const files = items.map(item => new File([item.blob], item.name || 'file', {
+      type: item.kind || item.blob.type || 'application/octet-stream'
+    }));
+    const prompt = buildPrompt();
+    let promptCopied = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(prompt);
+        promptCopied = true;
+      }
+    } catch (e) {
+      const pc = $('promptContent'); if (pc) pc.textContent = prompt;
+      openModal('promptModal');
+    }
+    const canShare = navigator.share && navigator.canShare && navigator.canShare({ files });
+    if (canShare) {
+      try {
+        await navigator.share({ files, title: 'French Bakery Аудит — файлы',
+          text: promptCopied ? 'Промпт в буфере — вставьте в чат.' : '' });
+        const el = $('shareStatus');
+        if (el) { el.className = 'status show ok'; el.textContent = '✅ Файлы переданы.'; }
+        return;
+      } catch (e) { if (e.name === 'AbortError') return; }
+    }
+    for (const file of files) {
+      try {
+        const url = URL.createObjectURL(file);
+        const a = document.createElement('a');
+        a.href = url; a.download = file.name; a.click();
+        URL.revokeObjectURL(url);
+        await new Promise(r => setTimeout(r, 300));
+      } catch (e) { console.warn('download:', e); }
+    }
+    const el = $('shareStatus');
+    if (el) { el.className = 'status show info'; el.textContent = 'ℹ️ Файлы скачаны. Прикрепите в чат.'; }
+    try { window.open('https://chat.openai.com/', '_blank'); } catch (e) {}
+  } finally {
+    shareBusy = false;
+    if (btn) btn.classList.remove('busy');
+  }
+}
+
+function bindUI() {
+  const invBtn = $('uploadInvoicePhotosBtn'); if (invBtn) invBtn.onclick = () => { const i = $('invoicePhotoInput'); if (i) i.click(); };
+  const salBtn = $('uploadSalesPhotosBtn'); if (salBtn) salBtn.onclick = () => { const i = $('salesPhotoInput'); if (i) i.click(); };
+  const invInput = $('invoicePhotoInput');
+  if (invInput) invInput.onchange = async e => {
+    try { if (e.target.files && e.target.files.length) await addPhotos(e.target.files, 'invoice'); }
+    finally { e.target.value = ''; }
+  };
+  const salInput = $('salesPhotoInput');
+  if (salInput) salInput.onchange = async e => {
+    try { if (e.target.files && e.target.files.length) await addPhotos(e.target.files, 'sales'); }
+    finally { e.target.value = ''; }
+  };
+  const shareBtn = $('shareToAIBtn'); if (shareBtn) shareBtn.onclick = shareToAI;
+  const copyPromptBtn = $('copyPromptBtn');
+  if (copyPromptBtn) copyPromptBtn.onclick = async () => {
+    const prompt = buildPrompt();
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(prompt);
+        const el = $('shareStatus');
+        if (el) { el.className = 'status show ok'; el.textContent = '✅ Промпт скопирован.'; }
+      } else throw new Error();
+    } catch (e) {
+      const pc = $('promptContent'); if (pc) pc.textContent = prompt;
+      openModal('promptModal');
+    }
+  };
+  const pasteCsvBtn = $('pasteCsvBtn');
+  if (pasteCsvBtn) pasteCsvBtn.onclick = async () => {
+    try {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        const text = await navigator.clipboard.readText();
+        const el = $('csvInput'); if (el) el.value = text.slice(0, MAX_CSV_BYTES);
+        const st = $('csvStatus');
+        if (st) { st.className = 'status show ok'; st.textContent = '✅ Вставлено.'; }
+        scheduleSessionSave();
+      } else throw new Error();
+    } catch (e) {
+      const st = $('csvStatus');
+      if (st) { st.className = 'status show'; st.textContent = 'Вставьте CSV вручную.'; }
+    }
+  };
+  const loadCsvBtn = $('loadCsvFileBtn');
+  if (loadCsvBtn) loadCsvBtn.onclick = () => {
+    if (_fileBusy) return;
+    _fileBusy = true;
+    setTimeout(() => _fileBusy = false, 500);
+    const i = $('csvFileInput'); if (i) i.click();
+  };
+  const csvFileInput = $('csvFileInput');
+  if (csvFileInput) csvFileInput.onchange = async e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) { e.target.value = ''; return; }
+    if (f.size > MAX_CSV_BYTES) {
+      const st = $('csvStatus');
+      if (st) { st.className = 'status show err'; st.textContent = '❌ Файл слишком большой.'; }
+      e.target.value = ''; return;
+    }
+    try {
+      const text = await f.text();
+      const el = $('csvInput'); if (el) el.value = text;
+      const st = $('csvStatus');
+      if (st) { st.className = 'status show ok'; st.textContent = '✅ Файл загружен.'; }
+      scheduleSessionSave();
+    } catch (err) {
+      const st = $('csvStatus');
+      if (st) { st.className = 'status show err'; st.textContent = '❌ Ошибка чтения.'; }
+    } finally { e.target.value = ''; }
+  };
+  const applyBtn = $('applyCsvBtn'); if (applyBtn) applyBtn.onclick = applyCSV;
+  const exportBtn = $('exportBtn'); if (exportBtn) exportBtn.onclick = exportExcel;
+  const restoreBtn = $('restoreSessionBtn');
+  if (restoreBtn) restoreBtn.onclick = () => {
+    if (pendingSessionReset) return;
+    const data = loadSession();
+    if (!data) {
+      const st = $('csvStatus');
+      if (st) { st.className = 'status show info'; st.textContent = 'ℹ️ Сессии не найдено.'; }
+      return;
+    }
+    if (!confirm('Восстановить последнюю сессию?')) return;
+    applySession(data);
+    renderTable();
+    const st = $('csvStatus');
+    if (st) { st.className = 'status show ok'; st.textContent = `✅ Сессия восстановлена.`; }
+  };
+  const clearBtn = $('clearBtn');
+  if (clearBtn) clearBtn.onclick = async () => {
+    if (pendingSessionReset) return;
+    if (!confirm('Сбросить все данные?')) return;
+    pendingSessionReset = true;
+    resetToken++;
+    try {
+      tableRows = [];
+      const ci = $('csvInput'); if (ci) ci.value = '';
+      const cs = $('csvStatus'); if (cs) { cs.className = 'status'; cs.textContent = ''; }
+      const ss = $('shareStatus'); if (ss) { ss.className = 'status'; ss.textContent = ''; }
+      try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+      try { await clearAllPhotos(); } catch (e) {}
+      renderTable();
+      await renderPhotoQueue();
+      const cs2 = $('csvStatus');
+      if (cs2) { cs2.className = 'status show ok'; cs2.textContent = '✅ Данные очищены.'; }
+    } finally { setTimeout(() => { pendingSessionReset = false; }, 500); }
+  };
+  const editCat = $('editCatalogBtn');
+  if (editCat) editCat.onclick = () => {
+    renderCatalogList();
+    openModal('catalogModal');
+  };
+  const closeCat = $('closeCatalogBtn');
+  if (closeCat) closeCat.onclick = () => {
+    saveCatalog();
+    closeModal('catalogModal');
+    if (Array.isArray(tableRows) && tableRows.length) {
+      tableRows.forEach(r => {
+        const p = PRODUCTS.find(x => x.name.toLowerCase() === r.name.toLowerCase());
+        if (p) r.shelfLife = p.shelfLife;
+      });
+      renderTable();
+    }
+  };
+  const catSearch = $('catalogSearch');
+  if (catSearch) catSearch.oninput = renderCatalogList;
+  const addProd = $('addProdBtn');
+  if (addProd) addProd.onclick = () => {
+    const nameEl = $('newProdName');
+    const hoursEl = $('newProdHours');
+    const name = safeStr(nameEl ? nameEl.value.trim() : '', MAX_NAME);
+    const hours = clampNum(hoursEl ? hoursEl.value : 48, 1, 10000, 48);
+    if (!name) { alert('Введите название.'); return; }
+    if (PRODUCTS.some(p => p.name.toLowerCase() === name.toLowerCase())) { alert('Такая позиция уже есть.'); return; }
+    if (PRODUCTS.length >= MAX_CATALOG) { alert('Справочник переполнен.'); return; }
+    PRODUCTS.push({ name, shelfLife: hours });
+    saveCatalog();
+    if (nameEl) nameEl.value = '';
+    if (hoursEl) hoursEl.value = '48';
+    renderCatalogList();
+  };
+  const resetCat = $('resetCatalogBtn'); if (resetCat) resetCat.onclick = resetToFactory;
+  const expCat = $('exportCatalogBtn');
+  if (expCat) expCat.onclick = () => {
+    try {
+      const data = JSON.stringify({ version: 1, products: PRODUCTS }, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `fb_audit_catalog_${getTodayStr()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) { alert('Ошибка: ' + e.message); }
+  };
+  const importCat = $('importCatalogBtn');
+  if (importCat) importCat.onclick = () => { const i = $('importCatalogFile'); if (i) i.click(); };
+  const importFile = $('importCatalogFile');
+  if (importFile) importFile.onchange = async e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) { e.target.value = ''; return; }
+    try {
+      const text = await f.text();
+      if (text.length > 5 * 1024 * 1024) throw new Error('Файл слишком большой');
+      const parsed = JSON.parse(text);
+      const products = Array.isArray(parsed) ? parsed : (parsed && typeof parsed === 'object' && Array.isArray(parsed.products)) ? parsed.products : [];
+      if (!products.length) throw new Error('Файл не содержит позиций.');
+      const cleaned = sanitizeProducts(products);
+      if (!cleaned.length) throw new Error('Нет корректных позиций.');
+      if (!confirm(`Импортировать ${cleaned.length} позиций?`)) { e.target.value = ''; return; }
+      PRODUCTS = cleaned;
+      saveCatalog();
+      renderCatalogList();
+      const el = $('catalogStatus');
+      if (el) { el.className = 'status show ok'; el.textContent = `✅ Импортировано ${cleaned.length}.`; }
+    } catch (err) {
+      const el = $('catalogStatus');
+      if (el) { el.className = 'status show err'; el.textContent = '❌ ' + (err.message || 'Ошибка'); }
+    } finally { e.target.value = ''; }
+  };
+  const copyModal = $('copyFromModalBtn');
+  if (copyModal) copyModal.onclick = async () => {
+    const pc = $('promptContent');
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText && pc) {
+        await navigator.clipboard.writeText(pc.textContent);
+        copyModal.textContent = '✅ Скопировано!';
+        setTimeout(() => { copyModal.textContent = '📋 Скопировать промпт'; }, 2000);
+      } else throw new Error();
+    } catch (e) { alert('Выделите текст вручную.'); }
+  };
+  const closePrompt = $('closePromptModalBtn');
+  if (closePrompt) closePrompt.onclick = () => closeModal('promptModal');
+}
+
+function bindProductModal() {
+  const cancel = $('pmCancel'); if (cancel) cancel.onclick = cancelProduct;
+  const commit = $('pmCommit'); if (commit) commit.onclick = commitProduct;
+  const stock = $('pmStock'); if (stock) stock.addEventListener('keydown', productKey);
+  const sales = $('pmSales'); if (sales) sales.addEventListener('keydown', productKey);
+
+  document.querySelectorAll('.pf-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = $(btn.dataset.target);
+      if (!target) return;
+      const step = Number(btn.dataset.step) || 1;
+      const cur = target.value === '' ? 0 : Number(target.value);
+      const next = Math.max(0, Math.min(MAX_NUM, (isFinite(cur) ? cur : 0) + step));
+      target.value = next;
+      target.focus();
+      target.select();
     });
   });
-})();
+
+  const modal = $('productModal');
+  if (modal) {
+    modal.addEventListener('click', e => {
+      if (e.target === modal) cancelProduct();
+    });
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !$('productModal').classList.contains('hidden')) {
+      cancelProduct();
+    }
+  });
+}
+
+function initLogoFallback() {
+  const logo = $('appLogo');
+  if (!logo) return;
+  logo.onerror = () => {
+    logo.onerror = null;
+    const parent = logo.parentNode;
+    if (!parent) return;
+    const fallback = document.createElement('div');
+    fallback.className = 'logo';
+    fallback.textContent = 'FB';
+    fallback.style.cssText = 'display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;background:#0a84ff;font-size:14px';
+    parent.replaceChild(fallback, logo);
+  };
+}
+
+function init() {
+  if (_initialized) return;
+  _initialized = true;
+  initLogoFallback();
+  startAutoDateTime();
+  const pt = $('point');
+  if (pt) pt.addEventListener('input', () => { scheduleSessionSave(); updateResultMeta(); });
+  const session = loadSession();
+  if (session) {
+    applySession(session);
+    const ageMin = Math.max(0, Math.round((Date.now() - session.savedAt) / 60000));
+    const st = $('csvStatus');
+    if (st) { st.className = 'status show info'; st.textContent = `ℹ️ Сессия восстановлена (${ageMin} мин назад).`; }
+  }
+  renderTable();
+  renderPhotoQueue();
+  const ci = $('csvInput');
+  if (ci) ci.addEventListener('blur', () => {
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+    saveSession();
+  });
+  window.addEventListener('storage', e => {
+    if (e.key === SESSION_KEY && !isRestoring) {
+      const data = loadSession();
+      if (data) { applySession(data); renderTable(); }
+    }
+  });
+  window.addEventListener('beforeunload', () => {
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+    saveSession();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+      saveSession();
+    }
+  });
+  window.addEventListener('error', e => console.warn('Global error:', e.message));
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v6.2 · catalog:', PRODUCTS.length);
+}
+
+PRODUCTS = loadCatalog();
+bindUI();
+bindProductModal();
+init();
 </script>
 </body>
 </html>
