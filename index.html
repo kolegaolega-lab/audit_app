@@ -51,17 +51,18 @@ body.modal-open{
   left:0;
   right:0;
 }
-header{
-  position:sticky;top:0;z-index:100;
-  padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top));
-  background:var(--bg);border-bottom:1px solid var(--separator);
-  -webkit-backdrop-filter:none;
-  backdrop-filter:none;
-  isolation:isolate;
+.header-sticky{
+  position:sticky;
+  top:0;
+  z-index:100;
+  background:var(--bg);
 }
-header::before{
-  content:'';position:absolute;inset:0;
-  background:var(--bg);z-index:-1;pointer-events:none;
+header{
+  position:relative;
+  padding:12px 16px;
+  padding-top:calc(12px + env(safe-area-inset-top));
+  background:var(--bg);
+  border-bottom:1px solid var(--separator);
 }
 .header-inner{max-width:1100px;margin:auto;display:flex;align-items:center;gap:12px}
 .logo{
@@ -546,16 +547,18 @@ pre.code{
 </head>
 <body>
 
-<header>
-  <div class="header-inner">
-    <img src="logo.png" alt="French Bakery" class="logo" id="appLogo">
-    <div class="header-text">
-      <h1>French Bakery Аудит</h1>
-      <div class="sub">Накладные · Чек продаж · FIFO · Списание 22:00 · Excel</div>
+<div class="header-sticky">
+  <header>
+    <div class="header-inner">
+      <img src="logo.png" alt="French Bakery" class="logo" id="appLogo">
+      <div class="header-text">
+        <h1>French Bakery Аудит</h1>
+        <div class="sub">Накладные · Чек продаж · FIFO · Списание 22:00 · Excel</div>
+      </div>
+      <div id="autosaveBadge" class="autosave-badge">💾 Сохранено</div>
     </div>
-    <div id="autosaveBadge" class="autosave-badge">💾 Сохранено</div>
-  </div>
-</header>
+  </header>
+</div>
 
 <main>
 
@@ -687,7 +690,7 @@ pre.code{
     <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v5.5
+      French Bakery Аудит · v5.6
     </div>
   </div>
 
@@ -2621,7 +2624,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v5.5 · catalog:', PRODUCTS.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v5.6 · catalog:', PRODUCTS.length);
 }
 
 PRODUCTS = loadCatalog();
