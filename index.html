@@ -40,176 +40,72 @@ html,body{margin:0;padding:0}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;
   background:var(--bg);color:var(--text);font-size:15px;line-height:1.45;
-  -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
-  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;overflow-x:hidden;
 }
-body.modal-open{
-  overflow:hidden;position:fixed;width:100%;height:100%;top:0;left:0;right:0;
-}
-.app-header{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  padding:12px 16px;
-  padding-top:calc(12px + env(safe-area-inset-top,0px));
-  background:var(--bg);
-  border-bottom:1px solid var(--separator);
-}
+body.modal-open{overflow:hidden;position:fixed;width:100%;height:100%;top:0;left:0;right:0}
+.app-header{position:fixed;top:0;left:0;right:0;z-index:100;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top,0px));background:var(--bg);border-bottom:1px solid var(--separator)}
 .header-inner{max-width:1100px;margin:auto;display:flex;align-items:center;gap:12px}
-.logo{
-  width:42px;height:42px;border-radius:50%;background:#FFE600;object-fit:cover;
-  flex:0 0 auto;display:block;border:1px solid var(--separator);
-}
+.logo{width:42px;height:42px;border-radius:50%;background:#FFE600;object-fit:cover;flex:0 0 auto;display:block;border:1px solid var(--separator)}
 .header-text{flex:1;min-width:0}
-.header-text h1{
-  font-size:17px;margin:0;font-weight:700;letter-spacing:-.3px;line-height:1.2;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-}
-.autosave-badge{
-  font-size:11px;padding:4px 10px;border-radius:999px;
-  background:var(--green-soft);color:var(--green);font-weight:600;
-  opacity:0;transition:opacity .25s;white-space:nowrap;flex-shrink:0;
-}
+.header-text h1{font-size:17px;margin:0;font-weight:700;letter-spacing:-.3px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.autosave-badge{font-size:11px;padding:4px 10px;border-radius:999px;background:var(--green-soft);color:var(--green);font-weight:600;opacity:0;transition:opacity .25s;white-space:nowrap;flex-shrink:0}
 .autosave-badge.show{opacity:1}
-main{
-  max-width:1100px;margin:auto;
-  padding:14px 14px calc(20px + env(safe-area-inset-bottom,0px));
-  padding-top:calc(var(--header-h) + env(safe-area-inset-top,0px));
-}
-.card{
-  background:var(--bg-card);border-radius:var(--r-lg);padding:18px;
-  margin-bottom:12px;border:1px solid var(--separator);
-}
-.card h2{
-  font-size:15px;font-weight:700;margin:0 0 12px;
-  display:flex;align-items:center;gap:8px;letter-spacing:-.2px;
-}
-.card h2 .icon{
-  width:26px;height:26px;border-radius:7px;background:var(--accent-soft);color:var(--accent);
-  display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:0 0 auto;
-}
+main{max-width:1100px;margin:auto;padding:14px 14px calc(20px + env(safe-area-inset-bottom,0px));padding-top:calc(var(--header-h) + env(safe-area-inset-top,0px))}
+.card{background:var(--bg-card);border-radius:var(--r-lg);padding:18px;margin-bottom:12px;border:1px solid var(--separator)}
+.card h2{font-size:15px;font-weight:700;margin:0 0 12px;display:flex;align-items:center;gap:8px;letter-spacing:-.2px}
+.card h2 .icon{width:26px;height:26px;border-radius:7px;background:var(--accent-soft);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:0 0 auto}
 .card .hint{font-size:12.5px;color:var(--text-secondary);margin:0 0 12px;line-height:1.5}
 .card .hint b{color:var(--text);font-weight:600}
-label{
-  display:block;font-size:11px;font-weight:600;color:var(--text-secondary);
-  margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;
-}
+label{display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
 input,button,select,textarea{font:inherit;outline:none;font-family:inherit}
-input[type=text],input[type=number],textarea{
-  width:100%;padding:12px 14px;border:1.5px solid var(--separator);border-radius:var(--r-sm);
-  background:var(--bg-input);color:var(--text);font-size:16px;
-  transition:border-color .15s,background .15s;-webkit-appearance:none;appearance:none;min-height:46px;
-}
+input[type=text],input[type=number],textarea{width:100%;padding:12px 14px;border:1.5px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input);color:var(--text);font-size:16px;transition:border-color .15s,background .15s;-webkit-appearance:none;appearance:none;min-height:46px}
 input:focus,textarea:focus{border-color:var(--accent);background:var(--bg-card)}
-textarea{
-  font-size:13px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  line-height:1.5;min-height:160px;resize:vertical;
-}
+textarea{font-size:13px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.5;min-height:160px;resize:vertical}
 input::placeholder,textarea::placeholder{color:var(--text-tertiary)}
 .auto-datetime{display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:10px;align-items:end}
-@media (max-width:640px){
-  .auto-datetime{grid-template-columns:1fr 1fr}
-  .auto-datetime .point-field{grid-column:1 / -1}
-}
+@media (max-width:640px){.auto-datetime{grid-template-columns:1fr 1fr}.auto-datetime .point-field{grid-column:1 / -1}}
 .auto-field{position:relative}
-.auto-value{
-  display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--bg-input);
-  border:1.5px solid var(--separator);border-radius:var(--r-sm);min-height:46px;
-  font-size:16px;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums;
-}
+.auto-value{display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--bg-input);border:1.5px solid var(--separator);border-radius:var(--r-sm);min-height:46px;font-size:16px;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
 .auto-value .icon{font-size:15px;flex:0 0 auto}
 .auto-value .value{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.auto-value .live-dot{
-  width:7px;height:7px;border-radius:50%;background:var(--green);
-  animation:pulse 2s infinite;flex:0 0 auto;
-}
-@keyframes pulse{
-  0%{box-shadow:0 0 0 0 rgba(52,199,89,.5)}
-  70%{box-shadow:0 0 0 6px rgba(52,199,89,0)}
-  100%{box-shadow:0 0 0 0 rgba(52,199,89,0)}
-}
-button{
-  border:0;border-radius:var(--r-sm);padding:12px 18px;background:var(--bg-elev-2);
-  color:var(--text);font-weight:600;font-size:15px;cursor:pointer;
-  transition:transform .15s var(--spring),opacity .15s,background .15s;
-  white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  min-height:46px;user-select:none;-webkit-user-select:none;position:relative;overflow:hidden;
-}
+.auto-value .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex:0 0 auto}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,199,89,.5)}70%{box-shadow:0 0 0 6px rgba(52,199,89,0)}100%{box-shadow:0 0 0 0 rgba(52,199,89,0)}}
+button{border:0;border-radius:var(--r-sm);padding:12px 18px;background:var(--bg-elev-2);color:var(--text);font-weight:600;font-size:15px;cursor:pointer;transition:transform .15s var(--spring),opacity .15s,background .15s;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:46px;user-select:none;-webkit-user-select:none;position:relative;overflow:hidden}
 button:active{transform:scale(.97)}
 button:disabled{opacity:.5;cursor:not-allowed;transform:none}
 button.block{width:100%}
 button.primary{background:#0a84ff;color:#fff}
 button.success{background:#10b981;color:#fff}
 button.info{background:#0ea5e9;color:#fff}
+button.warn{background:#ff9500;color:#fff}
+button.danger{background:#ff3b30;color:#fff}
 button.secondary{background:var(--bg-elev-2);color:var(--text);border:1.5px solid var(--separator-opaque)}
 button.busy{pointer-events:none;opacity:.7}
-button.busy::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
-  animation:busy 1s linear infinite;
-}
+button.busy::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:busy 1s linear infinite}
 @keyframes busy{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
-.status{
-  margin-top:10px;font-size:13px;padding:12px 14px;background:var(--bg-input);
-  border-radius:var(--r-sm);border:1px solid var(--separator);line-height:1.5;display:none;
-}
+.status{margin-top:10px;font-size:13px;padding:12px 14px;background:var(--bg-input);border-radius:var(--r-sm);border:1px solid var(--separator);line-height:1.5;display:none}
 .status.show{display:block}
 .status.ok{background:var(--green-soft);border-color:transparent;color:var(--green);font-weight:600}
 .status.err{background:var(--red-soft);border-color:transparent;color:var(--red);font-weight:600}
 .status.info{background:var(--blue-soft);border-color:transparent;color:var(--accent);font-weight:600}
-.result-meta{
-  display:flex;flex-wrap:wrap;gap:12px 18px;font-size:12px;color:var(--text-secondary);
-  padding:10px 12px;margin-bottom:12px;background:var(--bg-input);border-radius:var(--r-sm);align-items:center;
-}
+.status.warn{background:var(--orange-soft);border-color:transparent;color:var(--orange);font-weight:600}
+.result-meta{display:flex;flex-wrap:wrap;gap:12px 18px;font-size:12px;color:var(--text-secondary);padding:10px 12px;margin-bottom:12px;background:var(--bg-input);border-radius:var(--r-sm);align-items:center}
 .result-meta .item{display:inline-flex;align-items:center;gap:5px}
 .result-meta .item b{color:var(--text);font-weight:700}
 .result-meta .item.empty b{color:var(--text-tertiary)}
-.table-wrap{
-  border-radius:var(--r-md);border:1px solid var(--separator);
-  background:var(--bg-card);overflow:hidden;margin-bottom:4px;
-}
-.table-scroll{
-  max-height:65vh;overflow:auto;-webkit-overflow-scrolling:touch;
-  background:var(--bg-card);position:relative;
-  scrollbar-width:thin;scrollbar-color:var(--separator-opaque) transparent;
-}
+.table-wrap{border-radius:var(--r-md);border:1px solid var(--separator);background:var(--bg-card);overflow:hidden;margin-bottom:4px}
+.table-scroll{max-height:65vh;overflow:auto;-webkit-overflow-scrolling:touch;background:var(--bg-card);position:relative;scrollbar-width:thin;scrollbar-color:var(--separator-opaque) transparent}
 .table-scroll::-webkit-scrollbar{width:8px;height:8px}
 .table-scroll::-webkit-scrollbar-track{background:transparent}
 .table-scroll::-webkit-scrollbar-thumb{background:var(--separator-opaque);border-radius:4px}
-.table-scroll table.table-body{
-  table-layout:fixed;border-collapse:separate;border-spacing:0;
-  font-size:13px;width:max-content;min-width:100%;
-}
-.table-scroll thead th{
-  position:sticky;top:0;z-index:20;
-  font-size:10.5px;font-weight:700;color:var(--text-secondary);
-  text-transform:uppercase;letter-spacing:.04em;
-  background:var(--bg-card);padding:8px 6px;text-align:center;vertical-align:middle;
-  line-height:1.25;white-space:normal;word-wrap:break-word;overflow-wrap:anywhere;
-  border-bottom:1px solid var(--separator);transform:translateZ(0);
-}
+.table-scroll table.table-body{table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:13px;width:max-content;min-width:100%}
+.table-scroll thead th{position:sticky;top:0;z-index:20;font-size:10.5px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;background:var(--bg-card);padding:8px 6px;text-align:center;vertical-align:middle;line-height:1.25;white-space:normal;word-wrap:break-word;overflow-wrap:anywhere;border-bottom:1px solid var(--separator);transform:translateZ(0)}
 .table-scroll thead th.col-name{text-align:left;padding-left:14px;padding-right:8px}
-.table-scroll thead th:first-child{
-  position:sticky;left:0;z-index:25;background:var(--bg-card);
-  transform:translateZ(0);isolation:isolate;
-}
-.table-scroll thead th:first-child::after{
-  content:'';position:absolute;right:0;top:0;bottom:0;width:1px;
-  background:var(--separator);pointer-events:none;
-}
-.table-scroll tbody td{
-  padding:8px 6px;border-bottom:1px solid var(--separator);
-  vertical-align:middle;white-space:nowrap;line-height:1.2;
-  background:var(--bg-card);text-align:center;
-}
-.table-scroll tbody td:first-child{
-  position:sticky;left:0;z-index:15;background:var(--bg-card);
-  text-align:left;white-space:normal;word-break:break-word;
-  padding:8px 10px 8px 14px;transform:translateZ(0);isolation:isolate;
-  cursor:pointer;
-}
-.table-scroll tbody td:first-child::after{
-  content:'';position:absolute;right:0;top:0;bottom:0;width:1px;
-  background:var(--separator);pointer-events:none;
-}
+.table-scroll thead th:first-child{position:sticky;left:0;z-index:25;background:var(--bg-card);transform:translateZ(0);isolation:isolate}
+.table-scroll thead th:first-child::after{content:'';position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--separator);pointer-events:none}
+.table-scroll tbody td{padding:8px 6px;border-bottom:1px solid var(--separator);vertical-align:middle;white-space:nowrap;line-height:1.2;background:var(--bg-card);text-align:center}
+.table-scroll tbody td:first-child{position:sticky;left:0;z-index:15;background:var(--bg-card);text-align:left;white-space:normal;word-break:break-word;padding:8px 10px 8px 14px;transform:translateZ(0);isolation:isolate;cursor:pointer}
+.table-scroll tbody td:first-child::after{content:'';position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--separator);pointer-events:none}
 .table-scroll tbody tr:last-child td{border-bottom:none}
 .table-scroll tbody tr{cursor:pointer}
 .table-scroll tbody tr.row-fresh td{background:var(--green-row)}
@@ -217,37 +113,17 @@ button.busy::before{
 .table-scroll tbody tr.row-danger td{background:var(--red-row)}
 .table-scroll tbody tr.row-info td{background:var(--blue-row)}
 .table-scroll tbody tr.row-unknown td{background:var(--bg-card)}
-.table-scroll tbody tr.row-fresh td:first-child{
-  background:linear-gradient(var(--green-row),var(--green-row)),var(--bg-card);
-}
-.table-scroll tbody tr.row-warn td:first-child{
-  background:linear-gradient(var(--orange-row),var(--orange-row)),var(--bg-card);
-}
-.table-scroll tbody tr.row-danger td:first-child{
-  background:linear-gradient(var(--red-row),var(--red-row)),var(--bg-card);
-}
-.table-scroll tbody tr.row-info td:first-child{
-  background:linear-gradient(var(--blue-row),var(--blue-row)),var(--bg-card);
-}
+.table-scroll tbody tr.row-fresh td:first-child{background:linear-gradient(var(--green-row),var(--green-row)),var(--bg-card)}
+.table-scroll tbody tr.row-warn td:first-child{background:linear-gradient(var(--orange-row),var(--orange-row)),var(--bg-card)}
+.table-scroll tbody tr.row-danger td:first-child{background:linear-gradient(var(--red-row),var(--red-row)),var(--bg-card)}
+.table-scroll tbody tr.row-info td:first-child{background:linear-gradient(var(--blue-row),var(--blue-row)),var(--bg-card)}
 .table-scroll tbody tr.row-unknown td:first-child{background:var(--bg-card)}
-.table-scroll tbody tr:hover td:first-child{
-  background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card);
-}
-.table-scroll tbody tr.row-fresh:hover td:first-child{
-  background:linear-gradient(var(--green-row-hover),var(--green-row-hover)),var(--bg-card);
-}
-.table-scroll tbody tr.row-warn:hover td:first-child{
-  background:linear-gradient(var(--orange-row-hover),var(--orange-row-hover)),var(--bg-card);
-}
-.table-scroll tbody tr.row-danger:hover td:first-child{
-  background:linear-gradient(var(--red-row-hover),var(--red-row-hover)),var(--bg-card);
-}
-.table-scroll tbody tr.row-info:hover td:first-child{
-  background:linear-gradient(var(--blue-row-hover),var(--blue-row-hover)),var(--bg-card);
-}
-.table-scroll tbody tr.row-unknown:hover td:first-child{
-  background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card);
-}
+.table-scroll tbody tr:hover td:first-child{background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card)}
+.table-scroll tbody tr.row-fresh:hover td:first-child{background:linear-gradient(var(--green-row-hover),var(--green-row-hover)),var(--bg-card)}
+.table-scroll tbody tr.row-warn:hover td:first-child{background:linear-gradient(var(--orange-row-hover),var(--orange-row-hover)),var(--bg-card)}
+.table-scroll tbody tr.row-danger:hover td:first-child{background:linear-gradient(var(--red-row-hover),var(--red-row-hover)),var(--bg-card)}
+.table-scroll tbody tr.row-info:hover td:first-child{background:linear-gradient(var(--blue-row-hover),var(--blue-row-hover)),var(--bg-card)}
+.table-scroll tbody tr.row-unknown:hover td:first-child{background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card)}
 .table-scroll tbody tr.row-fresh:hover td{background:var(--green-row-hover)}
 .table-scroll tbody tr.row-warn:hover td{background:var(--orange-row-hover)}
 .table-scroll tbody tr.row-danger:hover td{background:var(--red-row-hover)}
@@ -256,9 +132,7 @@ button.busy::before{
 .table-scroll tbody tr.row-fresh td:first-child::before,
 .table-scroll tbody tr.row-warn td:first-child::before,
 .table-scroll tbody tr.row-danger td:first-child::before,
-.table-scroll tbody tr.row-info td:first-child::before{
-  content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:2px;
-}
+.table-scroll tbody tr.row-info td:first-child::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:2px}
 .table-scroll tbody tr.row-fresh td:first-child::before{background:var(--green)}
 .table-scroll tbody tr.row-warn td:first-child::before{background:var(--orange)}
 .table-scroll tbody tr.row-danger td:first-child::before{background:var(--red)}
@@ -267,31 +141,14 @@ button.busy::before{
 .name-cell .name-text{flex:1 1 auto;min-width:0;word-break:break-word}
 .name-cell .edit-hint{flex:0 0 auto;font-size:14px;opacity:.35;margin-top:1px;display:none}
 @media (max-width:640px){.name-cell .edit-hint{display:inline-block}}
-.num{
-  width:60px;min-width:60px;max-width:60px;height:38px;padding:0 4px;
-  border:0;border-radius:10px;font-size:15px;text-align:center;
-  background:var(--bg-input);color:var(--text);font-weight:600;
-  -webkit-appearance:none;appearance:none;line-height:38px;font-family:inherit;
-  transition:box-shadow .15s,background .15s;margin:0;display:inline-block;vertical-align:middle;
-}
+.num{width:60px;min-width:60px;max-width:60px;height:38px;padding:0 4px;border:0;border-radius:10px;font-size:15px;text-align:center;background:var(--bg-input);color:var(--text);font-weight:600;-webkit-appearance:none;appearance:none;line-height:38px;font-family:inherit;transition:box-shadow .15s,background .15s;margin:0;display:inline-block;vertical-align:middle}
 .num:focus{outline:none;box-shadow:0 0 0 2px var(--accent);background:var(--bg-card)}
-.num::-webkit-outer-spin-button,
-.num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.num::-webkit-outer-spin-button,.num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .num[type=number]{-moz-appearance:textfield}
-.num-disabled{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:60px;min-width:60px;height:38px;
-  color:var(--text-tertiary);font-weight:600;font-size:15px;
-  user-select:none;vertical-align:middle;
-}
+.num-disabled{display:inline-flex;align-items:center;justify-content:center;width:60px;min-width:60px;height:38px;color:var(--text-tertiary);font-weight:600;font-size:15px;user-select:none;vertical-align:middle}
 .income-cell{position:relative;padding:8px 4px !important;text-align:center}
 .income-cell.edited .num{background:var(--orange-soft);box-shadow:0 0 0 1.5px var(--orange)}
-.income-cell .reset-btn{
-  position:absolute;top:0;right:4px;width:20px;height:20px;padding:0;
-  border-radius:50%;background:var(--orange);color:#fff;font-size:11px;font-weight:800;
-  display:none;z-index:3;min-height:auto;border:2px solid var(--bg-card);
-  line-height:1;align-items:center;justify-content:center;
-}
+.income-cell .reset-btn{position:absolute;top:0;right:4px;width:20px;height:20px;padding:0;border-radius:50%;background:var(--orange);color:#fff;font-size:11px;font-weight:800;display:none;z-index:3;min-height:auto;border:2px solid var(--bg-card);line-height:1;align-items:center;justify-content:center}
 .income-cell.edited .reset-btn{display:inline-flex}
 .calc-cell{text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
 .calc-cell.zero{color:var(--text-tertiary)}
@@ -299,139 +156,71 @@ button.busy::before{
 .calc-cell[data-role="soldExpired"].positive{color:var(--red)}
 @media (max-width:640px){
   .table-scroll thead th:nth-child(2),
-  .table-scroll tbody td:nth-child(2){
-    position:sticky;left:160px;z-index:14;
-    transform:translateZ(0);isolation:isolate;
-    box-shadow:4px 0 8px -4px rgba(0,0,0,.06);
-  }
+  .table-scroll tbody td:nth-child(2){position:sticky;left:160px;z-index:14;transform:translateZ(0);isolation:isolate;box-shadow:4px 0 8px -4px rgba(0,0,0,.06)}
   .table-scroll thead th:nth-child(2){z-index:24;background:var(--bg-card)}
-  .table-scroll tbody tr.row-fresh td:nth-child(2){
-    background:linear-gradient(var(--green-row),var(--green-row)),var(--bg-card);
-  }
-  .table-scroll tbody tr.row-warn td:nth-child(2){
-    background:linear-gradient(var(--orange-row),var(--orange-row)),var(--bg-card);
-  }
-  .table-scroll tbody tr.row-danger td:nth-child(2){
-    background:linear-gradient(var(--red-row),var(--red-row)),var(--bg-card);
-  }
-  .table-scroll tbody tr.row-info td:nth-child(2){
-    background:linear-gradient(var(--blue-row),var(--blue-row)),var(--bg-card);
-  }
+  .table-scroll tbody tr.row-fresh td:nth-child(2){background:linear-gradient(var(--green-row),var(--green-row)),var(--bg-card)}
+  .table-scroll tbody tr.row-warn td:nth-child(2){background:linear-gradient(var(--orange-row),var(--orange-row)),var(--bg-card)}
+  .table-scroll tbody tr.row-danger td:nth-child(2){background:linear-gradient(var(--red-row),var(--red-row)),var(--bg-card)}
+  .table-scroll tbody tr.row-info td:nth-child(2){background:linear-gradient(var(--blue-row),var(--blue-row)),var(--bg-card)}
   .table-scroll tbody tr.row-unknown td:nth-child(2){background:var(--bg-card)}
-  .table-scroll tbody tr:hover td:nth-child(2){
-    background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card);
-  }
-  .table-scroll tbody tr.row-fresh:hover td:nth-child(2){
-    background:linear-gradient(var(--green-row-hover),var(--green-row-hover)),var(--bg-card);
-  }
-  .table-scroll tbody tr.row-warn:hover td:nth-child(2){
-    background:linear-gradient(var(--orange-row-hover),var(--orange-row-hover)),var(--bg-card);
-  }
-  .table-scroll tbody tr.row-danger:hover td:nth-child(2){
-    background:linear-gradient(var(--red-row-hover),var(--red-row-hover)),var(--bg-card);
-  }
-  .table-scroll tbody tr.row-info:hover td:nth-child(2){
-    background:linear-gradient(var(--blue-row-hover),var(--blue-row-hover)),var(--bg-card);
-  }
-  .table-scroll tbody tr.row-unknown:hover td:nth-child(2){
-    background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card);
-  }
+  .table-scroll tbody tr:hover td:nth-child(2){background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card)}
+  .table-scroll tbody tr.row-fresh:hover td:nth-child(2){background:linear-gradient(var(--green-row-hover),var(--green-row-hover)),var(--bg-card)}
+  .table-scroll tbody tr.row-warn:hover td:nth-child(2){background:linear-gradient(var(--orange-row-hover),var(--orange-row-hover)),var(--bg-card)}
+  .table-scroll tbody tr.row-danger:hover td:nth-child(2){background:linear-gradient(var(--red-row-hover),var(--red-row-hover)),var(--bg-card)}
+  .table-scroll tbody tr.row-info:hover td:nth-child(2){background:linear-gradient(var(--blue-row-hover),var(--blue-row-hover)),var(--bg-card)}
+  .table-scroll tbody tr.row-unknown:hover td:nth-child(2){background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card)}
 }
-.modal{
-  position:fixed;inset:0;z-index:1000;
-  background:rgba(0,0,0,.5);
-  display:flex;align-items:center;justify-content:center;
-  padding:20px;
-}
+.modal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px}
 .modal.hidden{display:none}
-.modal-content{
-  background:var(--bg-card);border-radius:16px;
-  width:100%;max-width:520px;max-height:88vh;overflow:auto;
-  padding:24px;animation:modalIn .2s cubic-bezier(.16,1,.3,1);
-  -webkit-overflow-scrolling:touch;
-}
+.modal-content{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;max-height:88vh;overflow:auto;padding:24px;animation:modalIn .2s cubic-bezier(.16,1,.3,1);-webkit-overflow-scrolling:touch}
 @keyframes modalIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
 .modal-handle{display:none}
 .modal-content h3{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.25}
 .modal-content .product-shelf{font-size:12px;color:var(--text-secondary);margin-bottom:14px}
 .product-form{display:flex;flex-direction:column;gap:14px}
-.pf-section-title{
-  font-size:10.5px;font-weight:700;color:var(--text-secondary);
-  text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;
-}
+.pf-section-title{font-size:10.5px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
 .pf-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
 .pf-row-dates{display:flex;flex-direction:column;gap:8px}
 .pf-date-row{display:grid;grid-template-columns:70px 1fr;gap:8px;align-items:center}
 .pf-date-label{font-size:13px;font-weight:600;color:var(--text-secondary);font-variant-numeric:tabular-nums}
-.pf-num{
-  width:100%;height:44px;padding:0 12px;border:0;border-radius:12px;
-  background:var(--bg-input);color:var(--text);
-  font-size:17px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;
-  -webkit-appearance:none;appearance:none;font-family:inherit;line-height:44px;
-  transition:box-shadow .15s,background .15s;
-}
+.pf-num{width:100%;height:44px;padding:0 12px;border:0;border-radius:12px;background:var(--bg-input);color:var(--text);font-size:17px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none;font-family:inherit;line-height:44px;transition:box-shadow .15s,background .15s}
 .pf-num:focus{outline:none;box-shadow:0 0 0 2.5px var(--accent);background:var(--bg-card)}
-.pf-num::-webkit-outer-spin-button,
-.pf-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.pf-num::-webkit-outer-spin-button,.pf-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .pf-num[type=number]{-moz-appearance:textfield}
-.pf-btn{
-  width:44px;height:44px;padding:0;border-radius:12px;
-  background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator);
-  font-size:18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;
-  user-select:none;-webkit-user-select:none;cursor:pointer;
-  transition:transform .12s var(--spring),background .12s;
-}
+.pf-btn{width:44px;height:44px;padding:0;border-radius:12px;background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator);font-size:18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;cursor:pointer;transition:transform .12s var(--spring),background .12s}
 .pf-btn:active{transform:scale(.94);background:var(--bg-hover)}
 .pf-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
-.pf-actions button{
-  min-height:44px;border:0;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;
-  display:inline-flex;align-items:center;justify-content:center;font-family:inherit;
-  transition:transform .12s var(--spring),background .12s;
-}
+.pf-actions button{min-height:44px;border:0;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;transition:transform .12s var(--spring),background .12s}
 .pf-actions button:active{transform:scale(.97)}
 .pf-cancel{background:var(--bg-elev-2);color:var(--text);border:1.5px solid var(--separator-opaque)!important}
 .pf-commit{background:#0a84ff;color:#fff}
-#catalogModalContent{
-  display:flex;flex-direction:column;
-  max-height:88vh;overflow:hidden;
-}
-#catalogList{
-  flex:1 1 auto;min-height:0;
-  max-height:none;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-  margin-bottom:14px;
-}
-@media (max-width:640px){
-  .modal{align-items:flex-end;padding:0}
-  .modal-content{
-    border-radius:20px 20px 0 0;max-width:none;max-height:92vh;padding:20px;
-    padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));
-    animation:slideUp .3s cubic-bezier(.16,1,.3,1);
-  }
-  #catalogModalContent{max-height:92vh}
-  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-  .modal-handle{
-    display:block;width:40px;height:4px;
-    background:var(--separator-opaque);border-radius:2px;margin:0 auto 16px;
-  }
-  .modal-content h3{font-size:19px}
-  .modal-content .product-shelf{font-size:13px;margin-bottom:18px}
-  .product-form{gap:18px}
-  .pf-section-title{font-size:11px;margin-bottom:8px}
-  .pf-row{gap:10px}
-  .pf-row-dates{gap:10px}
-  .pf-date-row{grid-template-columns:80px 1fr;gap:10px}
-  .pf-date-label{font-size:14px}
-  .pf-num{height:54px;font-size:22px;line-height:54px;border-radius:14px;padding:0 14px}
-  .pf-btn{width:54px;height:54px;font-size:22px;border-radius:14px}
-  .pf-actions{gap:10px;margin-top:8px}
-  .pf-actions button{min-height:54px;font-size:16px;border-radius:14px}
-}
-.legend{
-  display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:14px;padding:12px 14px;
-  background:var(--bg-input);border-radius:var(--r-sm);font-size:12px;color:var(--text-secondary);
-}
+#catalogModalContent{display:flex;flex-direction:column;max-height:88vh;overflow:hidden}
+#catalogList{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
+#unknownModalContent{display:flex;flex-direction:column;max-height:88vh;overflow:hidden}
+#unknownBody{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
+.unknown-item{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input);margin-bottom:8px}
+.unknown-item input[type=checkbox]{width:22px;height:22px;margin-top:4px;accent-color:var(--accent);cursor:pointer;flex:0 0 auto}
+.unknown-body{min-width:0}
+.unknown-name{font-size:14px;font-weight:600;word-break:break-word;margin-bottom:6px}
+.unknown-info{font-size:12.5px;color:var(--text-secondary);line-height:1.5;margin-bottom:6px}
+.unknown-info .kv{display:inline-block;margin-right:12px;white-space:nowrap}
+.unknown-info .kv b{color:var(--text);font-weight:600}
+.unknown-shelf{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary)}
+.unknown-shelf input[type=number]{width:80px;min-height:36px;height:36px;padding:0 8px;font-size:14px;font-weight:600;text-align:center}
+.unknown-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.unknown-actions .full{grid-column:1 / -1}
+.unknown-search{margin-bottom:10px}
+.unknown-search input{min-height:40px;padding:8px 12px;font-size:14px}
+.unknown-counter{font-size:12px;color:var(--text-secondary);margin-bottom:10px}
+.unknown-load-more{padding:10px;text-align:center;color:var(--accent);font-weight:600;font-size:13px;cursor:pointer;user-select:none}
+.unknown-load-more:active{opacity:.6}
+#ignoredModalContent{display:flex;flex-direction:column;max-height:88vh;overflow:hidden}
+#ignoredList{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
+.ignored-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
+.ignored-row:hover{background:var(--bg-hover)}
+.ignored-row .name{font-size:14px;word-break:break-word}
+.ignored-row .del-btn{min-height:36px;padding:6px 12px;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:12.5px;font-weight:700;border-radius:8px}
+.legend{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:14px;padding:12px 14px;background:var(--bg-input);border-radius:var(--r-sm);font-size:12px;color:var(--text-secondary)}
 .legend-item{display:inline-flex;align-items:center;gap:5px}
 .legend-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
 .legend-dot.fresh{background:var(--green)}
@@ -440,49 +229,34 @@ button.busy::before{
 .legend-dot.unknown{background:var(--text-tertiary)}
 .legend-dot.info{background:var(--blue)}
 .legend-dot.edited{background:var(--orange);border:1px solid var(--orange)}
-.steps-hint{
-  background:var(--bg-input);border:1px solid var(--separator);border-radius:var(--r-sm);
-  padding:12px 14px;font-size:13px;line-height:1.55;color:var(--text-secondary);margin-bottom:12px;
-}
+.steps-hint{background:var(--bg-input);border:1px solid var(--separator);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;line-height:1.55;color:var(--text-secondary);margin-bottom:12px}
 .steps-hint b{color:var(--text);font-weight:700}
 .steps-hint ol{margin:5px 0 0 18px;padding:0}
 .steps-hint li{margin-bottom:4px}
-.ai-help{
-  padding:12px 14px;border-radius:var(--r-sm);background:var(--bg-input);
-  border:1px solid var(--separator);font-size:12.5px;line-height:1.5;color:var(--text-secondary);
-}
+.ai-help{padding:12px 14px;border-radius:var(--r-sm);background:var(--bg-input);border:1px solid var(--separator);font-size:12.5px;line-height:1.5;color:var(--text-secondary)}
 .ai-help b{color:var(--text)}
 .action-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 @media (max-width:500px){.action-buttons{grid-template-columns:1fr}}
 .photo-queue{display:grid;gap:8px;margin-top:10px}
-.photo-item{
-  display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;
-  padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input);
-}
+.photo-item{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input)}
 .photo-thumb{width:48px;height:48px;object-fit:cover;border-radius:10px;background:var(--bg-elev-2)}
 .photo-meta{min-width:0}
 .photo-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .photo-type{font-size:11px;color:var(--text-secondary);margin-top:2px}
 .photo-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .photo-actions button{min-height:36px;padding:6px 12px;font-size:12.5px}
-pre.code{
-  background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm);
-  font-size:11.5px;line-height:1.55;overflow:auto;max-height:60vh;
-  white-space:pre-wrap;word-break:break-word;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #1e293b;
-}
+pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm);font-size:11.5px;line-height:1.55;overflow:auto;max-height:60vh;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #1e293b}
 .save-card{padding:18px}
 .save-card .save-btn{min-height:48px;margin-bottom:8px}
 .save-card .save-btn:last-of-type{margin-bottom:0}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(0,0,0,.85);color:#fff;font-size:14px;font-weight:600;padding:12px 20px;border-radius:12px;z-index:9999;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media (min-width:641px){
   :root{--header-h:88px}
   .app-header{padding:14px 20px;padding-top:calc(14px + env(safe-area-inset-top,0px))}
   .header-text h1{font-size:19px}
   .logo{width:46px;height:46px}
-  main{
-    padding:20px 20px calc(32px + env(safe-area-inset-bottom,0px));
-    padding-top:calc(var(--header-h) + env(safe-area-inset-top,0px));
-  }
+  main{padding:20px 20px calc(32px + env(safe-area-inset-bottom,0px));padding-top:calc(var(--header-h) + env(safe-area-inset-top,0px))}
   .card{padding:22px;border-radius:22px}
   input[type=text],input[type=number],textarea{padding:11px 14px;font-size:15px;min-height:44px}
   textarea{font-size:13px;min-height:200px}
@@ -504,19 +278,11 @@ pre.code{
   :root{--header-h:70px}
   .auto-datetime{grid-template-columns:1fr}
 }
-.cat-row{
-  display:grid;grid-template-columns:1fr 80px 40px;gap:8px;align-items:center;
-  padding:8px;border-radius:var(--r-sm);
-}
+.cat-row{display:grid;grid-template-columns:1fr 80px 40px;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
 .cat-row:hover{background:var(--bg-hover)}
-.cat-row input[type=text],.cat-row input[type=number]{
-  padding:8px 10px;font-size:13px;min-height:38px;border-radius:8px;
-}
+.cat-row input[type=text],.cat-row input[type=number]{padding:8px 10px;font-size:13px;min-height:38px;border-radius:8px}
 .cat-row input[type=number]{text-align:center;font-weight:700;color:var(--accent)}
-.cat-row .del-btn{
-  min-height:38px;padding:0;background:var(--red-soft);color:var(--red);
-  border:1px solid var(--red-soft);font-size:14px;font-weight:800;
-}
+.cat-row .del-btn{min-height:38px;padding:0;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:14px;font-weight:800}
 .cat-row .del-btn:hover{background:var(--red);color:#fff;border-color:var(--red)}
 </style>
 </head>
@@ -599,8 +365,8 @@ pre.code{
     </div>
     <input id="csvFileInput" type="file" accept=".csv,text/csv" hidden>
     <textarea id="csvInput" maxlength="2000000" placeholder="Наименование;Получено за 17.09;Получено за 18.09;Продано сегодня;Срок годности
-Слойка со сливой;4;2;0;18 часов
-Шатель;3;3;5;36 часов"></textarea>
+Слойка со сливой;4;2;0;18
+Шатель;3;3;5;36"></textarea>
     <button id="applyCsvBtn" class="success block" style="margin-top:12px">✅ Применить CSV</button>
     <div id="csvStatus" class="status"></div>
   </div>
@@ -616,6 +382,10 @@ pre.code{
       <button id="importCatalogBtn" class="secondary">📥 Импорт JSON</button>
       <button id="resetCatalogBtn" class="secondary">↺ Сбросить</button>
     </div>
+    <div class="action-buttons">
+      <button id="ignoredBtn" class="warn">🚫 Игнор-лист (<span id="ignoredCount">0</span>)</button>
+      <button id="clearIgnoredBtn" class="secondary">Очистить игнор</button>
+    </div>
     <input id="importCatalogFile" type="file" accept=".json,application/json" hidden>
     <div id="catalogStatus" class="status"></div>
   </div>
@@ -628,6 +398,10 @@ pre.code{
       <span class="item">📅 <b id="metaDate">—</b></span>
       <span class="item">🕐 <b id="metaTime">—</b></span>
       <span class="item" id="metaPointWrap">📍 <b id="metaPoint">—</b></span>
+    </div>
+
+    <div id="unknownBanner" style="display:none;margin-bottom:12px">
+      <button id="openUnknownBtn" class="warn block">⚠️ Не в справочнике (<span id="unknownCount">0</span>) — нажмите, чтобы разобрать</button>
     </div>
 
     <div class="table-wrap" id="tableWrap" style="display:none">
@@ -658,7 +432,7 @@ pre.code{
     <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v7.0
+      French Bakery Аудит · v7.2
     </div>
   </div>
 
@@ -732,6 +506,34 @@ pre.code{
   </div>
 </div>
 
+<div id="unknownModal" class="modal hidden">
+  <div class="modal-content" id="unknownModalContent">
+    <div class="modal-handle"></div>
+    <h3>⚠️ Не в справочнике</h3>
+    <p class="hint">Позиции из CSV, которых нет в справочнике. Отметьте те, что нужно добавить, или проигнорируйте.</p>
+    <div id="unknownCounter" class="unknown-counter"></div>
+    <div class="unknown-search" id="unknownSearchWrap" style="display:none">
+      <input id="unknownSearch" type="text" placeholder="🔍 Поиск по названию..." autocomplete="off" maxlength="100">
+    </div>
+    <div id="unknownBody"></div>
+    <div class="unknown-actions">
+      <button id="unknownAddBtn" class="success">➕ Добавить выбранные</button>
+      <button id="unknownIgnoreBtn" class="warn">🚫 Игнорировать все</button>
+      <button id="unknownCloseBtn" class="secondary full">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<div id="ignoredModal" class="modal hidden">
+  <div class="modal-content" id="ignoredModalContent">
+    <div class="modal-handle"></div>
+    <h3>🚫 Игнор-лист</h3>
+    <p class="hint">Эти позиции не будут появляться в списке «Не в справочнике».</p>
+    <div id="ignoredList"></div>
+    <button id="closeIgnoredBtn" class="secondary block">Закрыть</button>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 'use strict';
@@ -750,11 +552,18 @@ const TIME_UPDATE_MS = 30 * 1000;
 const SESSION_KEY = 'fbAuditSessionV5';
 const SESSION_VERSION = 5;
 const CATALOG_KEY = 'fbAuditProducts';
+const IGNORED_KEY = 'fbAuditIgnored';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
+const UNKNOWN_PAGE_SIZE = 30;
+const UNKNOWN_SEARCH_THRESHOLD = 20;
 
 let PRODUCTS = [];
+let IGNORED = [];
 let tableRows = [];
+let unknownRows = [];
+let unknownVisible = UNKNOWN_PAGE_SIZE;
+let unknownQuery = '';
 let isRestoring = false;
 let saveTimer = null;
 let isRendering = false;
@@ -847,6 +656,9 @@ function formatDateRu(iso) {
   const year = parts[0];
   const weekday = ['вс','пн','вт','ср','чт','пт','сб'][new Date(iso + 'T00:00:00').getDay()];
   return `${day} ${months[monthIdx]} ${year}, ${weekday}`;
+}
+function normalizeName(s) {
+  return String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
 }
 
 function updateAutoDate() { const el = $('autoDate'); if (el) el.textContent = formatDateRu(getTodayStr()); }
@@ -941,6 +753,39 @@ function saveCatalog() {
   try { localStorage.setItem(CATALOG_KEY, JSON.stringify(PRODUCTS)); }
   catch (e) { console.warn('saveCatalog:', e); }
 }
+function loadIgnored() {
+  try {
+    const raw = localStorage.getItem(IGNORED_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    const seen = new Set();
+    const out = [];
+    for (const item of arr.slice(0, MAX_CATALOG)) {
+      if (typeof item !== 'string') continue;
+      const name = item.trim().slice(0, MAX_NAME);
+      if (!name) continue;
+      const key = normalizeName(name);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(name);
+    }
+    return out;
+  } catch (e) { return []; }
+}
+function saveIgnored() {
+  try { localStorage.setItem(IGNORED_KEY, JSON.stringify(IGNORED)); }
+  catch (e) { console.warn('saveIgnored:', e); }
+  updateIgnoredCount();
+}
+function isIgnored(name) {
+  const key = normalizeName(name);
+  return IGNORED.some(i => normalizeName(i) === key);
+}
+function updateIgnoredCount() {
+  const el = $('ignoredCount');
+  if (el) el.textContent = String(IGNORED.length);
+}
 
 function getCheckMoment() {
   const dateStr = getTodayStr();
@@ -1015,9 +860,7 @@ function computeFIFO(row) {
   const expiredSold = Math.max(0, sales - freshSold);
   return { soldExpired: expiredSold, expiredOnShelf, freshOnShelf, freshSold };
 }
-function emptyResult() {
-  return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null };
-}
+function emptyResult() { return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null }; }
 function getRowStatus(calc, row) {
   if (row && row.salesOnly) return { cls: 'row-info', label: 'info' };
   if (!calc || calc.soldExpired === null) return { cls: 'row-unknown', label: 'unknown' };
@@ -1132,7 +975,7 @@ function parseCSV(text, referenceDate) {
       name,
       stock: idxStock >= 0 ? parseNum(vals[idxStock]) : (salesOnlyMode ? 0 : ''),
       sales: salesVal === '' ? 0 : salesVal,
-      shelfLife: shelfRaw && shelfRaw > 0 ? shelfRaw : 72,
+      shelfLife: shelfRaw,
       incoming,
       salesOnly: salesOnlyMode
     });
@@ -1165,10 +1008,7 @@ async function addPhotos(files, type) {
   if (!files || !files.length) return;
   try {
     const existing = await getPhotos();
-    if (existing.length + files.length > MAX_PHOTOS) {
-      alert(`Максимум ${MAX_PHOTOS} файлов.`);
-      return;
-    }
+    if (existing.length + files.length > MAX_PHOTOS) { alert(`Максимум ${MAX_PHOTOS} файлов.`); return; }
     const db = await openPhotoDB();
     await Promise.all([...files].map(file => new Promise((resolve, reject) => {
       const tx = db.transaction(PHOTO_STORE, 'readwrite');
@@ -1227,11 +1067,8 @@ async function renderPhotoQueue() {
     const img = document.createElement('img');
     img.className = 'photo-thumb';
     if (item.kind && item.kind.startsWith('image/')) {
-      try {
-        const url = URL.createObjectURL(item.blob);
-        img.src = url;
-        img.onload = () => URL.revokeObjectURL(url);
-      } catch (e) { img.src = ''; }
+      try { const url = URL.createObjectURL(item.blob); img.src = url; img.onload = () => URL.revokeObjectURL(url); }
+      catch (e) { img.src = ''; }
     } else {
       img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect width="100%" height="100%" rx="10" fill="#e2e8f0"/><text x="50%" y="55%" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">PDF</text></svg>');
     }
@@ -1242,8 +1079,7 @@ async function renderPhotoQueue() {
     const acts = document.createElement('div');
     acts.className = 'photo-actions';
     const del = document.createElement('button');
-    del.className = 'secondary';
-    del.textContent = 'Удалить';
+    del.className = 'secondary'; del.textContent = 'Удалить';
     del.onclick = () => deletePhoto(item.id);
     acts.append(del);
     row.append(img, meta, acts);
@@ -1270,6 +1106,11 @@ function saveSession() {
           date: p.date, qty: p.qty,
           _originalQty: p._originalQty != null ? p._originalQty : p.qty
         })),
+        salesOnly: !!r.salesOnly
+      })),
+      unknown: unknownRows.slice(0, MAX_ROWS).map(r => ({
+        name: r.name, sales: r.sales, shelfLife: r.shelfLife,
+        incoming: (r.incoming || []).slice(0, MAX_DATES).map(p => ({ date: p.date, qty: p.qty })),
         salesOnly: !!r.salesOnly
       }))
     };
@@ -1315,6 +1156,17 @@ function applySession(data) {
         salesOnly: !!r.salesOnly
       })).filter(r => r.name);
     } else tableRows = [];
+    if (Array.isArray(data.unknown) && data.unknown.length) {
+      unknownRows = data.unknown.slice(0, MAX_ROWS).map(r => ({
+        name: safeStr(r.name, MAX_NAME),
+        sales: clampNum(r.sales, 0, MAX_NUM, 0),
+        shelfLife: r.shelfLife === 0 || r.shelfLife == null ? 0 : clampNum(r.shelfLife, 1, 10000, 72),
+        incoming: Array.isArray(r.incoming)
+          ? r.incoming.slice(0, MAX_DATES).map(p => ({ date: typeof p.date === 'string' ? p.date : '', qty: clampNum(p.qty, 0, MAX_NUM, 0) })).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date))
+          : [],
+        salesOnly: !!r.salesOnly
+      })).filter(r => r.name);
+    } else unknownRows = [];
     return true;
   } finally { isRestoring = false; }
 }
@@ -1377,15 +1229,9 @@ function tableKey(e) {
 
 function buildColgroupHTML(dates) {
   const cols = [
-    '<col style="width:220px">',
-    '<col style="width:76px">',
-    '<col style="width:76px">',
+    '<col style="width:220px">','<col style="width:76px">','<col style="width:76px">',
     ...dates.map(() => '<col style="width:84px">'),
-    '<col style="width:60px">',
-    '<col style="width:92px">',
-    '<col style="width:92px">',
-    '<col style="width:96px">',
-    '<col style="width:96px">'
+    '<col style="width:60px">','<col style="width:92px">','<col style="width:92px">','<col style="width:96px">','<col style="width:96px">'
   ];
   return cols.join('');
 }
@@ -1427,7 +1273,6 @@ function renderTable() {
     if (dates.length > MAX_DATES) dates = dates.slice(0, MAX_DATES);
     colgroup.innerHTML = buildColgroupHTML(dates);
     theadTr.innerHTML = buildTheadHTML(dates);
-
     const fragment = document.createDocumentFragment();
     tableRows.forEach(row => {
       const calc = computeFIFO(row);
@@ -1435,7 +1280,6 @@ function renderTable() {
       const tr = document.createElement('tr');
       tr.classList.add(status.cls);
       tr.dataset.status = status.label;
-
       const tdName = document.createElement('td');
       tdName.title = row.name;
       const nameCell = document.createElement('div');
@@ -1450,7 +1294,6 @@ function renderTable() {
       nameCell.appendChild(editHint);
       tdName.appendChild(nameCell);
       tr.appendChild(tdName);
-
       const tdStock = document.createElement('td');
       if (row.salesOnly) {
         const span = document.createElement('span');
@@ -1481,7 +1324,6 @@ function renderTable() {
         tdStock.appendChild(inputStock);
       }
       tr.appendChild(tdStock);
-
       const tdSales = document.createElement('td');
       const inputSales = document.createElement('input');
       inputSales.type = 'number';
@@ -1504,7 +1346,6 @@ function renderTable() {
       inputSales.addEventListener('keydown', tableKey);
       tdSales.appendChild(inputSales);
       tr.appendChild(tdSales);
-
       dates.forEach(d => {
         const td = document.createElement('td');
         td.className = 'income-cell';
@@ -1539,15 +1380,12 @@ function renderTable() {
           inp.addEventListener('focus', e => e.stopPropagation());
           inp.addEventListener('keydown', tableKey);
           td.appendChild(inp);
-
           const resetBtn = document.createElement('button');
           resetBtn.className = 'reset-btn';
           resetBtn.type = 'button';
           resetBtn.title = 'Сбросить';
           resetBtn.textContent = '↺';
-          if (party && party._originalQty != null && party._originalQty !== party.qty) {
-            td.classList.add('edited');
-          }
+          if (party && party._originalQty != null && party._originalQty !== party.qty) td.classList.add('edited');
           resetBtn.addEventListener('click', e => {
             e.stopPropagation();
             if (!party) return;
@@ -1563,23 +1401,19 @@ function renderTable() {
         }
         tr.appendChild(td);
       });
-
       const tdShelf = document.createElement('td');
       tdShelf.textContent = `${row.shelfLife} ч`;
       tr.appendChild(tdShelf);
-
       const tdFresh = document.createElement('td');
       tdFresh.className = 'calc-cell' + (calc.freshOnShelf === null ? ' zero' : '');
       tdFresh.textContent = calc.freshOnShelf === null ? '—' : calc.freshOnShelf;
       tdFresh.dataset.role = 'freshOnShelf';
       tr.appendChild(tdFresh);
-
       const tdFreshSold = document.createElement('td');
       tdFreshSold.className = 'calc-cell' + (calc.freshSold === null ? ' zero' : '');
       tdFreshSold.textContent = calc.freshSold === null ? '—' : calc.freshSold;
       tdFreshSold.dataset.role = 'freshSold';
       tr.appendChild(tdFreshSold);
-
       const tdExp = document.createElement('td');
       tdExp.className = 'calc-cell';
       tdExp.textContent = calc.expiredOnShelf === null ? '—' : calc.expiredOnShelf;
@@ -1587,7 +1421,6 @@ function renderTable() {
       else if (calc.expiredOnShelf > 0) tdExp.classList.add('positive');
       tdExp.dataset.role = 'expiredOnShelf';
       tr.appendChild(tdExp);
-
       const tdSoldExp = document.createElement('td');
       tdSoldExp.className = 'calc-cell';
       tdSoldExp.textContent = calc.soldExpired === null ? '—' : calc.soldExpired;
@@ -1595,21 +1428,17 @@ function renderTable() {
       else if (calc.soldExpired > 0) tdSoldExp.classList.add('positive');
       tdSoldExp.dataset.role = 'soldExpired';
       tr.appendChild(tdSoldExp);
-
       tr.addEventListener('click', e => {
         if (e.target.closest('input')) return;
         if (e.target.closest('button')) return;
         openProduct(row, tr);
       });
-
       fragment.appendChild(tr);
     });
     tbody.appendChild(fragment);
     updateTotals();
     updateResultMeta();
-  } finally {
-    isRendering = false;
-  }
+  } finally { isRendering = false; }
 }
 function markEdited(td, party, newQty) {
   if (!party) return;
@@ -1656,7 +1485,7 @@ function updateTotals() {
     totalSales += Number(row.sales) || 0;
   }
   const isSalesOnlyMode = cntInfo > 0 && cntInfo === tableRows.length;
-  if (isSalesOnlyMode) summary.textContent = `📋 Режим «только продажи»: ${tableRows.length} позиций. Накладные не загружены.`;
+  if (isSalesOnlyMode) summary.textContent = `📋 Режим «только продажи»: ${tableRows.length} позиций.`;
   else if (cntInfo > 0) summary.textContent = `Позиций: ${tableRows.length} (без накладных: ${cntInfo}).`;
   else summary.textContent = hasAnyStock ? `Позиций: ${tableRows.length}.` : `Позиций: ${tableRows.length}. Введите остаток для расчёта.`;
   const box = $('totals');
@@ -1720,7 +1549,6 @@ function openProduct(row, tr) {
   $('pmShelf').textContent = `Срок годности: ${row.shelfLife} ч`;
   $('pmStock').value = row.stock === '' ? '' : row.stock;
   $('pmSales').value = row.sales || 0;
-
   const box = $('pmIncoming');
   box.innerHTML = '';
   const dates = [...new Set((row.incoming || []).map(p => p.date))].sort((a, b) => b.localeCompare(a));
@@ -1790,6 +1618,146 @@ function cancelProduct() {
   closeProduct();
 }
 
+function renderUnknownModal() {
+  const body = $('unknownBody');
+  const counter = $('unknownCounter');
+  const searchWrap = $('unknownSearchWrap');
+  if (!body) return;
+  const total = unknownRows.length;
+  if (counter) counter.textContent = `Всего: ${total}`;
+  if (searchWrap) searchWrap.style.display = total > UNKNOWN_SEARCH_THRESHOLD ? 'block' : 'none';
+  const q = normalizeName(unknownQuery);
+  const filtered = q ? unknownRows.filter(r => normalizeName(r.name).includes(q)) : unknownRows;
+  if (!filtered.length) {
+    body.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Список пуст.</div>';
+    return;
+  }
+  const visible = filtered.slice(0, unknownVisible);
+  const frag = document.createDocumentFragment();
+  visible.forEach(r => {
+    const item = document.createElement('div');
+    item.className = 'unknown-item';
+    item.dataset.name = r.name;
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = false;
+    const bodyEl = document.createElement('div');
+    bodyEl.className = 'unknown-body';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'unknown-name';
+    nameEl.textContent = r.name;
+    const infoEl = document.createElement('div');
+    infoEl.className = 'unknown-info';
+    const salesKv = document.createElement('span');
+    salesKv.className = 'kv';
+    salesKv.innerHTML = `Продано: <b>${r.sales || 0}</b>`;
+    infoEl.appendChild(salesKv);
+    if (r.incoming && r.incoming.length) {
+      const datesWithQty = r.incoming.filter(p => p.qty > 0).sort((a, b) => b.date.localeCompare(a.date));
+      datesWithQty.forEach(p => {
+        const kv = document.createElement('span');
+        kv.className = 'kv';
+        kv.innerHTML = `За ${fmtDateRuShort(p.date)}: <b>${p.qty}</b>`;
+        infoEl.appendChild(kv);
+      });
+    }
+    const shelfRow = document.createElement('div');
+    shelfRow.className = 'unknown-shelf';
+    const shelfLbl = document.createElement('span');
+    shelfLbl.textContent = 'Срок:';
+    const shelfInp = document.createElement('input');
+    shelfInp.type = 'number';
+    shelfInp.min = '1'; shelfInp.max = '10000'; shelfInp.step = '1';
+    shelfInp.inputMode = 'numeric';
+    shelfInp.value = r.shelfLife && r.shelfLife > 0 ? r.shelfLife : 72;
+    shelfInp.dataset.role = 'shelf';
+    const suffix = document.createElement('span');
+    suffix.textContent = 'ч';
+    shelfRow.appendChild(shelfLbl);
+    shelfRow.appendChild(shelfInp);
+    shelfRow.appendChild(suffix);
+    bodyEl.appendChild(nameEl);
+    bodyEl.appendChild(infoEl);
+    bodyEl.appendChild(shelfRow);
+    item.appendChild(cb);
+    item.appendChild(bodyEl);
+    frag.appendChild(item);
+  });
+  body.innerHTML = '';
+  body.appendChild(frag);
+  if (filtered.length > visible.length) {
+    const more = document.createElement('div');
+    more.className = 'unknown-load-more';
+    more.textContent = `Показать ещё ${Math.min(UNKNOWN_PAGE_SIZE, filtered.length - visible.length)}`;
+    more.onclick = () => { unknownVisible += UNKNOWN_PAGE_SIZE; renderUnknownModal(); };
+    body.appendChild(more);
+  }
+}
+function openUnknownModal() {
+  if (!unknownRows.filter(r => !isIgnored(r.name)).length) return;
+  unknownVisible = UNKNOWN_PAGE_SIZE;
+  unknownQuery = '';
+  const searchEl = $('unknownSearch');
+  if (searchEl) searchEl.value = '';
+  renderUnknownModal();
+  openModal('unknownModal');
+}
+function updateUnknownBanner() {
+  const banner = $('unknownBanner');
+  const countEl = $('unknownCount');
+  const filter = unknownRows.filter(r => !isIgnored(r.name));
+  if (countEl) countEl.textContent = String(filter.length);
+  if (banner) banner.style.display = filter.length ? 'block' : 'none';
+}
+function addSelectedUnknown() {
+  const items = document.querySelectorAll('#unknownBody .unknown-item');
+  const added = [];
+  items.forEach(item => {
+    const cb = item.querySelector('input[type=checkbox]');
+    if (!cb || !cb.checked) return;
+    const name = safeStr(item.dataset.name, MAX_NAME);
+    if (!name) return;
+    if (PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) return;
+    const shelfInp = item.querySelector('input[data-role="shelf"]');
+    const hours = clampNum(shelfInp ? shelfInp.value : 72, 1, 10000, 72);
+    PRODUCTS.push({ name, shelfLife: hours });
+    added.push({ name, hours });
+  });
+  if (!added.length) return;
+  saveCatalog();
+  added.forEach(({ name, hours }) => {
+    const idx = unknownRows.findIndex(r => normalizeName(r.name) === normalizeName(name));
+    if (idx < 0) return;
+    const row = unknownRows[idx];
+    row.shelfLife = hours;
+    row.incoming.forEach(p => { p._originalQty = p.qty; });
+    tableRows.push(row);
+    unknownRows.splice(idx, 1);
+  });
+  tableRows = sortRowsAlphabetically(tableRows);
+  unknownRows = sortRowsAlphabetically(unknownRows);
+  renderTable();
+  updateUnknownBanner();
+  scheduleSessionSave();
+  if (!unknownRows.filter(r => !isIgnored(r.name)).length) closeModal('unknownModal');
+  else renderUnknownModal();
+  showToast(`✅ Добавлено в справочник: ${added.length}`);
+}
+function ignoreAllUnknown() {
+  if (!unknownRows.length) return;
+  const count = unknownRows.length;
+  if (!confirm(`Добавить ${count} позиций в игнор-лист?`)) return;
+  for (const r of unknownRows) {
+    if (!isIgnored(r.name)) IGNORED.push(r.name);
+  }
+  saveIgnored();
+  unknownRows = [];
+  scheduleSessionSave();
+  updateUnknownBanner();
+  closeModal('unknownModal');
+  showToast(`🚫 Игнорировано: позиций ${count}`);
+}
+
 let applyBusy = false;
 function applyCSV() {
   if (applyBusy) return;
@@ -1809,13 +1777,24 @@ function applyCSV() {
     const { rows, truncated } = parseCSV(text, reference);
     if (!rows.length) throw new Error('Не удалось распознать строки.');
     if (myToken !== resetToken) return;
-    rows.forEach(r => {
-      const p = PRODUCTS.find(x => x.name.toLowerCase() === r.name.toLowerCase());
-      if (p) r.shelfLife = p.shelfLife;
-      r.incoming.forEach(p => { p._originalQty = p.qty; });
-    });
-    tableRows = sortRowsAlphabetically(rows);
+    const inCatalog = [];
+    const notInCatalog = [];
+    for (const r of rows) {
+      const key = normalizeName(r.name);
+      const p = PRODUCTS.find(x => normalizeName(x.name) === key);
+      if (p) {
+        r.shelfLife = p.shelfLife;
+        r.incoming.forEach(p2 => { p2._originalQty = p2.qty; });
+        inCatalog.push(r);
+      } else {
+        if (isIgnored(r.name)) continue;
+        notInCatalog.push(r);
+      }
+    }
+    tableRows = sortRowsAlphabetically(inCatalog);
+    unknownRows = sortRowsAlphabetically(notInCatalog);
     renderTable();
+    updateUnknownBanner();
     scheduleSessionSave();
     const salesOnlyMode = rows.every(r => r.salesOnly);
     const hasMixed = rows.some(r => r.salesOnly) && !salesOnlyMode;
@@ -1829,7 +1808,11 @@ function applyCSV() {
       else msg = `✅ Загружено ${rows.length} позиций. Дат прихода: ${validDates.size}.`;
       if (truncated) msg += ` ⚠️ Первые ${MAX_ROWS} строк.`;
       if (!salesOnlyMode && validDates.size === 0) msg += ` ⚠️ Даты приходов не распознаны.`;
+      if (unknownRows.length) msg += ` · ⚠️ Не в справочнике: ${unknownRows.length}.`;
       statusEl.textContent = msg;
+    }
+    if (unknownRows.length) {
+      setTimeout(() => { if (unknownRows.length && $('unknownModal').classList.contains('hidden')) openUnknownModal(); }, 300);
     }
   } catch (e) {
     if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = '❌ ' + (e.message || 'Ошибка'); }
@@ -1846,6 +1829,7 @@ function exportExcel() {
   try {
     const allDates = new Set();
     tableRows.forEach(r => (r.incoming || []).forEach(p => { if (p.date) allDates.add(p.date); }));
+    unknownRows.forEach(r => (r.incoming || []).forEach(p => { if (p.date) allDates.add(p.date); }));
     let dates = [...allDates].sort((a, b) => b.localeCompare(a));
     if (dates.length > MAX_DATES) dates = dates.slice(0, MAX_DATES);
     const header = ['Наименование', 'Остаток', 'Продано',
@@ -1869,6 +1853,24 @@ function exportExcel() {
         calc.soldExpired === null ? '—' : calc.soldExpired
       ]);
     });
+    if (unknownRows.length) {
+      data.push([]);
+      data.push(['── НЕ В СПРАВОЧНИКЕ ──', '', '', ...dates.map(() => ''), '', '', '', '', '']);
+      data.push([]);
+      unknownRows.forEach(row => {
+        data.push([
+          safeExcelCell(row.name),
+          '—',
+          row.sales || 0,
+          ...dates.map(d => {
+            const p = (row.incoming || []).find(x => x.date === d);
+            return p ? p.qty : 0;
+          }),
+          '0 ч',
+          '—', '—', '—', '—'
+        ]);
+      });
+    }
     const ws = XLSX.utils.aoa_to_sheet(data);
     ws['!cols'] = [{ wch: 35 }, { wch: 10 }, { wch: 10 },
       ...dates.map(() => ({ wch: 14 })),
@@ -1904,10 +1906,11 @@ function renderCatalogList() {
       const oldName = PRODUCTS[p._idx].name;
       const newName = safeStr(nameInput.value.trim(), MAX_NAME);
       if (!newName) { nameInput.value = oldName; return; }
-      const dup = PRODUCTS.findIndex((x, i) => i !== p._idx && x.name.toLowerCase() === newName.toLowerCase());
+      const dup = PRODUCTS.findIndex((x, i) => i !== p._idx && normalizeName(x.name) === normalizeName(newName));
       if (dup >= 0) { alert('Такая позиция уже есть.'); nameInput.value = oldName; return; }
       PRODUCTS[p._idx].name = newName;
       tableRows.forEach(r => { if (r.name === oldName) r.name = newName; });
+      unknownRows.forEach(r => { if (r.name === oldName) r.name = newName; });
       saveCatalog();
       scheduleSessionSave();
     };
@@ -1941,6 +1944,47 @@ function resetToFactory() {
   const el = $('catalogStatus');
   if (el) { el.className = 'status show ok'; el.textContent = `✅ Справочник восстановлен (${PRODUCTS.length}).`; }
 }
+function renderIgnoredList() {
+  const list = $('ignoredList');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!IGNORED.length) {
+    list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Игнор-лист пуст.</div>';
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  IGNORED.slice().sort((a, b) => a.localeCompare(b, 'ru')).forEach((name) => {
+    const row = document.createElement('div');
+    row.className = 'ignored-row';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'name';
+    nameEl.textContent = name;
+    const delBtn = document.createElement('button');
+    delBtn.className = 'del-btn';
+    delBtn.textContent = 'Удалить';
+    delBtn.onclick = () => {
+      const key = normalizeName(name);
+      IGNORED = IGNORED.filter(i => normalizeName(i) !== key);
+      saveIgnored();
+      renderIgnoredList();
+    };
+    row.appendChild(nameEl);
+    row.appendChild(delBtn);
+    frag.appendChild(row);
+  });
+  list.appendChild(frag);
+}
+
+function showToast(text) {
+  const el = document.createElement('div');
+  el.className = 'toast show';
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 300);
+  }, 2500);
+}
 
 function buildPrompt() {
   const checkDate = getTodayStr();
@@ -1948,13 +1992,13 @@ function buildPrompt() {
   const catalogList = PRODUCTS.map(p => `- ${p.name}: ${p.shelfLife}`).join('\n');
   return `Ты — OCR-ассистент для аудита сроков годности в кондитерской French Bakery.
 
-ЗАДАЧА: распознать накладные (ТОРГ-12/УПД) и чеки продаж, вернуть единый CSV.
+ЗАДАЧА: распознать накладные (ТОРГ-12/УПД) и чек продаж, вернуть единый CSV.
 
 ═══════════════════════════════════════════
 📥 ИСТОЧНИКИ
 ═══════════════════════════════════════════
 1. НАКЛАДНЫЕ (ТОРГ-12 / УПД) → приход товара за конкретную дату
-2. ЧЕКИ ПРОДАЖ → продажи за день
+2. ЧЕК ПРОДАЖ → продажи за день
 
 ПРИОРИТЕТ:
 - приход ← только из накладной
@@ -1962,28 +2006,57 @@ function buildPrompt() {
 - НЕ суммировать приход и продажи между собой
 
 ═══════════════════════════════════════════
+📋 ФИЛЬТР ПО СПРАВОЧНИКУ И НАКЛАДНЫМ
+═══════════════════════════════════════════
+
+ШАГ 1. СНАЧАЛА прочитай НАКЛАДНЫЕ.
+        Составь список ВСЕХ позиций из накладных (включая новинки).
+
+ШАГ 2. ПОТОМ прочитай ЧЕК ПРОДАЖ.
+
+ШАГ 3. РАЗРЕШЁННЫЙ СПИСОК =
+        справочник ∪ позиции из накладных.
+
+ШАГ 4. ФИЛЬТР ЧЕКА:
+        - Позиция в разрешённом списке → включи её продажи.
+        - Позиция не в списке → игнорируй (чай, кофе, мусор).
+
+ПРИМЕР:
+  Справочник: Круассан с ветчиной, Эклер шоколадный
+  Накладная: Круассан с ветчиной (5), Малиновый чизкейк (10)
+  Чек: Круассан с ветчиной (3), Малиновый чизкейк (2), Чай чёрный (4)
+  
+  Разрешённый список: Круассан с ветчиной, Эклер шоколадный, Малиновый чизкейк
+  
+  В CSV:
+    Круассан с ветчиной;5;0;3;24
+    Малиновый чизкейк;10;0;2;0
+    ← Чай чёрный НЕ включён (нет ни в справочнике, ни в накладной)
+
+═══════════════════════════════════════════
+🆕 СРОК ГОДНОСТИ И НОВИНКИ
+═══════════════════════════════════════════
+- Позиция есть в справочнике → укажи срок из справочника (в часах).
+- Позиции нет в справочнике → поставь 0.
+  Ноль — это маркер новинки. Приложение её покажет отдельно.
+
+═══════════════════════════════════════════
 🧾 РАСПОЗНАВАНИЕ ЧЕКА ПРОДАЖ
 ═══════════════════════════════════════════
-Чек продаж — это НЕ накладная. Структура чека:
-[№] [Наименование] [К-во] [Цена] [Сумма] [Скидка]
+Структура чека: [№] [Наименование] [К-во] [Цена] [Сумма] [Скидка]
 
 ⚠️ ГЛАВНОЕ ПРАВИЛО: бери из чека колонку «К-во» (количество штук),
 НЕ «Сумма» (рубли), НЕ «Цена», НЕ «Скидка».
 
-Пример строки чека:
+Пример:
   1. Эклер шоколадный   2   150.00   300.00
-     ↑ название         ↑ К-во (берём это)   ↑ сумма (НЕ берём)
-
-Из этой строки в CSV: Эклер шоколадный = 2 (продано сегодня).
+  → Эклер шоколадный = 2
 
 ═══════════════════════════════════════════
 🧩 СКЛЕЙКА НЕСКОЛЬКИХ ФОТО ОДНОГО ЧЕКА
 ═══════════════════════════════════════════
-Длинный чек часто фотографируют НЕСКОЛЬКИМИ кадрами. Между кадрами есть
-ПЕРЕКРЫТИЕ — несколько строк в конце одного фото повторяются в начале
-следующего. Это делается, чтобы не потерять строки на стыке.
-
-⚠️ ГЛАВНАЯ ЗАДАЧА: склеить фото в ОДИН непрерывный список БЕЗ дублей.
+Длинный чек часто фотографируют НЕСКОЛЬКИМИ кадрами с ПЕРЕКРЫТИЕМ:
+несколько строк в конце одного фото повторяются в начале следующего.
 
 ПРИЗНАК ДУБЛЯ — НЕ складывать, взять ОДИН раз:
 - Одна и та же позиция идёт в КОНЦЕ фото 1 и в НАЧАЛЕ фото 2.
@@ -1992,152 +2065,104 @@ function buildPrompt() {
 
 ПРИЗНАК РЕАЛЬНОЙ ВТОРОЙ ПРОДАЖИ — складывать:
 - Позиция встречается дважды ВНУТРИ одного фото с разными № строк.
-- Между повторами есть другие строки.
 
 ПРИМЕР:
   Фото 1 (конец):
     Пуддинг Манго Чиа  1
     Ром баба          13
-    Салат цезарь       4
   Фото 2 (начало):
-    Пуддинг Манго Чиа  1   ← дубль (то же, что в конце фото 1)
+    Пуддинг Манго Чиа  1   ← дубль
     Ром баба          13   ← дубль
-    Салат цезарь       4   ← дубль
-    Сосиска ...        3   ← новая строка
+    Сосиска ...        3   ← новая
 
-  ✅ ПРАВИЛЬНО:
-    Пуддинг Манго Чиа = 1
-    Ром баба = 13
-    Салат цезарь = 4
-    Сосиска = 3
-
-  ❌ НЕПРАВИЛЬНО:
-    Ром баба = 26 (дубль посчитан дважды)
-    Салат цезарь = 8 (дубль посчитан дважды)
-
-АЛГОРИТМ СКЛЕЙКИ:
-1. Для каждого фото выпиши строки в порядке следования.
-2. Найди перекрытие: сравни конец фото N с началом фото N+1.
-3. Совпадающие строки — бери ОДИН раз (из того фото, где они полнее).
-4. Если позиция встречается в разных частях чека с разными соседями —
-   это ДВА разных пробития, К-во складывай.
-
-═══════════════════════════════════════════
-📋 ОБЪЕДИНЕНИЕ ДУБЛЕЙ ВНУТРИ ЧЕКА
-═══════════════════════════════════════════
-Если одна позиция пробита НЕСКОЛЬКО РАЗ в течение дня (не на стыке фото,
-а в разных частях чека) — К-во СКЛАДЫВАЙ.
-
-Пример:
-  Круассан классический  1  (утро)
-  Круассан классический  2  (день)
-  Круассан классический  1  (вечер)
-  → В CSV: Круассан классический = 4
+  ✅ Ром баба = 13 (не 26)
+  ❌ Ром баба = 26
 
 ═══════════════════════════════════════════
 🚫 ЧТО ИГНОРИРОВАТЬ В ЧЕКЕ
 ═══════════════════════════════════════════
 НЕ включай в CSV:
 - «Итого», «Всего», «К оплате», «Сумма чека»
-- «Скидка», «Скидка %», «Наценка», «НДС»
-- «Наличные», «Безнал», «Карта», «Бонусы», «Сдача»
+- «Скидка», «Наценка», «НДС»
+- «Наличные», «Безнал», «Карта», «Бонусы»
 - время, дату, № смены, № чека, № кассы
-- ФИО кассира, ИНН, адрес, телефон, QR-код, штрих-код
+- ФИО кассира, ИНН, адрес, QR-код, штрих-код
 - любые служебные строки без названия товара
 
-Если строка не содержит НАЗВАНИЕ ТОВАРА — пропускай её.
-
 ═══════════════════════════════════════════
-↩️ ВОЗВРАТЫ И ОТРИЦАТЕЛЬНЫЕ КОЛИЧЕСТВА
+↩️ ВОЗВРАТЫ
 ═══════════════════════════════════════════
-Если в чеке позиция идёт со знаком минус (−1, −2) — это ВОЗВРАТ.
-Вычитай его из общего количества.
+Если позиция идёт со знаком минус (−1) — это ВОЗВРАТ.
+Вычитай из общего количества.
 
 Пример:
   Эклер фисташковый   3
   Эклер фисташковый  -1
-  → В CSV: Эклер фисташковый = 2
-
-Если после вычитания 0 или меньше — НЕ включай позицию (продано = 0).
+  → Эклер фисташковый = 2
 
 ═══════════════════════════════════════════
 🗂 ГРУППИРОВКА СТРАНИЦ ПО НАКЛАДНЫМ
 ═══════════════════════════════════════════
 ⚠️ Файлы могут быть загружены в ПРОИЗВОЛЬНОМ порядке.
 
-ПРИЗНАКИ ПРИНАДЛЕЖНОСТИ НАКЛАДНОЙ:
-1. НОМЕР (ТОРГ-12 №…, УПД №…). Одинаковый номер = одна накладная.
-2. ДАТА + ПОСТАВЩИК. Совпадают = вероятно, одна накладная.
-3. НЕПРЕРЫВНОСТЬ № СТРОК. Страницы одной накладной имеют непрерывную
-   нумерацию (1–15, 16–30…).
-4. ПРОДОЛЖЕНИЕ ТАБЛИЦЫ. Страница без заголовка с середины списка —
-   продолжение предыдущей.
-5. ИТОГОВАЯ СТРОКА. Страница с «Итого» / «Всего» — последняя.
+ПРИЗНАКИ НАКЛАДНОЙ:
+1. НОМЕР (ТОРГ-12 №…, УПД №…). Одинаковый = одна накладная.
+2. ДАТА + ПОСТАВЩИК. Совпадают = одна накладная.
+3. НЕПРЕРЫВНОСТЬ № СТРОК (1–15, 16–30…).
+4. ПРОДОЛЖЕНИЕ ТАБЛИЦЫ. Без заголовка с середины — продолжение.
+5. ИТОГОВАЯ СТРОКА. «Итого» / «Всего» — последняя.
 
-🚫 ЗАПРЕЩЕНО: смешивать позиции из разных накладных в одну группу.
+🚫 НЕ смешивай позиции из разных накладных.
 
 ═══════════════════════════════════════════
-🔍 4 ЭТАПА РАБОТЫ (СТРОГО ПО ПОРЯДКУ)
+🔍 4 ЭТАПА РАБОТЫ
 ═══════════════════════════════════════════
 
 ЭТАП 1. ГРУППИРОВКА
-[файл №] | [тип: накладная / чек] | [№ документа] | [дата] | [поставщик] | [страница N из M]
+[файл №] | [тип] | [№ документа] | [дата] | [поставщик] | [стр. N из M]
 
-ЭТАП 2. ЧЕРНОВИК ПО КАЖДОМУ ДОКУМЕНТУ
-Для накладных — строки: [№] | [название] | [кол-во]
-Для чека — строки: [№] | [название] | [К-во] | [цена]
+ЭТАП 2. ЧЕРНОВИК
+Накладные: [№] | [название] | [кол-во]
+Чек: [№] | [название] | [К-во]
 
 ЭТАП 3. ПРОВЕРКА
-- Сумма количеств по позициям = итогу документа? Если нет — перечитай числа.
-- Все ли строки попали в черновик?
-- Есть ли неоднозначные цифры (6/9, 1/7, 0/О)? Помечай.
+- Сумма количеств = итогу? Если нет — перечитай.
+- Неоднозначные цифры (6/9, 1/7, 0/О)? Помечай.
 
 ЭТАП 4. СБОРКА CSV
-Объедини все документы в одну таблицу. Даты получения — из заголовков
-«Получено за ДД.ММ» или из даты накладной.
-
-═══════════════════════════════════════════
-🚫 ЖЁСТКИЙ ФИЛЬТР ПО СПРАВОЧНИКУ
-═══════════════════════════════════════════
-Включай в CSV ТОЛЬКО позиции из СПРАВОЧНИКА СРОКОВ (ниже).
-Всё остальное — напитки, кофе, блюда, услуги — ИГНОРИРУЙ.
 
 ═══════════════════════════════════════════
 ⚠️ ЧАСТЫЕ ОШИБКИ OCR
 ═══════════════════════════════════════════
 Символы: 0↔О, 1↔l↔7, 5↔S, 8↔В, 6↔б↔9, 3↔З
-Названия: «с ветчиной» ≠ «с курицей», «с сыром» ≠ «классический»
+Названия: «с ветчиной» ≠ «с курицей»
 
-НЕОДНОЗНАЧНЫЕ ЦИФРЫ: если не можешь уверенно прочитать цифру
-(например, «6» или «9»), НЕ выбирай «наиболее вероятную».
-Добавь строку в раздел «Сомнительные» с пометкой.
+НЕОДНОЗНАЧНЫЕ ЦИФРЫ: не угадывай. Помечай в «Сомнительные».
 
 ═══════════════════════════════════════════
 📋 ПРАВИЛА СБОРКИ CSV
 ═══════════════════════════════════════════
-1. Только позиции из справочника.
-2. Есть в накладной, нет в чеке → Продано = 0.
-3. Есть в чеке, нет в накладной → Получено = 0.
-4. Дубли в накладной → складывай. Разные накладные — не путай.
-5. Перекрытие фото чека → бери ОДИН раз.
-6. Дубли внутри чека с разными № строк → складывай.
-7. Возвраты (−N) → вычитай.
-8. Рукописные пометки → подтверждение, но печатное значение приоритетно.
-9. 🚫 НЕ ВЫДУМЫВАЙ. Нет в документе — не добавляй.
+1. Есть в накладной, нет в чеке → Продано = 0.
+2. Есть в чеке, нет в накладной → Получено = 0.
+3. Дубли в накладной → складывай.
+4. Перекрытие фото чека → бери ОДИН раз.
+5. Дубли внутри чека с разными № → складывай.
+6. Возвраты (−N) → вычитай.
+7. Позиция не в справочнике → срок 0.
+8. 🚫 НЕ ВЫДУМЫВАЙ.
 
 ═══════════════════════════════════════════
-🔢 ПРАВИЛА ДЛЯ ЧИСЕЛ
+🔢 ПРАВИЛА ЧИСЕЛ
 ═══════════════════════════════════════════
-- Количество товаров — ВСЕГДА ЦЕЛОЕ число.
-- Точки и запятые в колонке «К-во» — разделители тысяч, а не десятичные.
-  «1.234» = 1234, «1,234» = 1234.
-- НЕ добавляй знак «+», пробелы, символы валют в количества.
+- Количество — ВСЕГДА ЦЕЛОЕ.
+- «1.234» = 1234, «1,234» = 1234.
+- Без знаков «+», пробелов, валют.
 
 ═══════════════════════════════════════════
 📅 ФОРМАТ ДАТ
 ═══════════════════════════════════════════
 ✅ «Получено за 17.09»  ✅ «Получено за 18.09»
-❌ «Получено за 2026-09-17», «17/09/2026», «17-09-2026»
+❌ «2026-09-17», «17/09/2026»
 
 ═══════════════════════════════════════════
 📤 ФОРМАТ CSV
@@ -2145,33 +2170,20 @@ function buildPrompt() {
 Разделитель: ;
 Кодировка: UTF-8 с BOM
 Имя: audit_${checkDate}.csv
-Сортировка: по алфавиту (русский)
+Сортировка: по алфавиту
 Колонки: Наименование;Получено за ДД.ММ;...;Продано сегодня;Срок годности
-Кавычки: если есть ; , " → оберни в "..." и удваивай внутренние.
+Кавычки: если есть ; , " → оберни в "..." и удваивай.
 
 ═══════════════════════════════════════════
 📊 ПОСЛЕ CSV ВЫВЕДИ ОТЧЁТ
 ═══════════════════════════════════════════
-1. ДОКУМЕНТЫ:
-   [файл №] | [тип] | [№ документа] | [дата] | [страница N из M]
-
-2. СКЛЕЙКА ЧЕКА:
-   [фото №] | [строки] | [перекрытие с предыдущим]
-   Пример:
-   - Фото 1: строки 1–15
-   - Фото 2: строки 10–25 (перекрытие 10–15, дублей отброшено: 6)
-   - Фото 3: строки 20–30 (перекрытие 20–25, дублей отброшено: 6)
-
-3. СОМНИТЕЛЬНЫЕ СТРОКИ:
-   [название] | [что неясно] | [предположение]
-
+1. ДОКУМЕНТЫ: [файл №] | [тип] | [№] | [дата] | [стр. N из M]
+2. СКЛЕЙКА ЧЕКА: [фото №] | [строки] | [перекрытие]
+3. СОМНИТЕЛЬНЫЕ СТРОКИ
 4. ПРОВЕРКА:
-   - Накладных распознано: N
-   - Чеков распознано: N
-   - Строк в CSV: N (из справочника: N, вне: 0)
+   - Накладных: N, Чеков: N
+   - Строк в CSV: N (справочных: N, новинок: N)
    - Дат приходов: N
-   - Сумма по каждой накладной = её итогу? Да / Нет
-   - Сумма по чеку = итогу чека? Да / Нет
 
 ═══════════════════════════════════════════
 📚 СПРАВОЧНИК СРОКОВ (часы)
@@ -2323,6 +2335,7 @@ function bindUI() {
     if (!confirm('Восстановить последнюю сессию?')) return;
     applySession(data);
     renderTable();
+    updateUnknownBanner();
     const st = $('csvStatus');
     if (st) { st.className = 'status show ok'; st.textContent = `✅ Сессия восстановлена.`; }
   };
@@ -2334,29 +2347,28 @@ function bindUI() {
     resetToken++;
     try {
       tableRows = [];
+      unknownRows = [];
       const ci = $('csvInput'); if (ci) ci.value = '';
       const cs = $('csvStatus'); if (cs) { cs.className = 'status'; cs.textContent = ''; }
       const ss = $('shareStatus'); if (ss) { ss.className = 'status'; ss.textContent = ''; }
       try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
       try { await clearAllPhotos(); } catch (e) {}
       renderTable();
+      updateUnknownBanner();
       await renderPhotoQueue();
       const cs2 = $('csvStatus');
       if (cs2) { cs2.className = 'status show ok'; cs2.textContent = '✅ Данные очищены.'; }
     } finally { setTimeout(() => { pendingSessionReset = false; }, 500); }
   };
   const editCat = $('editCatalogBtn');
-  if (editCat) editCat.onclick = () => {
-    renderCatalogList();
-    openModal('catalogModal');
-  };
+  if (editCat) editCat.onclick = () => { renderCatalogList(); openModal('catalogModal'); };
   const closeCat = $('closeCatalogBtn');
   if (closeCat) closeCat.onclick = () => {
     saveCatalog();
     closeModal('catalogModal');
     if (Array.isArray(tableRows) && tableRows.length) {
       tableRows.forEach(r => {
-        const p = PRODUCTS.find(x => x.name.toLowerCase() === r.name.toLowerCase());
+        const p = PRODUCTS.find(x => normalizeName(x.name) === normalizeName(r.name));
         if (p) r.shelfLife = p.shelfLife;
       });
       renderTable();
@@ -2371,7 +2383,7 @@ function bindUI() {
     const name = safeStr(nameEl ? nameEl.value.trim() : '', MAX_NAME);
     const hours = clampNum(hoursEl ? hoursEl.value : 48, 1, 10000, 48);
     if (!name) { alert('Введите название.'); return; }
-    if (PRODUCTS.some(p => p.name.toLowerCase() === name.toLowerCase())) { alert('Такая позиция уже есть.'); return; }
+    if (PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) { alert('Такая позиция уже есть.'); return; }
     if (PRODUCTS.length >= MAX_CATALOG) { alert('Справочник переполнен.'); return; }
     PRODUCTS.push({ name, shelfLife: hours });
     saveCatalog();
@@ -2383,7 +2395,7 @@ function bindUI() {
   const expCat = $('exportCatalogBtn');
   if (expCat) expCat.onclick = () => {
     try {
-      const data = JSON.stringify({ version: 1, products: PRODUCTS }, null, 2);
+      const data = JSON.stringify({ version: 1, products: PRODUCTS, ignored: IGNORED }, null, 2);
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -2410,6 +2422,10 @@ function bindUI() {
       if (!confirm(`Импортировать ${cleaned.length} позиций?`)) { e.target.value = ''; return; }
       PRODUCTS = cleaned;
       saveCatalog();
+      if (Array.isArray(parsed.ignored)) {
+        IGNORED = parsed.ignored.filter(x => typeof x === 'string').map(x => x.trim()).filter(Boolean).slice(0, MAX_CATALOG);
+        saveIgnored();
+      }
       renderCatalogList();
       const el = $('catalogStatus');
       if (el) { el.className = 'status show ok'; el.textContent = `✅ Импортировано ${cleaned.length}.`; }
@@ -2417,6 +2433,33 @@ function bindUI() {
       const el = $('catalogStatus');
       if (el) { el.className = 'status show err'; el.textContent = '❌ ' + (err.message || 'Ошибка'); }
     } finally { e.target.value = ''; }
+  };
+  const ignoredBtn = $('ignoredBtn');
+  if (ignoredBtn) ignoredBtn.onclick = () => { renderIgnoredList(); openModal('ignoredModal'); };
+  const closeIgnored = $('closeIgnoredBtn');
+  if (closeIgnored) closeIgnored.onclick = () => { closeModal('ignoredModal'); updateUnknownBanner(); };
+  const clearIgnoredBtn = $('clearIgnoredBtn');
+  if (clearIgnoredBtn) clearIgnoredBtn.onclick = () => {
+    if (!IGNORED.length) { alert('Игнор-лист уже пуст.'); return; }
+    if (!confirm(`Очистить игнор-лист (${IGNORED.length})?`)) return;
+    IGNORED = [];
+    saveIgnored();
+    updateUnknownBanner();
+    showToast('✅ Игнор-лист очищен');
+  };
+  const openUnknownBtn = $('openUnknownBtn');
+  if (openUnknownBtn) openUnknownBtn.onclick = () => openUnknownModal();
+  const unknownAddBtn = $('unknownAddBtn');
+  if (unknownAddBtn) unknownAddBtn.onclick = addSelectedUnknown;
+  const unknownIgnoreBtn = $('unknownIgnoreBtn');
+  if (unknownIgnoreBtn) unknownIgnoreBtn.onclick = ignoreAllUnknown;
+  const unknownCloseBtn = $('unknownCloseBtn');
+  if (unknownCloseBtn) unknownCloseBtn.onclick = () => closeModal('unknownModal');
+  const unknownSearch = $('unknownSearch');
+  if (unknownSearch) unknownSearch.oninput = () => {
+    unknownQuery = unknownSearch.value;
+    unknownVisible = UNKNOWN_PAGE_SIZE;
+    renderUnknownModal();
   };
   const copyModal = $('copyFromModalBtn');
   if (copyModal) copyModal.onclick = async () => {
@@ -2438,7 +2481,6 @@ function bindProductModal() {
   const commit = $('pmCommit'); if (commit) commit.onclick = commitProduct;
   const stock = $('pmStock'); if (stock) stock.addEventListener('keydown', productKey);
   const sales = $('pmSales'); if (sales) sales.addEventListener('keydown', productKey);
-
   document.querySelectorAll('.pf-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = $(btn.dataset.target);
@@ -2451,17 +2493,13 @@ function bindProductModal() {
       target.select();
     });
   });
-
   const modal = $('productModal');
-  if (modal) {
-    modal.addEventListener('click', e => {
-      if (e.target === modal) cancelProduct();
-    });
-  }
-
+  if (modal) modal.addEventListener('click', e => { if (e.target === modal) cancelProduct(); });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && !$('productModal').classList.contains('hidden')) {
-      cancelProduct();
+    if (e.key === 'Escape') {
+      if (!$('productModal').classList.contains('hidden')) cancelProduct();
+      else if (!$('unknownModal').classList.contains('hidden')) closeModal('unknownModal');
+      else if (!$('ignoredModal').classList.contains('hidden')) closeModal('ignoredModal');
     }
   });
 }
@@ -2496,7 +2534,9 @@ function init() {
     if (st) { st.className = 'status show info'; st.textContent = `ℹ️ Сессия восстановлена (${ageMin} мин назад).`; }
   }
   renderTable();
+  updateUnknownBanner();
   renderPhotoQueue();
+  updateIgnoredCount();
   const ci = $('csvInput');
   if (ci) ci.addEventListener('blur', () => {
     if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
@@ -2505,7 +2545,12 @@ function init() {
   window.addEventListener('storage', e => {
     if (e.key === SESSION_KEY && !isRestoring) {
       const data = loadSession();
-      if (data) { applySession(data); renderTable(); }
+      if (data) { applySession(data); renderTable(); updateUnknownBanner(); }
+    }
+    if (e.key === IGNORED_KEY) {
+      IGNORED = loadIgnored();
+      updateIgnoredCount();
+      updateUnknownBanner();
     }
   });
   window.addEventListener('beforeunload', () => {
@@ -2519,10 +2564,11 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v7.0 · catalog:', PRODUCTS.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v7.2 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
+IGNORED = loadIgnored();
 bindUI();
 bindProductModal();
 init();
