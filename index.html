@@ -85,7 +85,6 @@ body{
   -webkit-font-smoothing:antialiased;
   -webkit-text-size-adjust:100%;
   padding-bottom:env(safe-area-inset-bottom);
-  /* Убираем горизонтальный скролл страницы */
   overflow-x: hidden;
 }
 
@@ -310,11 +309,11 @@ button.busy::before{
 .result-meta .item.empty b{color: var(--text-tertiary)}
 
 /* ============================================================
-   ✅ ТАБЛИЦА — sticky header + скролл ВНУТРИ контейнера
+   ✅ ТАБЛИЦА — ОДНА таблица, table-layout: fixed, colgroup
    ============================================================ */
 .table-scroll{
   max-height: 65vh;
-  overflow: auto;              /* ← и X, и Y скролл внутри */
+  overflow: auto;
   -webkit-overflow-scrolling: touch;
   border-radius: var(--r-md);
   border: 1px solid var(--separator);
@@ -330,29 +329,21 @@ button.busy::before{
   border-radius: 4px;
 }
 
-/* Sticky header — внутри .table-scroll, прилипает к верху контейнера */
-.table-sticky-header{
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--separator);
-  /* Никаких clip-path / overflow — браузер сам управляет */
-}
-.table-sticky-header.scrolled{
-  box-shadow: 0 4px 12px rgba(0,0,0,.06);
-}
-@media (prefers-color-scheme: dark){
-  .table-sticky-header.scrolled{box-shadow: 0 4px 12px rgba(0,0,0,.4)}
-}
-.table-sticky-header table{
+/* Одна таблица: фиксированная раскладка → колонки thead/tbody совпадают */
+.table-scroll table.table-body{
+  table-layout: fixed;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 13px;
   min-width: 1000px;
   width: 100%;
 }
-.table-sticky-header th{
+
+/* Заголовок — sticky сверху */
+.table-scroll thead th{
+  position: sticky;
+  top: 0;
+  z-index: 20;
   font-size: 10.5px;
   font-weight: 700;
   color: var(--text-secondary);
@@ -360,53 +351,79 @@ button.busy::before{
   letter-spacing: .05em;
   background: var(--bg-card);
   padding: 10px 8px;
-  text-align: left;
+  text-align: center;
   white-space: nowrap;
+  border-bottom: 1px solid var(--separator);
 }
+.table-scroll thead th.col-name{text-align: left; padding-left: 22px}
 
-/* Тело таблицы — внутри того же .table-scroll */
-.table-scroll table.table-body{
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 13px;
-  min-width: 1000px;
-  width: 100%;
+/* Первая колонка (название) — sticky слева */
+.table-scroll thead th:first-child,
+.table-scroll tbody td:first-child{
+  position: sticky;
+  left: 0;
+  z-index: 15;
+  background: var(--bg-card);
+  border-right: 1px solid var(--separator);
 }
-.table-scroll table.table-body td{
+/* Угловая ячейка — оба sticky */
+.table-scroll thead th:first-child{z-index: 25}
+
+.table-scroll tbody td{
   padding: 10px 8px;
   border-bottom: 1px solid var(--separator);
   vertical-align: middle;
   white-space: nowrap;
   line-height: 1.2;
   background: var(--bg-card);
+  text-align: center;
 }
-.table-scroll table.table-body tbody tr:hover td{background: var(--bg-hover)}
-.table-scroll table.table-body tbody tr:last-child td{border-bottom: none}
-.table-scroll table.table-body tbody tr.row-fresh td{background: var(--green-row)}
-.table-scroll table.table-body tbody tr.row-fresh:hover td{background: var(--green-row-hover)}
-.table-scroll table.table-body tbody tr.row-warn td{background: var(--orange-row)}
-.table-scroll table.table-body tbody tr.row-warn:hover td{background: var(--orange-row-hover)}
-.table-scroll table.table-body tbody tr.row-danger td{background: var(--red-row)}
-.table-scroll table.table-body tbody tr.row-danger:hover td{background: var(--red-row-hover)}
-.table-scroll table.table-body tbody tr.row-unknown td{background: var(--bg-card)}
-.table-scroll table.table-body tbody tr.row-unknown:hover td{background: var(--bg-hover)}
-.table-scroll table.table-body tbody tr.row-info td{background: var(--blue-row)}
-.table-scroll table.table-body tbody tr.row-info:hover td{background: var(--blue-row-hover)}
-.table-scroll table.table-body tbody tr.row-fresh td:first-child,
-.table-scroll table.table-body tbody tr.row-warn td:first-child,
-.table-scroll table.table-body tbody tr.row-danger td:first-child,
-.table-scroll table.table-body tbody tr.row-info td:first-child{position: relative}
-.table-scroll table.table-body tbody tr.row-fresh td:first-child::before,
-.table-scroll table.table-body tbody tr.row-warn td:first-child::before,
-.table-scroll table.table-body tbody tr.row-danger td:first-child::before,
-.table-scroll table.table-body tbody tr.row-info td:first-child::before{
+.table-scroll tbody td:first-child{
+  text-align: left;
+  white-space: normal;
+  word-break: break-word;
+  padding-left: 22px;
+  font-weight: 500;
+}
+.table-scroll tbody tr:hover td{background: var(--bg-hover)}
+.table-scroll tbody tr:hover td:first-child{background: var(--bg-hover)}
+.table-scroll tbody tr:last-child td{border-bottom: none}
+
+/* Цветные строки: фон применяется и к sticky-первой-колонке */
+.table-scroll tbody tr.row-fresh td,
+.table-scroll tbody tr.row-fresh td:first-child{background: var(--green-row)}
+.table-scroll tbody tr.row-fresh:hover td,
+.table-scroll tbody tr.row-fresh:hover td:first-child{background: var(--green-row-hover)}
+.table-scroll tbody tr.row-warn td,
+.table-scroll tbody tr.row-warn td:first-child{background: var(--orange-row)}
+.table-scroll tbody tr.row-warn:hover td,
+.table-scroll tbody tr.row-warn:hover td:first-child{background: var(--orange-row-hover)}
+.table-scroll tbody tr.row-danger td,
+.table-scroll tbody tr.row-danger td:first-child{background: var(--red-row)}
+.table-scroll tbody tr.row-danger:hover td,
+.table-scroll tbody tr.row-danger:hover td:first-child{background: var(--red-row-hover)}
+.table-scroll tbody tr.row-unknown td,
+.table-scroll tbody tr.row-unknown td:first-child{background: var(--bg-card)}
+.table-scroll tbody tr.row-unknown:hover td,
+.table-scroll tbody tr.row-unknown:hover td:first-child{background: var(--bg-hover)}
+.table-scroll tbody tr.row-info td,
+.table-scroll tbody tr.row-info td:first-child{background: var(--blue-row)}
+.table-scroll tbody tr.row-info:hover td,
+.table-scroll tbody tr.row-info:hover td:first-child{background: var(--blue-row-hover)}
+
+/* Цветная полоска слева у первой колонки */
+.table-scroll tbody tr.row-fresh td:first-child::before,
+.table-scroll tbody tr.row-warn td:first-child::before,
+.table-scroll tbody tr.row-danger td:first-child::before,
+.table-scroll tbody tr.row-info td:first-child::before{
   content: ''; position: absolute; left: 0; top: 6px; bottom: 6px;
   width: 3px; border-radius: 2px;
 }
-.table-scroll table.table-body tbody tr.row-fresh td:first-child::before{background: var(--green)}
-.table-scroll table.table-body tbody tr.row-warn td:first-child::before{background: var(--orange)}
-.table-scroll table.table-body tbody tr.row-danger td:first-child::before{background: var(--red)}
-.table-scroll table.table-body tbody tr.row-info td:first-child::before{background: var(--blue)}
+.table-scroll tbody tr.row-fresh td:first-child::before{background: var(--green)}
+.table-scroll tbody tr.row-warn td:first-child::before{background: var(--orange)}
+.table-scroll tbody tr.row-danger td:first-child::before{background: var(--red)}
+.table-scroll tbody tr.row-info td:first-child::before{background: var(--blue)}
+.table-scroll tbody td:first-child{position: sticky}
 
 .row-status{display: inline-block; width: 18px; text-align: center; margin-right: 5px; font-size: 12px}
 
@@ -434,8 +451,9 @@ button.busy::before{
 .empty-state .em-title{font-weight: 700; color: var(--text); margin-bottom: 5px; font-size: 15px}
 
 .num{
-  width: 68px; min-width: 64px;
-  padding: 6px 6px;
+  width: 100%;
+  max-width: 80px;
+  padding: 8px 6px;
   border: 1.5px solid var(--separator);
   border-radius: var(--r-xs);
   font-size: 15px; text-align: center;
@@ -446,6 +464,8 @@ button.busy::before{
   height: 40px; line-height: 1;
   font-family: inherit;
   transition: border-color .15s;
+  margin: 0 auto;
+  display: block;
 }
 .num:focus{border-color: var(--accent); outline: none}
 .num:disabled{background: var(--bg-input); cursor: not-allowed; color: var(--text-tertiary); opacity: .7}
@@ -453,11 +473,10 @@ button.busy::before{
 .num::-webkit-inner-spin-button{-webkit-appearance: none; margin: 0}
 .num[type=number]{-moz-appearance: textfield}
 .income-cell{position: relative; padding: 8px 6px !important; text-align: center}
-.income-cell .num{width: 62px; min-width: 58px; height: 40px; padding: 6px 4px; font-size: 14px}
 .income-cell.edited .num{background: var(--orange-soft); border-color: var(--orange)}
 .income-cell .reset-btn{
   position: absolute;
-  top: -5px; right: -5px;
+  top: 0px; right: 2px;
   width: 22px; height: 22px;
   padding: 0;
   border-radius: 50%;
@@ -589,12 +608,10 @@ pre.code{
     to { transform: scale(1); opacity: 1; }
   }
   .modal-handle{display: none}
-  .table-sticky-header table,
   .table-scroll table.table-body{font-size: 13.5px}
-  .table-sticky-header th{font-size: 11px; padding: 12px 10px}
-  .table-scroll table.table-body td{padding: 11px 10px}
-  .num{width: 72px; min-width: 68px; height: 40px}
-  .income-cell .num{width: 68px; min-width: 64px; height: 40px}
+  .table-scroll thead th{font-size: 11px; padding: 12px 10px}
+  .table-scroll tbody td{padding: 11px 10px}
+  .num{height: 40px}
   .table-scroll{max-height: 65vh}
 }
 @media (max-width: 640px){
@@ -608,8 +625,7 @@ pre.code{
   .header-text .sub{font-size: 10.5px}
   main{padding: 10px 10px 80px}
   .action-buttons{gap: 8px}
-  .num{width: 60px; min-width: 56px; height: 38px; font-size: 14px; padding: 4px 4px}
-  .income-cell .num{width: 56px; min-width: 52px; height: 38px; font-size: 13px}
+  .num{height: 38px; font-size: 14px; padding: 4px 4px}
 }
 @media (max-width: 360px){
   .header-text .sub{display: none}
@@ -760,14 +776,13 @@ pre.code{
       <span class="item" id="metaPointWrap">📍 <b id="metaPoint">—</b></span>
     </div>
 
-    <!-- ✅ Единый контейнер с обоими скроллами -->
+    <!-- ✅ ОДНА таблица с colgroup, thead sticky и sticky-первой-колонкой -->
     <div class="table-scroll" id="tableScroll" style="display:none">
-      <div class="table-sticky-header" id="tableStickyHeader">
-        <table id="resultTableHeader">
-          <thead><tr></tr></thead>
-        </table>
-      </div>
       <table id="resultTable" class="table-body">
+        <colgroup id="resultColgroup"></colgroup>
+        <thead id="resultThead">
+          <tr></tr>
+        </thead>
         <tbody></tbody>
       </table>
     </div>
@@ -790,7 +805,7 @@ pre.code{
     <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v4.1
+      French Bakery Аудит · v4.2
     </div>
   </div>
 
@@ -1126,17 +1141,34 @@ function updateResultMeta() {
   }
 }
 
-function buildHeaderHTML(dates) {
+/* ============================================================
+   ✅ Новая логика таблицы: colgroup + thead + tbody в одной <table>
+   ============================================================ */
+function buildColgroupHTML(dates) {
+  const cols = [
+    '<col style="width:24%;min-width:240px">',   // Наименование
+    '<col style="width:90px">',                   // Остаток
+    '<col style="width:80px">',                   // Продано
+    ...dates.map(() => '<col style="width:100px">'),
+    '<col style="width:80px">',                   // Срок
+    '<col style="width:100px">',                  // Свежих на витрине
+    '<col style="width:100px">',                  // Продано свежих
+    '<col style="width:110px">',                  // Просрочено на витрине
+    '<col style="width:110px">'                   // Продано просроченным
+  ];
+  return cols.join('');
+}
+function buildTheadHTML(dates) {
   return `
-    <th style="width:24%;min-width:240px">Наименование</th>
-    <th style="width:90px;text-align:center">Остаток</th>
-    <th style="width:80px;text-align:center">Продано</th>
-    ${dates.map(d => `<th style="width:100px;text-align:center">Получено за ${fmtDateRuShort(d)}</th>`).join('')}
-    <th style="width:80px;text-align:center">Срок</th>
-    <th style="width:90px;text-align:center">Свежих на витрине</th>
-    <th style="width:90px;text-align:center">Продано свежих</th>
-    <th style="width:100px;text-align:center">Просрочено на витрине</th>
-    <th style="width:100px;text-align:center">Продано просроченным</th>
+    <th class="col-name">Наименование</th>
+    <th>Остаток</th>
+    <th>Продано</th>
+    ${dates.map(d => `<th>Получено за ${fmtDateRuShort(d)}</th>`).join('')}
+    <th>Срок</th>
+    <th>Свежих на витрине</th>
+    <th>Продано свежих</th>
+    <th>Просрочено на витрине</th>
+    <th>Продано просроченным</th>
   `;
 }
 
@@ -1145,7 +1177,9 @@ function renderTable() {
   isRendering = true;
   try {
     const tbody = document.querySelector('#resultTable tbody');
-    if (!tbody) return;
+    const colgroup = $('resultColgroup');
+    const theadTr = document.querySelector('#resultThead tr');
+    if (!tbody || !colgroup || !theadTr) return;
     tbody.innerHTML = '';
     const scrollBox = $('tableScroll');
 
@@ -1163,8 +1197,8 @@ function renderTable() {
     let dates = [...allDates].sort((a, b) => b.localeCompare(a));
     if (dates.length > MAX_DATES) dates = dates.slice(0, MAX_DATES);
 
-    const theadTr = document.querySelector('#resultTableHeader thead tr');
-    if (theadTr) theadTr.innerHTML = buildHeaderHTML(dates);
+    colgroup.innerHTML = buildColgroupHTML(dates);
+    theadTr.innerHTML = buildTheadHTML(dates);
 
     tableRows.forEach(row => {
       const calc = computeFIFO(row);
@@ -1173,6 +1207,7 @@ function renderTable() {
       tr.classList.add(status.cls);
       tr.dataset.status = status.label;
 
+      // Название
       const tdName = document.createElement('td');
       tdName.title = row.name;
       const statusIcon = document.createElement('span');
@@ -1182,6 +1217,7 @@ function renderTable() {
       tdName.appendChild(document.createTextNode(row.name));
       tr.appendChild(tdName);
 
+      // Остаток
       const tdStock = document.createElement('td');
       const inputStock = document.createElement('input');
       inputStock.type = 'number';
@@ -1206,6 +1242,7 @@ function renderTable() {
       tdStock.appendChild(inputStock);
       tr.appendChild(tdStock);
 
+      // Продано
       const tdSales = document.createElement('td');
       const inputSales = document.createElement('input');
       inputSales.type = 'number';
@@ -1225,6 +1262,7 @@ function renderTable() {
       tdSales.appendChild(inputSales);
       tr.appendChild(tdSales);
 
+      // Приходы по датам
       dates.forEach(d => {
         const td = document.createElement('td');
         td.className = 'income-cell';
@@ -1276,23 +1314,26 @@ function renderTable() {
         tr.appendChild(td);
       });
 
+      // Срок
       const tdShelf = document.createElement('td');
-      tdShelf.style.textAlign = 'center';
       tdShelf.textContent = `${row.shelfLife} ч`;
       tr.appendChild(tdShelf);
 
+      // Свежих на витрине
       const tdFreshOnShelf = document.createElement('td');
       tdFreshOnShelf.className = 'calc-cell' + (calc.freshOnShelf === null ? ' zero' : '');
       tdFreshOnShelf.textContent = calc.freshOnShelf === null ? '—' : calc.freshOnShelf;
       tdFreshOnShelf.dataset.role = 'freshOnShelf';
       tr.appendChild(tdFreshOnShelf);
 
+      // Продано свежих
       const tdFreshSold = document.createElement('td');
       tdFreshSold.className = 'calc-cell' + (calc.freshSold === null ? ' zero' : '');
       tdFreshSold.textContent = calc.freshSold === null ? '—' : calc.freshSold;
       tdFreshSold.dataset.role = 'freshSold';
       tr.appendChild(tdFreshSold);
 
+      // Просрочено на витрине
       const tdExpiredShelf = document.createElement('td');
       tdExpiredShelf.className = 'calc-cell';
       tdExpiredShelf.textContent = calc.expiredOnShelf === null ? '—' : calc.expiredOnShelf;
@@ -1301,6 +1342,7 @@ function renderTable() {
       tdExpiredShelf.dataset.role = 'expiredOnShelf';
       tr.appendChild(tdExpiredShelf);
 
+      // Продано просроченным
       const tdSoldExpired = document.createElement('td');
       tdSoldExpired.className = 'calc-cell';
       tdSoldExpired.textContent = calc.soldExpired === null ? '—' : calc.soldExpired;
@@ -1395,10 +1437,12 @@ function updateTotals() {
 }
 function scheduleSessionSave() {
   if (isRestoring) return;
+  if (pendingSessionReset) return;
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => { saveTimer = null; saveSession(); }, 400);
 }
 function saveSession() {
+  if (pendingSessionReset) return;
   try {
     const payload = {
       version: 4,
@@ -1705,7 +1749,7 @@ async function shareToAI() {
       const pc = $('promptContent'); if (pc) pc.textContent = prompt;
       const pm = $('promptModal'); if (pm) pm.classList.remove('hidden');
     }
-    const canShare = navigator.canShare && navigator.canShare({ files });
+    const canShare = navigator.share && navigator.canShare && navigator.canShare({ files });
     if (canShare) {
       try {
         await navigator.share({ files, title: 'French Bakery Аудит — файлы',
@@ -2220,7 +2264,7 @@ function init() {
 
   window.addEventListener('error', e => console.warn('Global error:', e.message));
 
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v4.1 · таблица · каталог:', PRODUCTS.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v4.2 · таблица (colgroup) · каталог:', PRODUCTS.length);
 }
 
 bindUI();
