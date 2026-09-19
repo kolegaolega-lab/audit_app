@@ -42,6 +42,15 @@ body{
   -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
   padding-bottom:env(safe-area-inset-bottom);overflow-x:hidden;
 }
+body.modal-open{
+  overflow:hidden;
+  position:fixed;
+  width:100%;
+  height:100%;
+  top:0;
+  left:0;
+  right:0;
+}
 header{
   position:sticky;top:0;z-index:100;
   padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top));
@@ -341,7 +350,7 @@ button.busy::before{
   }
 }
 
-/* PRODUCT MODAL */
+/* MODALS */
 .modal{
   position:fixed;inset:0;z-index:1000;
   background:rgba(0,0,0,.5);
@@ -397,6 +406,19 @@ button.busy::before{
 .pf-cancel{background:var(--bg-elev-2);color:var(--text);border:1.5px solid var(--separator-opaque)!important}
 .pf-commit{background:#0a84ff;color:#fff}
 
+/* Модалка справочника — flex-колонка с фиксированной высотой */
+#catalogModalContent{
+  display:flex;flex-direction:column;
+  max-height:88vh;overflow:hidden;
+}
+#catalogList{
+  flex:1 1 auto;min-height:0;
+  max-height:none;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  margin-bottom:14px;
+}
+
 @media (max-width:640px){
   .modal{align-items:flex-end;padding:0}
   .modal-content{
@@ -404,6 +426,7 @@ button.busy::before{
     padding-bottom:calc(20px + env(safe-area-inset-bottom));
     animation:slideUp .3s cubic-bezier(.16,1,.3,1);
   }
+  #catalogModalContent{max-height:92vh}
   @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
   .modal-handle{
     display:block;width:40px;height:4px;
@@ -658,21 +681,21 @@ pre.code{
     <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v5.3
+      French Bakery Аудит · v5.4
     </div>
   </div>
 
 </main>
 
 <div id="catalogModal" class="modal hidden">
-  <div class="modal-content">
+  <div class="modal-content" id="catalogModalContent">
     <div class="modal-handle"></div>
     <h3>✏️ Справочник сроков</h3>
     <p class="hint">Меняйте названия, сроки, добавляйте новые позиции.</p>
     <div style="margin:12px 0">
       <input id="catalogSearch" type="text" placeholder="🔍 Поиск..." autocomplete="off" maxlength="100">
     </div>
-    <div id="catalogList" style="max-height:50vh;overflow-y:auto;margin-bottom:14px;-webkit-overflow-scrolling:touch"></div>
+    <div id="catalogList"></div>
     <div style="border-top:1px solid var(--separator);padding-top:14px;margin-top:14px">
       <label>➕ Новая позиция</label>
       <input id="newProdName" type="text" placeholder="Название" style="margin:6px 0" autocomplete="off" maxlength="100">
@@ -774,7 +797,36 @@ let openIdx = -1;
 let openTr = null;
 let openSnapshot = null;
 
+let _scrollY = 0;
+let _modalCount = 0;
+
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
+
+/* ============================================================
+   МОДАЛКИ — блокировка скролла фона
+   ============================================================ */
+function openModal(id) {
+  const el = $(id);
+  if (!el) return;
+  if (_modalCount === 0) {
+    _scrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.style.top = `-${_scrollY}px`;
+    document.body.classList.add('modal-open');
+  }
+  _modalCount++;
+  el.classList.remove('hidden');
+}
+function closeModal(id) {
+  const el = $(id);
+  if (!el) return;
+  el.classList.add('hidden');
+  _modalCount = Math.max(0, _modalCount - 1);
+  if (_modalCount === 0) {
+    document.body.classList.remove('modal-open');
+    document.body.style.top = '';
+    window.scrollTo(0, _scrollY);
+  }
+}
 
 /* ============================================================
    УТИЛИТЫ
@@ -1767,11 +1819,11 @@ function openProduct(row, tr) {
       box.appendChild(dateRow);
     });
   }
-  $('productModal').classList.remove('hidden');
+  openModal('productModal');
   setTimeout(() => $('pmStock').focus(), 100);
 }
 function closeProduct() {
-  $('productModal').classList.add('hidden');
+  closeModal('productModal');
   openIdx = -1;
   openTr = null;
   openSnapshot = null;
@@ -2241,7 +2293,7 @@ async function shareToAI() {
       }
     } catch (e) {
       const pc = $('promptContent'); if (pc) pc.textContent = prompt;
-      const pm = $('promptModal'); if (pm) pm.classList.remove('hidden');
+      openModal('promptModal');
     }
     const canShare = navigator.share && navigator.canShare && navigator.canShare({ files });
     if (canShare) {
@@ -2299,7 +2351,7 @@ function bindUI() {
       } else throw new Error();
     } catch (e) {
       const pc = $('promptContent'); if (pc) pc.textContent = prompt;
-      const pm = $('promptModal'); if (pm) pm.classList.remove('hidden');
+      openModal('promptModal');
     }
   };
   const pasteCsvBtn = $('pasteCsvBtn');
@@ -2383,12 +2435,12 @@ function bindUI() {
   const editCat = $('editCatalogBtn');
   if (editCat) editCat.onclick = () => {
     renderCatalogList();
-    const cm = $('catalogModal'); if (cm) cm.classList.remove('hidden');
+    openModal('catalogModal');
   };
   const closeCat = $('closeCatalogBtn');
   if (closeCat) closeCat.onclick = () => {
     saveCatalog();
-    const cm = $('catalogModal'); if (cm) cm.classList.add('hidden');
+    closeModal('catalogModal');
     if (Array.isArray(tableRows) && tableRows.length) {
       tableRows.forEach(r => {
         const p = PRODUCTS.find(x => x.name.toLowerCase() === r.name.toLowerCase());
@@ -2465,9 +2517,7 @@ function bindUI() {
     } catch (e) { alert('Выделите текст вручную.'); }
   };
   const closePrompt = $('closePromptModalBtn');
-  if (closePrompt) closePrompt.onclick = () => {
-    const pm = $('promptModal'); if (pm) pm.classList.add('hidden');
-  };
+  if (closePrompt) closePrompt.onclick = () => closeModal('promptModal');
 }
 
 /* ============================================================
@@ -2565,7 +2615,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v5.3 · catalog:', PRODUCTS.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v5.4 · catalog:', PRODUCTS.length);
 }
 
 PRODUCTS = loadCatalog();
