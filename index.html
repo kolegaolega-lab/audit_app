@@ -47,7 +47,7 @@ body{
   -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;overflow-x:hidden;
   letter-spacing:-.005em;
 }
-body.modal-open{overflow:hidden;position:fixed;width:100%;height:100%;top:0;left:0;right:0}
+body.modal-open{overflow:hidden}
 .app-header{
   position:sticky;top:0;z-index:100;
   padding:11px var(--page-pad);
@@ -87,7 +87,7 @@ body.modal-open{overflow:hidden;position:fixed;width:100%;height:100%;top:0;left
 main{
   max-width:var(--page-max);
   margin:0 auto;
-  padding:14px var(--page-pad) env(safe-area-inset-bottom,0px);
+  padding:14px var(--page-pad) calc(12px + env(safe-area-inset-bottom,0px));
 }
 .section{background:var(--bg-card);border-radius:var(--r-lg);margin-bottom:10px;border:1px solid var(--separator);overflow:hidden}
 .section-header{padding:16px 18px 0}
@@ -178,7 +178,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .table-scroll::-webkit-scrollbar{width:8px;height:8px}
 .table-scroll::-webkit-scrollbar-track{background:transparent}
 .table-scroll::-webkit-scrollbar-thumb{background:var(--separator-opaque);border-radius:4px}
-.table-scroll table.table-body{table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:13px;width:max-content;min-width:100%}
+.table-scroll table.table-body{border-collapse:separate;border-spacing:0;font-size:13px;width:max-content;min-width:100%}
 .table-scroll thead th{position:sticky;top:0;z-index:20;font-size:10.5px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;background:var(--bg-card);padding:8px 6px;text-align:center;vertical-align:middle;line-height:1.25;white-space:normal;word-wrap:break-word;overflow-wrap:anywhere;border-bottom:1px solid var(--separator);transform:translateZ(0)}
 .table-scroll thead th.col-name{text-align:left;padding-left:14px;padding-right:8px}
 .table-scroll thead th:first-child{position:sticky;left:0;z-index:25;background:var(--bg-card);transform:translateZ(0);isolation:isolate}
@@ -233,9 +233,113 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .calc-cell.zero{color:var(--text-tertiary)}
 .calc-cell[data-role="expiredOnShelf"].positive,
 .calc-cell[data-role="soldExpired"].positive{color:var(--red)}
+
+/* === МОДАЛЫ: новая структура шапка / тулбар / тело / подвал === */
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));height:100vh;height:100dvh;width:100vw;width:100dvw}
 .modal.hidden{display:none}
-.modal-content{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:auto;padding:22px;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px));-webkit-overflow-scrolling:touch}
+.modal-content{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;overflow:hidden}
+
+.modal-header{
+  flex:0 0 auto;
+  padding:20px 22px 12px;
+}
+.modal-header h3{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.25}
+.modal-header .hint{margin:4px 0 0}
+
+.unknown-toolbar-block{
+  flex:0 0 auto;
+  padding:0 22px 12px;
+  background:var(--bg-card);
+  border-bottom:1px solid var(--separator);
+}
+.unknown-toolbar-block .unknown-counter{margin:0 0 10px}
+.unknown-toolbar-block .unknown-toolbar{padding:0 0 10px}
+.unknown-toolbar-block .unknown-search{padding:0}
+
+.catalog-add-block{
+  flex:0 0 auto;
+  padding:12px 22px 12px;
+  border-top:1px solid var(--separator);
+  background:var(--bg-card);
+}
+.catalog-add-block label{display:block;margin-bottom:6px}
+.catalog-add-block .hint{margin-top:8px;font-size:11.5px;color:var(--text-tertiary)}
+
+.modal-body{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  padding:12px 22px;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+.modal-body::-webkit-scrollbar{display:none;width:0;height:0}
+
+.modal-footer{
+  flex:0 0 auto;
+  padding:12px 22px calc(16px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid var(--separator);
+  background:var(--bg-card);
+  position:relative;
+  z-index:10;
+}
+.modal-footer button{pointer-events:auto;cursor:pointer}
+
+#unknownModalContent,
+#catalogModalContent,
+#ignoredModalContent{
+  display:flex;
+  flex-direction:column;
+  padding:0 !important;
+  height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
+  max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
+  overflow:hidden;
+}
+
+/* === НЕ В СПРАВОЧНИКЕ === */
+.unknown-counter{font-size:11.5px;color:var(--text-secondary)}
+.unknown-counter b{color:var(--text-secondary);font-weight:600;font-variant-numeric:tabular-nums}
+.unknown-toolbar{display:flex;gap:8px}
+.unknown-toolbar button{flex:1;min-height:38px;font-size:13.5px;padding:8px 12px}
+.unknown-row{background:var(--bg-input);border:1.5px solid transparent;border-radius:var(--r-md);padding:10px 12px;margin-bottom:6px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .12s,border-color .12s}
+.unknown-row:last-child{margin-bottom:0}
+.unknown-row:active{background:var(--bg-hover)}
+.unknown-row.selected{border-color:var(--accent);background:var(--accent-soft)}
+.unknown-row.selected .unknown-row-name{color:var(--accent)}
+.unknown-row-grid{display:grid;grid-template-columns:1fr 60px 70px;gap:8px;align-items:center}
+.unknown-row-main{min-width:0}
+.unknown-row-name{font-size:14px;font-weight:600;line-height:1.3;word-break:break-word;overflow-wrap:anywhere;margin-bottom:3px}
+.unknown-row-info{font-size:11.5px;color:var(--text-secondary);line-height:1.35;display:flex;flex-wrap:wrap;gap:2px 10px}
+.unknown-row-info .kv{white-space:nowrap}
+.unknown-row-info .kv b{color:var(--text);font-weight:600}
+.unknown-row-hours{position:relative;display:block}
+.unknown-row-hours input{width:100%;min-height:38px;padding:0 20px 0 6px;font-size:14px;font-weight:500;text-align:center;color:var(--text);border-radius:8px;background:var(--bg-card);border:1px solid var(--separator-opaque)}
+.unknown-row-hours input:focus{background:var(--bg-card);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.unknown-row-hours .unit{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
+.unknown-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.unknown-actions .full{grid-column:1 / -1}
+
+/* === СПРАВОЧНИК === */
+.cat-row{display:grid;grid-template-columns:1fr 66px 76px 38px;gap:6px;align-items:center;padding:6px 0;border-radius:var(--r-sm)}
+.cat-row input[type=text]{padding:8px 10px;font-size:13.5px;min-height:38px;border-radius:8px;font-family:inherit}
+.cat-row .inp-wrap{position:relative;display:block}
+.cat-row .inp-wrap input{padding-right:22px;text-align:center;font-weight:500;color:var(--text)}
+.cat-row .inp-wrap .unit{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
+.cat-row .del-btn{min-height:38px;padding:0;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:16px;font-weight:700;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
+.cat-row.add-row .add-btn{background:var(--green-soft);color:var(--green);border:1px solid var(--green-soft);font-size:20px;font-weight:500;min-height:38px;padding:0;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
+
+/* === ИГНОР-ЛИСТ === */
+.ignored-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
+.ignored-row:hover{background:var(--bg-hover)}
+.ignored-row .name{font-size:14px;word-break:break-word;overflow-wrap:anywhere}
+.ignored-row .del-btn{min-height:36px;padding:6px 12px;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:12.5px;font-weight:600;border-radius:8px}
+
+/* === ПРОМПТ === */
+pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm);font-size:11.5px;line-height:1.55;overflow:auto;max-height:60vh;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #1e293b}
+#promptModal .modal-content{max-height:calc(100dvh - 32px);padding:22px;overflow:auto}
+#productModal .modal-content{max-height:calc(100dvh - 32px);padding:22px;overflow:auto}
 .modal-content::-webkit-scrollbar{display:none}
 .modal-content{scrollbar-width:none;-ms-overflow-style:none}
 .modal-content h3{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.25}
@@ -254,49 +358,8 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .pf-actions button{min-height:44px;border:0;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit}
 .pf-cancel{background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator-opaque)!important}
 .pf-commit{background:#0a84ff;color:#fff}
-#catalogModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));padding:22px 22px 0 22px}
-#catalogList{flex:0 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;-ms-overflow-style:none;padding-right:0}
-#catalogList::-webkit-scrollbar{display:none}
-.catalog-bottom{flex-shrink:0;padding-top:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);margin-top:12px;isolation:isolate;position:relative;z-index:1}
-.cat-row{display:grid;grid-template-columns:1fr 66px 76px 38px;gap:6px;align-items:center;padding:6px 0;border-radius:var(--r-sm)}
-.cat-row input[type=text]{padding:8px 10px;font-size:13.5px;min-height:38px;border-radius:8px;font-family:inherit}
-.cat-row .inp-wrap{position:relative;display:block}
-.cat-row .inp-wrap input{padding-right:22px;text-align:center;font-weight:500;color:var(--text)}
-.cat-row .inp-wrap .unit{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
-.cat-row .del-btn{min-height:38px;padding:0;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:16px;font-weight:700;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
-.cat-row.add-row .add-btn{background:var(--green-soft);color:var(--green);border:1px solid var(--green-soft);font-size:20px;font-weight:500;min-height:38px;padding:0;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
-#unknownModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-width:520px;padding:20px 20px 0 20px}
-@media (max-width:640px){#unknownModalContent{max-width:100%}}
-#unknownBody{flex:0 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;-ms-overflow-style:none;padding-right:0}
-#unknownBody::-webkit-scrollbar{display:none}
-.unknown-counter{font-size:11.5px;color:var(--text-secondary);margin-bottom:10px}
-.unknown-counter b{color:var(--text-secondary);font-weight:600;font-variant-numeric:tabular-nums}
-.unknown-row{background:var(--bg-input);border:1.5px solid transparent;border-radius:var(--r-md);padding:10px 12px;margin-bottom:6px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .12s,border-color .12s}
-.unknown-row:last-child{margin-bottom:0}
-.unknown-row:active{background:var(--bg-hover)}
-.unknown-row.selected{border-color:var(--accent);background:var(--accent-soft)}
-.unknown-row.selected .unknown-row-name{color:var(--accent)}
-.unknown-row-grid{display:grid;grid-template-columns:1fr 60px 70px;gap:8px;align-items:center}
-.unknown-row-main{min-width:0}
-.unknown-row-name{font-size:14px;font-weight:600;line-height:1.3;word-break:break-word;overflow-wrap:anywhere;margin-bottom:3px}
-.unknown-row-info{font-size:11.5px;color:var(--text-secondary);line-height:1.35;display:flex;flex-wrap:wrap;gap:2px 10px}
-.unknown-row-info .kv{white-space:nowrap}
-.unknown-row-info .kv b{color:var(--text);font-weight:600}
-.unknown-row-hours{position:relative;display:block}
-.unknown-row-hours input{width:100%;min-height:38px;padding:0 20px 0 6px;font-size:14px;font-weight:500;text-align:center;color:var(--text);border-radius:8px;background:var(--bg-card);border:1px solid var(--separator-opaque)}
-.unknown-row-hours input:focus{background:var(--bg-card);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-.unknown-row-hours .unit{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
-.unknown-bottom{flex-shrink:0;padding-top:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);margin-top:12px;isolation:isolate;position:relative;z-index:1}
-.unknown-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.unknown-actions .full{grid-column:1 / -1}
-#ignoredModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));padding:22px 22px 0 22px}
-#ignoredList{flex:0 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;-ms-overflow-style:none;margin-bottom:12px}
-#ignoredList::-webkit-scrollbar{display:none}
-.ignored-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
-.ignored-row:hover{background:var(--bg-hover)}
-.ignored-row .name{font-size:14px;word-break:break-word;overflow-wrap:anywhere}
-.ignored-row .del-btn{min-height:36px;padding:6px 12px;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:12.5px;font-weight:600;border-radius:8px}
-.ignored-bottom{flex-shrink:0;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));isolation:isolate;position:relative;z-index:1}
+
+/* === ФОТО === */
 .photo-queue{display:grid;gap:8px;margin-top:10px}
 .photo-item{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input)}
 .photo-thumb{width:44px;height:44px;object-fit:cover;border-radius:9px;background:var(--bg-elev-2)}
@@ -305,9 +368,17 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .photo-type{font-size:11px;color:var(--text-secondary);margin-top:2px}
 .photo-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .photo-actions button{min-height:34px;padding:6px 12px;font-size:12.5px;border-radius:8px}
-pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm);font-size:11.5px;line-height:1.55;overflow:auto;max-height:60vh;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #1e293b}
+
+/* === TOAST === */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(28,28,30,.96);color:#fff;font-size:13.5px;font-weight:500;padding:11px 18px;border-radius:11px;z-index:9999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;max-width:90vw;text-align:center;letter-spacing:-.005em;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* === ДЕСКТОП === */
+@media (min-width:900px){
+  :root{--page-max:840px}
+  .table-scroll table.table-body{table-layout:auto;width:100%}
+}
+
 @media (max-width:420px){
   .unknown-row-grid{grid-template-columns:1fr 54px 62px;gap:6px}
   .unknown-row-name{font-size:13.5px}
@@ -528,31 +599,33 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 
 <div id="catalogModal" class="modal hidden">
   <div class="modal-content" id="catalogModalContent">
-    <h3>Справочник сроков</h3>
-    <p class="hint" style="margin:4px 0 12px">Меняйте названия и сроки. Введите часы или сутки — второе пересчитается.</p>
-    <div style="margin:0 0 12px"><input id="catalogSearch" type="text" placeholder="Поиск по названию..." autocomplete="off" maxlength="100"></div>
-    <div id="catalogList"></div>
-    <div class="catalog-bottom">
-      <div>
-        <label>Добавить позицию</label>
-        <div class="cat-row add-row" style="margin-top:6px">
-          <input id="newProdName" type="text" placeholder="Название" autocomplete="off" maxlength="100">
-          <div class="inp-wrap"><input id="newProdHours" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" value="0" maxlength="3"><span class="unit">ч</span></div>
-          <div class="inp-wrap"><input id="newProdDays" type="text" inputmode="decimal" placeholder="0" value="0" maxlength="4"><span class="unit">сут</span></div>
-          <button id="addProdBtn" class="add-btn" type="button" aria-label="Добавить">+</button>
-        </div>
-        <p class="hint" style="margin-top:8px;font-size:11.5px;color:var(--text-tertiary)">
-          Срок в часах (макс. 720) или сутках (макс. 30). <b style="color:var(--text-secondary)">24 ч = 1 сутки</b>.
-        </p>
+    <div class="modal-header">
+      <h3>Справочник сроков</h3>
+      <p class="hint">Меняйте названия и сроки. Введите часы или сутки — второе пересчитается.</p>
+      <div style="margin:12px 0 0"><input id="catalogSearch" type="text" placeholder="Поиск по названию..." autocomplete="off" maxlength="100"></div>
+    </div>
+    <div class="modal-body" id="catalogList"></div>
+    <div class="catalog-add-block">
+      <label>Добавить позицию</label>
+      <div class="cat-row add-row" style="margin-top:6px">
+        <input id="newProdName" type="text" placeholder="Название" autocomplete="off" maxlength="100">
+        <div class="inp-wrap"><input id="newProdHours" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" value="0" maxlength="3"><span class="unit">ч</span></div>
+        <div class="inp-wrap"><input id="newProdDays" type="text" inputmode="decimal" placeholder="0" value="0" maxlength="4"><span class="unit">сут</span></div>
+        <button id="addProdBtn" class="add-btn" type="button" aria-label="Добавить">+</button>
       </div>
-      <div class="row" style="margin-top:14px">
+      <p class="hint">
+        Срок в часах (макс. 720) или сутках (макс. 30). <b style="color:var(--text-secondary)">24 ч = 1 сутки</b>.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <div class="row" style="margin-bottom:8px">
         <button id="exportCatalogBtn" class="secondary">Экспорт</button>
         <button id="importCatalogBtn" class="secondary">Импорт</button>
       </div>
-      <button id="resetCatalogBtn" class="secondary block" style="margin-top:8px">Сбросить к заводскому</button>
+      <button id="resetCatalogBtn" class="secondary block" style="margin-bottom:8px">Сбросить к заводскому</button>
       <input id="importCatalogFile" type="file" accept=".json,application/json" hidden>
       <div id="catalogStatus" class="status"></div>
-      <button id="closeCatalogBtn" class="secondary block" style="margin-top:14px">Закрыть</button>
+      <button id="closeCatalogBtn" class="secondary block" style="margin-top:10px">Закрыть</button>
     </div>
   </div>
 </div>
@@ -602,14 +675,24 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 
 <div id="unknownModal" class="modal hidden">
   <div class="modal-content" id="unknownModalContent">
-    <h3>Не в справочнике</h3>
-    <p class="hint" style="margin:4px 0 12px">Тапните по позиции, чтобы выбрать. Введите часы или сутки.</p>
-    <div class="unknown-counter">Всего: <b id="unknownTotal">0</b> · Выбрано: <b id="unknownSelectedCount">0</b></div>
-    <div class="unknown-search" id="unknownSearchWrap" style="display:none;margin-bottom:10px">
-      <input id="unknownSearch" type="text" placeholder="Поиск по названию..." autocomplete="off" maxlength="100">
+    <div class="modal-header">
+      <h3>Не в справочнике</h3>
+      <p class="hint">Тапните по позиции, чтобы выбрать. Введите часы или сутки.</p>
     </div>
-    <div id="unknownBody"></div>
-    <div class="unknown-bottom">
+    <div class="unknown-toolbar-block">
+      <div class="unknown-counter">Всего: <b id="unknownTotal">0</b> · Выбрано: <b id="unknownSelectedCount">0</b></div>
+      <div class="unknown-toolbar">
+        <button type="button" id="unknownSelectAllBtn" class="secondary">Выбрать все</button>
+        <button type="button" id="unknownClearSelBtn" class="secondary">Снять выделение</button>
+      </div>
+      <div class="unknown-search" id="unknownSearchWrap" style="display:none;margin-top:10px">
+        <input id="unknownSearch" type="text" placeholder="Поиск по названию..." autocomplete="off" maxlength="100">
+      </div>
+    </div>
+    <div class="modal-body">
+      <div id="unknownRows"></div>
+    </div>
+    <div class="modal-footer">
       <div class="unknown-actions">
         <button id="unknownAddBtn" class="success">Добавить</button>
         <button id="unknownIgnoreBtn" class="warn">Игнорировать</button>
@@ -621,10 +704,12 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 
 <div id="ignoredModal" class="modal hidden">
   <div class="modal-content" id="ignoredModalContent">
-    <h3>Игнор-лист</h3>
-    <p class="hint" style="margin:4px 0 12px">Эти позиции не появляются в списке «Не в справочнике».</p>
-    <div id="ignoredList"></div>
-    <div class="ignored-bottom">
+    <div class="modal-header">
+      <h3>Игнор-лист</h3>
+      <p class="hint">Эти позиции не появляются в списке «Не в справочнике».</p>
+    </div>
+    <div class="modal-body" id="ignoredList"></div>
+    <div class="modal-footer">
       <button id="clearIgnoredBtn" class="secondary block" style="margin-bottom:8px">Очистить игнор-лист</button>
       <button id="closeIgnoredBtn" class="secondary block">Закрыть</button>
     </div>
@@ -687,13 +772,10 @@ let openIdx = -1;
 let openTr = null;
 let openSnapshot = null;
 let _scrollY = 0;
-let _modalCount = 0;
 let _totalsTimer = null;
 let applyBusy = false;
 let exportBusy = false;
 let shareBusy = false;
-let _bodyFrozen = false;
-let _frozenScrollY = 0;
 let _tableQuery = '';
 let _tableSearchTimer = null;
 let _pendingRemote = null;
@@ -702,52 +784,21 @@ let _currentToast = null;
 
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
 
-function freezeBody() {
-  if (_bodyFrozen) return;
-  _frozenScrollY = window.scrollY || window.pageYOffset || 0;
-  document.body.style.position = 'fixed';
-  document.body.style.top = `-${_frozenScrollY}px`;
-  document.body.style.left = '0';
-  document.body.style.right = '0';
-  document.body.style.width = '100%';
-  document.body.style.height = '100%';
-  document.body.style.overflow = 'hidden';
-  _bodyFrozen = true;
-}
-function unfreezeBody() {
-  if (!_bodyFrozen) return;
-  if (_modalCount > 0) { _bodyFrozen = false; return; }
-  document.body.style.position = '';
-  document.body.style.top = '';
-  document.body.style.left = '';
-  document.body.style.right = '';
-  document.body.style.width = '';
-  document.body.style.height = '';
-  document.body.style.overflow = '';
-  window.scrollTo(0, _frozenScrollY);
-  _bodyFrozen = false;
-}
 function openModal(id) {
   const el = $(id);
   if (!el) return;
-  if (_modalCount === 0) {
-    _scrollY = window.scrollY || window.pageYOffset || 0;
-    document.body.style.top = `-${_scrollY}px`;
-    document.body.classList.add('modal-open');
-  }
-  _modalCount++;
+  document.body.style.overflow = 'hidden';
+  document.body.classList.add('modal-open');
   el.classList.remove('hidden');
 }
 function closeModal(id) {
   const el = $(id);
   if (!el) return;
   el.classList.add('hidden');
-  _modalCount = Math.max(0, _modalCount - 1);
-  if (_modalCount === 0) {
+  const anyOpen = document.querySelector('.modal:not(.hidden)');
+  if (!anyOpen) {
+    document.body.style.overflow = '';
     document.body.classList.remove('modal-open');
-    document.body.style.top = '';
-    if (_bodyFrozen) window.scrollTo(0, _frozenScrollY);
-    else window.scrollTo(0, _scrollY);
   }
 }
 
@@ -1577,7 +1628,7 @@ function updateResultMeta() {
   if (!box) return;
   if (!Array.isArray(tableRows) || !tableRows.length) { box.style.display = 'none'; return; }
   box.style.display = 'grid';
-  const d = $('metaDate'); if (d) d.textContent = formatDateShortRu(getTodayStr());
+  const d = $('metaDate'); if (d) d.textContent = formatDateRu(getTodayStr());
   const pt = $('point');
   const p = $('metaPoint'); if (p) p.textContent = (pt && pt.value.trim()) ? pt.value.trim() : '—';
 }
@@ -1672,13 +1723,7 @@ function makeNumInput(opts) {
 }
 function bindTableInput(inp) {
   inp.addEventListener('click', e => e.stopPropagation());
-  inp.addEventListener('focus', e => { e.stopPropagation(); freezeBody(); requestAnimationFrame(() => scrollIntoContainer(inp)); });
-  inp.addEventListener('blur', () => {
-    setTimeout(() => {
-      if (_modalCount > 0) return;
-      if (!document.activeElement || !document.activeElement.closest('.table-scroll')) unfreezeBody();
-    }, 100);
-  });
+  inp.addEventListener('focus', e => { e.stopPropagation(); requestAnimationFrame(() => scrollIntoContainer(inp)); });
   inp.addEventListener('keydown', tableKey);
 }
 function renderTable() {
@@ -1989,7 +2034,7 @@ function cancelProduct() {
 }
 
 function renderUnknownModal() {
-  const body = $('unknownBody');
+  const body = $('unknownRows');
   const totalEl = $('unknownTotal');
   const selectedEl = $('unknownSelectedCount');
   const searchWrap = $('unknownSearchWrap');
@@ -2099,6 +2144,7 @@ function renderUnknownModal() {
   if (filtered.length > visible.length) {
     const more = document.createElement('div');
     more.className = 'unknown-load-more';
+    more.style.cssText = 'text-align:center;padding:12px;cursor:pointer;color:var(--accent);font-weight:600';
     more.textContent = `Показать ещё ${Math.min(UNKNOWN_PAGE_SIZE, filtered.length - visible.length)}`;
     more.onclick = () => { unknownVisible += UNKNOWN_PAGE_SIZE; renderUnknownModal(); };
     body.appendChild(more);
@@ -2127,7 +2173,7 @@ function updateUnknownBanner() {
   if (banner) banner.style.display = filter.length ? 'block' : 'none';
 }
 function addSelectedUnknown() {
-  const items = document.querySelectorAll('#unknownBody .unknown-row.selected');
+  const items = document.querySelectorAll('#unknownRows .unknown-row.selected');
   const toAdd = [];
   items.forEach(item => {
     const name = safeStr(item.dataset.name, MAX_NAME);
@@ -2735,7 +2781,8 @@ function bindUI() {
     openModal('catalogModal');
   };
   const closeCat = $('closeCatalogBtn');
-  if (closeCat) closeCat.onclick = () => {
+  if (closeCat) closeCat.onclick = (e) => {
+    e.stopPropagation();
     saveCatalog(); closeModal('catalogModal');
     if (Array.isArray(tableRows) && tableRows.length) {
       tableRows.forEach(r => { const p = PRODUCTS.find(x => normalizeName(x.name) === normalizeName(r.name)); if (p) r.shelfLife = p.shelfLife; });
@@ -2834,7 +2881,7 @@ function bindUI() {
   const ignoredBtn = $('ignoredBtn');
   if (ignoredBtn) ignoredBtn.onclick = () => { renderIgnoredList(); openModal('ignoredModal'); };
   const closeIgnored = $('closeIgnoredBtn');
-  if (closeIgnored) closeIgnored.onclick = () => { closeModal('ignoredModal'); updateUnknownBanner(); };
+  if (closeIgnored) closeIgnored.onclick = (e) => { e.stopPropagation(); closeModal('ignoredModal'); updateUnknownBanner(); };
   const clearIgnoredBtn = $('clearIgnoredBtn');
   if (clearIgnoredBtn) clearIgnoredBtn.onclick = () => {
     if (!IGNORED.length) { alert('Игнор-лист уже пуст.'); return; }
@@ -2843,9 +2890,23 @@ function bindUI() {
   };
   const openUnknownBtn = $('openUnknownBtn');
   if (openUnknownBtn) openUnknownBtn.onclick = () => openUnknownModal();
+  const unknownSelectAllBtn = $('unknownSelectAllBtn');
+  if (unknownSelectAllBtn) unknownSelectAllBtn.onclick = (e) => {
+    e.stopPropagation();
+    const q = normalizeName(unknownQuery);
+    const filtered = q ? unknownRows.filter(r => normalizeName(r.name).includes(q)) : unknownRows;
+    filtered.forEach(r => unknownSelected.add(normalizeName(r.name)));
+    renderUnknownModal();
+  };
+  const unknownClearSelBtn = $('unknownClearSelBtn');
+  if (unknownClearSelBtn) unknownClearSelBtn.onclick = (e) => {
+    e.stopPropagation();
+    unknownSelected = new Set();
+    renderUnknownModal();
+  };
   const unknownAddBtn = $('unknownAddBtn'); if (unknownAddBtn) unknownAddBtn.onclick = addSelectedUnknown;
   const unknownIgnoreBtn = $('unknownIgnoreBtn'); if (unknownIgnoreBtn) unknownIgnoreBtn.onclick = ignoreAllUnknown;
-  const unknownCloseBtn = $('unknownCloseBtn'); if (unknownCloseBtn) unknownCloseBtn.onclick = () => closeUnknownModal();
+  const unknownCloseBtn = $('unknownCloseBtn'); if (unknownCloseBtn) unknownCloseBtn.onclick = (e) => { e.stopPropagation(); closeUnknownModal(); };
   const unknownSearch = $('unknownSearch');
   if (unknownSearch) unknownSearch.oninput = () => { unknownQuery = unknownSearch.value; unknownVisible = UNKNOWN_PAGE_SIZE; renderUnknownModal(); };
   const copyModal = $('copyFromModalBtn');
@@ -2932,6 +2993,27 @@ function bindProductModal() {
   });
   const modal = $('productModal');
   if (modal) modal.addEventListener('click', e => { if (e.target === modal) cancelProduct(); });
+
+  ['catalogModal', 'unknownModal', 'ignoredModal'].forEach(id => {
+    const m = $(id);
+    if (!m) return;
+    m.addEventListener('click', e => {
+      if (e.target !== m) return;
+      if (id === 'catalogModal') {
+        saveCatalog(); closeModal('catalogModal');
+        if (Array.isArray(tableRows) && tableRows.length) {
+          tableRows.forEach(r => { const p = PRODUCTS.find(x => normalizeName(x.name) === normalizeName(r.name)); if (p) r.shelfLife = p.shelfLife; });
+          renderTable();
+        }
+        updateCatalogMeta();
+      } else if (id === 'unknownModal') {
+        closeUnknownModal();
+      } else if (id === 'ignoredModal') {
+        closeModal('ignoredModal'); updateUnknownBanner();
+      }
+    });
+  });
+
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       if (!$('productModal').classList.contains('hidden')) cancelProduct();
