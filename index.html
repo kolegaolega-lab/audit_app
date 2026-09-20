@@ -62,7 +62,7 @@ label{display:block;font-size:11px;font-weight:600;color:var(--text-secondary);m
 input,button,select,textarea{font:inherit;outline:none;font-family:inherit}
 input[type=text],input[type=number],textarea{width:100%;padding:12px 14px;border:1.5px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input);color:var(--text);font-size:16px;transition:border-color .15s,background .15s;-webkit-appearance:none;appearance:none;min-height:46px}
 input:focus,textarea:focus{border-color:var(--accent);background:var(--bg-card)}
-textarea{font-size:13px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.5;min-height:160px;resize:vertical}
+textarea{font-size:13px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.5;min-height:160px;max-height:400px;resize:vertical;overflow-y:auto}
 input::placeholder,textarea::placeholder{color:var(--text-tertiary)}
 .auto-datetime{display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:10px;align-items:end}
 @media (max-width:640px){.auto-datetime{grid-template-columns:1fr 1fr}.auto-datetime .point-field{grid-column:1 / -1}}
@@ -91,10 +91,19 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .status.err{background:var(--red-soft);border-color:transparent;color:var(--red);font-weight:600}
 .status.info{background:var(--blue-soft);border-color:transparent;color:var(--accent);font-weight:600}
 .status.warn{background:var(--orange-soft);border-color:transparent;color:var(--orange);font-weight:600}
+.csv-counter{font-size:12px;color:var(--text-secondary);margin-top:6px;padding:0 2px;min-height:16px}
+.csv-counter b{color:var(--text);font-weight:600}
+.csv-counter.warn{color:var(--orange)}
+.csv-counter.err{color:var(--red)}
 .result-meta{display:flex;flex-wrap:wrap;gap:12px 18px;font-size:12px;color:var(--text-secondary);padding:10px 12px;margin-bottom:12px;background:var(--bg-input);border-radius:var(--r-sm);align-items:center}
 .result-meta .item{display:inline-flex;align-items:center;gap:5px}
 .result-meta .item b{color:var(--text);font-weight:700}
 .result-meta .item.empty b{color:var(--text-tertiary)}
+.table-search{margin-bottom:10px;position:relative}
+.table-search input{padding-left:38px}
+.table-search::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.5;pointer-events:none}
+.table-search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:28px;height:28px;padding:0;border-radius:50%;background:var(--bg-elev-2);color:var(--text-secondary);font-size:14px;font-weight:700;display:none;min-height:auto;align-items:center;justify-content:center;cursor:pointer}
+.table-search.has-value .table-search-clear{display:inline-flex}
 .table-wrap{border-radius:var(--r-md);border:1px solid var(--separator);background:var(--bg-card);overflow:hidden;margin-bottom:4px}
 .table-scroll{max-height:65vh;overflow:auto;-webkit-overflow-scrolling:touch;background:var(--bg-card);position:relative;scrollbar-width:thin;scrollbar-color:var(--separator-opaque) transparent;overscroll-behavior:contain}
 .table-scroll::-webkit-scrollbar{width:8px;height:8px}
@@ -110,6 +119,7 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .table-scroll tbody td:first-child::after{content:'';position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--separator);pointer-events:none}
 .table-scroll tbody tr:last-child td{border-bottom:none}
 .table-scroll tbody tr{cursor:pointer}
+.table-scroll tbody tr.hidden-row{display:none}
 .table-scroll tbody tr.row-fresh td{background:var(--green-row)}
 .table-scroll tbody tr.row-warn td{background:var(--orange-row)}
 .table-scroll tbody tr.row-danger td{background:var(--red-row)}
@@ -413,6 +423,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     <textarea id="csvInput" maxlength="2000000" placeholder="Наименование;Получено за 17.09;Получено за 18.09;Продано сегодня;Срок годности
 Слойка со сливой;4;2;0;18
 Шатель;3;3;5;36"></textarea>
+    <div id="csvCounter" class="csv-counter"></div>
     <button id="applyCsvBtn" class="success block" style="margin-top:12px">✅ Применить CSV</button>
     <div id="csvStatus" class="status"></div>
   </div>
@@ -450,6 +461,11 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <button id="openUnknownBtn" class="warn block">⚠️ Не в справочнике (<span id="unknownCount">0</span>) — нажмите, чтобы разобрать</button>
     </div>
 
+    <div id="tableSearchWrap" class="table-search" style="display:none">
+      <input id="tableSearch" type="text" placeholder="Поиск по таблице..." autocomplete="off" maxlength="100">
+      <button type="button" class="table-search-clear" id="tableSearchClear">✕</button>
+    </div>
+
     <div class="table-wrap" id="tableWrap" style="display:none">
       <div class="table-scroll" id="tableScroll">
         <table id="resultTable" class="table-body">
@@ -478,7 +494,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v8.2
+      French Bakery Аудит · v8.3
     </div>
   </div>
 
@@ -601,6 +617,7 @@ const SHELF_LIFE_START_HOUR = 7;
 const BTN_LOCK_MS = 300;
 const TIME_UPDATE_MS = 30 * 1000;
 const TOTAL_DEBOUNCE_MS = 150;
+const SEARCH_DEBOUNCE_MS = 120;
 const SESSION_KEY = 'fbAuditSessionV6';
 const SESSION_VERSION = 6;
 const LEGACY_SESSION_KEY = 'fbAuditSessionV5';
@@ -637,6 +654,8 @@ let exportBusy = false;
 let shareBusy = false;
 let _bodyFrozen = false;
 let _frozenScrollY = 0;
+let _tableQuery = '';
+let _tableSearchTimer = null;
 
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
 
@@ -654,6 +673,10 @@ function freezeBody() {
 }
 function unfreezeBody() {
   if (!_bodyFrozen) return;
+  if (_modalCount > 0) {
+    _bodyFrozen = false;
+    return;
+  }
   document.body.style.position = '';
   document.body.style.top = '';
   document.body.style.left = '';
@@ -684,7 +707,11 @@ function closeModal(id) {
   if (_modalCount === 0) {
     document.body.classList.remove('modal-open');
     document.body.style.top = '';
-    window.scrollTo(0, _scrollY);
+    if (_bodyFrozen) {
+      window.scrollTo(0, _frozenScrollY);
+    } else {
+      window.scrollTo(0, _scrollY);
+    }
   }
 }
 
@@ -748,6 +775,9 @@ function formatDateRu(iso) {
 function normalizeName(s) {
   return String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
 }
+function normalizeForSearch(s) {
+  return String(s || '').toLowerCase().trim().replace(/\s+/g, ' ').replace(/ё/g, 'е');
+}
 
 function updateAutoDate() { const el = $('autoDate'); if (el) el.textContent = formatDateRu(getTodayStr()); }
 function updateAutoTime() { const el = $('autoTime'); if (el) el.textContent = getCurrentTimeStr(); }
@@ -756,6 +786,64 @@ function startAutoDateTime() {
   updateAutoTime();
   if (_timeUpdater) clearInterval(_timeUpdater);
   _timeUpdater = setInterval(() => { updateAutoDate(); updateAutoTime(); }, TIME_UPDATE_MS);
+}
+
+function autoResizeTextarea() {
+  const ta = $('csvInput');
+  if (!ta) return;
+  ta.style.height = 'auto';
+  const next = Math.min(ta.scrollHeight, 400);
+  ta.style.height = next + 'px';
+}
+function updateCsvCounter() {
+  const ta = $('csvInput');
+  const counter = $('csvCounter');
+  if (!ta || !counter) return;
+  const text = ta.value;
+  if (!text.trim()) { counter.textContent = ''; counter.className = 'csv-counter'; return; }
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  const dataLines = Math.max(0, lines.length - 1);
+  const bytes = new Blob([text]).size;
+  const kb = Math.round(bytes / 1024);
+  let cls = 'csv-counter';
+  let suffix = '';
+  if (bytes > MAX_CSV_BYTES) { cls += ' err'; suffix = ' ⚠️ превышает 2 МБ'; }
+  else if (bytes > MAX_CSV_BYTES * 0.8) { cls += ' warn'; }
+  counter.className = cls;
+  counter.innerHTML = `<b>${dataLines}</b> строк · ${kb} КБ${suffix}`;
+}
+function applyTableFilter() {
+  const tbody = document.querySelector('#resultTable tbody');
+  if (!tbody) return;
+  const q = normalizeForSearch(_tableQuery);
+  let visible = 0;
+  const rows = tbody.children;
+  for (let i = 0; i < rows.length; i++) {
+    const tr = rows[i];
+    const nameEl = tr.querySelector('.name-text');
+    const name = nameEl ? normalizeForSearch(nameEl.textContent) : '';
+    if (!q || name.includes(q)) {
+      tr.classList.remove('hidden-row');
+      visible++;
+    } else {
+      tr.classList.add('hidden-row');
+    }
+  }
+  const searchWrap = $('tableSearchWrap');
+  if (searchWrap) searchWrap.classList.toggle('has-value', !!q);
+  const summary = $('summary');
+  if (summary && q) {
+    const prev = summary.dataset.baseSummary || '';
+    summary.textContent = `${prev} · Показано: ${visible}`;
+  } else if (summary) {
+    const prev = summary.dataset.baseSummary || '';
+    if (prev) summary.textContent = prev;
+  }
+}
+function setTableQuery(q) {
+  _tableQuery = q;
+  if (_tableSearchTimer) clearTimeout(_tableSearchTimer);
+  _tableSearchTimer = setTimeout(() => { _tableSearchTimer = null; applyTableFilter(); }, SEARCH_DEBOUNCE_MS);
 }
 
 const FACTORY_CATALOG = [
@@ -879,9 +967,7 @@ function updateIgnoredCount() {
 }
 
 function getCheckMoment() {
-  const dateStr = getTodayStr();
-  const timeStr = getCurrentTimeStr();
-  const d = new Date(`${dateStr}T${timeStr}:00`);
+  const d = new Date();
   return isValidDate(d) ? d : new Date();
 }
 function getWriteOffMoment(partyDate, shelfLife) {
@@ -1326,12 +1412,7 @@ function scrollIntoContainer(el) {
 function focusEl(el) {
   el.focus({ preventScroll: true });
   try { el.select(); } catch (e) {}
-  requestAnimationFrame(() => {
-    if ((window.scrollY || window.pageYOffset) !== _frozenScrollY && _bodyFrozen) {
-      window.scrollTo(0, _frozenScrollY);
-    }
-    scrollIntoContainer(el);
-  });
+  requestAnimationFrame(() => { scrollIntoContainer(el); });
 }
 function tableNav(input, key) {
   const td = input.closest('td');
@@ -1406,6 +1487,24 @@ function makeNumInput(opts) {
   return inp;
 }
 
+function bindTableInput(inp) {
+  inp.addEventListener('click', e => e.stopPropagation());
+  inp.addEventListener('focus', e => {
+    e.stopPropagation();
+    freezeBody();
+    requestAnimationFrame(() => scrollIntoContainer(inp));
+  });
+  inp.addEventListener('blur', () => {
+    setTimeout(() => {
+      if (_modalCount > 0) return;
+      if (!document.activeElement || !document.activeElement.closest('.table-scroll')) {
+        unfreezeBody();
+      }
+    }, 100);
+  });
+  inp.addEventListener('keydown', tableKey);
+}
+
 function renderTable() {
   if (isRendering) return;
   isRendering = true;
@@ -1414,16 +1513,19 @@ function renderTable() {
     const colgroup = $('resultColgroup');
     const theadTr = document.querySelector('#resultThead tr');
     const wrap = $('tableWrap');
+    const searchWrap = $('tableSearchWrap');
     if (!tbody || !colgroup || !theadTr || !wrap) return;
     tbody.innerHTML = '';
     if (!Array.isArray(tableRows) || !tableRows.length) {
-      if ($('summary')) $('summary').textContent = 'Загрузите CSV от ИИ, чтобы увидеть результат.';
+      if ($('summary')) { $('summary').textContent = 'Загрузите CSV от ИИ, чтобы увидеть результат.'; $('summary').dataset.baseSummary = ''; }
       if ($('totals')) $('totals').style.display = 'none';
       wrap.style.display = 'none';
+      if (searchWrap) searchWrap.style.display = 'none';
       updateResultMeta();
       return;
     }
     wrap.style.display = 'block';
+    if (searchWrap) searchWrap.style.display = 'block';
     const allDates = new Set();
     tableRows.forEach(r => (r.incoming || []).forEach(p => { if (p.date) allDates.add(p.date); }));
     let dates = [...allDates].sort((a, b) => b.localeCompare(a));
@@ -1471,20 +1573,7 @@ function renderTable() {
           if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
           saveSession();
         });
-        inputStock.addEventListener('click', e => e.stopPropagation());
-        inputStock.addEventListener('focus', e => {
-          e.stopPropagation();
-          freezeBody();
-          requestAnimationFrame(() => scrollIntoContainer(inputStock));
-        });
-        inputStock.addEventListener('blur', () => {
-          setTimeout(() => {
-            if (!document.activeElement || !document.activeElement.closest('.table-scroll')) {
-              unfreezeBody();
-            }
-          }, 100);
-        });
-        inputStock.addEventListener('keydown', tableKey);
+        bindTableInput(inputStock);
         tdStock.appendChild(inputStock);
       }
       tr.appendChild(tdStock);
@@ -1501,20 +1590,7 @@ function renderTable() {
         if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
         saveSession();
       });
-      inputSales.addEventListener('click', e => e.stopPropagation());
-      inputSales.addEventListener('focus', e => {
-        e.stopPropagation();
-        freezeBody();
-        requestAnimationFrame(() => scrollIntoContainer(inputSales));
-      });
-      inputSales.addEventListener('blur', () => {
-        setTimeout(() => {
-          if (!document.activeElement || !document.activeElement.closest('.table-scroll')) {
-            unfreezeBody();
-          }
-        }, 100);
-      });
-      inputSales.addEventListener('keydown', tableKey);
+      bindTableInput(inputSales);
       tdSales.appendChild(inputSales);
       tr.appendChild(tdSales);
       dates.forEach(d => {
@@ -1538,25 +1614,12 @@ function renderTable() {
               scheduleSessionSave();
             }
           });
-          inp.addEventListener('blur', () => {
-            if (inp.value === '') inp.value = '0';
-            setTimeout(() => {
-              if (!document.activeElement || !document.activeElement.closest('.table-scroll')) {
-                unfreezeBody();
-              }
-            }, 100);
-          });
+          inp.addEventListener('blur', () => { if (inp.value === '') inp.value = '0'; });
           inp.addEventListener('change', () => {
             if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
             saveSession();
           });
-          inp.addEventListener('click', e => e.stopPropagation());
-          inp.addEventListener('focus', e => {
-            e.stopPropagation();
-            freezeBody();
-            requestAnimationFrame(() => scrollIntoContainer(inp));
-          });
-          inp.addEventListener('keydown', tableKey);
+          bindTableInput(inp);
           td.appendChild(inp);
           const resetBtn = document.createElement('button');
           resetBtn.className = 'reset-btn';
@@ -1616,6 +1679,7 @@ function renderTable() {
     tbody.appendChild(fragment);
     scheduleTotalsUpdate();
     updateResultMeta();
+    if (_tableQuery) applyTableFilter();
   } finally { isRendering = false; }
 }
 function markEdited(td, party, newQty) {
@@ -1667,9 +1731,12 @@ function updateTotals() {
     totalSales += Number(row.sales) || 0;
   }
   const isSalesOnlyMode = cntInfo > 0 && cntInfo === tableRows.length;
-  if (isSalesOnlyMode) summary.textContent = `📋 Режим «только продажи»: ${tableRows.length} позиций.`;
-  else if (cntInfo > 0) summary.textContent = `Позиций: ${tableRows.length} (без накладных: ${cntInfo}).`;
-  else summary.textContent = hasAnyStock ? `Позиций: ${tableRows.length}.` : `Позиций: ${tableRows.length}. Введите остаток для расчёта.`;
+  let base = '';
+  if (isSalesOnlyMode) base = `📋 Режим «только продажи»: ${tableRows.length} позиций.`;
+  else if (cntInfo > 0) base = `Позиций: ${tableRows.length} (без накладных: ${cntInfo}).`;
+  else base = hasAnyStock ? `Позиций: ${tableRows.length}.` : `Позиций: ${tableRows.length}. Введите остаток для расчёта.`;
+  summary.dataset.baseSummary = base;
+  summary.textContent = base;
   const box = $('totals');
   if (!box) return;
   box.style.display = 'block';
@@ -1689,6 +1756,7 @@ function updateTotals() {
     Просрочено на витрине: <b style="color:var(--red)">${totalExpiredOnShelf}</b> шт
     ${cntInfo > 0 ? `<br><span style="color:var(--accent)">🔵 Без накладных: <b>${cntInfo}</b> поз.</span>` : ''}
   `;
+  if (_tableQuery) applyTableFilter();
 }
 
 function productInputs() {
@@ -1759,7 +1827,13 @@ function openProduct(row, tr) {
     });
   }
   openModal('productModal');
-  setTimeout(() => { const s = $('pmStock'); if (s) s.focus(); }, 100);
+  setTimeout(() => {
+    const s = $('pmStock');
+    if (s) {
+      s.focus({ preventScroll: true });
+      try { s.select(); } catch (e) {}
+    }
+  }, 100);
 }
 function closeProduct() {
   closeModal('productModal');
@@ -1941,7 +2015,7 @@ function addSelectedUnknown() {
     if (addKeys.has(normalizeName(row.name))) {
       const entry = toAdd.find(x => normalizeName(x.name) === normalizeName(row.name));
       row.shelfLife = entry ? entry.hours : row.shelfLife;
-      row.incoming.forEach(p => { p._originalQty = p.qty; });
+      if (Array.isArray(row.incoming)) row.incoming.forEach(p => { p._originalQty = p.qty; });
       moved.push(row);
       unknownRows.splice(i, 1);
     }
@@ -2519,6 +2593,8 @@ function bindUI() {
       if (navigator.clipboard && navigator.clipboard.readText) {
         const text = await navigator.clipboard.readText();
         const el = $('csvInput'); if (el) el.value = text.slice(0, MAX_CSV_BYTES);
+        autoResizeTextarea();
+        updateCsvCounter();
         const st = $('csvStatus');
         if (st) { st.className = 'status show ok'; st.textContent = '✅ Вставлено.'; }
         scheduleSessionSave();
@@ -2547,6 +2623,8 @@ function bindUI() {
     try {
       const text = await f.text();
       const el = $('csvInput'); if (el) el.value = text;
+      autoResizeTextarea();
+      updateCsvCounter();
       const st = $('csvStatus');
       if (st) { st.className = 'status show ok'; st.textContent = '✅ Файл загружен.'; }
       scheduleSessionSave();
@@ -2555,6 +2633,24 @@ function bindUI() {
       if (st) { st.className = 'status show err'; st.textContent = '❌ Ошибка чтения.'; }
     } finally { e.target.value = ''; }
   };
+  const csvInput = $('csvInput');
+  if (csvInput) {
+    csvInput.addEventListener('input', () => { autoResizeTextarea(); updateCsvCounter(); });
+    csvInput.addEventListener('blur', () => {
+      if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+      saveSession();
+    });
+  }
+  const tableSearch = $('tableSearch');
+  if (tableSearch) tableSearch.addEventListener('input', () => setTableQuery(tableSearch.value));
+  const tableSearchClear = $('tableSearchClear');
+  if (tableSearchClear) tableSearchClear.addEventListener('click', () => {
+    const s = $('tableSearch');
+    if (s) s.value = '';
+    setTableQuery('');
+    const wrap = $('tableSearchWrap');
+    if (wrap) wrap.classList.remove('has-value');
+  });
   const applyBtn = $('applyCsvBtn'); if (applyBtn) applyBtn.onclick = applyCSV;
   const exportBtn = $('exportBtn'); if (exportBtn) exportBtn.onclick = exportExcel;
   const restoreBtn = $('restoreSessionBtn');
@@ -2568,6 +2664,8 @@ function bindUI() {
     }
     if (!confirm('Восстановить последнюю сессию?')) return;
     applySession(data);
+    autoResizeTextarea();
+    updateCsvCounter();
     renderTable();
     updateUnknownBanner();
     const st = $('csvStatus');
@@ -2583,7 +2681,9 @@ function bindUI() {
       tableRows = [];
       unknownRows = [];
       unknownSelected = new Set();
-      const ci = $('csvInput'); if (ci) ci.value = '';
+      _tableQuery = '';
+      const ci = $('csvInput'); if (ci) { ci.value = ''; autoResizeTextarea(); updateCsvCounter(); }
+      const ts = $('tableSearch'); if (ts) ts.value = '';
       const cs = $('csvStatus'); if (cs) { cs.className = 'status'; cs.textContent = ''; }
       const ss = $('shareStatus'); if (ss) { ss.className = 'status'; ss.textContent = ''; }
       try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
@@ -2802,6 +2902,8 @@ function init() {
   const session = loadSession();
   if (session) {
     applySession(session);
+    autoResizeTextarea();
+    updateCsvCounter();
     const ageMin = Math.max(0, Math.round((Date.now() - session.savedAt) / 60000));
     const st = $('csvStatus');
     if (st) { st.className = 'status show info'; st.textContent = `ℹ️ Сессия восстановлена (${ageMin} мин назад).`; }
@@ -2810,15 +2912,13 @@ function init() {
   updateUnknownBanner();
   renderPhotoQueue();
   updateIgnoredCount();
-  const ci = $('csvInput');
-  if (ci) ci.addEventListener('blur', () => {
-    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
-    saveSession();
-  });
+  if (pt && !pt.value.trim()) {
+    setTimeout(() => { try { pt.focus({ preventScroll: true }); } catch (e) {} }, 300);
+  }
   window.addEventListener('storage', e => {
     if (e.key === SESSION_KEY && !isRestoring) {
       const data = loadSession();
-      if (data) { applySession(data); renderTable(); updateUnknownBanner(); }
+      if (data) { applySession(data); autoResizeTextarea(); updateCsvCounter(); renderTable(); updateUnknownBanner(); }
     }
     if (e.key === IGNORED_KEY) {
       IGNORED = loadIgnored();
@@ -2837,7 +2937,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v8.2 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v8.3 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
