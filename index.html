@@ -59,6 +59,7 @@ body.modal-open{overflow:hidden}
   max-width:var(--page-max);
   width:100%;
   margin:0 auto;
+  padding:0 var(--page-pad);
   display:flex;
   align-items:center;
   gap:11px;
@@ -233,60 +234,16 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .calc-cell.zero{color:var(--text-tertiary)}
 .calc-cell[data-role="expiredOnShelf"].positive,
 .calc-cell[data-role="soldExpired"].positive{color:var(--red)}
-
-/* === МОДАЛЫ: новая структура шапка / тулбар / тело / подвал === */
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));height:100vh;height:100dvh;width:100vw;width:100dvw}
 .modal.hidden{display:none}
 .modal-content{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;overflow:hidden}
-
-.modal-header{
-  flex:0 0 auto;
-  padding:20px 22px 12px;
-}
+.modal-header{flex:0 0 auto;padding:20px 22px 12px}
 .modal-header h3{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.25}
 .modal-header .hint{margin:4px 0 0}
-
-.unknown-toolbar-block{
-  flex:0 0 auto;
-  padding:0 22px 12px;
-  background:var(--bg-card);
-  border-bottom:1px solid var(--separator);
-}
-.unknown-toolbar-block .unknown-counter{margin:0 0 10px}
-.unknown-toolbar-block .unknown-toolbar{padding:0 0 10px}
-.unknown-toolbar-block .unknown-search{padding:0}
-
-.catalog-add-block{
-  flex:0 0 auto;
-  padding:12px 22px 12px;
-  border-top:1px solid var(--separator);
-  background:var(--bg-card);
-}
-.catalog-add-block label{display:block;margin-bottom:6px}
-.catalog-add-block .hint{margin-top:8px;font-size:11.5px;color:var(--text-tertiary)}
-
-.modal-body{
-  flex:1 1 auto;
-  min-height:0;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-  overscroll-behavior:contain;
-  padding:12px 22px;
-  scrollbar-width:none;
-  -ms-overflow-style:none;
-}
+.modal-body{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:12px 22px;scrollbar-width:none;-ms-overflow-style:none}
 .modal-body::-webkit-scrollbar{display:none;width:0;height:0}
-
-.modal-footer{
-  flex:0 0 auto;
-  padding:12px 22px calc(16px + env(safe-area-inset-bottom,0px));
-  border-top:1px solid var(--separator);
-  background:var(--bg-card);
-  position:relative;
-  z-index:10;
-}
+.modal-footer{flex:0 0 auto;padding:12px 22px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);background:var(--bg-card);position:relative;z-index:10}
 .modal-footer button{pointer-events:auto;cursor:pointer}
-
 #unknownModalContent,
 #catalogModalContent,
 #ignoredModalContent{
@@ -297,8 +254,13 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
   max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
   overflow:hidden;
 }
-
-/* === НЕ В СПРАВОЧНИКЕ === */
+.unknown-toolbar-block{flex:0 0 auto;padding:0 22px 12px;background:var(--bg-card);border-bottom:1px solid var(--separator)}
+.unknown-toolbar-block .unknown-counter{margin:0 0 10px}
+.unknown-toolbar-block .unknown-toolbar{padding:0 0 10px}
+.unknown-toolbar-block .unknown-search{padding:0}
+.catalog-add-block{flex:0 0 auto;padding:12px 22px 12px;border-top:1px solid var(--separator);background:var(--bg-card)}
+.catalog-add-block label{display:block;margin-bottom:6px}
+.catalog-add-block .hint{margin-top:8px;font-size:11.5px;color:var(--text-tertiary)}
 .unknown-counter{font-size:11.5px;color:var(--text-secondary)}
 .unknown-counter b{color:var(--text-secondary);font-weight:600;font-variant-numeric:tabular-nums}
 .unknown-toolbar{display:flex;gap:8px}
@@ -320,8 +282,6 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .unknown-row-hours .unit{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
 .unknown-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .unknown-actions .full{grid-column:1 / -1}
-
-/* === СПРАВОЧНИК === */
 .cat-row{display:grid;grid-template-columns:1fr 66px 76px 38px;gap:6px;align-items:center;padding:6px 0;border-radius:var(--r-sm)}
 .cat-row input[type=text]{padding:8px 10px;font-size:13.5px;min-height:38px;border-radius:8px;font-family:inherit}
 .cat-row .inp-wrap{position:relative;display:block}
@@ -329,20 +289,23 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .cat-row .inp-wrap .unit{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
 .cat-row .del-btn{min-height:38px;padding:0;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:16px;font-weight:700;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
 .cat-row.add-row .add-btn{background:var(--green-soft);color:var(--green);border:1px solid var(--green-soft);font-size:20px;font-weight:500;min-height:38px;padding:0;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
-
-/* === ИГНОР-ЛИСТ === */
 .ignored-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
 .ignored-row:hover{background:var(--bg-hover)}
 .ignored-row .name{font-size:14px;word-break:break-word;overflow-wrap:anywhere}
 .ignored-row .del-btn{min-height:36px;padding:6px 12px;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:12.5px;font-weight:600;border-radius:8px}
-
-/* === ПРОМПТ === */
+.photo-queue{display:grid;gap:8px;margin-top:10px}
+.photo-item{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input)}
+.photo-thumb{width:44px;height:44px;object-fit:cover;border-radius:9px;background:var(--bg-elev-2)}
+.photo-meta{min-width:0}
+.photo-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.photo-type{font-size:11px;color:var(--text-secondary);margin-top:2px}
+.photo-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.photo-actions button{min-height:34px;padding:6px 12px;font-size:12.5px;border-radius:8px}
 pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm);font-size:11.5px;line-height:1.55;overflow:auto;max-height:60vh;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #1e293b}
-#promptModal .modal-content{max-height:calc(100dvh - 32px);padding:22px;overflow:auto}
-#productModal .modal-content{max-height:calc(100dvh - 32px);padding:22px;overflow:auto}
-.modal-content::-webkit-scrollbar{display:none}
-.modal-content{scrollbar-width:none;-ms-overflow-style:none}
-.modal-content h3{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.25}
+#promptModal .modal-content,
+#productModal .modal-content{max-height:calc(100dvh - 32px);padding:22px;overflow:auto;scrollbar-width:none;-ms-overflow-style:none}
+#promptModal .modal-content::-webkit-scrollbar,
+#productModal .modal-content::-webkit-scrollbar{display:none}
 .modal-content .product-shelf{font-size:12px;color:var(--text-secondary);margin-bottom:14px}
 .product-form{display:flex;flex-direction:column;gap:14px}
 .pf-section-title{font-size:10.5px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
@@ -358,27 +321,12 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .pf-actions button{min-height:44px;border:0;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit}
 .pf-cancel{background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator-opaque)!important}
 .pf-commit{background:#0a84ff;color:#fff}
-
-/* === ФОТО === */
-.photo-queue{display:grid;gap:8px;margin-top:10px}
-.photo-item{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input)}
-.photo-thumb{width:44px;height:44px;object-fit:cover;border-radius:9px;background:var(--bg-elev-2)}
-.photo-meta{min-width:0}
-.photo-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.photo-type{font-size:11px;color:var(--text-secondary);margin-top:2px}
-.photo-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.photo-actions button{min-height:34px;padding:6px 12px;font-size:12.5px;border-radius:8px}
-
-/* === TOAST === */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(28,28,30,.96);color:#fff;font-size:13.5px;font-weight:500;padding:11px 18px;border-radius:11px;z-index:9999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;max-width:90vw;text-align:center;letter-spacing:-.005em;box-shadow:0 8px 24px rgba(0,0,0,.25)}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* === ДЕСКТОП === */
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;cursor:pointer}
 @media (min-width:900px){
   :root{--page-max:840px}
   .table-scroll table.table-body{table-layout:auto;width:100%}
 }
-
 @media (max-width:420px){
   .unknown-row-grid{grid-template-columns:1fr 54px 62px;gap:6px}
   .unknown-row-name{font-size:13.5px}
@@ -490,33 +438,26 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <p class="desc">Хранится локально. Можно обновить с сервера.</p>
     </div>
     <div class="section-body">
-
       <div class="meta" id="metaLocal">
         <div class="item"><span class="dot stale"></span><span>Локальная версия · <b>не синхронизировано</b></span></div>
         <div class="item"><span class="label">Последняя проверка</span><span id="lastCheckTime">—</span></div>
       </div>
-
       <div class="meta" id="metaRemote" style="display:none">
         <div class="item"><span class="dot fresh"></span><span>Синхронизировано · <b id="syncTime">—</b></span></div>
         <div class="item"><span class="label">Последняя проверка</span><span id="lastCheckTime2">—</span></div>
       </div>
-
       <div class="meta" id="metaSyncing" style="display:none">
         <div class="item"><span class="dot syncing"></span><span>Проверка обновлений…</span></div>
       </div>
-
       <div class="stack">
         <button id="checkUpdatesBtn" class="secondary">Проверить обновления</button>
         <button id="publishBtn" class="purple" style="display:none">Опубликовать</button>
       </div>
-
       <div id="syncStatus" class="status"></div>
-
       <div class="actions-row">
         <button id="editCatalogBtn" class="secondary">Редактировать</button>
         <button id="ignoredBtn" class="secondary">Игнор-лист (<span id="ignoredCount">0</span>)</button>
       </div>
-
       <details class="settings">
         <summary>Настройки синхронизации</summary>
         <div class="content">
@@ -530,7 +471,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
           <button id="deactivateOwnerBtn" class="secondary block" style="display:none">Выйти из режима владельца</button>
         </div>
       </details>
-
     </div>
   </div>
 
@@ -544,16 +484,13 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
         <span class="k">Дата проверки</span><span class="v" id="metaDate">—</span>
         <span class="k">Точка</span><span class="v" id="metaPoint">—</span>
       </div>
-
       <div id="unknownBanner" style="display:none;margin-top:12px">
         <button id="openUnknownBtn" class="warn block">Не в справочнике (<span id="unknownCount">0</span>)</button>
       </div>
-
       <div id="tableSearchWrap" class="table-search" style="display:none;margin-top:12px">
         <input id="tableSearch" type="text" placeholder="Поиск по таблице..." autocomplete="off" maxlength="100">
         <button type="button" class="table-search-clear" id="tableSearchClear">×</button>
       </div>
-
       <div class="table-wrap" id="tableWrap" style="display:none;margin-top:12px">
         <div class="table-scroll" id="tableScroll">
           <table id="resultTable" class="table-body">
@@ -563,9 +500,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
           </table>
         </div>
       </div>
-
       <div id="totals" class="status" style="margin-top:12px"></div>
-
       <div class="legend" style="margin-top:12px">
         <span class="legend-item"><span class="legend-dot fresh"></span> Свежие</span>
         <span class="legend-item"><span class="legend-dot warn"></span> Просрочка на витрине</span>
@@ -593,7 +528,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint version">French Bakery Аудит · v9.2.3</div>
+  <div class="hint version">French Bakery Аудит · v9.2.4</div>
 
 </main>
 
@@ -613,9 +548,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
         <div class="inp-wrap"><input id="newProdDays" type="text" inputmode="decimal" placeholder="0" value="0" maxlength="4"><span class="unit">сут</span></div>
         <button id="addProdBtn" class="add-btn" type="button" aria-label="Добавить">+</button>
       </div>
-      <p class="hint">
-        Срок в часах (макс. 720) или сутках (макс. 30). <b style="color:var(--text-secondary)">24 ч = 1 сутки</b>.
-      </p>
+      <p class="hint">Срок в часах (макс. 720) или сутках (макс. 30). <b style="color:var(--text-secondary)">24 ч = 1 сутки</b>.</p>
     </div>
     <div class="modal-footer">
       <div class="row" style="margin-bottom:8px">
@@ -716,9 +649,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   </div>
 </div>
 
-<div id="updateBanner" class="toast" style="pointer-events:auto;cursor:pointer">
-  Доступно обновление · нажмите, чтобы перезагрузить
-</div>
+<div id="updateBanner" class="toast">Доступно обновление · нажмите, чтобы перезагрузить</div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
@@ -771,7 +702,6 @@ let _timeUpdater = null;
 let openIdx = -1;
 let openTr = null;
 let openSnapshot = null;
-let _scrollY = 0;
 let _totalsTimer = null;
 let applyBusy = false;
 let exportBusy = false;
@@ -881,12 +811,6 @@ function formatDateRu(iso) {
   const monthIdx = parseInt(parts[1], 10) - 1;
   const year = parts[0];
   return `${day} ${months[monthIdx]} ${year}`;
-}
-function formatDateShortRu(iso) {
-  if (!iso) return '—';
-  const parts = String(iso).split('-');
-  if (parts.length !== 3) return iso;
-  return `${parseInt(parts[2], 10)} ${['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'][parseInt(parts[1],10)-1]}`;
 }
 function formatDateTimeRu(iso) {
   if (!iso) return '—';
@@ -2053,17 +1977,14 @@ function renderUnknownModal() {
     row.className = 'unknown-row';
     row.dataset.name = r.name;
     if (unknownSelected.has(normalizeName(r.name))) row.classList.add('selected');
-
     const grid = document.createElement('div');
     grid.className = 'unknown-row-grid';
-
     const main = document.createElement('div');
     main.className = 'unknown-row-main';
     const nameEl = document.createElement('div');
     nameEl.className = 'unknown-row-name';
     nameEl.textContent = r.name;
     main.appendChild(nameEl);
-
     const infoEl = document.createElement('div');
     infoEl.className = 'unknown-row-info';
     const salesKv = document.createElement('span');
@@ -2080,7 +2001,6 @@ function renderUnknownModal() {
       });
     }
     main.appendChild(infoEl);
-
     const hoursWrap = document.createElement('div');
     hoursWrap.className = 'unknown-row-hours';
     const hInp = makeNumInput({ className: '', value: r.shelfLife && r.shelfLife > 0 ? r.shelfLife : 0 });
@@ -2090,7 +2010,6 @@ function renderUnknownModal() {
     const hUnit = document.createElement('span'); hUnit.className = 'unit'; hUnit.textContent = 'ч';
     hoursWrap.appendChild(hInp);
     hoursWrap.appendChild(hUnit);
-
     const daysWrap = document.createElement('div');
     daysWrap.className = 'unknown-row-hours';
     const dInp = document.createElement('input');
@@ -2108,7 +2027,6 @@ function renderUnknownModal() {
     const dUnit = document.createElement('span'); dUnit.className = 'unit'; dUnit.textContent = 'сут';
     daysWrap.appendChild(dInp);
     daysWrap.appendChild(dUnit);
-
     hInp.addEventListener('input', () => {
       const h = Number(onlyDigits(hInp.value) || '0');
       if (h > 0 && h % 24 === 0) dInp.value = String(h / 24);
@@ -2118,12 +2036,10 @@ function renderUnknownModal() {
       const d = parseDaysInput(dInp.value);
       if (d > 0) hInp.value = String(daysToHours(d));
     });
-
     grid.appendChild(main);
     grid.appendChild(hoursWrap);
     grid.appendChild(daysWrap);
     row.appendChild(grid);
-
     row.addEventListener('click', e => {
       if (e.target.closest('input')) return;
       const key = normalizeName(r.name);
@@ -2136,14 +2052,13 @@ function renderUnknownModal() {
       }
       if (selectedEl) selectedEl.textContent = String(unknownSelected.size);
     });
-
     frag.appendChild(row);
   });
   body.innerHTML = '';
   body.appendChild(frag);
   if (filtered.length > visible.length) {
     const more = document.createElement('div');
-    more.className = 'unknown-load-more';
+    more.className = 'hint';
     more.style.cssText = 'text-align:center;padding:12px;cursor:pointer;color:var(--accent);font-weight:600';
     more.textContent = `Показать ещё ${Math.min(UNKNOWN_PAGE_SIZE, filtered.length - visible.length)}`;
     more.onclick = () => { unknownVisible += UNKNOWN_PAGE_SIZE; renderUnknownModal(); };
@@ -2337,7 +2252,6 @@ function renderCatalogList() {
   filtered.forEach(p => {
     const row = document.createElement('div');
     row.className = 'cat-row';
-
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
     nameInput.value = p.name;
@@ -2354,7 +2268,6 @@ function renderCatalogList() {
       unknownRows.forEach(r => { if (r.name === oldName) r.name = newName; });
       saveCatalog(); scheduleSessionSave();
     };
-
     const hoursWrap = document.createElement('div');
     hoursWrap.className = 'inp-wrap';
     const hoursInput = document.createElement('input');
@@ -2369,7 +2282,6 @@ function renderCatalogList() {
     hoursUnit.textContent = 'ч';
     hoursWrap.appendChild(hoursInput);
     hoursWrap.appendChild(hoursUnit);
-
     const daysWrap = document.createElement('div');
     daysWrap.className = 'inp-wrap';
     const daysInput = document.createElement('input');
@@ -2383,7 +2295,6 @@ function renderCatalogList() {
     daysUnit.textContent = 'сут';
     daysWrap.appendChild(daysInput);
     daysWrap.appendChild(daysUnit);
-
     hoursInput.addEventListener('input', () => {
       const cleaned = onlyDigits(hoursInput.value);
       if (cleaned !== hoursInput.value) hoursInput.value = cleaned;
@@ -2400,7 +2311,6 @@ function renderCatalogList() {
       tableRows.forEach(r => { if (r.name === PRODUCTS[p._idx].name) r.shelfLife = v; });
       saveCatalog(); scheduleSessionSave();
     });
-
     daysInput.addEventListener('input', () => {
       const cleaned = String(daysInput.value).replace(',', '.').replace(/[^\d.]/g, '');
       if (cleaned !== daysInput.value) daysInput.value = cleaned;
@@ -2422,7 +2332,6 @@ function renderCatalogList() {
       tableRows.forEach(r => { if (r.name === PRODUCTS[p._idx].name) r.shelfLife = hours; });
       saveCatalog(); scheduleSessionSave();
     });
-
     const delBtn = document.createElement('button');
     delBtn.className = 'del-btn';
     delBtn.type = 'button';
@@ -2433,7 +2342,6 @@ function renderCatalogList() {
       saveCatalog();
       renderCatalogList();
     };
-
     row.append(nameInput, hoursWrap, daysWrap, delBtn);
     fragment.appendChild(row);
   });
@@ -3087,9 +2995,6 @@ function init() {
   updateIgnoredCount();
   updateCatalogMeta();
   restoreOwnerMode();
-  if (pt && !pt.value.trim()) {
-    setTimeout(() => { try { pt.focus({ preventScroll: true }); } catch (e) {} }, 300);
-  }
   syncCheckOnStartup();
   window.addEventListener('storage', e => {
     if (e.key === SESSION_KEY && !isRestoring) {
@@ -3116,7 +3021,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.2.3 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.2.4 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
