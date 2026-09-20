@@ -138,13 +138,12 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .table-scroll tbody tr.row-danger td:first-child::before{background:var(--red)}
 .table-scroll tbody tr.row-info td:first-child::before{background:var(--blue)}
 .name-cell{display:flex;align-items:flex-start;gap:8px;min-width:0}
-.name-cell .name-text{flex:1 1 auto;min-width:0;word-break:break-word}
+.name-cell .name-text{flex:1 1 auto;min-width:0;word-break:break-word;overflow-wrap:anywhere}
 .name-cell .edit-hint{flex:0 0 auto;font-size:14px;opacity:.35;margin-top:1px;display:none}
 @media (max-width:640px){.name-cell .edit-hint{display:inline-block}}
 .num{width:60px;min-width:60px;max-width:60px;height:38px;padding:0 4px;border:0;border-radius:10px;font-size:15px;text-align:center;background:var(--bg-input);color:var(--text);font-weight:600;-webkit-appearance:none;appearance:none;line-height:38px;font-family:inherit;transition:box-shadow .15s,background .15s;margin:0;display:inline-block;vertical-align:middle}
 .num:focus{outline:none;box-shadow:0 0 0 2px var(--accent);background:var(--bg-card)}
 .num::-webkit-outer-spin-button,.num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-.num[type=number]{-moz-appearance:textfield}
 .num-disabled{display:inline-flex;align-items:center;justify-content:center;width:60px;min-width:60px;height:38px;color:var(--text-tertiary);font-weight:600;font-size:15px;user-select:none;vertical-align:middle}
 .income-cell{position:relative;padding:8px 4px !important;text-align:center}
 .income-cell.edited .num{background:var(--orange-soft);box-shadow:0 0 0 1.5px var(--orange)}
@@ -170,9 +169,9 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
   .table-scroll tbody tr.row-info:hover td:nth-child(2){background:linear-gradient(var(--blue-row-hover),var(--blue-row-hover)),var(--bg-card)}
   .table-scroll tbody tr.row-unknown:hover td:nth-child(2){background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card)}
 }
-.modal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));padding-top:calc(20px + env(safe-area-inset-top,0px))}
 .modal.hidden{display:none}
-.modal-content{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;max-height:88vh;overflow:auto;padding:24px;animation:modalIn .2s cubic-bezier(.16,1,.3,1);-webkit-overflow-scrolling:touch}
+.modal-content{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;max-height:88vh;max-height:85dvh;overflow:auto;padding:24px;animation:modalIn .2s cubic-bezier(.16,1,.3,1);-webkit-overflow-scrolling:touch;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
 @keyframes modalIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
 .modal-handle{display:none}
 .modal-content h3{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.25}
@@ -185,8 +184,6 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .pf-date-label{font-size:13px;font-weight:600;color:var(--text-secondary);font-variant-numeric:tabular-nums}
 .pf-num{width:100%;height:44px;padding:0 12px;border:0;border-radius:12px;background:var(--bg-input);color:var(--text);font-size:17px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none;font-family:inherit;line-height:44px;transition:box-shadow .15s,background .15s}
 .pf-num:focus{outline:none;box-shadow:0 0 0 2.5px var(--accent);background:var(--bg-card)}
-.pf-num::-webkit-outer-spin-button,.pf-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-.pf-num[type=number]{-moz-appearance:textfield}
 .pf-btn{width:44px;height:44px;padding:0;border-radius:12px;background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator);font-size:18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;cursor:pointer;transition:transform .12s var(--spring),background .12s}
 .pf-btn:active{transform:scale(.94);background:var(--bg-hover)}
 .pf-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
@@ -194,17 +191,25 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .pf-actions button:active{transform:scale(.97)}
 .pf-cancel{background:var(--bg-elev-2);color:var(--text);border:1.5px solid var(--separator-opaque)!important}
 .pf-commit{background:#0a84ff;color:#fff}
-#catalogModalContent{display:flex;flex-direction:column;max-height:88vh;overflow:hidden}
+#catalogModalContent{
+  display:flex;flex-direction:column;
+  max-height:85dvh;
+  max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
+  overflow:hidden;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
+}
 #catalogList{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
 #unknownModalContent{
   display:flex;flex-direction:column;
-  max-height:80vh;
+  max-height:80dvh;
+  max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
   max-width:420px;
   padding:20px;
+  padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));
   overflow:hidden;
 }
 @media (max-width:640px){
-  #unknownModalContent{max-height:85vh;max-width:100%}
+  #unknownModalContent{max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-width:100%}
 }
 #unknownBody{
   flex:1 1 auto;min-height:0;
@@ -213,22 +218,30 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
   padding-right:4px;
 }
 .unknown-item{
-  display:grid;grid-template-columns:auto 1fr;
-  gap:8px;align-items:start;
-  padding:8px 10px;
-  border:1px solid var(--separator);
+  display:block;
+  padding:10px 12px;
+  border:1.5px solid var(--separator);
   border-radius:var(--r-sm);
   background:var(--bg-input);
   margin-bottom:6px;
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+  transition:border-color .12s,background .12s;
 }
-.unknown-item input[type=checkbox]{width:20px;height:20px;margin-top:3px;accent-color:var(--accent);cursor:pointer;flex:0 0 auto}
-.unknown-body{min-width:0}
-.unknown-name{font-size:13.5px;font-weight:600;word-break:break-word;margin-bottom:4px}
+.unknown-item:active{background:var(--bg-hover)}
+.unknown-item.selected{
+  border-color:var(--accent);
+  background:var(--accent-soft);
+}
+.unknown-item.selected .unknown-name{color:var(--accent)}
+.unknown-body{min-width:0;overflow-wrap:anywhere;word-break:break-word}
+.unknown-name{font-size:13.5px;font-weight:600;word-break:break-word;overflow-wrap:anywhere;white-space:normal;margin-bottom:4px}
 .unknown-info{font-size:12px;color:var(--text-secondary);line-height:1.4;margin-bottom:4px}
 .unknown-info .kv{display:inline-block;margin-right:10px;white-space:nowrap}
 .unknown-info .kv b{color:var(--text);font-weight:600}
 .unknown-shelf{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-secondary)}
-.unknown-shelf input[type=number]{width:70px;min-height:32px;height:32px;padding:0 6px;font-size:13px;font-weight:600;text-align:center}
+.unknown-shelf input[type=text]{width:70px;min-height:32px;height:32px;padding:0 6px;font-size:13px;font-weight:600;text-align:center}
 .unknown-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:0}
 .unknown-actions .full{grid-column:1 / -1}
 .unknown-search{margin-bottom:8px}
@@ -236,11 +249,11 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .unknown-counter{font-size:11.5px;color:var(--text-secondary);margin-bottom:8px}
 .unknown-load-more{padding:8px;text-align:center;color:var(--accent);font-weight:600;font-size:12.5px;cursor:pointer;user-select:none}
 .unknown-load-more:active{opacity:.6}
-#ignoredModalContent{display:flex;flex-direction:column;max-height:88vh;overflow:hidden}
+#ignoredModalContent{display:flex;flex-direction:column;max-height:85dvh;max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
 #ignoredList{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
 .ignored-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
 .ignored-row:hover{background:var(--bg-hover)}
-.ignored-row .name{font-size:14px;word-break:break-word}
+.ignored-row .name{font-size:14px;word-break:break-word;overflow-wrap:anywhere}
 .ignored-row .del-btn{min-height:36px;padding:6px 12px;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:12.5px;font-weight:700;border-radius:8px}
 .legend{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:14px;padding:12px 14px;background:var(--bg-input);border-radius:var(--r-sm);font-size:12px;color:var(--text-secondary)}
 .legend-item{display:inline-flex;align-items:center;gap:5px}
@@ -303,7 +316,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .cat-row{display:grid;grid-template-columns:1fr 80px 40px;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
 .cat-row:hover{background:var(--bg-hover)}
 .cat-row input[type=text],.cat-row input[type=number]{padding:8px 10px;font-size:13px;min-height:38px;border-radius:8px}
-.cat-row input[type=number]{text-align:center;font-weight:700;color:var(--accent)}
+.cat-row input[inputmode=numeric]{text-align:center;font-weight:700;color:var(--accent)}
 .cat-row .del-btn{min-height:38px;padding:0;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:14px;font-weight:800}
 .cat-row .del-btn:hover{background:var(--red);color:#fff;border-color:var(--red)}
 </style>
@@ -454,7 +467,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v8.0
+      French Bakery Аудит · v8.1
     </div>
   </div>
 
@@ -472,7 +485,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     <div style="border-top:1px solid var(--separator);padding-top:14px;margin-top:14px">
       <label>➕ Новая позиция</label>
       <input id="newProdName" type="text" placeholder="Название" style="margin:6px 0" autocomplete="off" maxlength="100">
-      <input id="newProdHours" type="number" placeholder="Срок, часов" style="margin-bottom:8px" min="0" max="10000" value="0">
+      <input id="newProdHours" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Срок, часов" style="margin-bottom:8px" value="0">
       <button id="addProdBtn" class="success block">Добавить</button>
     </div>
     <button id="closeCatalogBtn" class="secondary block" style="margin-top:14px">Закрыть</button>
@@ -500,7 +513,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <div>
         <div class="pf-section-title">Остаток</div>
         <div class="pf-row">
-          <input type="number" class="pf-num" id="pmStock" inputmode="numeric" min="0" placeholder="—">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" class="pf-num" id="pmStock" placeholder="—">
           <button type="button" class="pf-btn" data-target="pmStock" data-step="-1">−</button>
           <button type="button" class="pf-btn" data-target="pmStock" data-step="1">+</button>
         </div>
@@ -509,7 +522,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <div>
         <div class="pf-section-title">Продано</div>
         <div class="pf-row">
-          <input type="number" class="pf-num" id="pmSales" inputmode="numeric" min="0">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" class="pf-num" id="pmSales">
           <button type="button" class="pf-btn" data-target="pmSales" data-step="-1">−</button>
           <button type="button" class="pf-btn" data-target="pmSales" data-step="1">+</button>
         </div>
@@ -532,7 +545,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   <div class="modal-content" id="unknownModalContent">
     <div class="modal-handle"></div>
     <h3>Не в справочнике</h3>
-    <p class="hint">Позиции из CSV, которых нет в справочнике.</p>
+    <p class="hint">Тапните по позиции, чтобы выбрать. Срок можно изменить.</p>
     <div id="unknownCounter" class="unknown-counter"></div>
     <div class="unknown-search" id="unknownSearchWrap" style="display:none">
       <input id="unknownSearch" type="text" placeholder="Поиск по названию..." autocomplete="off" maxlength="100">
@@ -586,6 +599,7 @@ let PRODUCTS = [];
 let IGNORED = [];
 let tableRows = [];
 let unknownRows = [];
+let unknownSelected = new Set();
 let unknownVisible = UNKNOWN_PAGE_SIZE;
 let unknownQuery = '';
 let isRestoring = false;
@@ -659,6 +673,9 @@ function safeExcelCell(v) {
   if (typeof v !== 'string') return v;
   if (/^[=+\-@\t\r\n]/.test(v)) return "'" + v;
   return v;
+}
+function onlyDigits(v) {
+  return String(v ?? '').replace(/[^\d]/g, '').replace(/^0+(?=\d)/, '');
 }
 function fmtDateRuShort(iso) {
   if (!iso) return '';
@@ -1243,9 +1260,27 @@ function updateResultMeta() {
 
 function focusEl(el) {
   el.focus({ preventScroll: true });
-  el.select();
-  try { el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' }); }
-  catch (e) { el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+  try { el.select(); } catch (e) {}
+  const scroller = el.closest('.table-scroll');
+  if (!scroller) return;
+  const elRect = el.getBoundingClientRect();
+  const scRect = scroller.getBoundingClientRect();
+  const thead = scroller.querySelector('thead');
+  const theadH = thead ? thead.getBoundingClientRect().height : 0;
+  const topLimit = scRect.top + theadH;
+  const bottomLimit = scRect.bottom;
+  if (elRect.top < topLimit) {
+    scroller.scrollTop += elRect.top - topLimit;
+  } else if (elRect.bottom > bottomLimit) {
+    scroller.scrollTop += elRect.bottom - bottomLimit;
+  }
+  const leftLimit = scRect.left;
+  const rightLimit = scRect.right;
+  if (elRect.left < leftLimit) {
+    scroller.scrollLeft += elRect.left - leftLimit;
+  } else if (elRect.right > rightLimit) {
+    scroller.scrollLeft += elRect.right - rightLimit;
+  }
 }
 function tableNav(input, key) {
   const td = input.closest('td');
@@ -1303,6 +1338,23 @@ function buildTheadHTML(dates) {
   `;
 }
 
+function makeNumInput(opts) {
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.inputMode = 'numeric';
+  inp.pattern = '[0-9]*';
+  inp.autocomplete = 'off';
+  inp.className = opts.className || 'num';
+  if (opts.value != null) inp.value = String(opts.value);
+  if (opts.placeholder) inp.placeholder = opts.placeholder;
+  inp.addEventListener('input', () => {
+    const cleaned = onlyDigits(inp.value);
+    if (cleaned !== inp.value) inp.value = cleaned;
+    if (opts.onInput) opts.onInput(cleaned);
+  });
+  return inp;
+}
+
 function renderTable() {
   if (isRendering) return;
   isRendering = true;
@@ -1355,18 +1407,14 @@ function renderTable() {
         span.textContent = '—';
         tdStock.appendChild(span);
       } else {
-        const inputStock = document.createElement('input');
-        inputStock.type = 'number';
-        inputStock.min = '0'; inputStock.max = String(MAX_NUM);
-        inputStock.className = 'num';
-        inputStock.inputMode = 'numeric';
-        inputStock.value = row.stock == null ? '' : row.stock;
-        inputStock.placeholder = '—';
-        inputStock.addEventListener('input', () => {
-          const v = inputStock.value;
-          row.stock = v === '' ? null : clampNum(v, 0, MAX_NUM, null);
-          refreshRow(row, tr);
-          scheduleSessionSave();
+        const inputStock = makeNumInput({
+          value: row.stock == null ? '' : row.stock,
+          placeholder: '—',
+          onInput: (cleaned) => {
+            row.stock = cleaned === '' ? null : clampNum(cleaned, 0, MAX_NUM, null);
+            refreshRow(row, tr);
+            scheduleSessionSave();
+          }
         });
         inputStock.addEventListener('change', () => {
           if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
@@ -1379,17 +1427,13 @@ function renderTable() {
       }
       tr.appendChild(tdStock);
       const tdSales = document.createElement('td');
-      const inputSales = document.createElement('input');
-      inputSales.type = 'number';
-      inputSales.min = '0'; inputSales.max = String(MAX_NUM);
-      inputSales.className = 'num';
-      inputSales.inputMode = 'numeric';
-      inputSales.value = row.sales || 0;
-      inputSales.addEventListener('input', () => {
-        const v = inputSales.value;
-        row.sales = v === '' ? 0 : clampNum(v, 0, MAX_NUM, 0);
-        refreshRow(row, tr);
-        scheduleSessionSave();
+      const inputSales = makeNumInput({
+        value: row.sales || 0,
+        onInput: (cleaned) => {
+          row.sales = cleaned === '' ? 0 : clampNum(cleaned, 0, MAX_NUM, 0);
+          refreshRow(row, tr);
+          scheduleSessionSave();
+        }
       });
       inputSales.addEventListener('change', () => {
         if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
@@ -1410,20 +1454,16 @@ function renderTable() {
           span.textContent = '—';
           td.appendChild(span);
         } else {
-          const inp = document.createElement('input');
-          inp.type = 'number';
-          inp.min = '0'; inp.max = String(MAX_NUM);
-          inp.className = 'num';
-          inp.inputMode = 'numeric';
-          inp.value = party ? party.qty : 0;
-          inp.addEventListener('input', () => {
-            const v = inp.value;
-            const newQty = v === '' ? 0 : clampNum(v, 0, MAX_NUM, 0);
-            if (party) party.qty = newQty;
-            else row.incoming.push({ date: d, qty: newQty, _originalQty: 0 });
-            markEdited(td, party, newQty);
-            refreshRow(row, tr);
-            scheduleSessionSave();
+          const inp = makeNumInput({
+            value: party ? party.qty : 0,
+            onInput: (cleaned) => {
+              const newQty = cleaned === '' ? 0 : clampNum(cleaned, 0, MAX_NUM, 0);
+              if (party) party.qty = newQty;
+              else row.incoming.push({ date: d, qty: newQty, _originalQty: 0 });
+              markEdited(td, party, newQty);
+              refreshRow(row, tr);
+              scheduleSessionSave();
+            }
           });
           inp.addEventListener('blur', () => { if (inp.value === '') inp.value = '0'; });
           inp.addEventListener('change', () => {
@@ -1445,7 +1485,7 @@ function renderTable() {
             if (!party) return;
             if (party._originalQty != null) {
               party.qty = party._originalQty;
-              inp.value = party._originalQty;
+              inp.value = String(party._originalQty);
               markEdited(td, party, party.qty);
               refreshRow(row, tr);
               scheduleSessionSave();
@@ -1584,7 +1624,7 @@ function productNav(input, dir) {
   if (j < 0 || j >= list.length) return;
   const t = list[j];
   t.focus();
-  t.select();
+  try { t.select(); } catch (e) {}
 }
 function productKey(e) {
   const k = e.key;
@@ -1605,8 +1645,8 @@ function openProduct(row, tr) {
   };
   $('pmName').textContent = row.name;
   $('pmShelf').textContent = `Срок годности: ${row.shelfLife} ч`;
-  $('pmStock').value = row.stock == null ? '' : row.stock;
-  $('pmSales').value = row.sales || 0;
+  $('pmStock').value = row.stock == null ? '' : String(row.stock);
+  $('pmSales').value = String(row.sales || 0);
   const box = $('pmIncoming');
   box.innerHTML = '';
   const dates = [...new Set((row.incoming || []).map(p => p.date))].sort((a, b) => b.localeCompare(a));
@@ -1623,12 +1663,10 @@ function openProduct(row, tr) {
       const lbl = document.createElement('div');
       lbl.className = 'pf-date-label';
       lbl.textContent = fmtDateRuShort(d);
-      const inp = document.createElement('input');
-      inp.type = 'number';
-      inp.className = 'pf-num';
-      inp.inputMode = 'numeric';
-      inp.min = '0';
-      inp.value = party ? (party.qty || 0) : 0;
+      const inp = makeNumInput({
+        className: 'pf-num',
+        value: party ? (party.qty || 0) : 0
+      });
       inp.dataset.date = d;
       inp.addEventListener('keydown', productKey);
       dateRow.appendChild(lbl);
@@ -1649,16 +1687,17 @@ function commitProduct() {
   if (openIdx < 0) { closeProduct(); return; }
   const row = tableRows[openIdx];
   if (!row) { closeProduct(); return; }
-  const vStock = $('pmStock').value;
+  const vStock = onlyDigits($('pmStock').value);
   row.stock = vStock === '' ? null : clampNum(vStock, 0, MAX_NUM, null);
-  row.sales = clampNum($('pmSales').value, 0, MAX_NUM, 0);
+  const vSales = onlyDigits($('pmSales').value);
+  row.sales = vSales === '' ? 0 : clampNum(vSales, 0, MAX_NUM, 0);
   const incBox = $('pmIncoming');
   if (incBox) {
     incBox.querySelectorAll('input.pf-num').forEach(inp => {
       const d = inp.dataset.date;
       if (!d) return;
       const party = (row.incoming || []).find(p => p.date === d);
-      const q = clampNum(inp.value, 0, MAX_NUM, 0);
+      const q = clampNum(onlyDigits(inp.value) || '0', 0, MAX_NUM, 0);
       if (party) party.qty = q;
       else row.incoming.push({ date: d, qty: q, _originalQty: 0 });
     });
@@ -1685,7 +1724,7 @@ function renderUnknownModal() {
   const searchWrap = $('unknownSearchWrap');
   if (!body) return;
   const total = unknownRows.length;
-  if (counter) counter.textContent = `Всего: ${total}`;
+  if (counter) counter.textContent = `Всего: ${total} · Выбрано: ${unknownSelected.size}`;
   if (searchWrap) searchWrap.style.display = total > UNKNOWN_SEARCH_THRESHOLD ? 'block' : 'none';
   const q = normalizeName(unknownQuery);
   const filtered = q ? unknownRows.filter(r => normalizeName(r.name).includes(q)) : unknownRows;
@@ -1699,9 +1738,7 @@ function renderUnknownModal() {
     const item = document.createElement('div');
     item.className = 'unknown-item';
     item.dataset.name = r.name;
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.checked = false;
+    if (unknownSelected.has(normalizeName(r.name))) item.classList.add('selected');
     const bodyEl = document.createElement('div');
     bodyEl.className = 'unknown-body';
     const nameEl = document.createElement('div');
@@ -1726,12 +1763,20 @@ function renderUnknownModal() {
     shelfRow.className = 'unknown-shelf';
     const shelfLbl = document.createElement('span');
     shelfLbl.textContent = 'Срок:';
-    const shelfInp = document.createElement('input');
-    shelfInp.type = 'number';
-    shelfInp.min = '0'; shelfInp.max = '10000'; shelfInp.step = '1';
-    shelfInp.inputMode = 'numeric';
-    shelfInp.value = r.shelfLife && r.shelfLife > 0 ? r.shelfLife : 0;
+    const shelfInp = makeNumInput({
+      className: '',
+      value: r.shelfLife && r.shelfLife > 0 ? r.shelfLife : 0
+    });
+    shelfInp.style.width = '70px';
+    shelfInp.style.minHeight = '32px';
+    shelfInp.style.height = '32px';
+    shelfInp.style.padding = '0 6px';
+    shelfInp.style.fontSize = '13px';
+    shelfInp.style.fontWeight = '600';
+    shelfInp.style.textAlign = 'center';
     shelfInp.dataset.role = 'shelf';
+    shelfInp.addEventListener('click', e => e.stopPropagation());
+    shelfInp.addEventListener('focus', e => e.stopPropagation());
     const suffix = document.createElement('span');
     suffix.textContent = 'ч';
     shelfRow.appendChild(shelfLbl);
@@ -1740,8 +1785,20 @@ function renderUnknownModal() {
     bodyEl.appendChild(nameEl);
     bodyEl.appendChild(infoEl);
     bodyEl.appendChild(shelfRow);
-    item.appendChild(cb);
     item.appendChild(bodyEl);
+    item.addEventListener('click', e => {
+      if (e.target.closest('input')) return;
+      const key = normalizeName(r.name);
+      if (unknownSelected.has(key)) {
+        unknownSelected.delete(key);
+        item.classList.remove('selected');
+      } else {
+        unknownSelected.add(key);
+        item.classList.add('selected');
+      }
+      const c = $('unknownCounter');
+      if (c) c.textContent = `Всего: ${total} · Выбрано: ${unknownSelected.size}`;
+    });
     frag.appendChild(item);
   });
   body.innerHTML = '';
@@ -1758,10 +1815,16 @@ function openUnknownModal() {
   if (!unknownRows.filter(r => !isIgnored(r.name)).length) return;
   unknownVisible = UNKNOWN_PAGE_SIZE;
   unknownQuery = '';
+  unknownSelected = new Set();
   const searchEl = $('unknownSearch');
   if (searchEl) searchEl.value = '';
   renderUnknownModal();
   openModal('unknownModal');
+}
+function closeUnknownModal() {
+  unknownSelected = new Set();
+  closeModal('unknownModal');
+  updateUnknownBanner();
 }
 function updateUnknownBanner() {
   const banner = $('unknownBanner');
@@ -1774,13 +1837,12 @@ function addSelectedUnknown() {
   const items = document.querySelectorAll('#unknownBody .unknown-item');
   const toAdd = [];
   items.forEach(item => {
-    const cb = item.querySelector('input[type=checkbox]');
-    if (!cb || !cb.checked) return;
+    if (!item.classList.contains('selected')) return;
     const name = safeStr(item.dataset.name, MAX_NAME);
     if (!name) return;
     if (PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) return;
     const shelfInp = item.querySelector('input[data-role="shelf"]');
-    const hours = clampNum(shelfInp ? shelfInp.value : 0, 0, 10000, 0);
+    const hours = clampNum(shelfInp ? (onlyDigits(shelfInp.value) || '0') : 0, 0, 10000, 0);
     toAdd.push({ name, hours });
   });
   if (!toAdd.length) return;
@@ -1800,6 +1862,7 @@ function addSelectedUnknown() {
       unknownRows.splice(i, 1);
     }
   }
+  unknownSelected = new Set();
   tableRows = sortRowsAlphabetically(tableRows.concat(moved));
   unknownRows = sortRowsAlphabetically(unknownRows);
   renderTable();
@@ -1818,6 +1881,7 @@ function ignoreAllUnknown() {
   }
   saveIgnored();
   unknownRows = [];
+  unknownSelected = new Set();
   scheduleSessionSave();
   updateUnknownBanner();
   closeModal('unknownModal');
@@ -1982,17 +2046,22 @@ function renderCatalogList() {
       scheduleSessionSave();
     };
     const hoursInput = document.createElement('input');
-    hoursInput.type = 'number'; hoursInput.min = '0'; hoursInput.max = '10000'; hoursInput.value = p.shelfLife;
+    hoursInput.type = 'text'; hoursInput.inputMode = 'numeric'; hoursInput.pattern = '[0-9]*'; hoursInput.value = String(p.shelfLife);
+    hoursInput.addEventListener('input', () => {
+      const cleaned = onlyDigits(hoursInput.value);
+      if (cleaned !== hoursInput.value) hoursInput.value = cleaned;
+    });
     hoursInput.onchange = () => {
+      const cleaned = onlyDigits(hoursInput.value);
       let v;
-      if (hoursInput.value === '') v = 0;
+      if (cleaned === '') v = 0;
       else {
-        const n = Number(hoursInput.value);
+        const n = Number(cleaned);
         if (!isFinite(n) || n === 0) v = 0;
         else v = clampNum(n, 1, 10000, 48);
       }
       PRODUCTS[p._idx].shelfLife = v;
-      hoursInput.value = v;
+      hoursInput.value = String(v);
       tableRows.forEach(r => { if (r.name === PRODUCTS[p._idx].name) r.shelfLife = v; });
       saveCatalog();
       scheduleSessionSave();
@@ -2429,6 +2498,7 @@ function bindUI() {
     try {
       tableRows = [];
       unknownRows = [];
+      unknownSelected = new Set();
       const ci = $('csvInput'); if (ci) ci.value = '';
       const cs = $('csvStatus'); if (cs) { cs.className = 'status'; cs.textContent = ''; }
       const ss = $('shareStatus'); if (ss) { ss.className = 'status'; ss.textContent = ''; }
@@ -2462,10 +2532,11 @@ function bindUI() {
     const nameEl = $('newProdName');
     const hoursEl = $('newProdHours');
     const name = safeStr(nameEl ? nameEl.value.trim() : '', MAX_NAME);
+    const cleaned = onlyDigits(hoursEl ? hoursEl.value : '0');
     let hours;
-    if (!hoursEl || hoursEl.value === '') hours = 0;
+    if (cleaned === '') hours = 0;
     else {
-      const n = Number(hoursEl.value);
+      const n = Number(cleaned);
       if (!isFinite(n) || n === 0) hours = 0;
       else hours = clampNum(n, 1, 10000, 0);
     }
@@ -2541,7 +2612,7 @@ function bindUI() {
   const unknownIgnoreBtn = $('unknownIgnoreBtn');
   if (unknownIgnoreBtn) unknownIgnoreBtn.onclick = ignoreAllUnknown;
   const unknownCloseBtn = $('unknownCloseBtn');
-  if (unknownCloseBtn) unknownCloseBtn.onclick = () => closeModal('unknownModal');
+  if (unknownCloseBtn) unknownCloseBtn.onclick = () => closeUnknownModal();
   const unknownSearch = $('unknownSearch');
   if (unknownSearch) unknownSearch.oninput = () => {
     unknownQuery = unknownSearch.value;
@@ -2566,8 +2637,22 @@ function bindUI() {
 function bindProductModal() {
   const cancel = $('pmCancel'); if (cancel) cancel.onclick = cancelProduct;
   const commit = $('pmCommit'); if (commit) commit.onclick = commitProduct;
-  const stock = $('pmStock'); if (stock) stock.addEventListener('keydown', productKey);
-  const sales = $('pmSales'); if (sales) sales.addEventListener('keydown', productKey);
+  const stock = $('pmStock');
+  if (stock) {
+    stock.addEventListener('keydown', productKey);
+    stock.addEventListener('input', () => {
+      const cleaned = onlyDigits(stock.value);
+      if (cleaned !== stock.value) stock.value = cleaned;
+    });
+  }
+  const sales = $('pmSales');
+  if (sales) {
+    sales.addEventListener('keydown', productKey);
+    sales.addEventListener('input', () => {
+      const cleaned = onlyDigits(sales.value);
+      if (cleaned !== sales.value) sales.value = cleaned;
+    });
+  }
   document.querySelectorAll('.pf-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = $(btn.dataset.target);
@@ -2575,9 +2660,9 @@ function bindProductModal() {
       const step = Number(btn.dataset.step) || 1;
       const cur = target.value === '' ? 0 : Number(target.value);
       const next = Math.max(0, Math.min(MAX_NUM, (isFinite(cur) ? cur : 0) + step));
-      target.value = next;
+      target.value = String(next);
       target.focus();
-      target.select();
+      try { target.select(); } catch (e) {}
     });
   });
   const modal = $('productModal');
@@ -2585,7 +2670,7 @@ function bindProductModal() {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       if (!$('productModal').classList.contains('hidden')) cancelProduct();
-      else if (!$('unknownModal').classList.contains('hidden')) closeModal('unknownModal');
+      else if (!$('unknownModal').classList.contains('hidden')) closeUnknownModal();
       else if (!$('ignoredModal').classList.contains('hidden')) closeModal('ignoredModal');
     }
   });
@@ -2650,7 +2735,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v8.0 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v8.1 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
