@@ -89,7 +89,6 @@ main{
   margin:0 auto;
   padding:14px var(--page-pad) env(safe-area-inset-bottom,0px);
 }
-main > .section:last-of-type{margin-bottom:4px}
 .section{background:var(--bg-card);border-radius:var(--r-lg);margin-bottom:10px;border:1px solid var(--separator);overflow:hidden}
 .section-header{padding:16px 18px 0}
 .section-header h2{font-size:14.5px;font-weight:600;margin:0 0 3px;letter-spacing:-.2px;color:var(--text)}
@@ -150,6 +149,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .banner.hidden{display:none}
 .hint{font-size:12px;color:var(--text-secondary);margin:10px 0 0;line-height:1.5;letter-spacing:-.005em}
 .hint b{color:var(--text);font-weight:600}
+.hint.version{text-align:center;color:var(--text-tertiary);margin:8px 0 0 0;font-size:11px;letter-spacing:.02em}
 .legend{display:flex;flex-wrap:wrap;gap:8px 14px;padding:12px 14px;background:var(--bg-input);border-radius:var(--r-sm);font-size:12px;color:var(--text-secondary);letter-spacing:-.005em}
 .legend-item{display:inline-flex;align-items:center;gap:5px}
 .legend-dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
@@ -257,7 +257,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 #catalogModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));padding:22px 22px 0 22px}
 #catalogList{flex:0 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;-ms-overflow-style:none;padding-right:0}
 #catalogList::-webkit-scrollbar{display:none}
-.catalog-bottom{flex-shrink:0;padding-top:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);margin-top:14px;isolation:isolate;position:relative;z-index:1}
+.catalog-bottom{flex-shrink:0;padding-top:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);margin-top:12px;isolation:isolate;position:relative;z-index:1}
 .cat-row{display:grid;grid-template-columns:1fr 66px 76px 38px;gap:6px;align-items:center;padding:6px 0;border-radius:var(--r-sm)}
 .cat-row input[type=text]{padding:8px 10px;font-size:13.5px;min-height:38px;border-radius:8px;font-family:inherit}
 .cat-row .inp-wrap{position:relative;display:block}
@@ -286,17 +286,17 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .unknown-row-hours input{width:100%;min-height:38px;padding:0 20px 0 6px;font-size:14px;font-weight:500;text-align:center;color:var(--text);border-radius:8px;background:var(--bg-card);border:1px solid var(--separator-opaque)}
 .unknown-row-hours input:focus{background:var(--bg-card);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .unknown-row-hours .unit{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
-.unknown-bottom{flex-shrink:0;padding-top:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);margin-top:14px;isolation:isolate;position:relative;z-index:1}
+.unknown-bottom{flex-shrink:0;padding-top:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);margin-top:12px;isolation:isolate;position:relative;z-index:1}
 .unknown-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .unknown-actions .full{grid-column:1 / -1}
 #ignoredModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));padding:22px 22px 0 22px}
-#ignoredList{flex:0 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;-ms-overflow-style:none;margin-bottom:14px}
+#ignoredList{flex:0 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;-ms-overflow-style:none;margin-bottom:12px}
 #ignoredList::-webkit-scrollbar{display:none}
 .ignored-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
 .ignored-row:hover{background:var(--bg-hover)}
 .ignored-row .name{font-size:14px;word-break:break-word;overflow-wrap:anywhere}
 .ignored-row .del-btn{min-height:36px;padding:6px 12px;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:12.5px;font-weight:600;border-radius:8px}
-.ignored-bottom{flex-shrink:0;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));isolation:isolate;position:relative;z-index:1}
+.ignored-bottom{flex-shrink:0;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));isolation:isolate;position:relative;z-index:1}
 .photo-queue{display:grid;gap:8px;margin-top:10px}
 .photo-item{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input)}
 .photo-thumb{width:44px;height:44px;object-fit:cover;border-radius:9px;background:var(--bg-elev-2)}
@@ -522,9 +522,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint" style="text-align:center;color:var(--text-tertiary);margin:0;font-size:11px;letter-spacing:.02em">
-    French Bakery Аудит · v9.2.2
-  </div>
+  <div class="hint version">French Bakery Аудит · v9.2.3</div>
 
 </main>
 
@@ -700,6 +698,7 @@ let _tableQuery = '';
 let _tableSearchTimer = null;
 let _pendingRemote = null;
 let _isOwner = false;
+let _currentToast = null;
 
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
 
@@ -1252,6 +1251,7 @@ function syncPullFromServer(opts) {
     saveIgnored();
   }
   try { localStorage.setItem(SYNC_LOCAL_UPDATED_AT, String(remote.updatedAt || '')); } catch (e) {}
+  _pendingRemote = null;
   updateCatalogMeta();
   renderTable();
   updateUnknownBanner();
@@ -1348,6 +1348,7 @@ function setOwnerMode(on) {
   const activateBlock = $('ownerActivateBlock');
   const deactivateBtn = $('deactivateOwnerBtn');
   const statusEl = $('syncStatus');
+  const badge = $('headerBadge');
   if (publishBtn) publishBtn.style.display = _isOwner ? 'inline-flex' : 'none';
   if (activateBlock) activateBlock.style.display = _isOwner ? 'none' : 'block';
   if (deactivateBtn) deactivateBtn.style.display = _isOwner ? 'inline-flex' : 'none';
@@ -1357,6 +1358,10 @@ function setOwnerMode(on) {
   } else if (statusEl && !_isOwner) {
     statusEl.className = 'status';
     statusEl.textContent = '';
+  }
+  if (badge && badge._t) {
+    clearTimeout(badge._t);
+    badge._t = null;
   }
   updateHeaderBadge();
 }
@@ -1375,6 +1380,8 @@ function activateOwner() {
 function deactivateOwner() {
   try { localStorage.removeItem(ACCESS_KEY); } catch (e) {}
   setOwnerMode(false);
+  const input = $('tokenInput');
+  if (input) input.value = '';
   showToast('Режим владельца выключен');
 }
 function restoreOwnerMode() {
@@ -1508,18 +1515,12 @@ function saveSession() {
 function showAutosaveBadge() {
   const el = $('headerBadge');
   if (!el) return;
-  const wasOwner = _isOwner;
   el.className = 'header-badge show saved';
   el.textContent = 'Сохранено';
-  clearTimeout(el._t);
+  if (el._t) clearTimeout(el._t);
   el._t = setTimeout(() => {
-    if (wasOwner) {
-      el.className = 'header-badge show owner';
-      el.textContent = 'Владелец';
-    } else {
-      el.className = 'header-badge';
-      el.textContent = '';
-    }
+    el._t = null;
+    updateHeaderBadge();
   }, 1400);
 }
 function loadSession() {
@@ -2423,11 +2424,22 @@ function renderIgnoredList() {
 }
 
 function showToast(text) {
+  if (_currentToast) {
+    _currentToast.remove();
+    _currentToast = null;
+  }
   const el = document.createElement('div');
   el.className = 'toast show';
   el.textContent = text;
   document.body.appendChild(el);
-  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2400);
+  _currentToast = el;
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => {
+      el.remove();
+      if (_currentToast === el) _currentToast = null;
+    }, 300);
+  }, 2400);
 }
 
 function buildPrompt() {
@@ -2934,10 +2946,24 @@ function bindProductModal() {
 function initLogoFallback() {
   const logo = $('appLogo');
   if (!logo) return;
+  logo.onerror = () => {
+    logo.onerror = null;
+    const parent = logo.parentNode;
+    if (!parent) return;
+    const fallback = document.createElement('div');
+    fallback.className = 'logo';
+    fallback.textContent = 'FB';
+    fallback.style.cssText = 'display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;background:#0a84ff;font-size:14px';
+    parent.replaceChild(fallback, logo);
+  };
   const img = document.createElement('img');
   img.src = 'logo.png';
   img.alt = 'FB';
-  img.onload = () => { logo.innerHTML = ''; logo.appendChild(img); };
+  img.onload = () => {
+    logo.onerror = null;
+    logo.innerHTML = '';
+    logo.appendChild(img);
+  };
   img.onerror = () => { /* остаётся текст FB */ };
 }
 
@@ -3008,7 +3034,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.2.2 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.2.3 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
