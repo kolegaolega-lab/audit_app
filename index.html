@@ -225,8 +225,30 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .pf-actions button{min-height:44px;border:0;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit}
 .pf-cancel{background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator-opaque)!important}
 .pf-commit{background:#0a84ff;color:#fff}
-#catalogModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
-#catalogList{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin-bottom:14px}
+#catalogModalContent{
+  display:flex;flex-direction:column;
+  max-height:calc(100vh - 40px);
+  max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
+  overflow:hidden;
+  padding:22px 22px 0 22px;
+}
+#catalogList{
+  flex:1 1 auto;min-height:0;max-height:none;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  padding-right:6px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--separator-opaque) transparent;
+}
+#catalogList::-webkit-scrollbar{width:8px}
+#catalogList::-webkit-scrollbar-track{background:transparent}
+#catalogList::-webkit-scrollbar-thumb{background:var(--separator-opaque);border-radius:4px}
+.catalog-bottom{
+  flex-shrink:0;
+  padding-top:14px;
+  padding-bottom:calc(22px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid var(--separator);
+  margin-top:14px;
+}
 #unknownModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-width:420px;padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));overflow:hidden}
 @media (max-width:640px){#unknownModalContent{max-width:100%}}
 #unknownBody{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin-bottom:12px;padding-right:4px}
@@ -304,7 +326,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 
 <main>
 
-  <!-- BANNER обновления справочника -->
   <div class="banner hidden" id="banner">
     <div class="txt">
       Справочник обновился
@@ -314,7 +335,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     <button class="later" id="bannerLater">Позже</button>
   </div>
 
-  <!-- ПАРАМЕТРЫ -->
   <div class="section">
     <div class="section-header">
       <h2>Параметры</h2>
@@ -338,7 +358,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <!-- МАТЕРИАЛЫ -->
   <div class="section">
     <div class="section-header">
       <h2>Материалы для проверки</h2>
@@ -355,7 +374,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <!-- РАСПОЗНАВАНИЕ -->
   <div class="section">
     <div class="section-header">
       <h2>Распознавание</h2>
@@ -370,7 +388,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <!-- ИМПОРТ -->
   <div class="section">
     <div class="section-header">
       <h2>Импорт данных</h2>
@@ -389,7 +406,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <!-- СПРАВОЧНИК -->
   <div class="section">
     <div class="section-header">
       <h2>Справочник</h2>
@@ -440,7 +456,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <!-- РЕЗУЛЬТАТ -->
   <div class="section">
     <div class="section-header">
       <h2>Результат</h2>
@@ -484,7 +499,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <!-- ЭКСПОРТ -->
   <div class="section">
     <div class="section-header">
       <h2>Экспорт</h2>
@@ -502,12 +516,11 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   </div>
 
   <div class="hint" style="text-align:center;color:var(--text-tertiary);margin-top:20px;font-size:11px;letter-spacing:.02em">
-    French Bakery Аудит · v9.1
+    French Bakery Аудит · v9.1.1
   </div>
 
 </main>
 
-<!-- Модал: справочник -->
 <div id="catalogModal" class="modal hidden">
   <div class="modal-content" id="catalogModalContent">
     <h3>Справочник сроков</h3>
@@ -519,37 +532,38 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 
     <div id="catalogList"></div>
 
-    <div style="border-top:1px solid var(--separator);padding-top:14px;margin-top:14px">
-      <label>Добавить позицию</label>
-      <div class="cat-row add-row" style="margin-top:6px">
-        <input id="newProdName" type="text" placeholder="Название" autocomplete="off" maxlength="100">
-        <div class="inp-wrap">
-          <input id="newProdHours" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" value="0" maxlength="3">
-          <span class="unit">ч</span>
+    <div class="catalog-bottom">
+      <div>
+        <label>Добавить позицию</label>
+        <div class="cat-row add-row" style="margin-top:6px">
+          <input id="newProdName" type="text" placeholder="Название" autocomplete="off" maxlength="100">
+          <div class="inp-wrap">
+            <input id="newProdHours" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" value="0" maxlength="3">
+            <span class="unit">ч</span>
+          </div>
+          <div class="inp-wrap">
+            <input id="newProdDays" type="text" inputmode="decimal" placeholder="0" value="0" maxlength="4">
+            <span class="unit">сут</span>
+          </div>
+          <button id="addProdBtn" class="add-btn" type="button" aria-label="Добавить">+</button>
         </div>
-        <div class="inp-wrap">
-          <input id="newProdDays" type="text" inputmode="decimal" placeholder="0" value="0" maxlength="4">
-          <span class="unit">сут</span>
-        </div>
-        <button id="addProdBtn" class="add-btn" type="button" aria-label="Добавить">+</button>
+        <p class="hint" style="margin-top:8px;font-size:11.5px;color:var(--text-tertiary)">
+          Срок в часах (макс. 720) или сутках (макс. 30). <b style="color:var(--text-secondary)">24 ч = 1 сутки</b>.
+        </p>
       </div>
-      <p class="hint" style="margin-top:8px;font-size:11.5px;color:var(--text-tertiary)">
-        Срок в часах (макс. 720) или сутках (макс. 30). <b style="color:var(--text-secondary)">24 ч = 1 сутки</b>.
-      </p>
-    </div>
 
-    <div class="row" style="margin-top:14px">
-      <button id="exportCatalogBtn" class="secondary">Экспорт</button>
-      <button id="importCatalogBtn" class="secondary">Импорт</button>
+      <div class="row" style="margin-top:14px">
+        <button id="exportCatalogBtn" class="secondary">Экспорт</button>
+        <button id="importCatalogBtn" class="secondary">Импорт</button>
+      </div>
+      <button id="resetCatalogBtn" class="secondary block" style="margin-top:8px">Сбросить к заводскому</button>
+      <input id="importCatalogFile" type="file" accept=".json,application/json" hidden>
+      <div id="catalogStatus" class="status"></div>
+      <button id="closeCatalogBtn" class="secondary block" style="margin-top:14px">Закрыть</button>
     </div>
-    <button id="resetCatalogBtn" class="secondary block" style="margin-top:8px">Сбросить к заводскому</button>
-    <input id="importCatalogFile" type="file" accept=".json,application/json" hidden>
-    <div id="catalogStatus" class="status"></div>
-    <button id="closeCatalogBtn" class="secondary block" style="margin-top:14px">Закрыть</button>
   </div>
 </div>
 
-<!-- Модал: промпт -->
 <div id="promptModal" class="modal hidden">
   <div class="modal-content">
     <h3>Промпт для ИИ</h3>
@@ -560,7 +574,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   </div>
 </div>
 
-<!-- Модал: товар -->
 <div id="productModal" class="modal hidden">
   <div class="modal-content">
     <h3 id="pmName">—</h3>
@@ -594,7 +607,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   </div>
 </div>
 
-<!-- Модал: неизвестные -->
 <div id="unknownModal" class="modal hidden">
   <div class="modal-content" id="unknownModalContent">
     <h3>Не в справочнике</h3>
@@ -612,7 +624,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   </div>
 </div>
 
-<!-- Модал: игнор-лист -->
 <div id="ignoredModal" class="modal hidden">
   <div class="modal-content" id="ignoredModalContent">
     <h3>Игнор-лист</h3>
@@ -623,7 +634,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   </div>
 </div>
 
-<!-- Баннер обновления SW -->
 <div id="updateBanner" class="toast" style="pointer-events:auto;cursor:pointer">
   Доступно обновление · нажмите, чтобы перезагрузить
 </div>
@@ -2266,7 +2276,6 @@ function renderCatalogList() {
     const row = document.createElement('div');
     row.className = 'cat-row';
 
-    /* Название */
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
     nameInput.value = p.name;
@@ -2284,7 +2293,6 @@ function renderCatalogList() {
       saveCatalog(); scheduleSessionSave();
     };
 
-    /* Часы */
     const hoursWrap = document.createElement('div');
     hoursWrap.className = 'inp-wrap';
     const hoursInput = document.createElement('input');
@@ -2301,7 +2309,6 @@ function renderCatalogList() {
     hoursWrap.appendChild(hoursInput);
     hoursWrap.appendChild(hoursUnit);
 
-    /* Сутки */
     const daysWrap = document.createElement('div');
     daysWrap.className = 'inp-wrap';
     const daysInput = document.createElement('input');
@@ -2319,7 +2326,6 @@ function renderCatalogList() {
     daysWrap.appendChild(daysInput);
     daysWrap.appendChild(daysUnit);
 
-    /* Часы → изменение */
     hoursInput.addEventListener('input', () => {
       const cleaned = onlyDigits(hoursInput.value);
       if (cleaned !== hoursInput.value) hoursInput.value = cleaned;
@@ -2329,7 +2335,7 @@ function renderCatalogList() {
       let v;
       if (cleaned === '') v = 0;
       else { const n = Number(cleaned); if (!isFinite(n) || n === 0) v = 0; else v = clampNum(n, 1, MAX_SHELF_HOURS, 48); }
-      if (n > MAX_SHELF_HOURS) showToast(`Максимум ${MAX_SHELF_HOURS} ч (${MAX_SHELF_DAYS} суток)`);
+      if (cleaned !== '' && Number(cleaned) > MAX_SHELF_HOURS) showToast(`Максимум ${MAX_SHELF_HOURS} ч (${MAX_SHELF_DAYS} суток)`);
       PRODUCTS[p._idx].shelfLife = v;
       hoursInput.value = String(v);
       const d = formatDays(v);
@@ -2338,7 +2344,6 @@ function renderCatalogList() {
       saveCatalog(); scheduleSessionSave();
     });
 
-    /* Сутки → изменение */
     daysInput.addEventListener('input', () => {
       const cleaned = String(daysInput.value).replace(',', '.').replace(/[^\d.]/g, '');
       if (cleaned !== daysInput.value) daysInput.value = cleaned;
@@ -2361,7 +2366,6 @@ function renderCatalogList() {
       saveCatalog(); scheduleSessionSave();
     });
 
-    /* Удалить */
     const delBtn = document.createElement('button');
     delBtn.className = 'del-btn';
     delBtn.type = 'button';
@@ -2848,7 +2852,6 @@ function bindUI() {
   };
   const closePrompt = $('closePromptModalBtn'); if (closePrompt) closePrompt.onclick = () => closeModal('promptModal');
 
-  /* SYNC UI */
   const activateOwnerBtn = $('activateOwnerBtn'); if (activateOwnerBtn) activateOwnerBtn.onclick = activateOwner;
   const deactivateOwnerBtn = $('deactivateOwnerBtn'); if (deactivateOwnerBtn) deactivateOwnerBtn.onclick = deactivateOwner;
   const checkUpdatesBtn = $('checkUpdatesBtn');
@@ -2893,9 +2896,6 @@ function bindUI() {
   if (bannerLater) bannerLater.onclick = () => { _pendingRemote = null; hideCatalogUpdateBanner(); };
 }
 
-/* ==============================
-   BIND PRODUCT MODAL
-   ============================== */
 function bindProductModal() {
   const cancel = $('pmCancel'); if (cancel) cancel.onclick = cancelProduct;
   const commit = $('pmCommit'); if (commit) commit.onclick = commitProduct;
@@ -2934,9 +2934,6 @@ function bindProductModal() {
   });
 }
 
-/* ==============================
-   LOGO FALLBACK
-   ============================== */
 function initLogoFallback() {
   const logo = $('appLogo');
   if (!logo) return;
@@ -2947,9 +2944,6 @@ function initLogoFallback() {
   img.onerror = () => { /* остаётся текст FB */ };
 }
 
-/* ==============================
-   SW
-   ============================== */
 function initSW() {
   if (!('serviceWorker' in navigator)) return;
   window.addEventListener('load', () => {
@@ -2968,9 +2962,6 @@ function initSW() {
   });
 }
 
-/* ==============================
-   INIT
-   ============================== */
 function init() {
   initLogoFallback();
   try { localStorage.removeItem(LEGACY_SESSION_KEY); } catch (e) {}
@@ -3020,7 +3011,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.1 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.1.1 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
