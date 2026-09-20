@@ -9,6 +9,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="French Bakery Аудит">
 <title>French Bakery Аудит</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="logo-180.png">
 <style>
 :root{
   --bg:#f5f5f7;--bg-card:#ffffff;--bg-elev-2:#f2f2f7;--bg-input:#f2f2f7;
@@ -94,7 +96,7 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .result-meta .item b{color:var(--text);font-weight:700}
 .result-meta .item.empty b{color:var(--text-tertiary)}
 .table-wrap{border-radius:var(--r-md);border:1px solid var(--separator);background:var(--bg-card);overflow:hidden;margin-bottom:4px}
-.table-scroll{max-height:65vh;overflow:auto;-webkit-overflow-scrolling:touch;background:var(--bg-card);position:relative;scrollbar-width:thin;scrollbar-color:var(--separator-opaque) transparent}
+.table-scroll{max-height:65vh;overflow:auto;-webkit-overflow-scrolling:touch;background:var(--bg-card);position:relative;scrollbar-width:thin;scrollbar-color:var(--separator-opaque) transparent;overscroll-behavior:contain}
 .table-scroll::-webkit-scrollbar{width:8px;height:8px}
 .table-scroll::-webkit-scrollbar-track{background:transparent}
 .table-scroll::-webkit-scrollbar-thumb{background:var(--separator-opaque);border-radius:4px}
@@ -169,9 +171,9 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
   .table-scroll tbody tr.row-info:hover td:nth-child(2){background:linear-gradient(var(--blue-row-hover),var(--blue-row-hover)),var(--bg-card)}
   .table-scroll tbody tr.row-unknown:hover td:nth-child(2){background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card)}
 }
-.modal{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));padding-top:calc(20px + env(safe-area-inset-top,0px))}
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));padding-top:calc(20px + env(safe-area-inset-top,0px));height:100vh;height:100dvh;width:100vw;width:100dvw}
 .modal.hidden{display:none}
-.modal-content{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;max-height:88vh;max-height:85dvh;overflow:auto;padding:24px;animation:modalIn .2s cubic-bezier(.16,1,.3,1);-webkit-overflow-scrolling:touch;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+.modal-content{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:auto;padding:24px;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));animation:modalIn .2s cubic-bezier(.16,1,.3,1);-webkit-overflow-scrolling:touch}
 @keyframes modalIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
 .modal-handle{display:none}
 .modal-content h3{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.25}
@@ -193,15 +195,15 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .pf-commit{background:#0a84ff;color:#fff}
 #catalogModalContent{
   display:flex;flex-direction:column;
-  max-height:85dvh;
+  max-height:calc(100vh - 40px);
   max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
   overflow:hidden;
   padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
 }
-#catalogList{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
+#catalogList{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin-bottom:14px}
 #unknownModalContent{
   display:flex;flex-direction:column;
-  max-height:80dvh;
+  max-height:calc(100vh - 40px);
   max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
   max-width:420px;
   padding:20px;
@@ -209,11 +211,11 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
   overflow:hidden;
 }
 @media (max-width:640px){
-  #unknownModalContent{max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-width:100%}
+  #unknownModalContent{max-width:100%}
 }
 #unknownBody{
   flex:1 1 auto;min-height:0;
-  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
   margin-bottom:12px;
   padding-right:4px;
 }
@@ -249,8 +251,14 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .unknown-counter{font-size:11.5px;color:var(--text-secondary);margin-bottom:8px}
 .unknown-load-more{padding:8px;text-align:center;color:var(--accent);font-weight:600;font-size:12.5px;cursor:pointer;user-select:none}
 .unknown-load-more:active{opacity:.6}
-#ignoredModalContent{display:flex;flex-direction:column;max-height:85dvh;max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
-#ignoredList{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
+#ignoredModalContent{
+  display:flex;flex-direction:column;
+  max-height:calc(100vh - 40px);
+  max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
+  overflow:hidden;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
+}
+#ignoredList{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin-bottom:14px}
 .ignored-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
 .ignored-row:hover{background:var(--bg-hover)}
 .ignored-row .name{font-size:14px;word-break:break-word;overflow-wrap:anywhere}
@@ -286,6 +294,9 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .save-card .save-btn:last-of-type{margin-bottom:0}
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(0,0,0,.85);color:#fff;font-size:14px;font-weight:600;padding:12px 20px;border-radius:12px;z-index:9999;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.update-banner{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#0a84ff;color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;font-size:14px;z-index:9998;box-shadow:0 4px 16px rgba(0,0,0,.25);display:none;align-items:center;gap:10px;max-width:calc(100vw - 40px)}
+.update-banner.show{display:inline-flex}
+.update-banner button{background:#fff;color:#0a84ff;padding:6px 14px;border-radius:8px;min-height:32px;font-size:13px;font-weight:700}
 @media (min-width:641px){
   :root{--header-h:88px}
   .app-header{padding:14px 20px;padding-top:calc(14px + env(safe-area-inset-top,0px))}
@@ -467,7 +478,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v8.1
+      French Bakery Аудит · v8.2
     </div>
   </div>
 
@@ -569,6 +580,11 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   </div>
 </div>
 
+<div id="updateBanner" class="update-banner">
+  <span>Доступно обновление</span>
+  <button onclick="location.reload()">Обновить</button>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 'use strict';
@@ -619,8 +635,35 @@ let _totalsTimer = null;
 let applyBusy = false;
 let exportBusy = false;
 let shareBusy = false;
+let _bodyFrozen = false;
+let _frozenScrollY = 0;
 
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
+
+function freezeBody() {
+  if (_bodyFrozen) return;
+  _frozenScrollY = window.scrollY || window.pageYOffset || 0;
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${_frozenScrollY}px`;
+  document.body.style.left = '0';
+  document.body.style.right = '0';
+  document.body.style.width = '100%';
+  document.body.style.height = '100%';
+  document.body.style.overflow = 'hidden';
+  _bodyFrozen = true;
+}
+function unfreezeBody() {
+  if (!_bodyFrozen) return;
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.left = '';
+  document.body.style.right = '';
+  document.body.style.width = '';
+  document.body.style.height = '';
+  document.body.style.overflow = '';
+  window.scrollTo(0, _frozenScrollY);
+  _bodyFrozen = false;
+}
 
 function openModal(id) {
   const el = $(id);
@@ -1258,17 +1301,15 @@ function updateResultMeta() {
   }
 }
 
-function focusEl(el) {
-  el.focus({ preventScroll: true });
-  try { el.select(); } catch (e) {}
+function scrollIntoContainer(el) {
   const scroller = el.closest('.table-scroll');
   if (!scroller) return;
   const elRect = el.getBoundingClientRect();
   const scRect = scroller.getBoundingClientRect();
   const thead = scroller.querySelector('thead');
   const theadH = thead ? thead.getBoundingClientRect().height : 0;
-  const topLimit = scRect.top + theadH;
-  const bottomLimit = scRect.bottom;
+  const topLimit = scRect.top + theadH + 4;
+  const bottomLimit = scRect.bottom - 4;
   if (elRect.top < topLimit) {
     scroller.scrollTop += elRect.top - topLimit;
   } else if (elRect.bottom > bottomLimit) {
@@ -1281,6 +1322,16 @@ function focusEl(el) {
   } else if (elRect.right > rightLimit) {
     scroller.scrollLeft += elRect.right - rightLimit;
   }
+}
+function focusEl(el) {
+  el.focus({ preventScroll: true });
+  try { el.select(); } catch (e) {}
+  requestAnimationFrame(() => {
+    if ((window.scrollY || window.pageYOffset) !== _frozenScrollY && _bodyFrozen) {
+      window.scrollTo(0, _frozenScrollY);
+    }
+    scrollIntoContainer(el);
+  });
 }
 function tableNav(input, key) {
   const td = input.closest('td');
@@ -1421,7 +1472,18 @@ function renderTable() {
           saveSession();
         });
         inputStock.addEventListener('click', e => e.stopPropagation());
-        inputStock.addEventListener('focus', e => e.stopPropagation());
+        inputStock.addEventListener('focus', e => {
+          e.stopPropagation();
+          freezeBody();
+          requestAnimationFrame(() => scrollIntoContainer(inputStock));
+        });
+        inputStock.addEventListener('blur', () => {
+          setTimeout(() => {
+            if (!document.activeElement || !document.activeElement.closest('.table-scroll')) {
+              unfreezeBody();
+            }
+          }, 100);
+        });
         inputStock.addEventListener('keydown', tableKey);
         tdStock.appendChild(inputStock);
       }
@@ -1440,7 +1502,18 @@ function renderTable() {
         saveSession();
       });
       inputSales.addEventListener('click', e => e.stopPropagation());
-      inputSales.addEventListener('focus', e => e.stopPropagation());
+      inputSales.addEventListener('focus', e => {
+        e.stopPropagation();
+        freezeBody();
+        requestAnimationFrame(() => scrollIntoContainer(inputSales));
+      });
+      inputSales.addEventListener('blur', () => {
+        setTimeout(() => {
+          if (!document.activeElement || !document.activeElement.closest('.table-scroll')) {
+            unfreezeBody();
+          }
+        }, 100);
+      });
       inputSales.addEventListener('keydown', tableKey);
       tdSales.appendChild(inputSales);
       tr.appendChild(tdSales);
@@ -1465,13 +1538,24 @@ function renderTable() {
               scheduleSessionSave();
             }
           });
-          inp.addEventListener('blur', () => { if (inp.value === '') inp.value = '0'; });
+          inp.addEventListener('blur', () => {
+            if (inp.value === '') inp.value = '0';
+            setTimeout(() => {
+              if (!document.activeElement || !document.activeElement.closest('.table-scroll')) {
+                unfreezeBody();
+              }
+            }, 100);
+          });
           inp.addEventListener('change', () => {
             if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
             saveSession();
           });
           inp.addEventListener('click', e => e.stopPropagation());
-          inp.addEventListener('focus', e => e.stopPropagation());
+          inp.addEventListener('focus', e => {
+            e.stopPropagation();
+            freezeBody();
+            requestAnimationFrame(() => scrollIntoContainer(inp));
+          });
           inp.addEventListener('keydown', tableKey);
           td.appendChild(inp);
           const resetBtn = document.createElement('button');
@@ -2691,6 +2775,24 @@ function initLogoFallback() {
   };
 }
 
+function initSW() {
+  if (!('serviceWorker' in navigator)) return;
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            const b = $('updateBanner');
+            if (b) b.classList.add('show');
+          }
+        });
+      });
+    }).catch(err => console.warn('SW registration failed:', err));
+  });
+}
+
 function init() {
   initLogoFallback();
   try { localStorage.removeItem(LEGACY_SESSION_KEY); } catch (e) {}
@@ -2735,7 +2837,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v8.1 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v8.2 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
@@ -2743,6 +2845,7 @@ IGNORED = loadIgnored();
 bindUI();
 bindProductModal();
 init();
+initSW();
 </script>
 </body>
 </html>
