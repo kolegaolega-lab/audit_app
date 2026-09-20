@@ -23,7 +23,7 @@
   --blue:#0a84ff;--blue-soft:rgba(10,132,255,.10);--blue-row:rgba(10,132,255,.10);--blue-row-hover:rgba(10,132,255,.18);
   --purple:#af52de;--purple-soft:rgba(175,82,222,.12);
   --r-lg:18px;--r-md:12px;--r-sm:9px;
-  --page-max:560px;
+  --page-max:840px;
   --page-pad:14px;
 }
 @media (prefers-color-scheme:dark){
@@ -56,40 +56,19 @@ body.modal-open{overflow:hidden}
   border-bottom:1px solid var(--separator);
 }
 .header-inner{
-  max-width:var(--page-max);
-  width:100%;
-  margin:0 auto;
+  max-width:var(--page-max);width:100%;margin:0 auto;
   padding:0 var(--page-pad);
-  display:flex;
-  align-items:center;
-  gap:11px;
-  box-sizing:border-box;
+  display:flex;align-items:center;gap:11px;box-sizing:border-box;
 }
 .logo{width:34px;height:34px;border-radius:50%;background:#FFE600;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:800;color:#333;font-size:11.5px;flex:0 0 auto;border:1px solid var(--separator);letter-spacing:-.02em}
 .logo img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
 .header-text{flex:1;min-width:0;overflow:hidden}
 .header-text h1{font-size:15.5px;margin:0;font-weight:600;letter-spacing:-.3px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.header-badge{
-  display:none;
-  font-size:10px;
-  font-weight:700;
-  padding:3px 8px;
-  border-radius:999px;
-  white-space:nowrap;
-  flex:0 0 auto;
-  margin-left:auto;
-  text-transform:uppercase;
-  letter-spacing:.04em;
-  transition:background .2s,color .2s;
-}
+.header-badge{display:none;font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap;flex:0 0 auto;margin-left:auto;text-transform:uppercase;letter-spacing:.04em;transition:background .2s,color .2s}
 .header-badge.show{display:inline-flex}
 .header-badge.owner{background:var(--purple-soft);color:var(--purple)}
 .header-badge.saved{background:var(--green-soft);color:var(--green)}
-main{
-  max-width:var(--page-max);
-  margin:0 auto;
-  padding:14px var(--page-pad) calc(12px + env(safe-area-inset-bottom,0px));
-}
+main{max-width:var(--page-max);margin:0 auto;padding:14px var(--page-pad) calc(12px + env(safe-area-inset-bottom,0px))}
 .section{background:var(--bg-card);border-radius:var(--r-lg);margin-bottom:10px;border:1px solid var(--separator);overflow:hidden}
 .section-header{padding:16px 18px 0}
 .section-header h2{font-size:14.5px;font-weight:600;margin:0 0 3px;letter-spacing:-.2px;color:var(--text)}
@@ -174,8 +153,10 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .table-search::before{content:'';position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;background:currentColor;opacity:.35;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") center/contain no-repeat;pointer-events:none}
 .table-search-clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:28px;height:28px;padding:0;border-radius:50%;background:transparent;color:var(--text-secondary);font-size:16px;font-weight:400;display:none;min-height:auto;align-items:center;justify-content:center;cursor:pointer;line-height:1}
 .table-search.has-value .table-search-clear{display:inline-flex}
-.table-wrap{border-radius:var(--r-md);border:1px solid var(--separator);background:var(--bg-card);overflow:hidden;margin-bottom:4px}
-.table-scroll{max-height:65vh;overflow:auto;-webkit-overflow-scrolling:touch;background:var(--bg-card);position:relative;scrollbar-width:thin;scrollbar-color:var(--separator-opaque) transparent;overscroll-behavior:contain}
+
+/* ==== ТАБЛИЦА (десктоп) ==== */
+.table-wrap{border-radius:var(--r-md);border:1px solid var(--separator);background:var(--bg-card);overflow:hidden;margin-bottom:4px;width:100%;max-width:100%}
+.table-scroll{overflow:auto;-webkit-overflow-scrolling:touch;background:var(--bg-card);position:relative;scrollbar-width:thin;scrollbar-color:var(--separator-opaque) transparent;overscroll-behavior:contain;max-width:100%}
 .table-scroll::-webkit-scrollbar{width:8px;height:8px}
 .table-scroll::-webkit-scrollbar-track{background:transparent}
 .table-scroll::-webkit-scrollbar-thumb{background:var(--separator-opaque);border-radius:4px}
@@ -234,6 +215,68 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .calc-cell.zero{color:var(--text-tertiary)}
 .calc-cell[data-role="expiredOnShelf"].positive,
 .calc-cell[data-role="soldExpired"].positive{color:var(--red)}
+
+/* ==== КАРТОЧКИ (только мобильный) ==== */
+.cards-view{display:none}
+.card{
+  background:var(--bg-card);
+  border:1px solid var(--separator);
+  border-radius:var(--r-md);
+  margin-bottom:8px;
+  overflow:hidden;
+  position:relative;
+}
+.card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:4px;z-index:10;
+  border-radius:var(--r-md) 0 0 var(--r-md);
+}
+.card.fresh::before{background:var(--green)}
+.card.warn::before{background:var(--orange)}
+.card.danger::before{background:var(--red)}
+.card-head{display:flex;align-items:flex-start;gap:8px;padding:12px 14px 0 18px}
+.card-name{flex:1 1 auto;min-width:0;font-size:14px;font-weight:600;line-height:1.3;word-break:break-word;cursor:pointer}
+.card-shelf{flex:0 0 auto;font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums;padding:2px 6px;background:var(--bg-input);border-radius:6px}
+.scroll-wrap{position:relative;overflow:hidden}
+.card .card-row-scroll{
+  display:flex;gap:6px;
+  padding:10px 18px;
+  overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+  overscroll-behavior-x:contain;
+  scrollbar-width:none;-ms-overflow-style:none;
+}
+.card .card-row-scroll::-webkit-scrollbar{display:none;height:0}
+.scroll-wrap.has-overflow .card-row-scroll{padding-right:44px}
+.card .cell{flex:0 0 auto;display:flex;flex-direction:column;gap:4px;width:62px}
+.card .cell .lbl{font-size:9px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em;padding-left:.04em;text-align:center;white-space:nowrap}
+.card .card-row-scroll.fit .cell{flex:1 1 0;min-width:0;width:auto}
+.card .num{width:62px;min-width:62px;max-width:none;height:38px;font-size:15px;line-height:38px;border-radius:8px;display:block;margin:0 auto}
+.card .card-row-scroll.fit .num{width:100%}
+.card .inp-wrap{position:relative}
+.card .inp-wrap.edited .num{background:var(--orange-soft);box-shadow:0 0 0 1.5px var(--orange)}
+.card .inp-wrap .reset-btn{position:absolute;top:-4px;right:-4px;width:18px;height:18px;padding:0;border-radius:50%;background:var(--orange);color:#fff;font-size:10px;font-weight:800;display:none;z-index:3;border:2px solid var(--bg-card);line-height:1;align-items:center;justify-content:center;cursor:pointer}
+.card .inp-wrap.edited .reset-btn{display:inline-flex}
+.scroll-fade{display:none;position:absolute;top:0;right:0;bottom:0;width:44px;pointer-events:none;background:linear-gradient(to right, transparent, var(--bg-card) 80%);z-index:5}
+.scroll-wrap.has-overflow .scroll-fade{display:block}
+.scroll-wrap.at-end .scroll-fade{display:none}
+.scroll-arrow{display:none;position:absolute;right:8px;top:calc(50% + 9px);transform:translateY(-50%);width:26px;height:26px;border-radius:50%;background:var(--bg-card);border:1px solid var(--separator-opaque);color:var(--text-secondary);font-size:14px;font-weight:700;align-items:center;justify-content:center;z-index:6;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.10);line-height:1;padding-bottom:2px}
+.scroll-wrap.has-overflow .scroll-arrow{display:flex}
+.scroll-wrap.at-end .scroll-arrow{display:none}
+.card-result{padding:10px 14px 10px 18px;border-top:1px solid var(--separator);font-size:12px;color:var(--text-secondary);display:flex;flex-direction:column;gap:4px}
+.card-result .rv{font-weight:600}
+.card-result .rv.positive{color:var(--red)}
+.card-result .rv.zero{color:var(--text-tertiary)}
+
+@media (max-width:900px){
+  .table-wrap{display:none}
+  .cards-view{display:block}
+}
+@media (min-width:901px){
+  .cards-view{display:none}
+  .table-wrap{display:block}
+  .table-scroll table.table-body{table-layout:auto;width:100%}
+}
+
+/* ==== МОДАЛЫ ==== */
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));height:100vh;height:100dvh;width:100vw;width:100dvw}
 .modal.hidden{display:none}
 .modal-content{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;overflow:hidden}
@@ -247,9 +290,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 #unknownModalContent,
 #catalogModalContent,
 #ignoredModalContent{
-  display:flex;
-  flex-direction:column;
-  padding:0 !important;
+  display:flex;flex-direction:column;padding:0 !important;
   height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
   max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
   overflow:hidden;
@@ -258,7 +299,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .unknown-toolbar-block .unknown-counter{margin:0 0 10px}
 .unknown-toolbar-block .unknown-toolbar{padding:0 0 10px}
 .unknown-toolbar-block .unknown-search{padding:0}
-.catalog-add-block{flex:0 0 auto;padding:12px 22px 12px;border-top:1px solid var(--separator);background:var(--bg-card)}
+.catalog-add-block{flex:0 0 auto;padding:12px 22px;border-top:1px solid var(--separator);background:var(--bg-card)}
 .catalog-add-block label{display:block;margin-bottom:6px}
 .catalog-add-block .hint{margin-top:8px;font-size:11.5px;color:var(--text-tertiary)}
 .unknown-counter{font-size:11.5px;color:var(--text-secondary)}
@@ -282,6 +323,10 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .unknown-row-hours .unit{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
 .unknown-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .unknown-actions .full{grid-column:1 / -1}
+.ignored-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
+.ignored-row:hover{background:var(--bg-hover)}
+.ignored-row .name{font-size:14px;word-break:break-word;overflow-wrap:anywhere}
+.ignored-row .del-btn{min-height:36px;padding:6px 12px;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:12.5px;font-weight:600;border-radius:8px}
 .cat-row{display:grid;grid-template-columns:1fr 66px 76px 38px;gap:6px;align-items:center;padding:6px 0;border-radius:var(--r-sm)}
 .cat-row input[type=text]{padding:8px 10px;font-size:13.5px;min-height:38px;border-radius:8px;font-family:inherit}
 .cat-row .inp-wrap{position:relative;display:block}
@@ -289,24 +334,13 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .cat-row .inp-wrap .unit{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
 .cat-row .del-btn{min-height:38px;padding:0;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:16px;font-weight:700;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
 .cat-row.add-row .add-btn{background:var(--green-soft);color:var(--green);border:1px solid var(--green-soft);font-size:20px;font-weight:500;min-height:38px;padding:0;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
-.ignored-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
-.ignored-row:hover{background:var(--bg-hover)}
-.ignored-row .name{font-size:14px;word-break:break-word;overflow-wrap:anywhere}
-.ignored-row .del-btn{min-height:36px;padding:6px 12px;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:12.5px;font-weight:600;border-radius:8px}
-.photo-queue{display:grid;gap:8px;margin-top:10px}
-.photo-item{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input)}
-.photo-thumb{width:44px;height:44px;object-fit:cover;border-radius:9px;background:var(--bg-elev-2)}
-.photo-meta{min-width:0}
-.photo-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.photo-type{font-size:11px;color:var(--text-secondary);margin-top:2px}
-.photo-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.photo-actions button{min-height:34px;padding:6px 12px;font-size:12.5px;border-radius:8px}
-pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm);font-size:11.5px;line-height:1.55;overflow:auto;max-height:60vh;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #1e293b}
+
+/* ==== ПРОМПТ / PRODUCT модалы ==== */
 #promptModal .modal-content,
 #productModal .modal-content{max-height:calc(100dvh - 32px);padding:22px;overflow:auto;scrollbar-width:none;-ms-overflow-style:none}
 #promptModal .modal-content::-webkit-scrollbar,
 #productModal .modal-content::-webkit-scrollbar{display:none}
-.modal-content .product-shelf{font-size:12px;color:var(--text-secondary);margin-bottom:14px}
+pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm);font-size:11.5px;line-height:1.55;overflow:auto;max-height:60vh;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #1e293b}
 .product-form{display:flex;flex-direction:column;gap:14px}
 .pf-section-title{font-size:10.5px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
 .pf-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
@@ -321,12 +355,21 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .pf-actions button{min-height:44px;border:0;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit}
 .pf-cancel{background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator-opaque)!important}
 .pf-commit{background:#0a84ff;color:#fff}
+
+/* ==== ФОТО ==== */
+.photo-queue{display:grid;gap:8px;margin-top:10px}
+.photo-item{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input)}
+.photo-thumb{width:44px;height:44px;object-fit:cover;border-radius:9px;background:var(--bg-elev-2)}
+.photo-meta{min-width:0}
+.photo-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.photo-type{font-size:11px;color:var(--text-secondary);margin-top:2px}
+.photo-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.photo-actions button{min-height:34px;padding:6px 12px;font-size:12.5px;border-radius:8px}
+
+/* ==== TOAST ==== */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(28,28,30,.96);color:#fff;font-size:13.5px;font-weight:500;padding:11px 18px;border-radius:11px;z-index:9999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;max-width:90vw;text-align:center;letter-spacing:-.005em;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;cursor:pointer}
-@media (min-width:900px){
-  :root{--page-max:840px}
-  .table-scroll table.table-body{table-layout:auto;width:100%}
-}
+
 @media (max-width:420px){
   .unknown-row-grid{grid-template-columns:1fr 54px 62px;gap:6px}
   .unknown-row-name{font-size:13.5px}
@@ -438,26 +481,33 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <p class="desc">Хранится локально. Можно обновить с сервера.</p>
     </div>
     <div class="section-body">
+
       <div class="meta" id="metaLocal">
         <div class="item"><span class="dot stale"></span><span>Локальная версия · <b>не синхронизировано</b></span></div>
         <div class="item"><span class="label">Последняя проверка</span><span id="lastCheckTime">—</span></div>
       </div>
+
       <div class="meta" id="metaRemote" style="display:none">
         <div class="item"><span class="dot fresh"></span><span>Синхронизировано · <b id="syncTime">—</b></span></div>
         <div class="item"><span class="label">Последняя проверка</span><span id="lastCheckTime2">—</span></div>
       </div>
+
       <div class="meta" id="metaSyncing" style="display:none">
         <div class="item"><span class="dot syncing"></span><span>Проверка обновлений…</span></div>
       </div>
+
       <div class="stack">
         <button id="checkUpdatesBtn" class="secondary">Проверить обновления</button>
         <button id="publishBtn" class="purple" style="display:none">Опубликовать</button>
       </div>
+
       <div id="syncStatus" class="status"></div>
+
       <div class="actions-row">
         <button id="editCatalogBtn" class="secondary">Редактировать</button>
         <button id="ignoredBtn" class="secondary">Игнор-лист (<span id="ignoredCount">0</span>)</button>
       </div>
+
       <details class="settings">
         <summary>Настройки синхронизации</summary>
         <div class="content">
@@ -471,6 +521,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
           <button id="deactivateOwnerBtn" class="secondary block" style="display:none">Выйти из режима владельца</button>
         </div>
       </details>
+
     </div>
   </div>
 
@@ -484,13 +535,16 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
         <span class="k">Дата проверки</span><span class="v" id="metaDate">—</span>
         <span class="k">Точка</span><span class="v" id="metaPoint">—</span>
       </div>
+
       <div id="unknownBanner" style="display:none;margin-top:12px">
         <button id="openUnknownBtn" class="warn block">Не в справочнике (<span id="unknownCount">0</span>)</button>
       </div>
+
       <div id="tableSearchWrap" class="table-search" style="display:none;margin-top:12px">
         <input id="tableSearch" type="text" placeholder="Поиск по таблице..." autocomplete="off" maxlength="100">
         <button type="button" class="table-search-clear" id="tableSearchClear">×</button>
       </div>
+
       <div class="table-wrap" id="tableWrap" style="display:none;margin-top:12px">
         <div class="table-scroll" id="tableScroll">
           <table id="resultTable" class="table-body">
@@ -500,7 +554,11 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
           </table>
         </div>
       </div>
+
+      <div class="cards-view" id="cardsView"></div>
+
       <div id="totals" class="status" style="margin-top:12px"></div>
+
       <div class="legend" style="margin-top:12px">
         <span class="legend-item"><span class="legend-dot fresh"></span> Свежие</span>
         <span class="legend-item"><span class="legend-dot warn"></span> Просрочка на витрине</span>
@@ -528,7 +586,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint version">French Bakery Аудит · v9.2.4</div>
+  <div class="hint version">French Bakery Аудит · v9.2.5</div>
 
 </main>
 
@@ -1080,6 +1138,13 @@ function getRowStatus(calc, row) {
   if (calc.expiredOnShelf > 0) return { cls: 'row-warn', label: 'warn' };
   return { cls: 'row-fresh', label: 'fresh' };
 }
+function getCardStatus(calc, row) {
+  if (row && row.salesOnly) return 'fresh';
+  if (!calc || calc.soldExpired === null) return 'fresh';
+  if (calc.soldExpired > 0) return 'danger';
+  if (calc.expiredOnShelf > 0) return 'warn';
+  return 'fresh';
+}
 
 function detectDelimiter(firstLine) {
   let semi = 0, comma = 0, inQ = false;
@@ -1178,7 +1243,8 @@ function parseCSV(text, referenceDate) {
     const shelfRaw = idxShelf >= 0 ? parseShelfLife(vals[idxShelf]) : null;
     const incoming = [];
     validDateCols.forEach(dc => { const q = parseNum(vals[dc.index]); incoming.push({ date: dc.date, qty: q === '' ? 0 : q }); });
-    rows.push({ name, stock: null, sales: salesVal === '' ? 0 : salesVal, shelfLife: shelfRaw, incoming, salesOnly: salesOnlyMode });
+    const salesFinal = salesVal === '' ? 0 : salesVal;
+    rows.push({ name, stock: null, sales: salesFinal, _originalSales: salesFinal, shelfLife: shelfRaw, incoming, salesOnly: salesOnlyMode });
   }
   if (!rows.length) throw new Error('Не удалось распознать ни одной строки.');
   const truncated = matrix.length - 1 > MAX_ROWS;
@@ -1229,6 +1295,7 @@ function syncPullFromServer(opts) {
   _pendingRemote = null;
   updateCatalogMeta();
   renderTable();
+  renderCards();
   updateUnknownBanner();
   if (!silent && statusEl) {
     statusEl.className = 'status show ok';
@@ -1334,10 +1401,7 @@ function setOwnerMode(on) {
     statusEl.className = 'status';
     statusEl.textContent = '';
   }
-  if (badge && badge._t) {
-    clearTimeout(badge._t);
-    badge._t = null;
-  }
+  if (badge && badge._t) { clearTimeout(badge._t); badge._t = null; }
   updateHeaderBadge();
 }
 function activateOwner() {
@@ -1474,6 +1538,7 @@ function saveSession() {
       csvText: ($('csvInput') ? $('csvInput').value : '').slice(0, 500000),
       rows: tableRows.slice(0, MAX_ROWS).map(r => ({
         name: r.name, stock: r.stock, sales: r.sales, shelfLife: r.shelfLife,
+        _originalSales: r._originalSales != null ? r._originalSales : r.sales,
         incoming: (r.incoming || []).slice(0, MAX_DATES).map(p => ({ date: p.date, qty: p.qty, _originalQty: p._originalQty != null ? p._originalQty : p.qty })),
         salesOnly: !!r.salesOnly
       })),
@@ -1493,10 +1558,7 @@ function showAutosaveBadge() {
   el.className = 'header-badge show saved';
   el.textContent = 'Сохранено';
   if (el._t) clearTimeout(el._t);
-  el._t = setTimeout(() => {
-    el._t = null;
-    updateHeaderBadge();
-  }, 1400);
+  el._t = setTimeout(() => { el._t = null; updateHeaderBadge(); }, 1400);
 }
 function loadSession() {
   try {
@@ -1520,8 +1582,10 @@ function applySession(data) {
         let shelf;
         if (r.shelfLife === 0 || r.shelfLife == null) shelf = 0;
         else shelf = clampNum(r.shelfLife, 1, 10000, 72);
+        const salesVal = clampNum(r.sales, 0, MAX_NUM, 0);
+        const origSales = r._originalSales != null ? clampNum(r._originalSales, 0, MAX_NUM, salesVal) : salesVal;
         return {
-          name: safeStr(r.name, MAX_NAME), stock, sales: clampNum(r.sales, 0, MAX_NUM, 0), shelfLife: shelf,
+          name: safeStr(r.name, MAX_NAME), stock, sales: salesVal, _originalSales: origSales, shelfLife: shelf,
           incoming: Array.isArray(r.incoming) ? r.incoming.slice(0, MAX_DATES).map(p => {
             const qty = clampNum(p.qty, 0, MAX_NUM, 0);
             const orig = p._originalQty != null ? clampNum(p._originalQty, 0, MAX_NUM, qty) : qty;
@@ -1659,6 +1723,7 @@ function renderTable() {
     const theadTr = document.querySelector('#resultThead tr');
     const wrap = $('tableWrap');
     const searchWrap = $('tableSearchWrap');
+    const cardsView = $('cardsView');
     if (!tbody || !colgroup || !theadTr || !wrap) return;
     tbody.innerHTML = '';
     if (!Array.isArray(tableRows) || !tableRows.length) {
@@ -1666,6 +1731,7 @@ function renderTable() {
       if ($('totals')) $('totals').className = 'status';
       wrap.style.display = 'none';
       if (searchWrap) searchWrap.style.display = 'none';
+      if (cardsView) cardsView.innerHTML = '';
       updateResultMeta();
       return;
     }
@@ -1704,7 +1770,7 @@ function renderTable() {
       } else {
         const inputStock = makeNumInput({
           value: row.stock == null ? '' : row.stock, placeholder: '—',
-          onInput: (cleaned) => { row.stock = cleaned === '' ? null : clampNum(cleaned, 0, MAX_NUM, null); refreshRow(row, tr); scheduleSessionSave(); }
+          onInput: (cleaned) => { row.stock = cleaned === '' ? null : clampNum(cleaned, 0, MAX_NUM, null); refreshRow(row, tr); scheduleSessionSave(); renderCards(); }
         });
         inputStock.addEventListener('change', () => { if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; } saveSession(); });
         bindTableInput(inputStock);
@@ -1714,7 +1780,7 @@ function renderTable() {
       const tdSales = document.createElement('td');
       const inputSales = makeNumInput({
         value: row.sales || 0,
-        onInput: (cleaned) => { row.sales = cleaned === '' ? 0 : clampNum(cleaned, 0, MAX_NUM, 0); refreshRow(row, tr); scheduleSessionSave(); }
+        onInput: (cleaned) => { row.sales = cleaned === '' ? 0 : clampNum(cleaned, 0, MAX_NUM, 0); refreshRow(row, tr); scheduleSessionSave(); renderCards(); }
       });
       inputSales.addEventListener('change', () => { if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; } saveSession(); });
       bindTableInput(inputSales);
@@ -1735,6 +1801,7 @@ function renderTable() {
               markEdited(td, party, newQty);
               refreshRow(row, tr);
               scheduleSessionSave();
+              renderCards();
             }
           });
           inp.addEventListener('blur', () => { if (inp.value === '') inp.value = '0'; });
@@ -1752,6 +1819,7 @@ function renderTable() {
             markEdited(td, party, party.qty);
             refreshRow(row, tr);
             scheduleSessionSave();
+            renderCards();
           });
           td.appendChild(resetBtn);
         }
@@ -1795,6 +1863,7 @@ function renderTable() {
     scheduleTotalsUpdate();
     updateResultMeta();
     if (_tableQuery) applyTableFilter();
+    renderCards();
   } finally { isRendering = false; }
 }
 function markEdited(td, party, newQty) {
@@ -1867,6 +1936,215 @@ function updateTotals() {
     ${cntInfo > 0 ? `<br>Без накладных: <b>${cntInfo}</b> поз.` : ''}
   `;
   if (_tableQuery) applyTableFilter();
+}
+
+/* ==== КАРТОЧКИ (мобильный вид) ==== */
+function buildCardInput(row, opts) {
+  const inpWrap = document.createElement('div');
+  inpWrap.className = 'inp-wrap';
+  const edited = opts.isEdited ? opts.isEdited() : false;
+  if (edited) inpWrap.classList.add('edited');
+
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.inputMode = 'numeric';
+  inp.className = 'num';
+  inp.value = opts.value;
+  if (opts.placeholder) inp.placeholder = opts.placeholder;
+  inp.addEventListener('input', () => {
+    const cleaned = onlyDigits(inp.value);
+    if (cleaned !== inp.value) inp.value = cleaned;
+    opts.onChange(cleaned);
+    if (opts.isEdited) inpWrap.classList.toggle('edited', opts.isEdited());
+  });
+  inpWrap.appendChild(inp);
+
+  if (opts.onReset) {
+    const reset = document.createElement('button');
+    reset.type = 'button';
+    reset.className = 'reset-btn';
+    reset.textContent = '↺';
+    reset.title = 'Сбросить';
+    reset.addEventListener('click', e => {
+      e.stopPropagation();
+      opts.onReset();
+      inp.value = String(opts.original);
+      if (opts.isEdited) inpWrap.classList.toggle('edited', opts.isEdited());
+    });
+    inpWrap.appendChild(reset);
+  }
+  return inpWrap;
+}
+function buildCardCell(label, inputEl) {
+  const cell = document.createElement('div');
+  cell.className = 'cell';
+  const lbl = document.createElement('div');
+  lbl.className = 'lbl';
+  lbl.textContent = label;
+  cell.appendChild(lbl);
+  cell.appendChild(inputEl);
+  return cell;
+}
+function renderCards() {
+  const box = $('cardsView');
+  if (!box) return;
+  box.innerHTML = '';
+  if (!Array.isArray(tableRows) || !tableRows.length) return;
+
+  const allDates = new Set();
+  tableRows.forEach(r => (r.incoming || []).forEach(p => { if (p.date) allDates.add(p.date); }));
+  let dates = [...allDates].sort((a, b) => b.localeCompare(a));
+  if (dates.length > MAX_DATES) dates = dates.slice(0, MAX_DATES);
+
+  tableRows.forEach(row => {
+    const calc = computeFIFO(row);
+    const cardStatus = getCardStatus(calc, row);
+    const card = document.createElement('div');
+    card.className = `card ${cardStatus}`;
+
+    const head = document.createElement('div');
+    head.className = 'card-head';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'card-name';
+    nameEl.textContent = row.name;
+    nameEl.addEventListener('click', () => openProduct(row, null));
+    const shelfEl = document.createElement('div');
+    shelfEl.className = 'card-shelf';
+    shelfEl.textContent = `${row.shelfLife} ч`;
+    head.appendChild(nameEl);
+    head.appendChild(shelfEl);
+    card.appendChild(head);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'scroll-wrap';
+
+    const scroll = document.createElement('div');
+    scroll.className = 'card-row-scroll';
+
+    if (row.salesOnly) {
+      scroll.appendChild(buildCardCell('Прод.', buildCardInput(row, {
+        value: String(row.sales || 0),
+        isEdited: () => row._originalSales !== row.sales,
+        onChange: v => { row.sales = v === '' ? 0 : clampNum(v, 0, MAX_NUM, 0); refreshCardRow(row, card); scheduleSessionSave(); },
+        onReset: () => { row.sales = row._originalSales; refreshCardRow(row, card); },
+        original: row._originalSales
+      })));
+    } else {
+      scroll.appendChild(buildCardCell('Ост.', buildCardInput(row, {
+        value: row.stock == null ? '' : String(row.stock),
+        placeholder: '—',
+        isEdited: () => false,
+        onChange: v => { row.stock = v === '' ? null : clampNum(v, 0, MAX_NUM, null); refreshCardRow(row, card); scheduleSessionSave(); },
+        onReset: null,
+        original: null
+      })));
+      scroll.appendChild(buildCardCell('Прод.', buildCardInput(row, {
+        value: String(row.sales || 0),
+        isEdited: () => row._originalSales !== row.sales,
+        onChange: v => { row.sales = v === '' ? 0 : clampNum(v, 0, MAX_NUM, 0); refreshCardRow(row, card); scheduleSessionSave(); },
+        onReset: () => { row.sales = row._originalSales; refreshCardRow(row, card); },
+        original: row._originalSales
+      })));
+      dates.forEach(d => {
+        const party = (row.incoming || []).find(p => p.date === d);
+        scroll.appendChild(buildCardCell(fmtDateRuShort(d), buildCardInput(row, {
+          value: party ? party.qty : 0,
+          isEdited: () => party && party._originalQty != null && party._originalQty !== party.qty,
+          onChange: v => {
+            const newQty = v === '' ? 0 : clampNum(v, 0, MAX_NUM, 0);
+            if (party) party.qty = newQty; else row.incoming.push({ date: d, qty: newQty, _originalQty: 0 });
+            refreshCardRow(row, card); scheduleSessionSave();
+          },
+          onReset: () => {
+            if (!party || party._originalQty == null) return;
+            party.qty = party._originalQty;
+            refreshCardRow(row, card);
+          },
+          original: party ? party._originalQty : 0
+        })));
+      });
+    }
+
+    wrap.appendChild(scroll);
+
+    const fade = document.createElement('div');
+    fade.className = 'scroll-fade';
+    wrap.appendChild(fade);
+
+    const arrow = document.createElement('div');
+    arrow.className = 'scroll-arrow';
+    arrow.textContent = '›';
+    wrap.appendChild(arrow);
+
+    scroll.addEventListener('scroll', () => {
+      const atEnd = scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 2;
+      wrap.classList.toggle('at-end', atEnd);
+    }, { passive: true });
+
+    card.appendChild(wrap);
+
+    const res = document.createElement('div');
+    res.className = 'card-result';
+    res.dataset.role = 'cardResult';
+    card.appendChild(res);
+
+    box.appendChild(card);
+  });
+
+  requestAnimationFrame(() => {
+    updateCardsOverflow();
+    updateCardResults();
+  });
+}
+function updateCardsOverflow() {
+  const box = $('cardsView');
+  if (!box) return;
+  box.querySelectorAll('.card').forEach(card => {
+    const scroll = card.querySelector('.card-row-scroll');
+    const wrap = card.querySelector('.scroll-wrap');
+    if (!scroll || !wrap) return;
+    scroll.classList.remove('fit');
+    wrap.classList.remove('has-overflow', 'at-end');
+    const hasOverflow = scroll.scrollWidth > scroll.clientWidth + 1;
+    if (hasOverflow) wrap.classList.add('has-overflow');
+    else scroll.classList.add('fit');
+  });
+}
+function updateCardResults() {
+  const box = $('cardsView');
+  if (!box) return;
+  const cards = box.querySelectorAll('.card');
+  cards.forEach((card, idx) => {
+    const row = tableRows[idx];
+    if (!row) return;
+    const calc = computeFIFO(row);
+    const cardStatus = getCardStatus(calc, row);
+    card.classList.remove('fresh','warn','danger','unknown');
+    card.classList.add(cardStatus);
+    const res = card.querySelector('[data-role="cardResult"]');
+    if (!res) return;
+    const exp = calc.expiredOnShelf;
+    const sxp = calc.soldExpired;
+    res.innerHTML = `
+      <span>Просрочено на витрине: <span class="rv ${exp === null ? 'zero' : (exp > 0 ? 'positive' : '')}">${exp === null ? '—' : exp}</span></span>
+      <span>Продано просроченным: <span class="rv ${sxp === null ? 'zero' : (sxp > 0 ? 'positive' : '')}">${sxp === null ? '—' : sxp}</span></span>
+    `;
+  });
+}
+function refreshCardRow(row, card) {
+  const calc = computeFIFO(row);
+  const cardStatus = getCardStatus(calc, row);
+  card.classList.remove('fresh','warn','danger','unknown');
+  card.classList.add(cardStatus);
+  const res = card.querySelector('[data-role="cardResult"]');
+  if (!res) return;
+  const exp = calc.expiredOnShelf;
+  const sxp = calc.soldExpired;
+  res.innerHTML = `
+    <span>Просрочено на витрине: <span class="rv ${exp === null ? 'zero' : (exp > 0 ? 'positive' : '')}">${exp === null ? '—' : exp}</span></span>
+    <span>Продано просроченным: <span class="rv ${sxp === null ? 'zero' : (sxp > 0 ? 'positive' : '')}">${sxp === null ? '—' : sxp}</span></span>
+  `;
+  scheduleTotalsUpdate();
 }
 
 function productInputs() {
@@ -1943,6 +2221,8 @@ function commitProduct() {
   }
   if (openTr) refreshRow(row, openTr);
   scheduleSessionSave();
+  renderCards();
+  updateTotals();
   closeProduct();
 }
 function cancelProduct() {
@@ -1977,14 +2257,17 @@ function renderUnknownModal() {
     row.className = 'unknown-row';
     row.dataset.name = r.name;
     if (unknownSelected.has(normalizeName(r.name))) row.classList.add('selected');
+
     const grid = document.createElement('div');
     grid.className = 'unknown-row-grid';
+
     const main = document.createElement('div');
     main.className = 'unknown-row-main';
     const nameEl = document.createElement('div');
     nameEl.className = 'unknown-row-name';
     nameEl.textContent = r.name;
     main.appendChild(nameEl);
+
     const infoEl = document.createElement('div');
     infoEl.className = 'unknown-row-info';
     const salesKv = document.createElement('span');
@@ -2001,6 +2284,7 @@ function renderUnknownModal() {
       });
     }
     main.appendChild(infoEl);
+
     const hoursWrap = document.createElement('div');
     hoursWrap.className = 'unknown-row-hours';
     const hInp = makeNumInput({ className: '', value: r.shelfLife && r.shelfLife > 0 ? r.shelfLife : 0 });
@@ -2010,6 +2294,7 @@ function renderUnknownModal() {
     const hUnit = document.createElement('span'); hUnit.className = 'unit'; hUnit.textContent = 'ч';
     hoursWrap.appendChild(hInp);
     hoursWrap.appendChild(hUnit);
+
     const daysWrap = document.createElement('div');
     daysWrap.className = 'unknown-row-hours';
     const dInp = document.createElement('input');
@@ -2027,6 +2312,7 @@ function renderUnknownModal() {
     const dUnit = document.createElement('span'); dUnit.className = 'unit'; dUnit.textContent = 'сут';
     daysWrap.appendChild(dInp);
     daysWrap.appendChild(dUnit);
+
     hInp.addEventListener('input', () => {
       const h = Number(onlyDigits(hInp.value) || '0');
       if (h > 0 && h % 24 === 0) dInp.value = String(h / 24);
@@ -2036,10 +2322,12 @@ function renderUnknownModal() {
       const d = parseDaysInput(dInp.value);
       if (d > 0) hInp.value = String(daysToHours(d));
     });
+
     grid.appendChild(main);
     grid.appendChild(hoursWrap);
     grid.appendChild(daysWrap);
     row.appendChild(grid);
+
     row.addEventListener('click', e => {
       if (e.target.closest('input')) return;
       const key = normalizeName(r.name);
@@ -2052,13 +2340,14 @@ function renderUnknownModal() {
       }
       if (selectedEl) selectedEl.textContent = String(unknownSelected.size);
     });
+
     frag.appendChild(row);
   });
   body.innerHTML = '';
   body.appendChild(frag);
   if (filtered.length > visible.length) {
     const more = document.createElement('div');
-    more.className = 'hint';
+    more.className = 'unknown-load-more';
     more.style.cssText = 'text-align:center;padding:12px;cursor:pointer;color:var(--accent);font-weight:600';
     more.textContent = `Показать ещё ${Math.min(UNKNOWN_PAGE_SIZE, filtered.length - visible.length)}`;
     more.onclick = () => { unknownVisible += UNKNOWN_PAGE_SIZE; renderUnknownModal(); };
@@ -2159,8 +2448,15 @@ function applyCSV() {
     for (const r of rows) {
       const key = normalizeName(r.name);
       const p = PRODUCTS.find(x => normalizeName(x.name) === key);
-      if (p) { r.shelfLife = p.shelfLife; r.incoming.forEach(p2 => { p2._originalQty = p2.qty; }); inCatalog.push(r); }
-      else { if (isIgnored(r.name)) continue; notInCatalog.push(r); }
+      if (p) {
+        r.shelfLife = p.shelfLife;
+        r.incoming.forEach(p2 => { p2._originalQty = p2.qty; });
+        r._originalSales = r.sales;
+        inCatalog.push(r);
+      } else {
+        if (isIgnored(r.name)) continue;
+        notInCatalog.push(r);
+      }
     }
     if (myToken !== resetToken) return;
     tableRows = sortRowsAlphabetically(inCatalog);
@@ -2378,10 +2674,7 @@ function renderIgnoredList() {
 }
 
 function showToast(text) {
-  if (_currentToast) {
-    _currentToast.remove();
-    _currentToast = null;
-  }
+  if (_currentToast) { _currentToast.remove(); _currentToast = null; }
   const el = document.createElement('div');
   el.className = 'toast show';
   el.textContent = text;
@@ -2389,10 +2682,7 @@ function showToast(text) {
   _currentToast = el;
   setTimeout(() => {
     el.classList.remove('show');
-    setTimeout(() => {
-      el.remove();
-      if (_currentToast === el) _currentToast = null;
-    }, 300);
+    setTimeout(() => { el.remove(); if (_currentToast === el) _currentToast = null; }, 300);
   }, 2400);
 }
 
@@ -2872,6 +3162,13 @@ function bindUI() {
   if (bannerApply) bannerApply.onclick = () => applyPendingRemote();
   const bannerLater = $('bannerLater');
   if (bannerLater) bannerLater.onclick = () => { _pendingRemote = null; hideCatalogUpdateBanner(); };
+
+  // Обработка resize — пересчитать overflow карточек
+  let _resizeTimer = null;
+  window.addEventListener('resize', () => {
+    if (_resizeTimer) clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(() => { _resizeTimer = null; updateCardsOverflow(); }, 120);
+  });
 }
 
 function bindProductModal() {
@@ -2949,12 +3246,8 @@ function initLogoFallback() {
   const img = document.createElement('img');
   img.src = 'logo.png';
   img.alt = 'FB';
-  img.onload = () => {
-    logo.onerror = null;
-    logo.innerHTML = '';
-    logo.appendChild(img);
-  };
-  img.onerror = () => { /* остаётся текст FB */ };
+  img.onload = () => { logo.onerror = null; logo.innerHTML = ''; logo.appendChild(img); };
+  img.onerror = () => {};
 }
 
 function initSW() {
@@ -3021,7 +3314,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.2.4 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.2.5 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
