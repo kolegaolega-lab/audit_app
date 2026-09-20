@@ -196,8 +196,6 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .pf-commit{background:#0a84ff;color:#fff}
 #catalogModalContent{display:flex;flex-direction:column;max-height:88vh;overflow:hidden}
 #catalogList{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
-
-/* Компактный модал «Не в справочнике» */
 #unknownModalContent{
   display:flex;flex-direction:column;
   max-height:80vh;
@@ -444,7 +442,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <span class="legend-item"><span class="legend-dot fresh"></span> Свежие</span>
       <span class="legend-item"><span class="legend-dot warn"></span> Просрочка на витрине</span>
       <span class="legend-item"><span class="legend-dot danger"></span> Продано просрочки</span>
-      <span class="legend-item"><span class="legend-dot unknown"></span> Без остатка</span>
+      <span class="legend-item"><span class="legend-dot unknown"></span> Срок не задан</span>
       <span class="legend-item"><span class="legend-dot info"></span> Только продажи</span>
       <span class="legend-item"><span class="legend-dot edited"></span> Приход исправлен</span>
     </div>
@@ -456,7 +454,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
     <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
     <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v7.3
+      French Bakery Аудит · v8.0
     </div>
   </div>
 
@@ -474,7 +472,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     <div style="border-top:1px solid var(--separator);padding-top:14px;margin-top:14px">
       <label>➕ Новая позиция</label>
       <input id="newProdName" type="text" placeholder="Название" style="margin:6px 0" autocomplete="off" maxlength="100">
-      <input id="newProdHours" type="number" placeholder="Срок, часов" style="margin-bottom:8px" min="1" max="10000" value="48">
+      <input id="newProdHours" type="number" placeholder="Срок, часов" style="margin-bottom:8px" min="0" max="10000" value="0">
       <button id="addProdBtn" class="success block">Добавить</button>
     </div>
     <button id="closeCatalogBtn" class="secondary block" style="margin-top:14px">Закрыть</button>
@@ -573,8 +571,10 @@ const WRITE_OFF_HOUR = 22;
 const SHELF_LIFE_START_HOUR = 7;
 const BTN_LOCK_MS = 300;
 const TIME_UPDATE_MS = 30 * 1000;
-const SESSION_KEY = 'fbAuditSessionV5';
-const SESSION_VERSION = 5;
+const TOTAL_DEBOUNCE_MS = 150;
+const SESSION_KEY = 'fbAuditSessionV6';
+const SESSION_VERSION = 6;
+const LEGACY_SESSION_KEY = 'fbAuditSessionV5';
 const CATALOG_KEY = 'fbAuditProducts';
 const IGNORED_KEY = 'fbAuditIgnored';
 const PHOTO_DB = 'fbAuditPhotoDB';
@@ -593,7 +593,6 @@ let saveTimer = null;
 let isRendering = false;
 let pendingSessionReset = false;
 let resetToken = 0;
-let _initialized = false;
 const _activeDeletes = new Set();
 let _fileBusy = false;
 let _timeUpdater = null;
@@ -602,6 +601,10 @@ let openTr = null;
 let openSnapshot = null;
 let _scrollY = 0;
 let _modalCount = 0;
+let _totalsTimer = null;
+let applyBusy = false;
+let exportBusy = false;
+let shareBusy = false;
 
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
 
@@ -629,6 +632,7 @@ function closeModal(id) {
 }
 
 function clampNum(v, min, max, fallback) {
+  if (v == null) return fallback;
   const n = Number(v);
   if (!isFinite(n)) return fallback;
   return Math.min(max, Math.max(min, n));
@@ -653,7 +657,7 @@ function escapeHtml(s) {
 }
 function safeExcelCell(v) {
   if (typeof v !== 'string') return v;
-  if (/^[=+\-@\t\r]/.test(v)) return "'" + v;
+  if (/^[=+\-@\t\r\n]/.test(v)) return "'" + v;
   return v;
 }
 function fmtDateRuShort(iso) {
@@ -759,7 +763,10 @@ function sanitizeProducts(arr) {
     const key = name.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
-    out.push({ name, shelfLife: clampNum(p.shelfLife, 1, 10000, 48) });
+    let shelf;
+    if (p.shelfLife === 0) shelf = 0;
+    else shelf = clampNum(p.shelfLife, 1, 10000, 48);
+    out.push({ name, shelfLife: shelf });
   }
   return out;
 }
@@ -865,8 +872,8 @@ function mergeIncomingByDate(incoming) {
 function computeFIFO(row) {
   if (!row || typeof row !== 'object') return emptyResult();
   if (row.salesOnly) return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null, isSalesOnly: true };
-  const hasStock = !(row.stock === '' || row.stock == null);
-  if (!hasStock) return emptyResult();
+  if (row.shelfLife === 0 || row.shelfLife == null) return emptyResult();
+  if (row.stock == null) return emptyResult();
   const stock = clampNum(row.stock, 0, MAX_NUM, 0);
   const sales = clampNum(row.sales, 0, MAX_NUM, 0);
   const shelfLife = clampNum(row.shelfLife, 1, 10000, 72);
@@ -946,14 +953,26 @@ function parseNum(v) {
   return Math.min(MAX_NUM, Math.max(0, Math.round(n)));
 }
 function parseShelfLife(str) {
-  if (!str) return null;
-  const s = String(str).toLowerCase();
+  if (str == null || str === '') return null;
+  const s = String(str).toLowerCase().trim();
+  if (!s) return null;
   const hours = s.match(/(\d+)\s*час/);
-  if (hours) return clampNum(hours[1], 1, 10000, null);
+  if (hours) {
+    const n = Number(hours[1]);
+    if (n === 0) return 0;
+    return clampNum(n, 1, 10000, null);
+  }
   const days = s.match(/(\d+)\s*(сут|дн|день|дня|дней)/);
-  if (days) return clampNum(Number(days[1]) * 24, 1, 10000, null);
+  if (days) {
+    const n = Number(days[1]) * 24;
+    if (n === 0) return 0;
+    return clampNum(n, 1, 10000, null);
+  }
   const num = s.match(/(\d+)/);
-  return num ? clampNum(num[1], 1, 10000, null) : null;
+  if (!num) return null;
+  const n = Number(num[1]);
+  if (n === 0) return 0;
+  return clampNum(n, 1, 10000, null);
 }
 function parseCSV(text, referenceDate) {
   const raw = String(text || '').replace(/^\uFEFF/, '').slice(0, MAX_CSV_BYTES);
@@ -966,7 +985,6 @@ function parseCSV(text, referenceDate) {
   const maxCols = Math.min(matrix[0].length, 100);
   const header = matrix[0].slice(0, maxCols).map(h => safeStr(h, 100));
   const idxName = header.findIndex(h => /наимен|позиц|товар/i.test(h));
-  const idxStock = header.findIndex(h => /факт|остаток/i.test(h));
   const idxSales = header.findIndex(h => /продано|продажи|к-во|кол-во|количество/i.test(h));
   const idxShelf = header.findIndex(h => /срок/i.test(h));
   const dateCols = [];
@@ -997,7 +1015,7 @@ function parseCSV(text, referenceDate) {
     });
     rows.push({
       name,
-      stock: idxStock >= 0 ? parseNum(vals[idxStock]) : (salesOnlyMode ? 0 : ''),
+      stock: null,
       sales: salesVal === '' ? 0 : salesVal,
       shelfLife: shelfRaw,
       incoming,
@@ -1165,31 +1183,43 @@ function applySession(data) {
     if ($('point') && typeof data.point === 'string') $('point').value = data.point.slice(0, 50);
     if ($('csvInput') && typeof data.csvText === 'string') $('csvInput').value = data.csvText.slice(0, 500000);
     if (Array.isArray(data.rows) && data.rows.length) {
-      tableRows = data.rows.slice(0, MAX_ROWS).map(r => ({
-        name: safeStr(r.name, MAX_NAME),
-        stock: r.stock === '' || r.stock == null ? '' : clampNum(r.stock, 0, MAX_NUM, 0),
-        sales: clampNum(r.sales, 0, MAX_NUM, 0),
-        shelfLife: clampNum(r.shelfLife, 1, 10000, 72),
-        incoming: Array.isArray(r.incoming)
-          ? r.incoming.slice(0, MAX_DATES).map(p => {
-              const qty = clampNum(p.qty, 0, MAX_NUM, 0);
-              const orig = p._originalQty != null ? clampNum(p._originalQty, 0, MAX_NUM, qty) : qty;
-              return { date: typeof p.date === 'string' ? p.date : '', qty, _originalQty: orig };
-            }).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date))
-          : [],
-        salesOnly: !!r.salesOnly
-      })).filter(r => r.name);
+      tableRows = data.rows.slice(0, MAX_ROWS).map(r => {
+        let stock = null;
+        if (r.stock != null && r.stock !== '') stock = clampNum(r.stock, 0, MAX_NUM, 0);
+        let shelf;
+        if (r.shelfLife === 0 || r.shelfLife == null) shelf = 0;
+        else shelf = clampNum(r.shelfLife, 1, 10000, 72);
+        return {
+          name: safeStr(r.name, MAX_NAME),
+          stock,
+          sales: clampNum(r.sales, 0, MAX_NUM, 0),
+          shelfLife: shelf,
+          incoming: Array.isArray(r.incoming)
+            ? r.incoming.slice(0, MAX_DATES).map(p => {
+                const qty = clampNum(p.qty, 0, MAX_NUM, 0);
+                const orig = p._originalQty != null ? clampNum(p._originalQty, 0, MAX_NUM, qty) : qty;
+                return { date: typeof p.date === 'string' ? p.date : '', qty, _originalQty: orig };
+              }).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date))
+            : [],
+          salesOnly: !!r.salesOnly
+        };
+      }).filter(r => r.name);
     } else tableRows = [];
     if (Array.isArray(data.unknown) && data.unknown.length) {
-      unknownRows = data.unknown.slice(0, MAX_ROWS).map(r => ({
-        name: safeStr(r.name, MAX_NAME),
-        sales: clampNum(r.sales, 0, MAX_NUM, 0),
-        shelfLife: r.shelfLife === 0 || r.shelfLife == null ? 0 : clampNum(r.shelfLife, 1, 10000, 72),
-        incoming: Array.isArray(r.incoming)
-          ? r.incoming.slice(0, MAX_DATES).map(p => ({ date: typeof p.date === 'string' ? p.date : '', qty: clampNum(p.qty, 0, MAX_NUM, 0) })).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date))
-          : [],
-        salesOnly: !!r.salesOnly
-      })).filter(r => r.name);
+      unknownRows = data.unknown.slice(0, MAX_ROWS).map(r => {
+        let shelf;
+        if (r.shelfLife === 0 || r.shelfLife == null) shelf = 0;
+        else shelf = clampNum(r.shelfLife, 1, 10000, 72);
+        return {
+          name: safeStr(r.name, MAX_NAME),
+          sales: clampNum(r.sales, 0, MAX_NUM, 0),
+          shelfLife: shelf,
+          incoming: Array.isArray(r.incoming)
+            ? r.incoming.slice(0, MAX_DATES).map(p => ({ date: typeof p.date === 'string' ? p.date : '', qty: clampNum(p.qty, 0, MAX_NUM, 0) })).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date))
+            : [],
+          salesOnly: !!r.salesOnly
+        };
+      }).filter(r => r.name);
     } else unknownRows = [];
     return true;
   } finally { isRestoring = false; }
@@ -1330,11 +1360,11 @@ function renderTable() {
         inputStock.min = '0'; inputStock.max = String(MAX_NUM);
         inputStock.className = 'num';
         inputStock.inputMode = 'numeric';
-        inputStock.value = row.stock === '' ? '' : row.stock;
+        inputStock.value = row.stock == null ? '' : row.stock;
         inputStock.placeholder = '—';
         inputStock.addEventListener('input', () => {
           const v = inputStock.value;
-          row.stock = v === '' ? '' : clampNum(v, 0, MAX_NUM, 0);
+          row.stock = v === '' ? null : clampNum(v, 0, MAX_NUM, null);
           refreshRow(row, tr);
           scheduleSessionSave();
         });
@@ -1460,7 +1490,7 @@ function renderTable() {
       fragment.appendChild(tr);
     });
     tbody.appendChild(fragment);
-    updateTotals();
+    scheduleTotalsUpdate();
     updateResultMeta();
   } finally { isRendering = false; }
 }
@@ -1488,7 +1518,11 @@ function refreshRow(row, tr) {
   setCell('freshSold', calc.freshSold, false);
   setCell('expiredOnShelf', calc.expiredOnShelf, true);
   setCell('soldExpired', calc.soldExpired, true);
-  updateTotals();
+  scheduleTotalsUpdate();
+}
+function scheduleTotalsUpdate() {
+  if (_totalsTimer) clearTimeout(_totalsTimer);
+  _totalsTimer = setTimeout(() => { _totalsTimer = null; updateTotals(); }, TOTAL_DEBOUNCE_MS);
 }
 function updateTotals() {
   const summary = $('summary');
@@ -1571,7 +1605,7 @@ function openProduct(row, tr) {
   };
   $('pmName').textContent = row.name;
   $('pmShelf').textContent = `Срок годности: ${row.shelfLife} ч`;
-  $('pmStock').value = row.stock === '' ? '' : row.stock;
+  $('pmStock').value = row.stock == null ? '' : row.stock;
   $('pmSales').value = row.sales || 0;
   const box = $('pmIncoming');
   box.innerHTML = '';
@@ -1603,7 +1637,7 @@ function openProduct(row, tr) {
     });
   }
   openModal('productModal');
-  setTimeout(() => $('pmStock').focus(), 100);
+  setTimeout(() => { const s = $('pmStock'); if (s) s.focus(); }, 100);
 }
 function closeProduct() {
   closeModal('productModal');
@@ -1616,16 +1650,19 @@ function commitProduct() {
   const row = tableRows[openIdx];
   if (!row) { closeProduct(); return; }
   const vStock = $('pmStock').value;
-  row.stock = vStock === '' ? '' : clampNum(vStock, 0, MAX_NUM, 0);
+  row.stock = vStock === '' ? null : clampNum(vStock, 0, MAX_NUM, null);
   row.sales = clampNum($('pmSales').value, 0, MAX_NUM, 0);
-  $('pmIncoming').querySelectorAll('input.pf-num').forEach(inp => {
-    const d = inp.dataset.date;
-    if (!d) return;
-    const party = (row.incoming || []).find(p => p.date === d);
-    const q = clampNum(inp.value, 0, MAX_NUM, 0);
-    if (party) party.qty = q;
-    else row.incoming.push({ date: d, qty: q, _originalQty: 0 });
-  });
+  const incBox = $('pmIncoming');
+  if (incBox) {
+    incBox.querySelectorAll('input.pf-num').forEach(inp => {
+      const d = inp.dataset.date;
+      if (!d) return;
+      const party = (row.incoming || []).find(p => p.date === d);
+      const q = clampNum(inp.value, 0, MAX_NUM, 0);
+      if (party) party.qty = q;
+      else row.incoming.push({ date: d, qty: q, _originalQty: 0 });
+    });
+  }
   if (openTr) refreshRow(row, openTr);
   scheduleSessionSave();
   closeProduct();
@@ -1691,9 +1728,9 @@ function renderUnknownModal() {
     shelfLbl.textContent = 'Срок:';
     const shelfInp = document.createElement('input');
     shelfInp.type = 'number';
-    shelfInp.min = '1'; shelfInp.max = '10000'; shelfInp.step = '1';
+    shelfInp.min = '0'; shelfInp.max = '10000'; shelfInp.step = '1';
     shelfInp.inputMode = 'numeric';
-    shelfInp.value = r.shelfLife && r.shelfLife > 0 ? r.shelfLife : 72;
+    shelfInp.value = r.shelfLife && r.shelfLife > 0 ? r.shelfLife : 0;
     shelfInp.dataset.role = 'shelf';
     const suffix = document.createElement('span');
     suffix.textContent = 'ч';
@@ -1735,7 +1772,7 @@ function updateUnknownBanner() {
 }
 function addSelectedUnknown() {
   const items = document.querySelectorAll('#unknownBody .unknown-item');
-  const added = [];
+  const toAdd = [];
   items.forEach(item => {
     const cb = item.querySelector('input[type=checkbox]');
     if (!cb || !cb.checked) return;
@@ -1743,29 +1780,34 @@ function addSelectedUnknown() {
     if (!name) return;
     if (PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) return;
     const shelfInp = item.querySelector('input[data-role="shelf"]');
-    const hours = clampNum(shelfInp ? shelfInp.value : 72, 1, 10000, 72);
+    const hours = clampNum(shelfInp ? shelfInp.value : 0, 0, 10000, 0);
+    toAdd.push({ name, hours });
+  });
+  if (!toAdd.length) return;
+  const addKeys = new Set(toAdd.map(x => normalizeName(x.name)));
+  toAdd.forEach(({ name, hours }) => {
     PRODUCTS.push({ name, shelfLife: hours });
-    added.push({ name, hours });
   });
-  if (!added.length) return;
   saveCatalog();
-  added.forEach(({ name, hours }) => {
-    const idx = unknownRows.findIndex(r => normalizeName(r.name) === normalizeName(name));
-    if (idx < 0) return;
-    const row = unknownRows[idx];
-    row.shelfLife = hours;
-    row.incoming.forEach(p => { p._originalQty = p.qty; });
-    tableRows.push(row);
-    unknownRows.splice(idx, 1);
-  });
-  tableRows = sortRowsAlphabetically(tableRows);
+  const moved = [];
+  for (let i = unknownRows.length - 1; i >= 0; i--) {
+    const row = unknownRows[i];
+    if (addKeys.has(normalizeName(row.name))) {
+      const entry = toAdd.find(x => normalizeName(x.name) === normalizeName(row.name));
+      row.shelfLife = entry ? entry.hours : row.shelfLife;
+      row.incoming.forEach(p => { p._originalQty = p.qty; });
+      moved.push(row);
+      unknownRows.splice(i, 1);
+    }
+  }
+  tableRows = sortRowsAlphabetically(tableRows.concat(moved));
   unknownRows = sortRowsAlphabetically(unknownRows);
   renderTable();
   updateUnknownBanner();
   scheduleSessionSave();
   if (!unknownRows.filter(r => !isIgnored(r.name)).length) closeModal('unknownModal');
   else renderUnknownModal();
-  showToast(`Добавлено в справочник: ${added.length}`);
+  showToast(`Добавлено в справочник: ${toAdd.length}`);
 }
 function ignoreAllUnknown() {
   if (!unknownRows.length) return;
@@ -1782,7 +1824,6 @@ function ignoreAllUnknown() {
   showToast(`Игнорировано: позиций ${count}`);
 }
 
-let applyBusy = false;
 function applyCSV() {
   if (applyBusy) return;
   applyBusy = true;
@@ -1815,6 +1856,7 @@ function applyCSV() {
         notInCatalog.push(r);
       }
     }
+    if (myToken !== resetToken) return;
     tableRows = sortRowsAlphabetically(inCatalog);
     unknownRows = sortRowsAlphabetically(notInCatalog);
     renderTable();
@@ -1843,12 +1885,13 @@ function applyCSV() {
   }
 }
 
-let exportBusy = false;
 function exportExcel() {
   if (exportBusy) return;
   if (typeof XLSX === 'undefined') { alert('Библиотека Excel не загружена.'); return; }
   if (!Array.isArray(tableRows) || !tableRows.length) { alert('Нет данных.'); return; }
   exportBusy = true;
+  const btn = $('exportBtn');
+  if (btn) btn.classList.add('busy');
   if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
   try {
     const allDates = new Set();
@@ -1864,7 +1907,7 @@ function exportExcel() {
       const calc = computeFIFO(row);
       data.push([
         safeExcelCell(row.name),
-        row.salesOnly ? '—' : (row.stock === '' ? '' : row.stock),
+        row.salesOnly ? '—' : (row.stock == null ? '' : row.stock),
         row.sales || 0,
         ...dates.map(d => {
           const p = (row.incoming || []).find(x => x.date === d);
@@ -1890,7 +1933,7 @@ function exportExcel() {
             const p = (row.incoming || []).find(x => x.date === d);
             return p ? p.qty : 0;
           }),
-          '0 ч',
+          `${row.shelfLife || 0} ч`,
           '—', '—', '—', '—'
         ]);
       });
@@ -1906,7 +1949,7 @@ function exportExcel() {
     const point = sanitizeFilename((pt && pt.value.trim()) || 'точка');
     XLSX.writeFile(wb, `FB_Audit_${point}_${date}.xlsx`);
   } catch (e) { alert('Ошибка экспорта: ' + (e.message || e)); }
-  finally { setTimeout(() => { exportBusy = false; }, 500); }
+  finally { setTimeout(() => { exportBusy = false; if (btn) btn.classList.remove('busy'); }, 500); }
 }
 
 function renderCatalogList() {
@@ -1939,11 +1982,18 @@ function renderCatalogList() {
       scheduleSessionSave();
     };
     const hoursInput = document.createElement('input');
-    hoursInput.type = 'number'; hoursInput.min = '1'; hoursInput.max = '10000'; hoursInput.value = p.shelfLife;
+    hoursInput.type = 'number'; hoursInput.min = '0'; hoursInput.max = '10000'; hoursInput.value = p.shelfLife;
     hoursInput.onchange = () => {
-      PRODUCTS[p._idx].shelfLife = clampNum(hoursInput.value, 1, 10000, 48);
-      hoursInput.value = PRODUCTS[p._idx].shelfLife;
-      tableRows.forEach(r => { if (r.name === PRODUCTS[p._idx].name) r.shelfLife = PRODUCTS[p._idx].shelfLife; });
+      let v;
+      if (hoursInput.value === '') v = 0;
+      else {
+        const n = Number(hoursInput.value);
+        if (!isFinite(n) || n === 0) v = 0;
+        else v = clampNum(n, 1, 10000, 48);
+      }
+      PRODUCTS[p._idx].shelfLife = v;
+      hoursInput.value = v;
+      tableRows.forEach(r => { if (r.name === PRODUCTS[p._idx].name) r.shelfLife = v; });
       saveCatalog();
       scheduleSessionSave();
     };
@@ -2065,6 +2115,13 @@ function buildPrompt() {
   Ноль — это маркер новинки. Приложение её покажет отдельно.
 
 ═══════════════════════════════════════════
+❗ ВАЖНО ПРО ОСТАТОК
+═══════════════════════════════════════════
+НЕ добавляй колонку «Остаток» / «Факт» — фактический остаток
+вводит оператор вручную в приложении. Твоя задача — только
+приходы (из накладных) и продажи (из чека).
+
+═══════════════════════════════════════════
 🧾 РАСПОЗНАВАНИЕ ЧЕКА ПРОДАЖ
 ═══════════════════════════════════════════
 Структура чека: [№] [Наименование] [К-во] [Цена] [Сумма] [Скидка]
@@ -2174,6 +2231,7 @@ function buildPrompt() {
 6. Возвраты (−N) → вычитай.
 7. Позиция не в справочнике → срок 0.
 8. 🚫 НЕ ВЫДУМЫВАЙ.
+9. ❗ НЕ добавляй колонку «Остаток» / «Факт».
 
 ═══════════════════════════════════════════
 🔢 ПРАВИЛА ЧИСЕЛ
@@ -2220,7 +2278,6 @@ ${catalogList}
 склей фото чека без дублей и выдай CSV строго по формату выше.`;
 }
 
-let shareBusy = false;
 async function shareToAI() {
   if (shareBusy) return;
   const items = await getPhotos();
@@ -2262,7 +2319,7 @@ async function shareToAI() {
         const url = URL.createObjectURL(file);
         const a = document.createElement('a');
         a.href = url; a.download = file.name; a.click();
-        URL.revokeObjectURL(url);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
         await new Promise(r => setTimeout(r, 300));
       } catch (e) { console.warn('download:', e); }
     }
@@ -2405,14 +2462,20 @@ function bindUI() {
     const nameEl = $('newProdName');
     const hoursEl = $('newProdHours');
     const name = safeStr(nameEl ? nameEl.value.trim() : '', MAX_NAME);
-    const hours = clampNum(hoursEl ? hoursEl.value : 48, 1, 10000, 48);
+    let hours;
+    if (!hoursEl || hoursEl.value === '') hours = 0;
+    else {
+      const n = Number(hoursEl.value);
+      if (!isFinite(n) || n === 0) hours = 0;
+      else hours = clampNum(n, 1, 10000, 0);
+    }
     if (!name) { alert('Введите название.'); return; }
     if (PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) { alert('Такая позиция уже есть.'); return; }
     if (PRODUCTS.length >= MAX_CATALOG) { alert('Справочник переполнен.'); return; }
     PRODUCTS.push({ name, shelfLife: hours });
     saveCatalog();
     if (nameEl) nameEl.value = '';
-    if (hoursEl) hoursEl.value = '48';
+    if (hoursEl) hoursEl.value = '0';
     renderCatalogList();
   };
   const resetCat = $('resetCatalogBtn'); if (resetCat) resetCat.onclick = resetToFactory;
@@ -2426,7 +2489,7 @@ function bindUI() {
       a.href = url;
       a.download = `fb_audit_catalog_${getTodayStr()}.json`;
       a.click();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) { alert('Ошибка: ' + e.message); }
   };
   const importCat = $('importCatalogBtn');
@@ -2544,9 +2607,8 @@ function initLogoFallback() {
 }
 
 function init() {
-  if (_initialized) return;
-  _initialized = true;
   initLogoFallback();
+  try { localStorage.removeItem(LEGACY_SESSION_KEY); } catch (e) {}
   startAutoDateTime();
   const pt = $('point');
   if (pt) pt.addEventListener('input', () => { scheduleSessionSave(); updateResultMeta(); });
@@ -2588,7 +2650,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v7.3 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v8.0 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
