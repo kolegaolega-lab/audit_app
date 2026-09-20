@@ -53,12 +53,24 @@ body.modal-open{overflow:hidden;position:fixed;width:100%;height:100%;top:0;left
 .header-inner{max-width:560px;margin:auto;display:flex;align-items:center;gap:11px}
 .logo{width:34px;height:34px;border-radius:50%;background:#FFE600;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:800;color:#333;font-size:11.5px;flex:0 0 auto;border:1px solid var(--separator);letter-spacing:-.02em}
 .logo img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
-.header-text{flex:1;min-width:0}
+.header-text{flex:1;min-width:0;overflow:hidden}
 .header-text h1{font-size:15.5px;margin:0;font-weight:600;letter-spacing:-.3px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.owner-pill{font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--purple-soft);color:var(--purple);white-space:nowrap;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em;display:none}
-.owner-pill.show{display:inline-flex}
-.autosave-badge{font-size:10px;padding:3px 8px;border-radius:999px;background:var(--green-soft);color:var(--green);font-weight:600;opacity:0;transition:opacity .25s;white-space:nowrap;flex-shrink:0}
-.autosave-badge.show{opacity:1}
+.header-badge{
+  display:none;
+  font-size:10px;
+  font-weight:700;
+  padding:3px 8px;
+  border-radius:999px;
+  white-space:nowrap;
+  flex:0 0 auto;
+  margin-left:auto;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  transition:background .2s,color .2s;
+}
+.header-badge.show{display:inline-flex}
+.header-badge.owner{background:var(--purple-soft);color:var(--purple)}
+.header-badge.saved{background:var(--green-soft);color:var(--green)}
 main{max-width:560px;margin:auto;padding:14px 14px env(safe-area-inset-bottom,0px)}
 main > .section:last-of-type{margin-bottom:4px}
 .section{background:var(--bg-card);border-radius:var(--r-lg);margin-bottom:10px;border:1px solid var(--separator);overflow:hidden}
@@ -225,10 +237,10 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .pf-actions button{min-height:44px;border:0;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit}
 .pf-cancel{background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator-opaque)!important}
 .pf-commit{background:#0a84ff;color:#fff}
-#catalogModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden;padding:22px 22px 0 22px}
+#catalogModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));padding:22px 22px 0 22px}
 #catalogList{flex:0 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;-ms-overflow-style:none;padding-right:0}
 #catalogList::-webkit-scrollbar{display:none}
-.catalog-bottom{flex-shrink:0;padding-top:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);margin-top:14px}
+.catalog-bottom{flex-shrink:0;padding-top:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);margin-top:14px;isolation:isolate;position:relative;z-index:1}
 .cat-row{display:grid;grid-template-columns:1fr 66px 76px 38px;gap:6px;align-items:center;padding:6px 0;border-radius:var(--r-sm)}
 .cat-row input[type=text]{padding:8px 10px;font-size:13.5px;min-height:38px;border-radius:8px;font-family:inherit}
 .cat-row .inp-wrap{position:relative;display:block}
@@ -236,7 +248,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .cat-row .inp-wrap .unit{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
 .cat-row .del-btn{min-height:38px;padding:0;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:16px;font-weight:700;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
 .cat-row.add-row .add-btn{background:var(--green-soft);color:var(--green);border:1px solid var(--green-soft);font-size:20px;font-weight:500;min-height:38px;padding:0;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
-#unknownModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-width:520px;padding:20px 20px 0 20px;overflow:hidden}
+#unknownModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-width:520px;padding:20px 20px 0 20px}
 @media (max-width:640px){#unknownModalContent{max-width:100%}}
 #unknownBody{flex:0 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;-ms-overflow-style:none;padding-right:0}
 #unknownBody::-webkit-scrollbar{display:none}
@@ -257,17 +269,17 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .unknown-row-hours input{width:100%;min-height:38px;padding:0 20px 0 6px;font-size:14px;font-weight:500;text-align:center;color:var(--text);border-radius:8px;background:var(--bg-card);border:1px solid var(--separator-opaque)}
 .unknown-row-hours input:focus{background:var(--bg-card);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .unknown-row-hours .unit{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
-.unknown-bottom{flex-shrink:0;padding-top:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);margin-top:14px}
+.unknown-bottom{flex-shrink:0;padding-top:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);margin-top:14px;isolation:isolate;position:relative;z-index:1}
 .unknown-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .unknown-actions .full{grid-column:1 / -1}
-#ignoredModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden;padding:22px 22px 0 22px}
+#ignoredModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));padding:22px 22px 0 22px}
 #ignoredList{flex:0 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scrollbar-width:none;-ms-overflow-style:none;margin-bottom:14px}
 #ignoredList::-webkit-scrollbar{display:none}
 .ignored-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
 .ignored-row:hover{background:var(--bg-hover)}
 .ignored-row .name{font-size:14px;word-break:break-word;overflow-wrap:anywhere}
 .ignored-row .del-btn{min-height:36px;padding:6px 12px;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:12.5px;font-weight:600;border-radius:8px}
-.ignored-bottom{flex-shrink:0;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+.ignored-bottom{flex-shrink:0;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));isolation:isolate;position:relative;z-index:1}
 .photo-queue{display:grid;gap:8px;margin-top:10px}
 .photo-item{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input)}
 .photo-thumb{width:44px;height:44px;object-fit:cover;border-radius:9px;background:var(--bg-elev-2)}
@@ -304,8 +316,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     <div class="header-text">
       <h1>French Bakery Аудит</h1>
     </div>
-    <div id="ownerPill" class="owner-pill">Владелец</div>
-    <div id="autosaveBadge" class="autosave-badge">Сохранено</div>
+    <div id="headerBadge" class="header-badge"></div>
   </div>
 </div>
 
@@ -501,7 +512,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   </div>
 
   <div class="hint" style="text-align:center;color:var(--text-tertiary);margin:0;font-size:11px;letter-spacing:.02em">
-    French Bakery Аудит · v9.2.0
+    French Bakery Аудит · v9.2.1
   </div>
 
 </main>
@@ -1308,14 +1319,24 @@ function applyPendingRemote() {
   if (ok) showToast(`Справочник обновлён: ${PRODUCTS.length} позиций`);
 }
 
+function updateHeaderBadge() {
+  const el = $('headerBadge');
+  if (!el) return;
+  if (_isOwner) {
+    el.className = 'header-badge show owner';
+    el.textContent = 'Владелец';
+  } else {
+    el.className = 'header-badge';
+    el.textContent = '';
+  }
+}
+
 function setOwnerMode(on) {
   _isOwner = !!on;
-  const badge = $('ownerPill');
   const publishBtn = $('publishBtn');
   const activateBlock = $('ownerActivateBlock');
   const deactivateBtn = $('deactivateOwnerBtn');
   const statusEl = $('syncStatus');
-  if (badge) badge.classList.toggle('show', _isOwner);
   if (publishBtn) publishBtn.style.display = _isOwner ? 'inline-flex' : 'none';
   if (activateBlock) activateBlock.style.display = _isOwner ? 'none' : 'block';
   if (deactivateBtn) deactivateBtn.style.display = _isOwner ? 'inline-flex' : 'none';
@@ -1326,6 +1347,7 @@ function setOwnerMode(on) {
     statusEl.className = 'status';
     statusEl.textContent = '';
   }
+  updateHeaderBadge();
 }
 function activateOwner() {
   const input = $('tokenInput');
@@ -1473,11 +1495,21 @@ function saveSession() {
   } catch (e) { console.warn('saveSession:', e); }
 }
 function showAutosaveBadge() {
-  const b = $('autosaveBadge');
-  if (!b) return;
-  b.classList.add('show');
-  clearTimeout(b._t);
-  b._t = setTimeout(() => b.classList.remove('show'), 1400);
+  const el = $('headerBadge');
+  if (!el) return;
+  const wasOwner = _isOwner;
+  el.className = 'header-badge show saved';
+  el.textContent = 'Сохранено';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => {
+    if (wasOwner) {
+      el.className = 'header-badge show owner';
+      el.textContent = 'Владелец';
+    } else {
+      el.className = 'header-badge';
+      el.textContent = '';
+    }
+  }, 1400);
 }
 function loadSession() {
   try {
@@ -2965,7 +2997,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.2.0 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.2.1 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
