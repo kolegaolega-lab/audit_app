@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'fb-audit-v1';
+const CACHE_NAME = 'fb-audit-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -8,67 +8,79 @@ const ASSETS = [
   './logo.png',
   './logo-180.png',
   './logo-192.png',
-  './logo-512.png',
-  'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
+  './logo-512.png'
 ];
 
-// Установка — кэшируем ресурсы
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return Promise.all(
-        ASSETS.map(url =>
-          cache.add(url).catch(err => console.warn('SW cache skip:', url, err.message))
-        )
-      );
-    })
-  );
-  self.skipWaiting();
-});
-
-// Активация — чистим старые кэши
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+  e.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await Promise.all(
+      ASSETS.map(url =>
+        cache.add(url).catch(err => console.warn('SW cache skip:', url, err.message))
       )
-    )
-  );
-  self.clients.claim();
+    );
+    await self.skipWaiting();
+  })());
 });
 
-// Перехват запросов
-self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
+self.addEventListener('activate', e => {
+  e.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)));
+    await self.clients.claim();
+  })());
+});
 
-  // Не кэшируем запросы к GitHub API
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  if (req.method !== 'GET') return;
+
+  const url = new URL(req.url);
   if (url.hostname === 'api.github.com') return;
 
-  // Не кэшируем не-GET
-  if (e.request.method !== 'GET') return;
-
-  // Только same-origin и CDN xlsx
   const isSameOrigin = url.origin === self.location.origin;
-  const isXlsxCDN = url.href.includes('cdn.jsdelivr.net');
-  if (!isSameOrigin && !isXlsxCDN) return;
+  if (!isSameOrigin) return;
 
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        // Кэшируем только успешные ответы
+  if (req.mode === 'navigate' || url.pathname.endsWith('/index.html') || url.pathname.endsWith('/')) {
+    e.respondWith((async () => {
+      try {
+        const fresh = await fetch(req);
+        if (fresh && fresh.status === 200) {
+          const clone = fresh.clone();
+          caches.open(CACHE_NAME).then(c => c.put(req, clone));
+        }
+        return fresh;
+      } catch (err) {
+        const cached = await caches.match('./index.html');
+        return cached || Response.error();
+      }
+    })());
+    return;
+  }
+
+  e.respondWith((async () => {
+    const cached = await caches.match(req);
+    if (cached) {
+      fetch(req).then(res => {
         if (res && res.status === 200 && res.type === 'basic') {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+          caches.open(CACHE_NAME).then(c => c.put(req, res.clone()));
         }
-        return res;
-      }).catch(() => {
-        // Офлайн — возвращаем index.html для навигации
-        if (e.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
-      });
-    })
-  );
+      }).catch(() => {});
+      return cached;
+    }
+    try {
+      const res = await fetch(req);
+      if (res && res.status === 200 && res.type === 'basic') {
+        const clone = res.clone();
+        caches.open(CACHE_NAME).then(c => c.put(req, clone));
+      }
+      return res;
+    } catch (err) {
+      return Response.error();
+    }
+  })());
+});
+
+self.addEventListener('message', e => {
+  if (e.data === 'SKIP_WAITING') self.skipWaiting();
 });
