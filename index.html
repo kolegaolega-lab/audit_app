@@ -48,17 +48,20 @@ body{
   letter-spacing:-.005em;
 }
 body.modal-open{overflow:hidden;position:fixed;width:100%;height:100%;top:0;left:0;right:0}
-.app-header{position:sticky;top:0;z-index:100;padding:11px 16px;background:color-mix(in srgb, var(--bg) 80%, transparent);border-bottom:1px solid var(--separator);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px)}
+.app-header{position:sticky;top:0;z-index:100;padding:11px 16px;padding-top:calc(11px + env(safe-area-inset-top,0px));background:var(--bg);border-bottom:1px solid var(--separator);box-shadow:0 1px 0 rgba(0,0,0,.02)}
+@media (prefers-color-scheme:dark){
+  .app-header{box-shadow:0 1px 0 rgba(255,255,255,.04)}
+}
 .header-inner{max-width:560px;margin:auto;display:flex;align-items:center;gap:11px}
-.logo{width:34px;height:34px;border-radius:50%;background:#FFE600;display:flex;align-items:center;justify-content:center;font-weight:800;color:#333;font-size:11.5px;flex:0 0 auto;border:1px solid var(--separator);letter-spacing:-.02em;overflow:hidden}
-.logo img{width:100%;height:100%;object-fit:cover;display:block}
+.logo{width:34px;height:34px;border-radius:50%;background:#FFE600;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:800;color:#333;font-size:11.5px;flex:0 0 auto;border:1px solid var(--separator);letter-spacing:-.02em}
+.logo img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
 .header-text{flex:1;min-width:0}
 .header-text h1{font-size:15.5px;margin:0;font-weight:600;letter-spacing:-.3px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .owner-pill{font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--purple-soft);color:var(--purple);white-space:nowrap;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em;display:none}
 .owner-pill.show{display:inline-flex}
 .autosave-badge{font-size:10px;padding:3px 8px;border-radius:999px;background:var(--green-soft);color:var(--green);font-weight:600;opacity:0;transition:opacity .25s;white-space:nowrap;flex-shrink:0}
 .autosave-badge.show{opacity:1}
-main{max-width:560px;margin:auto;padding:14px 14px calc(32px + env(safe-area-inset-bottom,0px))}
+main{max-width:560px;margin:auto;padding:14px 14px calc(12px + env(safe-area-inset-bottom,0px))}
 .section{background:var(--bg-card);border-radius:var(--r-lg);margin-bottom:10px;border:1px solid var(--separator);overflow:hidden}
 .section-header{padding:16px 18px 0}
 .section-header h2{font-size:14.5px;font-weight:600;margin:0 0 3px;letter-spacing:-.2px;color:var(--text)}
@@ -90,7 +93,6 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 @keyframes busyAnim{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
 .stack{display:flex;flex-direction:column;gap:8px}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-@media (max-width:420px){.row.three{grid-template-columns:1fr 1fr}}
 .meta{display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--text-secondary);padding:11px 13px;background:var(--bg-input);border-radius:var(--r-sm);margin-bottom:12px;letter-spacing:-.005em}
 .meta .item{display:flex;align-items:center;gap:8px;line-height:1.35}
 .meta .dot{width:7px;height:7px;border-radius:50%;background:var(--text-tertiary);flex:0 0 auto}
@@ -205,9 +207,9 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .calc-cell.zero{color:var(--text-tertiary)}
 .calc-cell[data-role="expiredOnShelf"].positive,
 .calc-cell[data-role="soldExpired"].positive{color:var(--red)}
-.modal{position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));padding-top:calc(20px + env(safe-area-inset-top,0px));height:100vh;height:100dvh;width:100vw;width:100dvw}
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));height:100vh;height:100dvh;width:100vw;width:100dvw}
 .modal.hidden{display:none}
-.modal-content{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:auto;padding:22px;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px));animation:modalIn .2s cubic-bezier(.16,1,.3,1);-webkit-overflow-scrolling:touch}
+.modal-content{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:auto;padding:22px;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px));animation:modalIn .2s cubic-bezier(.16,1,.3,1);-webkit-overflow-scrolling:touch}
 @keyframes modalIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
 .modal-content h3{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.25}
 .modal-content .product-shelf{font-size:12px;color:var(--text-secondary);margin-bottom:14px}
@@ -227,15 +229,15 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .pf-commit{background:#0a84ff;color:#fff}
 #catalogModalContent{
   display:flex;flex-direction:column;
-  max-height:calc(100vh - 40px);
-  max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
+  max-height:calc(100vh - 32px);
+  max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
   overflow:hidden;
   padding:22px 22px 0 22px;
 }
 #catalogList{
   flex:1 1 auto;min-height:0;max-height:none;
   overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
-  padding-right:6px;
+  padding-right:24px;
   scrollbar-width:thin;
   scrollbar-color:var(--separator-opaque) transparent;
 }
@@ -249,7 +251,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
   border-top:1px solid var(--separator);
   margin-top:14px;
 }
-#unknownModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-width:420px;padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));overflow:hidden}
+#unknownModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-width:420px;padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));overflow:hidden}
 @media (max-width:640px){#unknownModalContent{max-width:100%}}
 #unknownBody{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin-bottom:12px;padding-right:4px}
 .unknown-item{display:block;padding:10px 12px;border:1px solid var(--separator-opaque);border-radius:var(--r-sm);background:var(--bg-input);margin-bottom:6px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:border-color .12s,background .12s}
@@ -270,7 +272,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .unknown-counter{font-size:11.5px;color:var(--text-secondary);margin-bottom:8px}
 .unknown-load-more{padding:8px;text-align:center;color:var(--accent);font-weight:600;font-size:12.5px;cursor:pointer;user-select:none}
 .unknown-load-more:active{opacity:.6}
-#ignoredModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+#ignoredModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
 #ignoredList{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin-bottom:14px}
 .ignored-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
 .ignored-row:hover{background:var(--bg-hover)}
@@ -288,8 +290,8 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(28,28,30,.96);color:#fff;font-size:13.5px;font-weight:500;padding:11px 18px;border-radius:11px;z-index:9999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;max-width:90vw;text-align:center;letter-spacing:-.005em;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media (min-width:560px){
-  .app-header{padding:13px 20px}
-  main{padding:18px 20px 40px}
+  .app-header{padding:13px 20px;padding-top:calc(13px + env(safe-area-inset-top,0px))}
+  main{padding:18px 20px calc(16px + env(safe-area-inset-bottom,0px))}
   .section-header{padding:18px 22px 0}
   .section-body{padding:16px 22px 22px}
 }
@@ -515,8 +517,8 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint" style="text-align:center;color:var(--text-tertiary);margin-top:20px;font-size:11px;letter-spacing:.02em">
-    French Bakery Аудит · v9.1.1
+  <div class="hint" style="text-align:center;color:var(--text-tertiary);margin-top:4px;margin-bottom:0;font-size:11px;letter-spacing:.02em">
+    French Bakery Аудит · v9.1.2
   </div>
 
 </main>
@@ -642,9 +644,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 <script>
 'use strict';
 
-/* ==============================
-   CONSTANTS
-   ============================== */
 const MAX_ROWS = 2000;
 const MAX_DATES = 30;
 const MAX_NUM = 100000;
@@ -674,9 +673,6 @@ const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
 const UNKNOWN_SEARCH_THRESHOLD = 20;
 
-/* ==============================
-   STATE
-   ============================== */
 let PRODUCTS = [];
 let IGNORED = [];
 let tableRows = [];
@@ -710,9 +706,6 @@ let _isOwner = false;
 
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
 
-/* ==============================
-   BODY FREEZE
-   ============================== */
 function freezeBody() {
   if (_bodyFrozen) return;
   _frozenScrollY = window.scrollY || window.pageYOffset || 0;
@@ -762,9 +755,6 @@ function closeModal(id) {
   }
 }
 
-/* ==============================
-   UTILS
-   ============================== */
 function clampNum(v, min, max, fallback) {
   if (v == null) return fallback;
   const n = Number(v);
@@ -865,9 +855,6 @@ function normalizeForSearch(s) {
   return String(s || '').toLowerCase().trim().replace(/\s+/g, ' ').replace(/ё/g, 'е');
 }
 
-/* ==============================
-   AUTO DATE/TIME
-   ============================== */
 function updateAutoDate() { const el = $('autoDate'); if (el) el.value = formatDateRu(getTodayStr()); }
 function updateAutoTime() { const el = $('autoTime'); if (el) el.value = getCurrentTimeStr(); }
 function startAutoDateTime() {
@@ -877,9 +864,6 @@ function startAutoDateTime() {
   _timeUpdater = setInterval(() => { updateAutoDate(); updateAutoTime(); }, TIME_UPDATE_MS);
 }
 
-/* ==============================
-   TEXTAREA / COUNTER / SEARCH
-   ============================== */
 function autoResizeTextarea() {
   const ta = $('csvInput');
   if (!ta) return;
@@ -931,9 +915,6 @@ function setTableQuery(q) {
   _tableSearchTimer = setTimeout(() => { _tableSearchTimer = null; applyTableFilter(); }, SEARCH_DEBOUNCE_MS);
 }
 
-/* ==============================
-   FACTORY CATALOG
-   ============================== */
 const FACTORY_CATALOG = [
   ["Баушкин рецепт",24],["Хлеб Деревенский",24],["Хлеб ржаной 100%",48],["Хлеб зерновой",48],
   ["Хлеб бородинский",48],["Батон деревенский",24],["Батон нарезной",24],["Багет французский",24],
@@ -985,9 +966,6 @@ const FACTORY_CATALOG = [
   ["Паннакотта ваниль-смородина",72],["Паннакотта кокос -ананас",72]
 ];
 
-/* ==============================
-   CATALOG / IGNORED
-   ============================== */
 function sanitizeProducts(arr) {
   if (!Array.isArray(arr)) return [];
   const seen = new Set();
@@ -1057,9 +1035,6 @@ function updateIgnoredCount() {
   if (el) el.textContent = String(IGNORED.length);
 }
 
-/* ==============================
-   FIFO CALC
-   ============================== */
 function getCheckMoment() { return new Date(); }
 function getWriteOffMoment(partyDate, shelfLife) {
   const [y, m, day] = partyDate.split('-').map(Number);
@@ -1135,9 +1110,6 @@ function getRowStatus(calc, row) {
   return { cls: 'row-fresh', label: 'fresh' };
 }
 
-/* ==============================
-   CSV PARSING
-   ============================== */
 function detectDelimiter(firstLine) {
   let semi = 0, comma = 0, inQ = false;
   for (let i = 0; i < firstLine.length; i++) {
@@ -1245,9 +1217,6 @@ function sortRowsAlphabetically(rows) {
   return [...rows].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' }));
 }
 
-/* ==============================
-   SYNC (simulated)
-   ============================== */
 function getRemoteSimulated() {
   try {
     const raw = localStorage.getItem(SYNC_REMOTE_KEY);
@@ -1364,9 +1333,6 @@ function applyPendingRemote() {
   if (ok) showToast(`Справочник обновлён: ${PRODUCTS.length} позиций`);
 }
 
-/* ==============================
-   OWNER MODE
-   ============================== */
 function setOwnerMode(on) {
   _isOwner = !!on;
   const badge = $('ownerPill');
@@ -1410,9 +1376,6 @@ function restoreOwnerMode() {
   } catch (e) {}
 }
 
-/* ==============================
-   PHOTOS
-   ============================== */
 function openPhotoDB() {
   return new Promise((resolve, reject) => {
     try {
@@ -1507,9 +1470,6 @@ async function renderPhotoQueue() {
   });
 }
 
-/* ==============================
-   SESSION
-   ============================== */
 function scheduleSessionSave() {
   if (isRestoring || pendingSessionReset) return;
   if (saveTimer) clearTimeout(saveTimer);
@@ -1593,9 +1553,6 @@ function applySession(data) {
   } finally { isRestoring = false; }
 }
 
-/* ==============================
-   RESULT META
-   ============================== */
 function updateResultMeta() {
   const box = $('resultMeta');
   if (!box) return;
@@ -1606,9 +1563,6 @@ function updateResultMeta() {
   const p = $('metaPoint'); if (p) p.textContent = (pt && pt.value.trim()) ? pt.value.trim() : '—';
 }
 
-/* ==============================
-   SCROLL/FOCUS
-   ============================== */
 function scrollIntoContainer(el) {
   const scroller = el.closest('.table-scroll');
   if (!scroller) return;
@@ -1664,9 +1618,6 @@ function tableKey(e) {
   tableNav(e.target, k);
 }
 
-/* ==============================
-   RENDER TABLE
-   ============================== */
 function buildColgroupHTML(dates) {
   return [
     '<col style="width:220px">','<col style="width:76px">','<col style="width:76px">',
@@ -1930,9 +1881,6 @@ function updateTotals() {
   if (_tableQuery) applyTableFilter();
 }
 
-/* ==============================
-   PRODUCT MODAL
-   ============================== */
 function productInputs() {
   const list = [];
   const s = $('pmStock'), sl = $('pmSales');
@@ -2021,9 +1969,6 @@ function cancelProduct() {
   closeProduct();
 }
 
-/* ==============================
-   UNKNOWN MODAL
-   ============================== */
 function renderUnknownModal() {
   const body = $('unknownBody');
   const counter = $('unknownCounter');
@@ -2151,9 +2096,6 @@ function ignoreAllUnknown() {
   showToast(`Игнорировано: ${count}`);
 }
 
-/* ==============================
-   APPLY CSV
-   ============================== */
 function applyCSV() {
   if (applyBusy) return;
   applyBusy = true;
@@ -2208,9 +2150,6 @@ function applyCSV() {
   }
 }
 
-/* ==============================
-   EXPORT EXCEL
-   ============================== */
 function exportExcel() {
   if (exportBusy) return;
   if (typeof XLSX === 'undefined') { alert('Библиотека Excel не загружена.'); return; }
@@ -2259,9 +2198,6 @@ function exportExcel() {
   finally { setTimeout(() => { exportBusy = false; if (btn) btn.classList.remove('busy'); }, 500); }
 }
 
-/* ==============================
-   CATALOG MODAL
-   ============================== */
 function renderCatalogList() {
   const list = $('catalogList');
   if (!list) return;
@@ -2413,9 +2349,6 @@ function renderIgnoredList() {
   list.appendChild(frag);
 }
 
-/* ==============================
-   TOAST
-   ============================== */
 function showToast(text) {
   const el = document.createElement('div');
   el.className = 'toast show';
@@ -2424,9 +2357,6 @@ function showToast(text) {
   setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2400);
 }
 
-/* ==============================
-   PROMPT
-   ============================== */
 function buildPrompt() {
   const checkDate = getTodayStr();
   const checkTime = getCurrentTimeStr();
@@ -2561,9 +2491,6 @@ ${catalogList}
 Выдай CSV строго по формату выше.`;
 }
 
-/* ==============================
-   SHARE TO AI
-   ============================== */
 async function shareToAI() {
   if (shareBusy) return;
   const items = await getPhotos();
@@ -2617,9 +2544,6 @@ async function shareToAI() {
   }
 }
 
-/* ==============================
-   BIND UI
-   ============================== */
 function bindUI() {
   const invBtn = $('uploadInvoicePhotosBtn'); if (invBtn) invBtn.onclick = () => { const i = $('invoicePhotoInput'); if (i) i.click(); };
   const salBtn = $('uploadSalesPhotosBtn'); if (salBtn) salBtn.onclick = () => { const i = $('salesPhotoInput'); if (i) i.click(); };
@@ -3011,7 +2935,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.1.1 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.1.2 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
