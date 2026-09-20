@@ -16,93 +16,135 @@
   --bg:#f5f5f7;--bg-card:#ffffff;--bg-elev-2:#f2f2f7;--bg-input:#f2f2f7;
   --bg-hover:rgba(0,0,0,.04);--separator:rgba(0,0,0,.08);--separator-opaque:#d1d1d6;
   --text:#000000;--text-secondary:rgba(0,0,0,.55);--text-tertiary:rgba(0,0,0,.3);
-  --accent:#0a84ff;--accent-soft:rgba(10,132,255,.12);
-  --green:#34c759;--green-soft:rgba(52,199,89,.14);--green-row:rgba(52,199,89,.10);--green-row-hover:rgba(52,199,89,.18);
-  --orange:#ff9500;--orange-soft:rgba(255,149,0,.14);--orange-row:rgba(255,149,0,.12);--orange-row-hover:rgba(255,149,0,.20);
-  --red:#ff3b30;--red-soft:rgba(255,59,48,.14);--red-row:rgba(255,59,48,.12);--red-row-hover:rgba(255,59,48,.22);
-  --blue:#0a84ff;--blue-soft:rgba(10,132,255,.14);--blue-row:rgba(10,132,255,.10);--blue-row-hover:rgba(10,132,255,.18);
-  --r-lg:20px;--r-md:14px;--r-sm:10px;
-  --spring:cubic-bezier(.34,1.56,.64,1);
-  --header-h:80px;
+  --accent:#0a84ff;--accent-soft:rgba(10,132,255,.10);
+  --green:#34c759;--green-soft:rgba(52,199,89,.12);--green-row:rgba(52,199,89,.10);--green-row-hover:rgba(52,199,89,.18);
+  --orange:#ff9500;--orange-soft:rgba(255,149,0,.12);--orange-row:rgba(255,149,0,.12);--orange-row-hover:rgba(255,149,0,.20);
+  --red:#ff3b30;--red-soft:rgba(255,59,48,.12);--red-row:rgba(255,59,48,.12);--red-row-hover:rgba(255,59,48,.22);
+  --blue:#0a84ff;--blue-soft:rgba(10,132,255,.10);--blue-row:rgba(10,132,255,.10);--blue-row-hover:rgba(10,132,255,.18);
+  --purple:#af52de;--purple-soft:rgba(175,82,222,.12);
+  --gray-soft:rgba(120,120,128,.10);
+  --r-lg:18px;--r-md:12px;--r-sm:9px;
 }
 @media (prefers-color-scheme:dark){
   :root{
     --bg:#000000;--bg-card:#1c1c1e;--bg-elev-2:#2c2c2e;--bg-input:#2c2c2e;
-    --bg-hover:rgba(255,255,255,.06);--separator:rgba(255,255,255,.10);--separator-opaque:#38383a;
+    --bg-hover:rgba(255,255,255,.06);--separator:rgba(255,255,255,.09);--separator-opaque:#38383a;
     --text:#ffffff;--text-secondary:rgba(255,255,255,.55);--text-tertiary:rgba(255,255,255,.3);
-    --accent:#0a84ff;--accent-soft:rgba(10,132,255,.20);
-    --green:#30d158;--green-soft:rgba(48,209,88,.20);--green-row:rgba(48,209,88,.14);--green-row-hover:rgba(48,209,88,.22);
-    --orange:#ff9f0a;--orange-soft:rgba(255,159,10,.20);--orange-row:rgba(255,159,10,.16);--orange-row-hover:rgba(255,159,10,.24);
-    --red:#ff453a;--red-soft:rgba(255,69,58,.20);--red-row:rgba(255,69,58,.16);--red-row-hover:rgba(255,69,58,.26);
-    --blue:#0a84ff;--blue-soft:rgba(10,132,255,.20);--blue-row:rgba(10,132,255,.14);--blue-row-hover:rgba(10,132,255,.22);
+    --accent:#0a84ff;--accent-soft:rgba(10,132,255,.18);
+    --green:#30d158;--green-soft:rgba(48,209,88,.18);--green-row:rgba(48,209,88,.14);--green-row-hover:rgba(48,209,88,.22);
+    --orange:#ff9f0a;--orange-soft:rgba(255,159,10,.18);--orange-row:rgba(255,159,10,.16);--orange-row-hover:rgba(255,159,10,.24);
+    --red:#ff453a;--red-soft:rgba(255,69,58,.18);--red-row:rgba(255,69,58,.16);--red-row-hover:rgba(255,69,58,.26);
+    --blue:#0a84ff;--blue-soft:rgba(10,132,255,.18);--blue-row:rgba(10,132,255,.14);--blue-row-hover:rgba(10,132,255,.22);
+    --purple:#bf5af2;--purple-soft:rgba(191,90,242,.18);
+    --gray-soft:rgba(120,120,128,.20);
   }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0}
 body{
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",Roboto,sans-serif;
   background:var(--bg);color:var(--text);font-size:15px;line-height:1.45;
   -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;overflow-x:hidden;
+  letter-spacing:-.005em;
 }
 body.modal-open{overflow:hidden;position:fixed;width:100%;height:100%;top:0;left:0;right:0}
-.app-header{position:fixed;top:0;left:0;right:0;z-index:100;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top,0px));background:var(--bg);border-bottom:1px solid var(--separator)}
-.header-inner{max-width:1100px;margin:auto;display:flex;align-items:center;gap:12px}
-.logo{width:42px;height:42px;border-radius:50%;background:#FFE600;object-fit:cover;flex:0 0 auto;display:block;border:1px solid var(--separator)}
+.app-header{position:sticky;top:0;z-index:100;padding:11px 16px;background:color-mix(in srgb, var(--bg) 80%, transparent);border-bottom:1px solid var(--separator);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px)}
+.header-inner{max-width:560px;margin:auto;display:flex;align-items:center;gap:11px}
+.logo{width:34px;height:34px;border-radius:50%;background:#FFE600;display:flex;align-items:center;justify-content:center;font-weight:800;color:#333;font-size:11.5px;flex:0 0 auto;border:1px solid var(--separator);letter-spacing:-.02em;overflow:hidden}
+.logo img{width:100%;height:100%;object-fit:cover;display:block}
 .header-text{flex:1;min-width:0}
-.header-text h1{font-size:17px;margin:0;font-weight:700;letter-spacing:-.3px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.autosave-badge{font-size:11px;padding:4px 10px;border-radius:999px;background:var(--green-soft);color:var(--green);font-weight:600;opacity:0;transition:opacity .25s;white-space:nowrap;flex-shrink:0}
+.header-text h1{font-size:15.5px;margin:0;font-weight:600;letter-spacing:-.3px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.owner-pill{font-size:10px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--purple-soft);color:var(--purple);white-space:nowrap;flex-shrink:0;text-transform:uppercase;letter-spacing:.04em;display:none}
+.owner-pill.show{display:inline-flex}
+.autosave-badge{font-size:10px;padding:3px 8px;border-radius:999px;background:var(--green-soft);color:var(--green);font-weight:600;opacity:0;transition:opacity .25s;white-space:nowrap;flex-shrink:0}
 .autosave-badge.show{opacity:1}
-main{max-width:1100px;margin:auto;padding:14px 14px calc(20px + env(safe-area-inset-bottom,0px));padding-top:calc(var(--header-h) + env(safe-area-inset-top,0px))}
-.card{background:var(--bg-card);border-radius:var(--r-lg);padding:18px;margin-bottom:12px;border:1px solid var(--separator)}
-.card h2{font-size:15px;font-weight:700;margin:0 0 12px;display:flex;align-items:center;gap:8px;letter-spacing:-.2px}
-.card h2 .icon{width:26px;height:26px;border-radius:7px;background:var(--accent-soft);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:0 0 auto}
-.card .hint{font-size:12.5px;color:var(--text-secondary);margin:0 0 12px;line-height:1.5}
-.card .hint b{color:var(--text);font-weight:600}
-label{display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
-input,button,select,textarea{font:inherit;outline:none;font-family:inherit}
-input[type=text],input[type=number],textarea{width:100%;padding:12px 14px;border:1.5px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input);color:var(--text);font-size:16px;transition:border-color .15s,background .15s;-webkit-appearance:none;appearance:none;min-height:46px}
-input:focus,textarea:focus{border-color:var(--accent);background:var(--bg-card)}
-textarea{font-size:13px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.5;min-height:160px;max-height:400px;resize:vertical;overflow-y:auto}
-input::placeholder,textarea::placeholder{color:var(--text-tertiary)}
-.auto-datetime{display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:10px;align-items:end}
-@media (max-width:640px){.auto-datetime{grid-template-columns:1fr 1fr}.auto-datetime .point-field{grid-column:1 / -1}}
-.auto-field{position:relative}
-.auto-value{display:flex;align-items:center;gap:8px;padding:12px 14px;background:var(--bg-input);border:1.5px solid var(--separator);border-radius:var(--r-sm);min-height:46px;font-size:16px;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
-.auto-value .icon{font-size:15px;flex:0 0 auto}
-.auto-value .value{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.auto-value .live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex:0 0 auto}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,199,89,.5)}70%{box-shadow:0 0 0 6px rgba(52,199,89,0)}100%{box-shadow:0 0 0 0 rgba(52,199,89,0)}}
-button{border:0;border-radius:var(--r-sm);padding:12px 18px;background:var(--bg-elev-2);color:var(--text);font-weight:600;font-size:15px;cursor:pointer;transition:transform .15s var(--spring),opacity .15s,background .15s;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:46px;user-select:none;-webkit-user-select:none;position:relative;overflow:hidden}
-button:active{transform:scale(.97)}
-button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+main{max-width:560px;margin:auto;padding:14px 14px calc(32px + env(safe-area-inset-bottom,0px))}
+.section{background:var(--bg-card);border-radius:var(--r-lg);margin-bottom:10px;border:1px solid var(--separator);overflow:hidden}
+.section-header{padding:16px 18px 0}
+.section-header h2{font-size:14.5px;font-weight:600;margin:0 0 3px;letter-spacing:-.2px;color:var(--text)}
+.section-header .desc{font-size:12.5px;color:var(--text-secondary);margin:0;line-height:1.45;font-weight:400}
+.section-header .desc b{color:var(--text);font-weight:600}
+.section-body{padding:14px 18px 18px}
+.section-header + .section-body{padding-top:12px}
+label{display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em}
+input[type=text],input[type=password]{width:100%;padding:11px 13px;border:1px solid var(--separator-opaque);border-radius:var(--r-sm);background:var(--bg-input);color:var(--text);font-size:15px;transition:border-color .15s,background .15s;-webkit-appearance:none;appearance:none;min-height:44px;font-family:inherit;outline:none;letter-spacing:-.005em}
+input:focus{border-color:var(--accent);background:var(--bg-card);box-shadow:0 0 0 3px var(--accent-soft)}
+input::placeholder{color:var(--text-tertiary)}
+input:read-only{color:var(--text-secondary);cursor:default}
+textarea{width:100%;padding:12px 13px;border:1px solid var(--separator-opaque);border-radius:var(--r-sm);background:var(--bg-input);color:var(--text);font-size:13px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.5;min-height:130px;max-height:400px;resize:vertical;outline:none;transition:border-color .15s,background .15s;letter-spacing:0;overflow-y:auto}
+textarea:focus{border-color:var(--accent);background:var(--bg-card);box-shadow:0 0 0 3px var(--accent-soft)}
+textarea::placeholder{color:var(--text-tertiary)}
+button{border:0;border-radius:var(--r-sm);padding:11px 16px;background:var(--bg-elev-2);color:var(--text);font-weight:500;font-size:14.5px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;user-select:none;-webkit-user-select:none;font-family:inherit;transition:transform .12s,background .12s,opacity .12s;letter-spacing:-.005em;position:relative;overflow:hidden}
+button:active{transform:scale(.98);opacity:.85}
 button.block{width:100%}
-button.primary{background:#0a84ff;color:#fff}
-button.success{background:#10b981;color:#fff}
-button.info{background:#0ea5e9;color:#fff}
-button.warn{background:#ff9500;color:#fff}
-button.danger{background:#ff3b30;color:#fff}
-button.secondary{background:var(--bg-elev-2);color:var(--text);border:1.5px solid var(--separator-opaque)}
+button.primary{background:#0a84ff;color:#fff;font-weight:600}
+button.success{background:#34c759;color:#fff;font-weight:600}
+button.warn{background:#ff9500;color:#fff;font-weight:600}
+button.danger{background:#ff3b30;color:#fff;font-weight:600}
+button.purple{background:#af52de;color:#fff;font-weight:600}
+button.secondary{background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator-opaque);font-weight:500}
+button.ghost{background:transparent;color:var(--accent);border:0;padding:10px;font-size:13px;font-weight:500;min-height:36px}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none}
 button.busy{pointer-events:none;opacity:.7}
-button.busy::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:busy 1s linear infinite}
-@keyframes busy{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
-.status{margin-top:10px;font-size:13px;padding:12px 14px;background:var(--bg-input);border-radius:var(--r-sm);border:1px solid var(--separator);line-height:1.5;display:none}
+button.busy::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:busyAnim 1s linear infinite}
+@keyframes busyAnim{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.stack{display:flex;flex-direction:column;gap:8px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.row.three{grid-template-columns:1fr 1fr 1fr}
+@media (max-width:420px){.row.three{grid-template-columns:1fr 1fr}}
+.meta{display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--text-secondary);padding:11px 13px;background:var(--bg-input);border-radius:var(--r-sm);margin-bottom:12px;letter-spacing:-.005em}
+.meta .item{display:flex;align-items:center;gap:8px;line-height:1.35}
+.meta .dot{width:7px;height:7px;border-radius:50%;background:var(--text-tertiary);flex:0 0 auto}
+.meta .dot.fresh{background:var(--green)}
+.meta .dot.stale{background:var(--orange)}
+.meta .dot.syncing{background:var(--accent);animation:pulseAnim 1.5s infinite}
+@keyframes pulseAnim{0%{box-shadow:0 0 0 0 rgba(10,132,255,.5)}70%{box-shadow:0 0 0 8px rgba(10,132,255,0)}100%{box-shadow:0 0 0 0 rgba(10,132,255,0)}}
+.meta b{color:var(--text);font-weight:600}
+.meta .label{color:var(--text-tertiary);min-width:130px;display:inline-block}
+.status{padding:11px 13px;border-radius:var(--r-sm);font-size:12.5px;font-weight:500;line-height:1.45;display:none;margin-top:10px;letter-spacing:-.005em}
 .status.show{display:block}
-.status.ok{background:var(--green-soft);border-color:transparent;color:var(--green);font-weight:600}
-.status.err{background:var(--red-soft);border-color:transparent;color:var(--red);font-weight:600}
-.status.info{background:var(--blue-soft);border-color:transparent;color:var(--accent);font-weight:600}
-.status.warn{background:var(--orange-soft);border-color:transparent;color:var(--orange);font-weight:600}
-.csv-counter{font-size:12px;color:var(--text-secondary);margin-top:6px;padding:0 2px;min-height:16px}
-.csv-counter b{color:var(--text);font-weight:600}
-.csv-counter.warn{color:var(--orange)}
-.csv-counter.err{color:var(--red)}
-.result-meta{display:flex;flex-wrap:wrap;gap:12px 18px;font-size:12px;color:var(--text-secondary);padding:10px 12px;margin-bottom:12px;background:var(--bg-input);border-radius:var(--r-sm);align-items:center}
-.result-meta .item{display:inline-flex;align-items:center;gap:5px}
-.result-meta .item b{color:var(--text);font-weight:700}
-.result-meta .item.empty b{color:var(--text-tertiary)}
+.status.ok{background:var(--green-soft);color:var(--green);font-weight:600}
+.status.err{background:var(--red-soft);color:var(--red);font-weight:600}
+.status.info{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.status.warn{background:var(--orange-soft);color:var(--orange);font-weight:600}
+.status.purple{background:var(--purple-soft);color:var(--purple);font-weight:600}
+details.settings{margin-top:14px;border-top:1px solid var(--separator);padding-top:12px}
+details.settings summary{list-style:none;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-secondary);display:flex;align-items:center;gap:6px;user-select:none;-webkit-user-select:none;padding:4px 0;transition:color .12s}
+details.settings summary:hover{color:var(--text)}
+details.settings summary::-webkit-details-marker{display:none}
+details.settings summary::before{content:'›';transition:transform .2s;display:inline-block;font-size:15px;color:var(--text-tertiary);font-weight:400;line-height:1}
+details.settings[open] summary::before{transform:rotate(90deg)}
+details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.banner{max-width:560px;margin:0 auto 10px;background:#af52de;color:#fff;padding:13px 15px;border-radius:14px;display:flex;align-items:center;gap:11px;box-shadow:0 6px 20px rgba(175,82,222,.28)}
+.banner .txt{flex:1;min-width:0;line-height:1.35;font-weight:600;font-size:13.5px;letter-spacing:-.005em}
+.banner .txt small{display:block;opacity:.9;font-weight:500;font-size:11.5px;margin-top:2px;letter-spacing:-.005em}
+.banner button{background:rgba(255,255,255,.95);color:#af52de;padding:7px 13px;min-height:34px;font-size:13px;font-weight:700;border-radius:9px}
+.banner button.later{background:rgba(255,255,255,.18);color:#fff;font-weight:500}
+.banner.hidden{display:none}
+.hint{font-size:12px;color:var(--text-secondary);margin:10px 0 0;line-height:1.5;letter-spacing:-.005em}
+.hint b{color:var(--text);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;padding:12px 14px;background:var(--bg-input);border-radius:var(--r-sm);font-size:12px;color:var(--text-secondary);letter-spacing:-.005em}
+.legend-item{display:inline-flex;align-items:center;gap:5px}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.legend-dot.fresh{background:var(--green)}
+.legend-dot.warn{background:var(--orange)}
+.legend-dot.danger{background:var(--red)}
+.legend-dot.unknown{background:var(--text-tertiary)}
+.legend-dot.info{background:var(--accent)}
+.legend-dot.edited{background:var(--orange);border:1px solid var(--orange)}
+.counter{font-size:12px;color:var(--text-secondary);margin-top:6px;padding:0 2px;min-height:16px;letter-spacing:-.005em}
+.counter b{color:var(--text);font-weight:600}
+.counter.warn{color:var(--orange)}
+.counter.err{color:var(--red)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:12.5px;color:var(--text-secondary);letter-spacing:-.005em}
+.kv .k{color:var(--text-tertiary)}
+.kv .v{color:var(--text);font-weight:500;text-align:right}
+.actions-row{display:flex;gap:6px;margin-top:12px}
+.actions-row button{flex:1}
 .table-search{margin-bottom:10px;position:relative}
-.table-search input{padding-left:38px}
-.table-search::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.5;pointer-events:none}
-.table-search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:28px;height:28px;padding:0;border-radius:50%;background:var(--bg-elev-2);color:var(--text-secondary);font-size:14px;font-weight:700;display:none;min-height:auto;align-items:center;justify-content:center;cursor:pointer}
+.table-search input{padding-left:34px;min-height:40px;font-size:14px}
+.table-search::before{content:'';position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;background:currentColor;opacity:.35;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") center/contain no-repeat;pointer-events:none}
+.table-search-clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:28px;height:28px;padding:0;border-radius:50%;background:transparent;color:var(--text-secondary);font-size:16px;font-weight:400;display:none;min-height:auto;align-items:center;justify-content:center;cursor:pointer;line-height:1}
 .table-search.has-value .table-search-clear{display:inline-flex}
 .table-wrap{border-radius:var(--r-md);border:1px solid var(--separator);background:var(--bg-card);overflow:hidden;margin-bottom:4px}
 .table-scroll{max-height:65vh;overflow:auto;-webkit-overflow-scrolling:touch;background:var(--bg-card);position:relative;scrollbar-width:thin;scrollbar-color:var(--separator-opaque) transparent;overscroll-behavior:contain}
@@ -151,11 +193,10 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .table-scroll tbody tr.row-info td:first-child::before{background:var(--blue)}
 .name-cell{display:flex;align-items:flex-start;gap:8px;min-width:0}
 .name-cell .name-text{flex:1 1 auto;min-width:0;word-break:break-word;overflow-wrap:anywhere}
-.name-cell .edit-hint{flex:0 0 auto;font-size:14px;opacity:.35;margin-top:1px;display:none}
+.name-cell .edit-hint{flex:0 0 auto;font-size:13px;opacity:.35;margin-top:1px;display:none}
 @media (max-width:640px){.name-cell .edit-hint{display:inline-block}}
 .num{width:60px;min-width:60px;max-width:60px;height:38px;padding:0 4px;border:0;border-radius:10px;font-size:15px;text-align:center;background:var(--bg-input);color:var(--text);font-weight:600;-webkit-appearance:none;appearance:none;line-height:38px;font-family:inherit;transition:box-shadow .15s,background .15s;margin:0;display:inline-block;vertical-align:middle}
 .num:focus{outline:none;box-shadow:0 0 0 2px var(--accent);background:var(--bg-card)}
-.num::-webkit-outer-spin-button,.num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .num-disabled{display:inline-flex;align-items:center;justify-content:center;width:60px;min-width:60px;height:38px;color:var(--text-tertiary);font-weight:600;font-size:15px;user-select:none;vertical-align:middle}
 .income-cell{position:relative;padding:8px 4px !important;text-align:center}
 .income-cell.edited .num{background:var(--orange-soft);box-shadow:0 0 0 1.5px var(--orange)}
@@ -165,27 +206,10 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .calc-cell.zero{color:var(--text-tertiary)}
 .calc-cell[data-role="expiredOnShelf"].positive,
 .calc-cell[data-role="soldExpired"].positive{color:var(--red)}
-@media (max-width:640px){
-  .table-scroll thead th:nth-child(2),
-  .table-scroll tbody td:nth-child(2){position:sticky;left:160px;z-index:14;transform:translateZ(0);isolation:isolate;box-shadow:4px 0 8px -4px rgba(0,0,0,.06)}
-  .table-scroll thead th:nth-child(2){z-index:24;background:var(--bg-card)}
-  .table-scroll tbody tr.row-fresh td:nth-child(2){background:linear-gradient(var(--green-row),var(--green-row)),var(--bg-card)}
-  .table-scroll tbody tr.row-warn td:nth-child(2){background:linear-gradient(var(--orange-row),var(--orange-row)),var(--bg-card)}
-  .table-scroll tbody tr.row-danger td:nth-child(2){background:linear-gradient(var(--red-row),var(--red-row)),var(--bg-card)}
-  .table-scroll tbody tr.row-info td:nth-child(2){background:linear-gradient(var(--blue-row),var(--blue-row)),var(--bg-card)}
-  .table-scroll tbody tr.row-unknown td:nth-child(2){background:var(--bg-card)}
-  .table-scroll tbody tr:hover td:nth-child(2){background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card)}
-  .table-scroll tbody tr.row-fresh:hover td:nth-child(2){background:linear-gradient(var(--green-row-hover),var(--green-row-hover)),var(--bg-card)}
-  .table-scroll tbody tr.row-warn:hover td:nth-child(2){background:linear-gradient(var(--orange-row-hover),var(--orange-row-hover)),var(--bg-card)}
-  .table-scroll tbody tr.row-danger:hover td:nth-child(2){background:linear-gradient(var(--red-row-hover),var(--red-row-hover)),var(--bg-card)}
-  .table-scroll tbody tr.row-info:hover td:nth-child(2){background:linear-gradient(var(--blue-row-hover),var(--blue-row-hover)),var(--bg-card)}
-  .table-scroll tbody tr.row-unknown:hover td:nth-child(2){background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card)}
-}
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));padding-top:calc(20px + env(safe-area-inset-top,0px));height:100vh;height:100dvh;width:100vw;width:100dvw}
 .modal.hidden{display:none}
-.modal-content{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:auto;padding:24px;padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));animation:modalIn .2s cubic-bezier(.16,1,.3,1);-webkit-overflow-scrolling:touch}
+.modal-content{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:auto;padding:22px;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px));animation:modalIn .2s cubic-bezier(.16,1,.3,1);-webkit-overflow-scrolling:touch}
 @keyframes modalIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
-.modal-handle{display:none}
 .modal-content h3{margin:0 0 4px;font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.25}
 .modal-content .product-shelf{font-size:12px;color:var(--text-secondary);margin-bottom:14px}
 .product-form{display:flex;flex-direction:column;gap:14px}
@@ -196,62 +220,26 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .pf-date-label{font-size:13px;font-weight:600;color:var(--text-secondary);font-variant-numeric:tabular-nums}
 .pf-num{width:100%;height:44px;padding:0 12px;border:0;border-radius:12px;background:var(--bg-input);color:var(--text);font-size:17px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;-webkit-appearance:none;appearance:none;font-family:inherit;line-height:44px;transition:box-shadow .15s,background .15s}
 .pf-num:focus{outline:none;box-shadow:0 0 0 2.5px var(--accent);background:var(--bg-card)}
-.pf-btn{width:44px;height:44px;padding:0;border-radius:12px;background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator);font-size:18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;cursor:pointer;transition:transform .12s var(--spring),background .12s}
+.pf-btn{width:44px;height:44px;padding:0;border-radius:12px;background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator);font-size:18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;cursor:pointer;transition:transform .12s,background .12s}
 .pf-btn:active{transform:scale(.94);background:var(--bg-hover)}
 .pf-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
-.pf-actions button{min-height:44px;border:0;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;transition:transform .12s var(--spring),background .12s}
-.pf-actions button:active{transform:scale(.97)}
-.pf-cancel{background:var(--bg-elev-2);color:var(--text);border:1.5px solid var(--separator-opaque)!important}
+.pf-actions button{min-height:44px;border:0;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit}
+.pf-cancel{background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator-opaque)!important}
 .pf-commit{background:#0a84ff;color:#fff}
-#catalogModalContent{
-  display:flex;flex-direction:column;
-  max-height:calc(100vh - 40px);
-  max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
-  overflow:hidden;
-  padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
-}
+#catalogModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
 #catalogList{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin-bottom:14px}
-#unknownModalContent{
-  display:flex;flex-direction:column;
-  max-height:calc(100vh - 40px);
-  max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
-  max-width:420px;
-  padding:20px;
-  padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));
-  overflow:hidden;
-}
-@media (max-width:640px){
-  #unknownModalContent{max-width:100%}
-}
-#unknownBody{
-  flex:1 1 auto;min-height:0;
-  overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
-  margin-bottom:12px;
-  padding-right:4px;
-}
-.unknown-item{
-  display:block;
-  padding:10px 12px;
-  border:1.5px solid var(--separator);
-  border-radius:var(--r-sm);
-  background:var(--bg-input);
-  margin-bottom:6px;
-  cursor:pointer;
-  user-select:none;
-  -webkit-user-select:none;
-  transition:border-color .12s,background .12s;
-}
+#unknownModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-width:420px;padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));overflow:hidden}
+@media (max-width:640px){#unknownModalContent{max-width:100%}}
+#unknownBody{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin-bottom:12px;padding-right:4px}
+.unknown-item{display:block;padding:10px 12px;border:1px solid var(--separator-opaque);border-radius:var(--r-sm);background:var(--bg-input);margin-bottom:6px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:border-color .12s,background .12s}
 .unknown-item:active{background:var(--bg-hover)}
-.unknown-item.selected{
-  border-color:var(--accent);
-  background:var(--accent-soft);
-}
+.unknown-item.selected{border-color:var(--accent);background:var(--accent-soft)}
 .unknown-item.selected .unknown-name{color:var(--accent)}
 .unknown-body{min-width:0;overflow-wrap:anywhere;word-break:break-word}
 .unknown-name{font-size:13.5px;font-weight:600;word-break:break-word;overflow-wrap:anywhere;white-space:normal;margin-bottom:4px}
 .unknown-info{font-size:12px;color:var(--text-secondary);line-height:1.4;margin-bottom:4px}
-.unknown-info .kv{display:inline-block;margin-right:10px;white-space:nowrap}
-.unknown-info .kv b{color:var(--text);font-weight:600}
+.unknown-info .kv-item{display:inline-block;margin-right:10px;white-space:nowrap}
+.unknown-info .kv-item b{color:var(--text);font-weight:600}
 .unknown-shelf{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-secondary)}
 .unknown-shelf input[type=text]{width:70px;min-height:32px;height:32px;padding:0 6px;font-size:13px;font-weight:600;text-align:center}
 .unknown-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:0}
@@ -261,82 +249,32 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .unknown-counter{font-size:11.5px;color:var(--text-secondary);margin-bottom:8px}
 .unknown-load-more{padding:8px;text-align:center;color:var(--accent);font-weight:600;font-size:12.5px;cursor:pointer;user-select:none}
 .unknown-load-more:active{opacity:.6}
-#ignoredModalContent{
-  display:flex;flex-direction:column;
-  max-height:calc(100vh - 40px);
-  max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
-  overflow:hidden;
-  padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
-}
+#ignoredModalContent{display:flex;flex-direction:column;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
 #ignoredList{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin-bottom:14px}
 .ignored-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
 .ignored-row:hover{background:var(--bg-hover)}
 .ignored-row .name{font-size:14px;word-break:break-word;overflow-wrap:anywhere}
-.ignored-row .del-btn{min-height:36px;padding:6px 12px;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:12.5px;font-weight:700;border-radius:8px}
-.legend{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:14px;padding:12px 14px;background:var(--bg-input);border-radius:var(--r-sm);font-size:12px;color:var(--text-secondary)}
-.legend-item{display:inline-flex;align-items:center;gap:5px}
-.legend-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
-.legend-dot.fresh{background:var(--green)}
-.legend-dot.warn{background:var(--orange)}
-.legend-dot.danger{background:var(--red)}
-.legend-dot.unknown{background:var(--text-tertiary)}
-.legend-dot.info{background:var(--blue)}
-.legend-dot.edited{background:var(--orange);border:1px solid var(--orange)}
-.steps-hint{background:var(--bg-input);border:1px solid var(--separator);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;line-height:1.55;color:var(--text-secondary);margin-bottom:12px}
-.steps-hint b{color:var(--text);font-weight:700}
-.steps-hint ol{margin:5px 0 0 18px;padding:0}
-.steps-hint li{margin-bottom:4px}
-.ai-help{padding:12px 14px;border-radius:var(--r-sm);background:var(--bg-input);border:1px solid var(--separator);font-size:12.5px;line-height:1.5;color:var(--text-secondary)}
-.ai-help b{color:var(--text)}
-.action-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-@media (max-width:500px){.action-buttons{grid-template-columns:1fr}}
+.ignored-row .del-btn{min-height:36px;padding:6px 12px;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:12.5px;font-weight:600;border-radius:8px}
 .photo-queue{display:grid;gap:8px;margin-top:10px}
-.photo-item{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input)}
-.photo-thumb{width:48px;height:48px;object-fit:cover;border-radius:10px;background:var(--bg-elev-2)}
+.photo-item{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input)}
+.photo-thumb{width:44px;height:44px;object-fit:cover;border-radius:9px;background:var(--bg-elev-2)}
 .photo-meta{min-width:0}
 .photo-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .photo-type{font-size:11px;color:var(--text-secondary);margin-top:2px}
 .photo-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.photo-actions button{min-height:36px;padding:6px 12px;font-size:12.5px}
+.photo-actions button{min-height:34px;padding:6px 12px;font-size:12.5px;border-radius:8px}
 pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm);font-size:11.5px;line-height:1.55;overflow:auto;max-height:60vh;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #1e293b}
-.save-card{padding:18px}
-.save-card .save-btn{min-height:48px;margin-bottom:8px}
-.save-card .save-btn:last-of-type{margin-bottom:0}
-.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(0,0,0,.85);color:#fff;font-size:14px;font-weight:600;padding:12px 20px;border-radius:12px;z-index:9999;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;max-width:90vw;text-align:center}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(28,28,30,.96);color:#fff;font-size:13.5px;font-weight:500;padding:11px 18px;border-radius:11px;z-index:9999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;max-width:90vw;text-align:center;letter-spacing:-.005em;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.update-banner{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:#0a84ff;color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;font-size:14px;z-index:9998;box-shadow:0 4px 16px rgba(0,0,0,.25);display:none;align-items:center;gap:10px;max-width:calc(100vw - 40px)}
-.update-banner.show{display:inline-flex}
-.update-banner button{background:#fff;color:#0a84ff;padding:6px 14px;border-radius:8px;min-height:32px;font-size:13px;font-weight:700}
-@media (min-width:641px){
-  :root{--header-h:88px}
-  .app-header{padding:14px 20px;padding-top:calc(14px + env(safe-area-inset-top,0px))}
-  .header-text h1{font-size:19px}
-  .logo{width:46px;height:46px}
-  main{padding:20px 20px calc(32px + env(safe-area-inset-bottom,0px));padding-top:calc(var(--header-h) + env(safe-area-inset-top,0px))}
-  .card{padding:22px;border-radius:22px}
-  input[type=text],input[type=number],textarea{padding:11px 14px;font-size:15px;min-height:44px}
-  textarea{font-size:13px;min-height:200px}
-  button{min-height:44px;padding:11px 18px}
-  .table-scroll table.table-body{font-size:13.5px}
-  .table-scroll thead th{font-size:11px;padding:9px 7px}
-  .table-scroll tbody td{padding:9px 7px}
-}
-@media (max-width:640px){.table-scroll{max-height:55vh}}
-@media (max-width:400px){
-  :root{--header-h:74px}
-  .card{padding:14px;border-radius:16px}
-  .card h2{font-size:14px}
-  .logo{width:36px;height:36px}
-  .header-text h1{font-size:15px}
-  .action-buttons{gap:8px}
-}
-@media (max-width:360px){
-  :root{--header-h:70px}
-  .auto-datetime{grid-template-columns:1fr}
+@media (min-width:560px){
+  .app-header{padding:13px 20px}
+  main{padding:18px 20px 40px}
+  .section-header{padding:18px 22px 0}
+  .section-body{padding:16px 22px 22px}
 }
 .cat-row{display:grid;grid-template-columns:1fr 80px 40px;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
 .cat-row:hover{background:var(--bg-hover)}
-.cat-row input[type=text],.cat-row input[type=number]{padding:8px 10px;font-size:13px;min-height:38px;border-radius:8px}
+.cat-row input[type=text]{padding:8px 10px;font-size:13px;min-height:38px;border-radius:8px}
 .cat-row input[inputmode=numeric]{text-align:center;font-weight:700;color:var(--accent)}
 .cat-row .del-btn{min-height:38px;padding:0;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:14px;font-weight:800}
 .cat-row .del-btn:hover{background:var(--red);color:#fff;border-color:var(--red)}
@@ -346,196 +284,260 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 
 <div class="app-header">
   <div class="header-inner">
-    <img src="logo.png" alt="French Bakery" class="logo" id="appLogo">
+    <div class="logo" id="appLogo">FB</div>
     <div class="header-text">
       <h1>French Bakery Аудит</h1>
     </div>
-    <div id="autosaveBadge" class="autosave-badge">💾 Сохранено</div>
+    <div id="ownerPill" class="owner-pill">Владелец</div>
+    <div id="autosaveBadge" class="autosave-badge">Сохранено</div>
   </div>
 </div>
 
 <main>
 
-  <div class="card">
-    <h2><span class="icon">⚙️</span>Параметры проверки</h2>
-    <div class="auto-datetime">
-      <div class="auto-field">
-        <label>Дата</label>
-        <div class="auto-value">
-          <span class="icon">📅</span>
-          <span class="value" id="autoDate">—</span>
-          <span class="live-dot"></span>
+  <!-- BANNER обновления справочника -->
+  <div class="banner hidden" id="banner">
+    <div class="txt">
+      Справочник обновился
+      <small id="bannerMeta">—</small>
+    </div>
+    <button id="bannerApply">Обновить</button>
+    <button class="later" id="bannerLater">Позже</button>
+  </div>
+
+  <!-- ПАРАМЕТРЫ -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Параметры</h2>
+      <p class="desc">Дата и время определяются автоматически.</p>
+    </div>
+    <div class="section-body">
+      <div class="row">
+        <div>
+          <label>Дата</label>
+          <input id="autoDate" type="text" readonly value="—">
+        </div>
+        <div>
+          <label>Время</label>
+          <input id="autoTime" type="text" readonly value="—">
         </div>
       </div>
-      <div class="auto-field">
-        <label>Время</label>
-        <div class="auto-value">
-          <span class="icon">🕐</span>
-          <span class="value" id="autoTime">—</span>
-        </div>
-      </div>
-      <div class="auto-field point-field">
-        <label>Точка <span style="text-transform:none;font-weight:400;color:var(--text-tertiary)">(введите вручную)</span></label>
+      <div style="margin-top:10px">
+        <label>Точка</label>
         <input id="point" type="text" placeholder="№037" autocomplete="off" maxlength="50">
       </div>
     </div>
   </div>
 
-  <div class="card">
-    <h2><span class="icon">📷</span>Шаг 1. Загрузка фото и PDF</h2>
-    <p class="hint">Загрузите накладные и чек продаж — <b>фото или PDF</b>.</p>
-    <div class="action-buttons">
-      <button id="uploadInvoicePhotosBtn" class="info">📷 Накладные</button>
-      <button id="uploadSalesPhotosBtn" class="secondary">🧾 Чек продаж</button>
+  <!-- МАТЕРИАЛЫ -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Материалы для проверки</h2>
+      <p class="desc">Фото или PDF накладных и чека продаж.</p>
     </div>
-    <input id="invoicePhotoInput" type="file" accept="image/*,application/pdf" multiple hidden>
-    <input id="salesPhotoInput" type="file" accept="image/*,application/pdf" multiple hidden>
-    <div id="photoQueue" class="photo-queue"></div>
+    <div class="section-body">
+      <div class="row">
+        <button id="uploadInvoicePhotosBtn" class="secondary">Накладные</button>
+        <button id="uploadSalesPhotosBtn" class="secondary">Чек продаж</button>
+      </div>
+      <input id="invoicePhotoInput" type="file" accept="image/*,application/pdf" multiple hidden>
+      <input id="salesPhotoInput" type="file" accept="image/*,application/pdf" multiple hidden>
+      <div id="photoQueue" class="photo-queue"></div>
+    </div>
   </div>
 
-  <div class="card">
-    <h2><span class="icon">📤</span>Шаг 2. Отправить в ИИ</h2>
-    <div class="steps-hint">
-      <b>Как это работает:</b>
-      <ol>
-        <li>Нажмите «Поделиться в ИИ» — откроется системное меню.</li>
-        <li>Выберите ChatGPT / DeepSeek / другое приложение.</li>
-        <li>Приложение получит <b>исходные файлы</b> и готовый промпт.</li>
-        <li>ИИ вернёт <b>CSV-файл для скачивания</b>.</li>
-        <li>Скачайте CSV и загрузите его в Шаг 3.</li>
-      </ol>
+  <!-- РАСПОЗНАВАНИЕ -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Распознавание</h2>
+      <p class="desc">Отправьте материалы в ИИ — он вернёт CSV с приходами и продажами.</p>
     </div>
-    <div class="action-buttons">
-      <button id="shareToAIBtn" class="primary">📤 Поделиться в ИИ</button>
-      <button id="copyPromptBtn" class="info">📋 Скопировать промпт</button>
+    <div class="section-body">
+      <div class="row">
+        <button id="shareToAIBtn" class="primary">Отправить</button>
+        <button id="copyPromptBtn" class="secondary">Промпт</button>
+      </div>
+      <div id="shareStatus" class="status"></div>
     </div>
-    <div id="shareStatus" class="status"></div>
   </div>
 
-  <div class="card">
-    <h2><span class="icon">📥</span>Шаг 3. Импорт CSV от ИИ</h2>
-    <p class="hint">Вставьте CSV, который вернул ИИ, или загрузите файл. <b>Строки будут отсортированы по алфавиту.</b></p>
-    <div class="action-buttons">
-      <button id="pasteCsvBtn" class="secondary">📋 Вставить из буфера</button>
-      <button id="loadCsvFileBtn" class="secondary">📁 Загрузить CSV</button>
+  <!-- ИМПОРТ -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Импорт данных</h2>
+      <p class="desc">Вставьте CSV, который вернул ИИ, или загрузите файл.</p>
     </div>
-    <input id="csvFileInput" type="file" accept=".csv,text/csv" hidden>
-    <textarea id="csvInput" maxlength="2000000" placeholder="Наименование;Получено за 17.09;Получено за 18.09;Продано сегодня;Срок годности
-Слойка со сливой;4;2;0;18
-Шатель;3;3;5;36"></textarea>
-    <div id="csvCounter" class="csv-counter"></div>
-    <button id="applyCsvBtn" class="success block" style="margin-top:12px">✅ Применить CSV</button>
-    <div id="csvStatus" class="status"></div>
+    <div class="section-body">
+      <div class="row">
+        <button id="pasteCsvBtn" class="secondary">Вставить</button>
+        <button id="loadCsvFileBtn" class="secondary">Из файла</button>
+      </div>
+      <input id="csvFileInput" type="file" accept=".csv,text/csv" hidden>
+      <textarea id="csvInput" maxlength="2000000" placeholder="Наименование;Получено за 17.09;Получено за 18.09;Продано сегодня;Срок годности" style="margin-top:10px"></textarea>
+      <div id="csvCounter" class="counter"></div>
+      <button id="applyCsvBtn" class="success block" style="margin-top:10px">Применить</button>
+      <div id="csvStatus" class="status"></div>
+    </div>
   </div>
 
-  <div class="card">
-    <h2><span class="icon">📚</span>Справочник сроков годности</h2>
-    <p class="hint">Отредактируйте справочник: добавьте новые позиции, удалите ненужные, измените сроки.</p>
-    <div class="action-buttons">
-      <button id="editCatalogBtn" class="info">✏️ Редактировать</button>
-      <button id="exportCatalogBtn" class="secondary">📤 Экспорт JSON</button>
+  <!-- СПРАВОЧНИК -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Справочник</h2>
+      <p class="desc">Хранится локально. Можно обновить с сервера.</p>
     </div>
-    <div class="action-buttons">
-      <button id="importCatalogBtn" class="secondary">📥 Импорт JSON</button>
-      <button id="resetCatalogBtn" class="secondary">↺ Сбросить</button>
+    <div class="section-body">
+
+      <div class="meta" id="metaLocal">
+        <div class="item"><span class="dot stale"></span><span>Локальная версия · <b>не синхронизировано</b></span></div>
+        <div class="item"><span class="label">Последняя проверка</span><span id="lastCheckTime">—</span></div>
+      </div>
+
+      <div class="meta" id="metaRemote" style="display:none">
+        <div class="item"><span class="dot fresh"></span><span>Синхронизировано · <b id="syncTime">—</b></span></div>
+        <div class="item"><span class="label">Последняя проверка</span><span id="lastCheckTime2">—</span></div>
+      </div>
+
+      <div class="meta" id="metaSyncing" style="display:none">
+        <div class="item"><span class="dot syncing"></span><span>Проверка обновлений…</span></div>
+      </div>
+
+      <div class="stack">
+        <button id="checkUpdatesBtn" class="secondary">Проверить обновления</button>
+        <button id="publishBtn" class="purple" style="display:none">Опубликовать</button>
+      </div>
+
+      <div id="syncStatus" class="status"></div>
+
+      <div class="actions-row">
+        <button id="editCatalogBtn" class="secondary">Редактировать</button>
+        <button id="ignoredBtn" class="secondary">Игнор-лист (<span id="ignoredCount">0</span>)</button>
+      </div>
+
+      <details class="settings">
+        <summary>Настройки синхронизации</summary>
+        <div class="content">
+          <div>
+            <label>Ключ доступа</label>
+            <input id="tokenInput" type="password" placeholder="Введите ключ" autocomplete="off" maxlength="200">
+          </div>
+          <button id="activateOwnerBtn" class="purple block">Активировать режим владельца</button>
+          <button id="deactivateOwnerBtn" class="secondary block" style="display:none">Выйти из режима владельца</button>
+        </div>
+      </details>
+
     </div>
-    <div class="action-buttons">
-      <button id="ignoredBtn" class="warn">🚫 Игнор-лист (<span id="ignoredCount">0</span>)</button>
-      <button id="clearIgnoredBtn" class="secondary">Очистить игнор</button>
-    </div>
-    <input id="importCatalogFile" type="file" accept=".json,application/json" hidden>
-    <div id="catalogStatus" class="status"></div>
   </div>
 
-  <div class="card">
-    <h2><span class="icon">📈</span>Шаг 4. Результат</h2>
-    <p id="summary" class="hint">Загрузите CSV и введите фактический остаток, чтобы увидеть результат.</p>
-
-    <div id="resultMeta" class="result-meta" style="display:none">
-      <span class="item">📅 <b id="metaDate">—</b></span>
-      <span class="item">🕐 <b id="metaTime">—</b></span>
-      <span class="item" id="metaPointWrap">📍 <b id="metaPoint">—</b></span>
+  <!-- РЕЗУЛЬТАТ -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Результат</h2>
+      <p id="summary" class="desc">Загрузите CSV и введите фактический остаток.</p>
     </div>
+    <div class="section-body">
+      <div id="resultMeta" class="kv" style="display:none">
+        <span class="k">Дата проверки</span><span class="v" id="metaDate">—</span>
+        <span class="k">Точка</span><span class="v" id="metaPoint">—</span>
+      </div>
 
-    <div id="unknownBanner" style="display:none;margin-bottom:12px">
-      <button id="openUnknownBtn" class="warn block">⚠️ Не в справочнике (<span id="unknownCount">0</span>) — нажмите, чтобы разобрать</button>
-    </div>
+      <div id="unknownBanner" style="display:none;margin-top:12px">
+        <button id="openUnknownBtn" class="warn block">Не в справочнике (<span id="unknownCount">0</span>)</button>
+      </div>
 
-    <div id="tableSearchWrap" class="table-search" style="display:none">
-      <input id="tableSearch" type="text" placeholder="Поиск по таблице..." autocomplete="off" maxlength="100">
-      <button type="button" class="table-search-clear" id="tableSearchClear">✕</button>
-    </div>
+      <div id="tableSearchWrap" class="table-search" style="display:none;margin-top:12px">
+        <input id="tableSearch" type="text" placeholder="Поиск по таблице..." autocomplete="off" maxlength="100">
+        <button type="button" class="table-search-clear" id="tableSearchClear">×</button>
+      </div>
 
-    <div class="table-wrap" id="tableWrap" style="display:none">
-      <div class="table-scroll" id="tableScroll">
-        <table id="resultTable" class="table-body">
-          <colgroup id="resultColgroup"></colgroup>
-          <thead id="resultThead"><tr></tr></thead>
-          <tbody></tbody>
-        </table>
+      <div class="table-wrap" id="tableWrap" style="display:none;margin-top:12px">
+        <div class="table-scroll" id="tableScroll">
+          <table id="resultTable" class="table-body">
+            <colgroup id="resultColgroup"></colgroup>
+            <thead id="resultThead"><tr></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="totals" class="status" style="margin-top:12px"></div>
+
+      <div class="legend" style="margin-top:12px">
+        <span class="legend-item"><span class="legend-dot fresh"></span> Свежие</span>
+        <span class="legend-item"><span class="legend-dot warn"></span> Просрочка на витрине</span>
+        <span class="legend-item"><span class="legend-dot danger"></span> Продано просрочки</span>
+        <span class="legend-item"><span class="legend-dot unknown"></span> Срок не задан</span>
+        <span class="legend-item"><span class="legend-dot info"></span> Только продажи</span>
+        <span class="legend-item"><span class="legend-dot edited"></span> Приход исправлен</span>
       </div>
     </div>
+  </div>
 
-    <div id="totals" class="ai-help" style="margin-top:14px;display:none"></div>
-
-    <div class="legend">
-      <span class="legend-item"><span class="legend-dot fresh"></span> Свежие</span>
-      <span class="legend-item"><span class="legend-dot warn"></span> Просрочка на витрине</span>
-      <span class="legend-item"><span class="legend-dot danger"></span> Продано просрочки</span>
-      <span class="legend-item"><span class="legend-dot unknown"></span> Срок не задан</span>
-      <span class="legend-item"><span class="legend-dot info"></span> Только продажи</span>
-      <span class="legend-item"><span class="legend-dot edited"></span> Приход исправлен</span>
+  <!-- ЭКСПОРТ -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Экспорт</h2>
+      <p class="desc">Скачайте отчёт или сохраните сессию.</p>
+    </div>
+    <div class="section-body">
+      <div class="stack">
+        <button id="exportBtn" class="primary block">Скачать Excel</button>
+        <div class="row">
+          <button id="restoreSessionBtn" class="secondary">Сохранить сессию</button>
+          <button id="clearBtn" class="secondary">Сбросить</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="card save-card">
-    <h2><span class="icon">💾</span>Сохранение</h2>
-    <button id="exportBtn" class="primary block save-btn">📥 Скачать Excel (.xlsx)</button>
-    <button id="restoreSessionBtn" class="secondary block save-btn">↺ Восстановить сессию</button>
-    <button id="clearBtn" class="secondary block save-btn">↻ Сбросить данные</button>
-    <div class="hint" style="margin-top:12px;text-align:center;font-size:11px;color:var(--text-tertiary)">
-      French Bakery Аудит · v8.3
-    </div>
+  <div class="hint" style="text-align:center;color:var(--text-tertiary);margin-top:20px;font-size:11px;letter-spacing:.02em">
+    French Bakery Аудит · v9.0
   </div>
 
 </main>
 
+<!-- Модал: справочник -->
 <div id="catalogModal" class="modal hidden">
   <div class="modal-content" id="catalogModalContent">
-    <div class="modal-handle"></div>
-    <h3>✏️ Справочник сроков</h3>
-    <p class="hint">Меняйте названия, сроки, добавляйте новые позиции.</p>
-    <div style="margin:12px 0">
-      <input id="catalogSearch" type="text" placeholder="🔍 Поиск..." autocomplete="off" maxlength="100">
+    <h3>Справочник сроков</h3>
+    <p class="hint" style="margin:4px 0 12px">Меняйте названия, сроки, добавляйте позиции.</p>
+    <div style="margin:0 0 12px">
+      <input id="catalogSearch" type="text" placeholder="Поиск..." autocomplete="off" maxlength="100">
     </div>
     <div id="catalogList"></div>
     <div style="border-top:1px solid var(--separator);padding-top:14px;margin-top:14px">
-      <label>➕ Новая позиция</label>
+      <label>Новая позиция</label>
       <input id="newProdName" type="text" placeholder="Название" style="margin:6px 0" autocomplete="off" maxlength="100">
       <input id="newProdHours" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Срок, часов" style="margin-bottom:8px" value="0">
       <button id="addProdBtn" class="success block">Добавить</button>
     </div>
+    <div class="row" style="margin-top:14px">
+      <button id="exportCatalogBtn" class="secondary">Экспорт</button>
+      <button id="importCatalogBtn" class="secondary">Импорт</button>
+    </div>
+    <button id="resetCatalogBtn" class="secondary block" style="margin-top:8px">Сбросить к заводскому</button>
+    <input id="importCatalogFile" type="file" accept=".json,application/json" hidden>
+    <div id="catalogStatus" class="status"></div>
     <button id="closeCatalogBtn" class="secondary block" style="margin-top:14px">Закрыть</button>
   </div>
 </div>
 
+<!-- Модал: промпт -->
 <div id="promptModal" class="modal hidden">
   <div class="modal-content">
-    <div class="modal-handle"></div>
-    <h3>📋 Промпт для ИИ</h3>
-    <p class="hint" style="margin-bottom:12px">Скопируйте текст и вставьте в чат вместе с файлами.</p>
+    <h3>Промпт для ИИ</h3>
+    <p class="hint" style="margin:4px 0 12px">Скопируйте текст и вставьте в чат вместе с файлами.</p>
     <pre class="code" id="promptContent"></pre>
-    <button id="copyFromModalBtn" class="info block" style="margin-top:14px">📋 Скопировать промпт</button>
+    <button id="copyFromModalBtn" class="primary block" style="margin-top:14px">Скопировать</button>
     <button id="closePromptModalBtn" class="secondary block" style="margin-top:8px">Закрыть</button>
   </div>
 </div>
 
+<!-- Модал: товар -->
 <div id="productModal" class="modal hidden">
   <div class="modal-content">
-    <div class="modal-handle"></div>
     <h3 id="pmName">—</h3>
     <div class="product-shelf" id="pmShelf">Срок: —</div>
-
     <div class="product-form">
       <div>
         <div class="pf-section-title">Остаток</div>
@@ -545,7 +547,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
           <button type="button" class="pf-btn" data-target="pmStock" data-step="1">+</button>
         </div>
       </div>
-
       <div>
         <div class="pf-section-title">Продано</div>
         <div class="pf-row">
@@ -554,12 +555,10 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
           <button type="button" class="pf-btn" data-target="pmSales" data-step="1">+</button>
         </div>
       </div>
-
       <div>
         <div class="pf-section-title">Приходы по датам</div>
         <div class="pf-row-dates" id="pmIncoming"></div>
       </div>
-
       <div class="pf-actions">
         <button type="button" class="pf-cancel" id="pmCancel">Отмена</button>
         <button type="button" class="pf-commit" id="pmCommit">Готово</button>
@@ -568,43 +567,47 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   </div>
 </div>
 
+<!-- Модал: неизвестные -->
 <div id="unknownModal" class="modal hidden">
   <div class="modal-content" id="unknownModalContent">
-    <div class="modal-handle"></div>
     <h3>Не в справочнике</h3>
-    <p class="hint">Тапните по позиции, чтобы выбрать. Срок можно изменить.</p>
+    <p class="hint" style="margin:4px 0 12px">Тапните по позиции, чтобы выбрать. Срок можно изменить.</p>
     <div id="unknownCounter" class="unknown-counter"></div>
     <div class="unknown-search" id="unknownSearchWrap" style="display:none">
       <input id="unknownSearch" type="text" placeholder="Поиск по названию..." autocomplete="off" maxlength="100">
     </div>
     <div id="unknownBody"></div>
     <div class="unknown-actions">
-      <button id="unknownAddBtn" class="success">Добавить выбранные</button>
-      <button id="unknownIgnoreBtn" class="warn">Игнорировать все</button>
+      <button id="unknownAddBtn" class="success">Добавить</button>
+      <button id="unknownIgnoreBtn" class="warn">Игнорировать</button>
       <button id="unknownCloseBtn" class="secondary full">Закрыть</button>
     </div>
   </div>
 </div>
 
+<!-- Модал: игнор-лист -->
 <div id="ignoredModal" class="modal hidden">
   <div class="modal-content" id="ignoredModalContent">
-    <div class="modal-handle"></div>
-    <h3>🚫 Игнор-лист</h3>
-    <p class="hint">Эти позиции не будут появляться в списке «Не в справочнике».</p>
+    <h3>Игнор-лист</h3>
+    <p class="hint" style="margin:4px 0 12px">Эти позиции не появляются в списке «Не в справочнике».</p>
     <div id="ignoredList"></div>
+    <button id="clearIgnoredBtn" class="secondary block" style="margin-bottom:8px">Очистить игнор-лист</button>
     <button id="closeIgnoredBtn" class="secondary block">Закрыть</button>
   </div>
 </div>
 
-<div id="updateBanner" class="update-banner">
-  <span>Доступно обновление</span>
-  <button onclick="location.reload()">Обновить</button>
+<!-- Баннер обновления SW -->
+<div id="updateBanner" class="toast" style="pointer-events:auto;cursor:pointer">
+  Доступно обновление · нажмите, чтобы перезагрузить
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 'use strict';
 
+/* ==============================
+   CONSTANTS
+   ============================== */
 const MAX_ROWS = 2000;
 const MAX_DATES = 30;
 const MAX_NUM = 100000;
@@ -623,11 +626,18 @@ const SESSION_VERSION = 6;
 const LEGACY_SESSION_KEY = 'fbAuditSessionV5';
 const CATALOG_KEY = 'fbAuditProducts';
 const IGNORED_KEY = 'fbAuditIgnored';
+const SYNC_REMOTE_KEY = 'fbAuditSyncRemoteSimulate';
+const SYNC_LOCAL_UPDATED_AT = 'fbAuditSyncLocalUpdatedAt';
+const SYNC_LAST_CHECK = 'fbAuditSyncLastCheck';
+const ACCESS_KEY = 'fbAuditAccessKey';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
 const UNKNOWN_SEARCH_THRESHOLD = 20;
 
+/* ==============================
+   STATE
+   ============================== */
 let PRODUCTS = [];
 let IGNORED = [];
 let tableRows = [];
@@ -656,9 +666,14 @@ let _bodyFrozen = false;
 let _frozenScrollY = 0;
 let _tableQuery = '';
 let _tableSearchTimer = null;
+let _pendingRemote = null;
+let _isOwner = false;
 
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
 
+/* ==============================
+   BODY FREEZE
+   ============================== */
 function freezeBody() {
   if (_bodyFrozen) return;
   _frozenScrollY = window.scrollY || window.pageYOffset || 0;
@@ -673,10 +688,7 @@ function freezeBody() {
 }
 function unfreezeBody() {
   if (!_bodyFrozen) return;
-  if (_modalCount > 0) {
-    _bodyFrozen = false;
-    return;
-  }
+  if (_modalCount > 0) { _bodyFrozen = false; return; }
   document.body.style.position = '';
   document.body.style.top = '';
   document.body.style.left = '';
@@ -687,7 +699,6 @@ function unfreezeBody() {
   window.scrollTo(0, _frozenScrollY);
   _bodyFrozen = false;
 }
-
 function openModal(id) {
   const el = $(id);
   if (!el) return;
@@ -707,14 +718,14 @@ function closeModal(id) {
   if (_modalCount === 0) {
     document.body.classList.remove('modal-open');
     document.body.style.top = '';
-    if (_bodyFrozen) {
-      window.scrollTo(0, _frozenScrollY);
-    } else {
-      window.scrollTo(0, _scrollY);
-    }
+    if (_bodyFrozen) window.scrollTo(0, _frozenScrollY);
+    else window.scrollTo(0, _scrollY);
   }
 }
 
+/* ==============================
+   UTILS
+   ============================== */
 function clampNum(v, min, max, fallback) {
   if (v == null) return fallback;
   const n = Number(v);
@@ -769,8 +780,20 @@ function formatDateRu(iso) {
   const day = parseInt(parts[2], 10);
   const monthIdx = parseInt(parts[1], 10) - 1;
   const year = parts[0];
-  const weekday = ['вс','пн','вт','ср','чт','пт','сб'][new Date(iso + 'T00:00:00').getDay()];
-  return `${day} ${months[monthIdx]} ${year}, ${weekday}`;
+  return `${day} ${months[monthIdx]} ${year}`;
+}
+function formatDateShortRu(iso) {
+  if (!iso) return '—';
+  const parts = String(iso).split('-');
+  if (parts.length !== 3) return iso;
+  return `${parseInt(parts[2], 10)} ${['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'][parseInt(parts[1],10)-1]}`;
+}
+function formatDateTimeRu(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (!isValidDate(d)) return '—';
+  const months = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+  return `${d.getDate()} ${months[d.getMonth()]}, ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 function normalizeName(s) {
   return String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
@@ -779,8 +802,11 @@ function normalizeForSearch(s) {
   return String(s || '').toLowerCase().trim().replace(/\s+/g, ' ').replace(/ё/g, 'е');
 }
 
-function updateAutoDate() { const el = $('autoDate'); if (el) el.textContent = formatDateRu(getTodayStr()); }
-function updateAutoTime() { const el = $('autoTime'); if (el) el.textContent = getCurrentTimeStr(); }
+/* ==============================
+   AUTO DATE/TIME
+   ============================== */
+function updateAutoDate() { const el = $('autoDate'); if (el) el.value = formatDateRu(getTodayStr()); }
+function updateAutoTime() { const el = $('autoTime'); if (el) el.value = getCurrentTimeStr(); }
 function startAutoDateTime() {
   updateAutoDate();
   updateAutoTime();
@@ -788,6 +814,9 @@ function startAutoDateTime() {
   _timeUpdater = setInterval(() => { updateAutoDate(); updateAutoTime(); }, TIME_UPDATE_MS);
 }
 
+/* ==============================
+   TEXTAREA / COUNTER / SEARCH
+   ============================== */
 function autoResizeTextarea() {
   const ta = $('csvInput');
   if (!ta) return;
@@ -800,14 +829,14 @@ function updateCsvCounter() {
   const counter = $('csvCounter');
   if (!ta || !counter) return;
   const text = ta.value;
-  if (!text.trim()) { counter.textContent = ''; counter.className = 'csv-counter'; return; }
+  if (!text.trim()) { counter.textContent = ''; counter.className = 'counter'; return; }
   const lines = text.split(/\r?\n/).filter(l => l.trim());
   const dataLines = Math.max(0, lines.length - 1);
   const bytes = new Blob([text]).size;
   const kb = Math.round(bytes / 1024);
-  let cls = 'csv-counter';
+  let cls = 'counter';
   let suffix = '';
-  if (bytes > MAX_CSV_BYTES) { cls += ' err'; suffix = ' ⚠️ превышает 2 МБ'; }
+  if (bytes > MAX_CSV_BYTES) { cls += ' err'; suffix = ' · превышает 2 МБ'; }
   else if (bytes > MAX_CSV_BYTES * 0.8) { cls += ' warn'; }
   counter.className = cls;
   counter.innerHTML = `<b>${dataLines}</b> строк · ${kb} КБ${suffix}`;
@@ -822,22 +851,15 @@ function applyTableFilter() {
     const tr = rows[i];
     const nameEl = tr.querySelector('.name-text');
     const name = nameEl ? normalizeForSearch(nameEl.textContent) : '';
-    if (!q || name.includes(q)) {
-      tr.classList.remove('hidden-row');
-      visible++;
-    } else {
-      tr.classList.add('hidden-row');
-    }
+    if (!q || name.includes(q)) { tr.classList.remove('hidden-row'); visible++; }
+    else tr.classList.add('hidden-row');
   }
   const searchWrap = $('tableSearchWrap');
   if (searchWrap) searchWrap.classList.toggle('has-value', !!q);
   const summary = $('summary');
-  if (summary && q) {
-    const prev = summary.dataset.baseSummary || '';
-    summary.textContent = `${prev} · Показано: ${visible}`;
-  } else if (summary) {
-    const prev = summary.dataset.baseSummary || '';
-    if (prev) summary.textContent = prev;
+  if (summary) {
+    const base = summary.dataset.baseSummary || '';
+    summary.textContent = q ? `${base} Показано: ${visible}` : base;
   }
 }
 function setTableQuery(q) {
@@ -846,6 +868,9 @@ function setTableQuery(q) {
   _tableSearchTimer = setTimeout(() => { _tableSearchTimer = null; applyTableFilter(); }, SEARCH_DEBOUNCE_MS);
 }
 
+/* ==============================
+   FACTORY CATALOG
+   ============================== */
 const FACTORY_CATALOG = [
   ["Баушкин рецепт",24],["Хлеб Деревенский",24],["Хлеб ржаной 100%",48],["Хлеб зерновой",48],
   ["Хлеб бородинский",48],["Батон деревенский",24],["Батон нарезной",24],["Багет французский",24],
@@ -897,6 +922,9 @@ const FACTORY_CATALOG = [
   ["Паннакотта ваниль-смородина",72],["Паннакотта кокос -ананас",72]
 ];
 
+/* ==============================
+   CATALOG / IGNORED
+   ============================== */
 function sanitizeProducts(arr) {
   if (!Array.isArray(arr)) return [];
   const seen = new Set();
@@ -966,10 +994,10 @@ function updateIgnoredCount() {
   if (el) el.textContent = String(IGNORED.length);
 }
 
-function getCheckMoment() {
-  const d = new Date();
-  return isValidDate(d) ? d : new Date();
-}
+/* ==============================
+   FIFO CALC
+   ============================== */
+function getCheckMoment() { return new Date(); }
 function getWriteOffMoment(partyDate, shelfLife) {
   const [y, m, day] = partyDate.split('-').map(Number);
   const check = new Date(y, m - 1, day);
@@ -1007,9 +1035,7 @@ function mergeIncomingByDate(incoming) {
   for (const p of incoming || []) {
     if (!p || !p.date || !/^\d{4}-\d{2}-\d{2}$/.test(p.date)) continue;
     const qty = clampNum(p.qty, 0, MAX_NUM, 0);
-    if (!map.has(p.date)) {
-      map.set(p.date, { date: p.date, qty: 0, _originalQty: p._originalQty != null ? p._originalQty : qty });
-    }
+    if (!map.has(p.date)) map.set(p.date, { date: p.date, qty: 0, _originalQty: p._originalQty != null ? p._originalQty : qty });
     const entry = map.get(p.date);
     entry.qty += qty;
   }
@@ -1046,17 +1072,15 @@ function getRowStatus(calc, row) {
   return { cls: 'row-fresh', label: 'fresh' };
 }
 
+/* ==============================
+   CSV PARSING
+   ============================== */
 function detectDelimiter(firstLine) {
   let semi = 0, comma = 0, inQ = false;
   for (let i = 0; i < firstLine.length; i++) {
     const ch = firstLine[i];
-    if (ch === '"') {
-      if (inQ && firstLine[i + 1] === '"') { i++; continue; }
-      inQ = !inQ;
-    } else if (!inQ) {
-      if (ch === ';') semi++;
-      else if (ch === ',') comma++;
-    }
+    if (ch === '"') { if (inQ && firstLine[i + 1] === '"') { i++; continue; } inQ = !inQ; }
+    else if (!inQ) { if (ch === ';') semi++; else if (ch === ',') comma++; }
   }
   return semi >= comma ? ';' : ',';
 }
@@ -1103,17 +1127,9 @@ function parseShelfLife(str) {
   const s = String(str).toLowerCase().trim();
   if (!s) return null;
   const hours = s.match(/(\d+)\s*час/);
-  if (hours) {
-    const n = Number(hours[1]);
-    if (n === 0) return 0;
-    return clampNum(n, 1, 10000, null);
-  }
+  if (hours) { const n = Number(hours[1]); if (n === 0) return 0; return clampNum(n, 1, 10000, null); }
   const days = s.match(/(\d+)\s*(сут|дн|день|дня|дней)/);
-  if (days) {
-    const n = Number(days[1]) * 24;
-    if (n === 0) return 0;
-    return clampNum(n, 1, 10000, null);
-  }
+  if (days) { const n = Number(days[1]) * 24; if (n === 0) return 0; return clampNum(n, 1, 10000, null); }
   const num = s.match(/(\d+)/);
   if (!num) return null;
   const n = Number(num[1]);
@@ -1155,37 +1171,188 @@ function parseCSV(text, referenceDate) {
     const salesVal = idxSales >= 0 ? parseNum(vals[idxSales]) : 0;
     const shelfRaw = idxShelf >= 0 ? parseShelfLife(vals[idxShelf]) : null;
     const incoming = [];
-    validDateCols.forEach(dc => {
-      const q = parseNum(vals[dc.index]);
-      incoming.push({ date: dc.date, qty: q === '' ? 0 : q });
-    });
-    rows.push({
-      name,
-      stock: null,
-      sales: salesVal === '' ? 0 : salesVal,
-      shelfLife: shelfRaw,
-      incoming,
-      salesOnly: salesOnlyMode
-    });
+    validDateCols.forEach(dc => { const q = parseNum(vals[dc.index]); incoming.push({ date: dc.date, qty: q === '' ? 0 : q }); });
+    rows.push({ name, stock: null, sales: salesVal === '' ? 0 : salesVal, shelfLife: shelfRaw, incoming, salesOnly: salesOnlyMode });
   }
   if (!rows.length) throw new Error('Не удалось распознать ни одной строки.');
   const truncated = matrix.length - 1 > MAX_ROWS;
   return { rows, truncated };
 }
 function sortRowsAlphabetically(rows) {
-  return [...rows].sort((a, b) =>
-    String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' })
-  );
+  return [...rows].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' }));
 }
 
+/* ==============================
+   SYNC (simulated)
+   ============================== */
+function getRemoteSimulated() {
+  try {
+    const raw = localStorage.getItem(SYNC_REMOTE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || !Array.isArray(data.products)) return null;
+    return data;
+  } catch (e) { return null; }
+}
+function setRemoteSimulated(data) {
+  try { localStorage.setItem(SYNC_REMOTE_KEY, JSON.stringify(data)); }
+  catch (e) { console.warn('setRemoteSimulated:', e); }
+}
+function buildSyncPayload() {
+  return {
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    updatedBy: _isOwner ? 'owner' : 'user',
+    products: PRODUCTS,
+    ignored: IGNORED
+  };
+}
+function syncPullFromServer(opts) {
+  opts = opts || {};
+  const silent = !!opts.silent;
+  const remote = getRemoteSimulated();
+  const statusEl = $('syncStatus');
+  if (!remote) {
+    if (!silent && statusEl) { statusEl.className = 'status show warn'; statusEl.textContent = 'На сервере нет данных.'; }
+    return false;
+  }
+  PRODUCTS = sanitizeProducts(remote.products);
+  saveCatalog();
+  if (Array.isArray(remote.ignored)) {
+    IGNORED = remote.ignored.filter(x => typeof x === 'string').map(x => x.trim()).filter(Boolean).slice(0, MAX_CATALOG);
+    saveIgnored();
+  }
+  try { localStorage.setItem(SYNC_LOCAL_UPDATED_AT, String(remote.updatedAt || '')); } catch (e) {}
+  updateCatalogMeta();
+  renderTable();
+  updateUnknownBanner();
+  if (!silent && statusEl) {
+    statusEl.className = 'status show ok';
+    statusEl.textContent = `Загружено с сервера: ${PRODUCTS.length} позиций.`;
+  }
+  return true;
+}
+function syncPushToServer() {
+  const statusEl = $('syncStatus');
+  const payload = buildSyncPayload();
+  setRemoteSimulated(payload);
+  try { localStorage.setItem(SYNC_LOCAL_UPDATED_AT, payload.updatedAt); } catch (e) {}
+  updateCatalogMeta();
+  if (statusEl) {
+    statusEl.className = 'status show ok';
+    statusEl.textContent = `Опубликовано: ${PRODUCTS.length} позиций.`;
+  }
+}
+function setLastCheckTime() {
+  const iso = new Date().toISOString();
+  try { localStorage.setItem(SYNC_LAST_CHECK, iso); } catch (e) {}
+  const el1 = $('lastCheckTime'); if (el1) el1.textContent = formatDateTimeRu(iso);
+  const el2 = $('lastCheckTime2'); if (el2) el2.textContent = formatDateTimeRu(iso);
+}
+function updateCatalogMeta() {
+  const metaLocal = $('metaLocal');
+  const metaRemote = $('metaRemote');
+  if (!metaLocal || !metaRemote) return;
+  try {
+    const localUpdatedAt = localStorage.getItem(SYNC_LOCAL_UPDATED_AT) || '';
+    if (localUpdatedAt) {
+      metaLocal.style.display = 'none';
+      metaRemote.style.display = 'flex';
+      const s = $('syncTime'); if (s) s.textContent = formatDateTimeRu(localUpdatedAt);
+    } else {
+      metaLocal.style.display = 'flex';
+      metaRemote.style.display = 'none';
+    }
+  } catch (e) {}
+}
+function syncCheckOnStartup() {
+  const remote = getRemoteSimulated();
+  if (!remote) return;
+  const localUpdatedAt = localStorage.getItem(SYNC_LOCAL_UPDATED_AT) || '';
+  const remoteUpdatedAt = String(remote.updatedAt || '');
+  if (!remoteUpdatedAt) return;
+  if (!localUpdatedAt || remoteUpdatedAt > localUpdatedAt) {
+    _pendingRemote = remote;
+    showCatalogUpdateBanner(remote);
+  }
+}
+function showCatalogUpdateBanner(remote) {
+  const banner = $('banner');
+  const meta = $('bannerMeta');
+  if (!banner) return;
+  if (meta) {
+    const cnt = Array.isArray(remote.products) ? remote.products.length : 0;
+    meta.textContent = `${formatDateTimeRu(remote.updatedAt)} · ${cnt} позиций`;
+  }
+  banner.classList.remove('hidden');
+}
+function hideCatalogUpdateBanner() {
+  const banner = $('banner');
+  if (banner) banner.classList.add('hidden');
+}
+function applyPendingRemote() {
+  if (!_pendingRemote) return;
+  const ok = syncPullFromServer({ silent: true });
+  _pendingRemote = null;
+  hideCatalogUpdateBanner();
+  if (ok) showToast(`Справочник обновлён: ${PRODUCTS.length} позиций`);
+}
+
+/* ==============================
+   OWNER MODE
+   ============================== */
+function setOwnerMode(on) {
+  _isOwner = !!on;
+  const badge = $('ownerPill');
+  const publishBtn = $('publishBtn');
+  const activateBtn = $('activateOwnerBtn');
+  const deactivateBtn = $('deactivateOwnerBtn');
+  const statusEl = $('syncStatus');
+  if (badge) badge.classList.toggle('show', _isOwner);
+  if (publishBtn) publishBtn.style.display = _isOwner ? 'inline-flex' : 'none';
+  if (activateBtn) activateBtn.style.display = _isOwner ? 'none' : 'inline-flex';
+  if (deactivateBtn) deactivateBtn.style.display = _isOwner ? 'inline-flex' : 'none';
+  if (statusEl && _isOwner) {
+    statusEl.className = 'status show purple';
+    statusEl.textContent = 'Режим владельца активирован';
+  } else if (statusEl && !_isOwner) {
+    statusEl.className = 'status';
+    statusEl.textContent = '';
+  }
+}
+function activateOwner() {
+  const input = $('tokenInput');
+  const statusEl = $('syncStatus');
+  const token = input ? input.value.trim() : '';
+  if (!token) {
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Введите ключ доступа'; }
+    return;
+  }
+  try { localStorage.setItem(ACCESS_KEY, token); } catch (e) {}
+  setOwnerMode(true);
+  if (input) input.value = '';
+}
+function deactivateOwner() {
+  try { localStorage.removeItem(ACCESS_KEY); } catch (e) {}
+  setOwnerMode(false);
+  showToast('Режим владельца выключен');
+}
+function restoreOwnerMode() {
+  try {
+    const token = localStorage.getItem(ACCESS_KEY);
+    if (token) setOwnerMode(true);
+  } catch (e) {}
+}
+
+/* ==============================
+   PHOTOS (IndexedDB)
+   ============================== */
 function openPhotoDB() {
   return new Promise((resolve, reject) => {
     try {
       const req = indexedDB.open(PHOTO_DB, 1);
       req.onupgradeneeded = () => {
-        if (!req.result.objectStoreNames.contains(PHOTO_STORE)) {
-          req.result.createObjectStore(PHOTO_STORE, { keyPath: 'id', autoIncrement: true });
-        }
+        if (!req.result.objectStoreNames.contains(PHOTO_STORE)) req.result.createObjectStore(PHOTO_STORE, { keyPath: 'id', autoIncrement: true });
       };
       req.onsuccess = () => resolve(req.result);
       req.onerror = () => reject(req.error);
@@ -1200,12 +1367,8 @@ async function addPhotos(files, type) {
     const db = await openPhotoDB();
     await Promise.all([...files].map(file => new Promise((resolve, reject) => {
       const tx = db.transaction(PHOTO_STORE, 'readwrite');
-      tx.objectStore(PHOTO_STORE).add({
-        name: safeStr(file.name, 200), type, kind: file.type || '',
-        size: file.size, createdAt: Date.now(), blob: file
-      });
-      tx.oncomplete = resolve;
-      tx.onerror = () => reject(tx.error);
+      tx.objectStore(PHOTO_STORE).add({ name: safeStr(file.name, 200), type, kind: file.type || '', size: file.size, createdAt: Date.now(), blob: file });
+      tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
     })));
     await renderPhotoQueue();
   } catch (e) { console.warn('addPhotos:', e); }
@@ -1238,8 +1401,7 @@ async function clearAllPhotos() {
     return new Promise((resolve, reject) => {
       const tx = db.transaction(PHOTO_STORE, 'readwrite');
       tx.objectStore(PHOTO_STORE).clear();
-      tx.oncomplete = resolve;
-      tx.onerror = () => reject(tx.error);
+      tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
     });
   } catch (e) { console.warn('clearAllPhotos:', e); }
 }
@@ -1247,8 +1409,12 @@ async function renderPhotoQueue() {
   const box = $('photoQueue');
   if (!box) return;
   const items = await getPhotos();
-  if (!items.length) { box.innerHTML = '<div class="hint">Пока нет загруженных файлов.</div>'; return; }
+  if (!items.length) { box.innerHTML = '<div class="hint">Загружено: <b>0 файлов</b></div>'; return; }
   box.innerHTML = '';
+  const count = document.createElement('div');
+  count.className = 'hint';
+  count.innerHTML = `Загружено: <b>${items.length}</b> ${items.length === 1 ? 'файл' : 'файлов'}`;
+  box.appendChild(count);
   items.sort((a, b) => b.createdAt - a.createdAt).forEach(item => {
     const row = document.createElement('div');
     row.className = 'photo-item';
@@ -1258,12 +1424,12 @@ async function renderPhotoQueue() {
       try { const url = URL.createObjectURL(item.blob); img.src = url; img.onload = () => URL.revokeObjectURL(url); }
       catch (e) { img.src = ''; }
     } else {
-      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect width="100%" height="100%" rx="10" fill="#e2e8f0"/><text x="50%" y="55%" text-anchor="middle" font-size="14" font-weight="600" fill="#475569">PDF</text></svg>');
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44"><rect width="100%" height="100%" rx="9" fill="#e2e8f0"/><text x="50%" y="55%" text-anchor="middle" font-size="12" font-weight="600" fill="#475569">PDF</text></svg>');
     }
     const meta = document.createElement('div');
     meta.className = 'photo-meta';
     const isPdf = item.kind === 'application/pdf';
-    meta.innerHTML = `<div class="photo-name">${escapeHtml(item.name)}</div><div class="photo-type">${item.type === 'invoice' ? '📋 Накладная' : '🧾 Чек продаж'} · ${isPdf ? 'PDF' : 'Фото'} · ${Math.round(item.size / 1024)} КБ</div>`;
+    meta.innerHTML = `<div class="photo-name">${escapeHtml(item.name)}</div><div class="photo-type">${item.type === 'invoice' ? 'Накладная' : 'Чек продаж'} · ${isPdf ? 'PDF' : 'Фото'} · ${Math.round(item.size / 1024)} КБ</div>`;
     const acts = document.createElement('div');
     acts.className = 'photo-actions';
     const del = document.createElement('button');
@@ -1275,6 +1441,9 @@ async function renderPhotoQueue() {
   });
 }
 
+/* ==============================
+   SESSION
+   ============================== */
 function scheduleSessionSave() {
   if (isRestoring || pendingSessionReset) return;
   if (saveTimer) clearTimeout(saveTimer);
@@ -1284,16 +1453,12 @@ function saveSession() {
   if (pendingSessionReset) return;
   try {
     const payload = {
-      version: SESSION_VERSION,
-      savedAt: Date.now(),
+      version: SESSION_VERSION, savedAt: Date.now(),
       point: $('point') ? $('point').value.slice(0, 50) : '',
       csvText: ($('csvInput') ? $('csvInput').value : '').slice(0, 500000),
       rows: tableRows.slice(0, MAX_ROWS).map(r => ({
         name: r.name, stock: r.stock, sales: r.sales, shelfLife: r.shelfLife,
-        incoming: (r.incoming || []).slice(0, MAX_DATES).map(p => ({
-          date: p.date, qty: p.qty,
-          _originalQty: p._originalQty != null ? p._originalQty : p.qty
-        })),
+        incoming: (r.incoming || []).slice(0, MAX_DATES).map(p => ({ date: p.date, qty: p.qty, _originalQty: p._originalQty != null ? p._originalQty : p.qty })),
         salesOnly: !!r.salesOnly
       })),
       unknown: unknownRows.slice(0, MAX_ROWS).map(r => ({
@@ -1336,17 +1501,12 @@ function applySession(data) {
         if (r.shelfLife === 0 || r.shelfLife == null) shelf = 0;
         else shelf = clampNum(r.shelfLife, 1, 10000, 72);
         return {
-          name: safeStr(r.name, MAX_NAME),
-          stock,
-          sales: clampNum(r.sales, 0, MAX_NUM, 0),
-          shelfLife: shelf,
-          incoming: Array.isArray(r.incoming)
-            ? r.incoming.slice(0, MAX_DATES).map(p => {
-                const qty = clampNum(p.qty, 0, MAX_NUM, 0);
-                const orig = p._originalQty != null ? clampNum(p._originalQty, 0, MAX_NUM, qty) : qty;
-                return { date: typeof p.date === 'string' ? p.date : '', qty, _originalQty: orig };
-              }).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date))
-            : [],
+          name: safeStr(r.name, MAX_NAME), stock, sales: clampNum(r.sales, 0, MAX_NUM, 0), shelfLife: shelf,
+          incoming: Array.isArray(r.incoming) ? r.incoming.slice(0, MAX_DATES).map(p => {
+            const qty = clampNum(p.qty, 0, MAX_NUM, 0);
+            const orig = p._originalQty != null ? clampNum(p._originalQty, 0, MAX_NUM, qty) : qty;
+            return { date: typeof p.date === 'string' ? p.date : '', qty, _originalQty: orig };
+          }).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date)) : [],
           salesOnly: !!r.salesOnly
         };
       }).filter(r => r.name);
@@ -1357,12 +1517,8 @@ function applySession(data) {
         if (r.shelfLife === 0 || r.shelfLife == null) shelf = 0;
         else shelf = clampNum(r.shelfLife, 1, 10000, 72);
         return {
-          name: safeStr(r.name, MAX_NAME),
-          sales: clampNum(r.sales, 0, MAX_NUM, 0),
-          shelfLife: shelf,
-          incoming: Array.isArray(r.incoming)
-            ? r.incoming.slice(0, MAX_DATES).map(p => ({ date: typeof p.date === 'string' ? p.date : '', qty: clampNum(p.qty, 0, MAX_NUM, 0) })).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date))
-            : [],
+          name: safeStr(r.name, MAX_NAME), sales: clampNum(r.sales, 0, MAX_NUM, 0), shelfLife: shelf,
+          incoming: Array.isArray(r.incoming) ? r.incoming.slice(0, MAX_DATES).map(p => ({ date: typeof p.date === 'string' ? p.date : '', qty: clampNum(p.qty, 0, MAX_NUM, 0) })).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date)) : [],
           salesOnly: !!r.salesOnly
         };
       }).filter(r => r.name);
@@ -1371,22 +1527,22 @@ function applySession(data) {
   } finally { isRestoring = false; }
 }
 
+/* ==============================
+   RESULT META
+   ============================== */
 function updateResultMeta() {
   const box = $('resultMeta');
   if (!box) return;
   if (!Array.isArray(tableRows) || !tableRows.length) { box.style.display = 'none'; return; }
-  box.style.display = 'flex';
-  const d = $('metaDate'); if (d) d.textContent = formatDateRu(getTodayStr());
-  const t = $('metaTime'); if (t) t.textContent = getCurrentTimeStr();
+  box.style.display = 'grid';
+  const d = $('metaDate'); if (d) d.textContent = formatDateShortRu(getTodayStr());
   const pt = $('point');
   const p = $('metaPoint'); if (p) p.textContent = (pt && pt.value.trim()) ? pt.value.trim() : '—';
-  const wrap = $('metaPointWrap');
-  if (wrap) {
-    if (pt && pt.value.trim()) wrap.classList.remove('empty');
-    else wrap.classList.add('empty');
-  }
 }
 
+/* ==============================
+   SCROLL/FOCUS
+   ============================== */
 function scrollIntoContainer(el) {
   const scroller = el.closest('.table-scroll');
   if (!scroller) return;
@@ -1396,18 +1552,12 @@ function scrollIntoContainer(el) {
   const theadH = thead ? thead.getBoundingClientRect().height : 0;
   const topLimit = scRect.top + theadH + 4;
   const bottomLimit = scRect.bottom - 4;
-  if (elRect.top < topLimit) {
-    scroller.scrollTop += elRect.top - topLimit;
-  } else if (elRect.bottom > bottomLimit) {
-    scroller.scrollTop += elRect.bottom - bottomLimit;
-  }
+  if (elRect.top < topLimit) scroller.scrollTop += elRect.top - topLimit;
+  else if (elRect.bottom > bottomLimit) scroller.scrollTop += elRect.bottom - bottomLimit;
   const leftLimit = scRect.left;
   const rightLimit = scRect.right;
-  if (elRect.left < leftLimit) {
-    scroller.scrollLeft += elRect.left - leftLimit;
-  } else if (elRect.right > rightLimit) {
-    scroller.scrollLeft += elRect.right - rightLimit;
-  }
+  if (elRect.left < leftLimit) scroller.scrollLeft += elRect.left - leftLimit;
+  else if (elRect.right > rightLimit) scroller.scrollLeft += elRect.right - rightLimit;
 }
 function focusEl(el) {
   el.focus({ preventScroll: true });
@@ -1448,13 +1598,15 @@ function tableKey(e) {
   tableNav(e.target, k);
 }
 
+/* ==============================
+   RENDER TABLE
+   ============================== */
 function buildColgroupHTML(dates) {
-  const cols = [
+  return [
     '<col style="width:220px">','<col style="width:76px">','<col style="width:76px">',
     ...dates.map(() => '<col style="width:84px">'),
     '<col style="width:60px">','<col style="width:92px">','<col style="width:92px">','<col style="width:96px">','<col style="width:96px">'
-  ];
-  return cols.join('');
+  ].join('');
 }
 function buildTheadHTML(dates) {
   return `
@@ -1469,13 +1621,9 @@ function buildTheadHTML(dates) {
     <th>Продано просроченным</th>
   `;
 }
-
 function makeNumInput(opts) {
   const inp = document.createElement('input');
-  inp.type = 'text';
-  inp.inputMode = 'numeric';
-  inp.pattern = '[0-9]*';
-  inp.autocomplete = 'off';
+  inp.type = 'text'; inp.inputMode = 'numeric'; inp.pattern = '[0-9]*'; inp.autocomplete = 'off';
   inp.className = opts.className || 'num';
   if (opts.value != null) inp.value = String(opts.value);
   if (opts.placeholder) inp.placeholder = opts.placeholder;
@@ -1486,25 +1634,17 @@ function makeNumInput(opts) {
   });
   return inp;
 }
-
 function bindTableInput(inp) {
   inp.addEventListener('click', e => e.stopPropagation());
-  inp.addEventListener('focus', e => {
-    e.stopPropagation();
-    freezeBody();
-    requestAnimationFrame(() => scrollIntoContainer(inp));
-  });
+  inp.addEventListener('focus', e => { e.stopPropagation(); freezeBody(); requestAnimationFrame(() => scrollIntoContainer(inp)); });
   inp.addEventListener('blur', () => {
     setTimeout(() => {
       if (_modalCount > 0) return;
-      if (!document.activeElement || !document.activeElement.closest('.table-scroll')) {
-        unfreezeBody();
-      }
+      if (!document.activeElement || !document.activeElement.closest('.table-scroll')) unfreezeBody();
     }, 100);
   });
   inp.addEventListener('keydown', tableKey);
 }
-
 function renderTable() {
   if (isRendering) return;
   isRendering = true;
@@ -1517,8 +1657,8 @@ function renderTable() {
     if (!tbody || !colgroup || !theadTr || !wrap) return;
     tbody.innerHTML = '';
     if (!Array.isArray(tableRows) || !tableRows.length) {
-      if ($('summary')) { $('summary').textContent = 'Загрузите CSV от ИИ, чтобы увидеть результат.'; $('summary').dataset.baseSummary = ''; }
-      if ($('totals')) $('totals').style.display = 'none';
+      if ($('summary')) { $('summary').textContent = 'Загрузите CSV и введите фактический остаток.'; $('summary').dataset.baseSummary = ''; }
+      if ($('totals')) $('totals').className = 'status';
       wrap.style.display = 'none';
       if (searchWrap) searchWrap.style.display = 'none';
       updateResultMeta();
@@ -1548,31 +1688,20 @@ function renderTable() {
       nameText.textContent = row.name;
       const editHint = document.createElement('span');
       editHint.className = 'edit-hint';
-      editHint.textContent = '✏️';
+      editHint.textContent = '›';
       nameCell.appendChild(nameText);
       nameCell.appendChild(editHint);
       tdName.appendChild(nameCell);
       tr.appendChild(tdName);
       const tdStock = document.createElement('td');
       if (row.salesOnly) {
-        const span = document.createElement('span');
-        span.className = 'num-disabled';
-        span.textContent = '—';
-        tdStock.appendChild(span);
+        const span = document.createElement('span'); span.className = 'num-disabled'; span.textContent = '—'; tdStock.appendChild(span);
       } else {
         const inputStock = makeNumInput({
-          value: row.stock == null ? '' : row.stock,
-          placeholder: '—',
-          onInput: (cleaned) => {
-            row.stock = cleaned === '' ? null : clampNum(cleaned, 0, MAX_NUM, null);
-            refreshRow(row, tr);
-            scheduleSessionSave();
-          }
+          value: row.stock == null ? '' : row.stock, placeholder: '—',
+          onInput: (cleaned) => { row.stock = cleaned === '' ? null : clampNum(cleaned, 0, MAX_NUM, null); refreshRow(row, tr); scheduleSessionSave(); }
         });
-        inputStock.addEventListener('change', () => {
-          if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
-          saveSession();
-        });
+        inputStock.addEventListener('change', () => { if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; } saveSession(); });
         bindTableInput(inputStock);
         tdStock.appendChild(inputStock);
       }
@@ -1580,16 +1709,9 @@ function renderTable() {
       const tdSales = document.createElement('td');
       const inputSales = makeNumInput({
         value: row.sales || 0,
-        onInput: (cleaned) => {
-          row.sales = cleaned === '' ? 0 : clampNum(cleaned, 0, MAX_NUM, 0);
-          refreshRow(row, tr);
-          scheduleSessionSave();
-        }
+        onInput: (cleaned) => { row.sales = cleaned === '' ? 0 : clampNum(cleaned, 0, MAX_NUM, 0); refreshRow(row, tr); scheduleSessionSave(); }
       });
-      inputSales.addEventListener('change', () => {
-        if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
-        saveSession();
-      });
+      inputSales.addEventListener('change', () => { if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; } saveSession(); });
       bindTableInput(inputSales);
       tdSales.appendChild(inputSales);
       tr.appendChild(tdSales);
@@ -1598,45 +1720,33 @@ function renderTable() {
         td.className = 'income-cell';
         const party = (row.incoming || []).find(p => p.date === d);
         if (row.salesOnly) {
-          const span = document.createElement('span');
-          span.className = 'num-disabled';
-          span.textContent = '—';
-          td.appendChild(span);
+          const span = document.createElement('span'); span.className = 'num-disabled'; span.textContent = '—'; td.appendChild(span);
         } else {
           const inp = makeNumInput({
             value: party ? party.qty : 0,
             onInput: (cleaned) => {
               const newQty = cleaned === '' ? 0 : clampNum(cleaned, 0, MAX_NUM, 0);
-              if (party) party.qty = newQty;
-              else row.incoming.push({ date: d, qty: newQty, _originalQty: 0 });
+              if (party) party.qty = newQty; else row.incoming.push({ date: d, qty: newQty, _originalQty: 0 });
               markEdited(td, party, newQty);
               refreshRow(row, tr);
               scheduleSessionSave();
             }
           });
           inp.addEventListener('blur', () => { if (inp.value === '') inp.value = '0'; });
-          inp.addEventListener('change', () => {
-            if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
-            saveSession();
-          });
+          inp.addEventListener('change', () => { if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; } saveSession(); });
           bindTableInput(inp);
           td.appendChild(inp);
           const resetBtn = document.createElement('button');
-          resetBtn.className = 'reset-btn';
-          resetBtn.type = 'button';
-          resetBtn.title = 'Сбросить';
-          resetBtn.textContent = '↺';
+          resetBtn.className = 'reset-btn'; resetBtn.type = 'button'; resetBtn.title = 'Сбросить'; resetBtn.textContent = '↺';
           if (party && party._originalQty != null && party._originalQty !== party.qty) td.classList.add('edited');
           resetBtn.addEventListener('click', e => {
             e.stopPropagation();
-            if (!party) return;
-            if (party._originalQty != null) {
-              party.qty = party._originalQty;
-              inp.value = String(party._originalQty);
-              markEdited(td, party, party.qty);
-              refreshRow(row, tr);
-              scheduleSessionSave();
-            }
+            if (!party || party._originalQty == null) return;
+            party.qty = party._originalQty;
+            inp.value = String(party._originalQty);
+            markEdited(td, party, party.qty);
+            refreshRow(row, tr);
+            scheduleSessionSave();
           });
           td.appendChild(resetBtn);
         }
@@ -1722,26 +1832,24 @@ function updateTotals() {
     const calc = computeFIFO(row);
     if (row.salesOnly) cntInfo++;
     else if (calc.soldExpired !== null) {
-      totalFreshOnShelf += calc.freshOnShelf;
-      totalFreshSold += calc.freshSold;
-      totalExpiredOnShelf += calc.expiredOnShelf;
-      totalSoldExpired += calc.soldExpired;
+      totalFreshOnShelf += calc.freshOnShelf; totalFreshSold += calc.freshSold;
+      totalExpiredOnShelf += calc.expiredOnShelf; totalSoldExpired += calc.soldExpired;
       hasAnyStock = true;
     }
     totalSales += Number(row.sales) || 0;
   }
   const isSalesOnlyMode = cntInfo > 0 && cntInfo === tableRows.length;
   let base = '';
-  if (isSalesOnlyMode) base = `📋 Режим «только продажи»: ${tableRows.length} позиций.`;
-  else if (cntInfo > 0) base = `Позиций: ${tableRows.length} (без накладных: ${cntInfo}).`;
-  else base = hasAnyStock ? `Позиций: ${tableRows.length}.` : `Позиций: ${tableRows.length}. Введите остаток для расчёта.`;
+  if (isSalesOnlyMode) base = `${tableRows.length} позиций · только продажи.`;
+  else if (cntInfo > 0) base = `${tableRows.length} позиций · без накладных: ${cntInfo}.`;
+  else base = hasAnyStock ? `${tableRows.length} позиций.` : `${tableRows.length} позиций. Введите остаток.`;
   summary.dataset.baseSummary = base;
   summary.textContent = base;
   const box = $('totals');
   if (!box) return;
-  box.style.display = 'block';
+  box.className = 'status show info';
   if (isSalesOnlyMode) {
-    box.innerHTML = `<b>🔵 Режим «только продажи»</b><br>Накладные не загружены.<br><br><b>Продано всего:</b> ${totalSales} шт.`;
+    box.innerHTML = `<b>Режим «только продажи»</b><br>Накладные не загружены.<br>Продано всего: <b>${totalSales}</b> шт.`;
     return;
   }
   if (!hasAnyStock) {
@@ -1749,21 +1857,20 @@ function updateTotals() {
     return;
   }
   box.innerHTML = `
-    <b>Итоги:</b><br>
-    Свежих на витрине: <b>${totalFreshOnShelf}</b> шт ·
-    Продано свежих: <b>${totalFreshSold}</b> шт ·
-    Продано просроченным: <b style="color:var(--red)">${totalSoldExpired}</b> шт ·
-    Просрочено на витрине: <b style="color:var(--red)">${totalExpiredOnShelf}</b> шт
-    ${cntInfo > 0 ? `<br><span style="color:var(--accent)">🔵 Без накладных: <b>${cntInfo}</b> поз.</span>` : ''}
+    Свежих на витрине: <b>${totalFreshOnShelf}</b> шт · Продано свежих: <b>${totalFreshSold}</b> шт<br>
+    Продано просроченным: <b style="color:var(--red)">${totalSoldExpired}</b> шт · Просрочено на витрине: <b style="color:var(--red)">${totalExpiredOnShelf}</b> шт
+    ${cntInfo > 0 ? `<br>Без накладных: <b>${cntInfo}</b> поз.` : ''}
   `;
   if (_tableQuery) applyTableFilter();
 }
 
+/* ==============================
+   PRODUCT MODAL
+   ============================== */
 function productInputs() {
   const list = [];
   const s = $('pmStock'), sl = $('pmSales');
-  if (s) list.push(s);
-  if (sl) list.push(sl);
+  if (s) list.push(s); if (sl) list.push(sl);
   const box = $('pmIncoming');
   if (box) box.querySelectorAll('input.pf-num').forEach(i => list.push(i));
   return list;
@@ -1785,16 +1892,11 @@ function productKey(e) {
   e.preventDefault();
   productNav(e.target, (k === 'ArrowDown' || k === 'ArrowRight') ? 1 : -1);
 }
-
 function openProduct(row, tr) {
   if (!row) return;
   openIdx = tableRows.indexOf(row);
   openTr = tr;
-  openSnapshot = {
-    stock: row.stock,
-    sales: row.sales,
-    incoming: (row.incoming || []).map(p => ({ date: p.date, qty: p.qty, _originalQty: p._originalQty }))
-  };
+  openSnapshot = { stock: row.stock, sales: row.sales, incoming: (row.incoming || []).map(p => ({ date: p.date, qty: p.qty, _originalQty: p._originalQty })) };
   $('pmName').textContent = row.name;
   $('pmShelf').textContent = `Срок годности: ${row.shelfLife} ч`;
   $('pmStock').value = row.stock == null ? '' : String(row.stock);
@@ -1803,44 +1905,22 @@ function openProduct(row, tr) {
   box.innerHTML = '';
   const dates = [...new Set((row.incoming || []).map(p => p.date))].sort((a, b) => b.localeCompare(a));
   if (!dates.length) {
-    const empty = document.createElement('div');
-    empty.className = 'pf-date-label';
-    empty.textContent = 'Нет накладных по этой позиции';
-    box.appendChild(empty);
+    const empty = document.createElement('div'); empty.className = 'pf-date-label'; empty.textContent = 'Нет накладных'; box.appendChild(empty);
   } else {
     dates.forEach(d => {
       const party = row.incoming.find(p => p.date === d);
-      const dateRow = document.createElement('div');
-      dateRow.className = 'pf-date-row';
-      const lbl = document.createElement('div');
-      lbl.className = 'pf-date-label';
-      lbl.textContent = fmtDateRuShort(d);
-      const inp = makeNumInput({
-        className: 'pf-num',
-        value: party ? (party.qty || 0) : 0
-      });
+      const dateRow = document.createElement('div'); dateRow.className = 'pf-date-row';
+      const lbl = document.createElement('div'); lbl.className = 'pf-date-label'; lbl.textContent = fmtDateRuShort(d);
+      const inp = makeNumInput({ className: 'pf-num', value: party ? (party.qty || 0) : 0 });
       inp.dataset.date = d;
       inp.addEventListener('keydown', productKey);
-      dateRow.appendChild(lbl);
-      dateRow.appendChild(inp);
-      box.appendChild(dateRow);
+      dateRow.appendChild(lbl); dateRow.appendChild(inp); box.appendChild(dateRow);
     });
   }
   openModal('productModal');
-  setTimeout(() => {
-    const s = $('pmStock');
-    if (s) {
-      s.focus({ preventScroll: true });
-      try { s.select(); } catch (e) {}
-    }
-  }, 100);
+  setTimeout(() => { const s = $('pmStock'); if (s) { s.focus({ preventScroll: true }); try { s.select(); } catch (e) {} } }, 100);
 }
-function closeProduct() {
-  closeModal('productModal');
-  openIdx = -1;
-  openTr = null;
-  openSnapshot = null;
-}
+function closeProduct() { closeModal('productModal'); openIdx = -1; openTr = null; openSnapshot = null; }
 function commitProduct() {
   if (openIdx < 0) { closeProduct(); return; }
   const row = tableRows[openIdx];
@@ -1856,8 +1936,7 @@ function commitProduct() {
       if (!d) return;
       const party = (row.incoming || []).find(p => p.date === d);
       const q = clampNum(onlyDigits(inp.value) || '0', 0, MAX_NUM, 0);
-      if (party) party.qty = q;
-      else row.incoming.push({ date: d, qty: q, _originalQty: 0 });
+      if (party) party.qty = q; else row.incoming.push({ date: d, qty: q, _originalQty: 0 });
     });
   }
   if (openTr) refreshRow(row, openTr);
@@ -1876,6 +1955,9 @@ function cancelProduct() {
   closeProduct();
 }
 
+/* ==============================
+   UNKNOWN MODAL
+   ============================== */
 function renderUnknownModal() {
   const body = $('unknownBody');
   const counter = $('unknownCounter');
@@ -1886,10 +1968,7 @@ function renderUnknownModal() {
   if (searchWrap) searchWrap.style.display = total > UNKNOWN_SEARCH_THRESHOLD ? 'block' : 'none';
   const q = normalizeName(unknownQuery);
   const filtered = q ? unknownRows.filter(r => normalizeName(r.name).includes(q)) : unknownRows;
-  if (!filtered.length) {
-    body.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Список пуст.</div>';
-    return;
-  }
+  if (!filtered.length) { body.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Список пуст.</div>'; return; }
   const visible = filtered.slice(0, unknownVisible);
   const frag = document.createDocumentFragment();
   visible.forEach(r => {
@@ -1899,61 +1978,34 @@ function renderUnknownModal() {
     if (unknownSelected.has(normalizeName(r.name))) item.classList.add('selected');
     const bodyEl = document.createElement('div');
     bodyEl.className = 'unknown-body';
-    const nameEl = document.createElement('div');
-    nameEl.className = 'unknown-name';
-    nameEl.textContent = r.name;
-    const infoEl = document.createElement('div');
-    infoEl.className = 'unknown-info';
-    const salesKv = document.createElement('span');
-    salesKv.className = 'kv';
-    salesKv.innerHTML = `Продано: <b>${r.sales || 0}</b>`;
+    const nameEl = document.createElement('div'); nameEl.className = 'unknown-name'; nameEl.textContent = r.name;
+    const infoEl = document.createElement('div'); infoEl.className = 'unknown-info';
+    const salesKv = document.createElement('span'); salesKv.className = 'kv-item'; salesKv.innerHTML = `Продано: <b>${r.sales || 0}</b>`;
     infoEl.appendChild(salesKv);
     if (r.incoming && r.incoming.length) {
       const datesWithQty = r.incoming.filter(p => p.qty > 0).sort((a, b) => b.date.localeCompare(a.date));
       datesWithQty.forEach(p => {
-        const kv = document.createElement('span');
-        kv.className = 'kv';
+        const kv = document.createElement('span'); kv.className = 'kv-item';
         kv.innerHTML = `За ${fmtDateRuShort(p.date)}: <b>${p.qty}</b>`;
         infoEl.appendChild(kv);
       });
     }
-    const shelfRow = document.createElement('div');
-    shelfRow.className = 'unknown-shelf';
-    const shelfLbl = document.createElement('span');
-    shelfLbl.textContent = 'Срок:';
-    const shelfInp = makeNumInput({
-      className: '',
-      value: r.shelfLife && r.shelfLife > 0 ? r.shelfLife : 0
-    });
-    shelfInp.style.width = '70px';
-    shelfInp.style.minHeight = '32px';
-    shelfInp.style.height = '32px';
-    shelfInp.style.padding = '0 6px';
-    shelfInp.style.fontSize = '13px';
-    shelfInp.style.fontWeight = '600';
-    shelfInp.style.textAlign = 'center';
+    const shelfRow = document.createElement('div'); shelfRow.className = 'unknown-shelf';
+    const shelfLbl = document.createElement('span'); shelfLbl.textContent = 'Срок:';
+    const shelfInp = makeNumInput({ className: '', value: r.shelfLife && r.shelfLife > 0 ? r.shelfLife : 0 });
+    Object.assign(shelfInp.style, { width:'70px', minHeight:'32px', height:'32px', padding:'0 6px', fontSize:'13px', fontWeight:'600', textAlign:'center' });
     shelfInp.dataset.role = 'shelf';
     shelfInp.addEventListener('click', e => e.stopPropagation());
     shelfInp.addEventListener('focus', e => e.stopPropagation());
-    const suffix = document.createElement('span');
-    suffix.textContent = 'ч';
-    shelfRow.appendChild(shelfLbl);
-    shelfRow.appendChild(shelfInp);
-    shelfRow.appendChild(suffix);
-    bodyEl.appendChild(nameEl);
-    bodyEl.appendChild(infoEl);
-    bodyEl.appendChild(shelfRow);
+    const suffix = document.createElement('span'); suffix.textContent = 'ч';
+    shelfRow.appendChild(shelfLbl); shelfRow.appendChild(shelfInp); shelfRow.appendChild(suffix);
+    bodyEl.appendChild(nameEl); bodyEl.appendChild(infoEl); bodyEl.appendChild(shelfRow);
     item.appendChild(bodyEl);
     item.addEventListener('click', e => {
       if (e.target.closest('input')) return;
       const key = normalizeName(r.name);
-      if (unknownSelected.has(key)) {
-        unknownSelected.delete(key);
-        item.classList.remove('selected');
-      } else {
-        unknownSelected.add(key);
-        item.classList.add('selected');
-      }
+      if (unknownSelected.has(key)) { unknownSelected.delete(key); item.classList.remove('selected'); }
+      else { unknownSelected.add(key); item.classList.add('selected'); }
       const c = $('unknownCounter');
       if (c) c.textContent = `Всего: ${total} · Выбрано: ${unknownSelected.size}`;
     });
@@ -1962,8 +2014,7 @@ function renderUnknownModal() {
   body.innerHTML = '';
   body.appendChild(frag);
   if (filtered.length > visible.length) {
-    const more = document.createElement('div');
-    more.className = 'unknown-load-more';
+    const more = document.createElement('div'); more.className = 'unknown-load-more';
     more.textContent = `Показать ещё ${Math.min(UNKNOWN_PAGE_SIZE, filtered.length - visible.length)}`;
     more.onclick = () => { unknownVisible += UNKNOWN_PAGE_SIZE; renderUnknownModal(); };
     body.appendChild(more);
@@ -1971,19 +2022,13 @@ function renderUnknownModal() {
 }
 function openUnknownModal() {
   if (!unknownRows.filter(r => !isIgnored(r.name)).length) return;
-  unknownVisible = UNKNOWN_PAGE_SIZE;
-  unknownQuery = '';
-  unknownSelected = new Set();
+  unknownVisible = UNKNOWN_PAGE_SIZE; unknownQuery = ''; unknownSelected = new Set();
   const searchEl = $('unknownSearch');
   if (searchEl) searchEl.value = '';
   renderUnknownModal();
   openModal('unknownModal');
 }
-function closeUnknownModal() {
-  unknownSelected = new Set();
-  closeModal('unknownModal');
-  updateUnknownBanner();
-}
+function closeUnknownModal() { unknownSelected = new Set(); closeModal('unknownModal'); updateUnknownBanner(); }
 function updateUnknownBanner() {
   const banner = $('unknownBanner');
   const countEl = $('unknownCount');
@@ -2005,9 +2050,7 @@ function addSelectedUnknown() {
   });
   if (!toAdd.length) return;
   const addKeys = new Set(toAdd.map(x => normalizeName(x.name)));
-  toAdd.forEach(({ name, hours }) => {
-    PRODUCTS.push({ name, shelfLife: hours });
-  });
+  toAdd.forEach(({ name, hours }) => { PRODUCTS.push({ name, shelfLife: hours }); });
   saveCatalog();
   const moved = [];
   for (let i = unknownRows.length - 1; i >= 0; i--) {
@@ -2016,8 +2059,7 @@ function addSelectedUnknown() {
       const entry = toAdd.find(x => normalizeName(x.name) === normalizeName(row.name));
       row.shelfLife = entry ? entry.hours : row.shelfLife;
       if (Array.isArray(row.incoming)) row.incoming.forEach(p => { p._originalQty = p.qty; });
-      moved.push(row);
-      unknownRows.splice(i, 1);
+      moved.push(row); unknownRows.splice(i, 1);
     }
   }
   unknownSelected = new Set();
@@ -2028,24 +2070,24 @@ function addSelectedUnknown() {
   scheduleSessionSave();
   if (!unknownRows.filter(r => !isIgnored(r.name)).length) closeModal('unknownModal');
   else renderUnknownModal();
-  showToast(`Добавлено в справочник: ${toAdd.length}`);
+  showToast(`Добавлено: ${toAdd.length}`);
 }
 function ignoreAllUnknown() {
   if (!unknownRows.length) return;
   const count = unknownRows.length;
   if (!confirm(`Добавить ${count} позиций в игнор-лист?`)) return;
-  for (const r of unknownRows) {
-    if (!isIgnored(r.name)) IGNORED.push(r.name);
-  }
+  for (const r of unknownRows) { if (!isIgnored(r.name)) IGNORED.push(r.name); }
   saveIgnored();
-  unknownRows = [];
-  unknownSelected = new Set();
+  unknownRows = []; unknownSelected = new Set();
   scheduleSessionSave();
   updateUnknownBanner();
   closeModal('unknownModal');
-  showToast(`Игнорировано: позиций ${count}`);
+  showToast(`Игнорировано: ${count}`);
 }
 
+/* ==============================
+   APPLY CSV
+   ============================== */
 function applyCSV() {
   if (applyBusy) return;
   applyBusy = true;
@@ -2064,19 +2106,12 @@ function applyCSV() {
     const { rows, truncated } = parseCSV(text, reference);
     if (!rows.length) throw new Error('Не удалось распознать строки.');
     if (myToken !== resetToken) return;
-    const inCatalog = [];
-    const notInCatalog = [];
+    const inCatalog = [], notInCatalog = [];
     for (const r of rows) {
       const key = normalizeName(r.name);
       const p = PRODUCTS.find(x => normalizeName(x.name) === key);
-      if (p) {
-        r.shelfLife = p.shelfLife;
-        r.incoming.forEach(p2 => { p2._originalQty = p2.qty; });
-        inCatalog.push(r);
-      } else {
-        if (isIgnored(r.name)) continue;
-        notInCatalog.push(r);
-      }
+      if (p) { r.shelfLife = p.shelfLife; r.incoming.forEach(p2 => { p2._originalQty = p2.qty; }); inCatalog.push(r); }
+      else { if (isIgnored(r.name)) continue; notInCatalog.push(r); }
     }
     if (myToken !== resetToken) return;
     tableRows = sortRowsAlphabetically(inCatalog);
@@ -2091,22 +2126,25 @@ function applyCSV() {
     if (statusEl) {
       statusEl.className = 'status show ok';
       let msg = '';
-      if (salesOnlyMode) msg = `✅ Загружено ${rows.length} позиций (только продажи).`;
-      else if (hasMixed) msg = `✅ Загружено ${rows.length} позиций (часть — только продажи).`;
-      else msg = `✅ Загружено ${rows.length} позиций. Дат прихода: ${validDates.size}.`;
-      if (truncated) msg += ` ⚠️ Первые ${MAX_ROWS} строк.`;
-      if (!salesOnlyMode && validDates.size === 0) msg += ` ⚠️ Даты приходов не распознаны.`;
-      if (unknownRows.length) msg += ` · ⚠️ Не в справочнике: ${unknownRows.length}.`;
+      if (salesOnlyMode) msg = `Загружено ${rows.length} позиций (только продажи).`;
+      else if (hasMixed) msg = `Загружено ${rows.length} позиций (часть — только продажи).`;
+      else msg = `Загружено ${rows.length} позиций. Дат прихода: ${validDates.size}.`;
+      if (truncated) msg += ` Первые ${MAX_ROWS} строк.`;
+      if (!salesOnlyMode && validDates.size === 0) msg += ` Даты приходов не распознаны.`;
+      if (unknownRows.length) msg += ` Не в справочнике: ${unknownRows.length}.`;
       statusEl.textContent = msg;
     }
     if (unknownRows.length) {
       setTimeout(() => { if (unknownRows.length && $('unknownModal').classList.contains('hidden')) openUnknownModal(); }, 300);
     }
   } catch (e) {
-    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = '❌ ' + (e.message || 'Ошибка'); }
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = e.message || 'Ошибка'; }
   }
 }
 
+/* ==============================
+   EXPORT EXCEL
+   ============================== */
 function exportExcel() {
   if (exportBusy) return;
   if (typeof XLSX === 'undefined') { alert('Библиотека Excel не загружена.'); return; }
@@ -2121,20 +2159,12 @@ function exportExcel() {
     unknownRows.forEach(r => (r.incoming || []).forEach(p => { if (p.date) allDates.add(p.date); }));
     let dates = [...allDates].sort((a, b) => b.localeCompare(a));
     if (dates.length > MAX_DATES) dates = dates.slice(0, MAX_DATES);
-    const header = ['Наименование', 'Остаток', 'Продано',
-      ...dates.map(d => `Получено за ${fmtDateRuShort(d)}`),
-      'Срок', 'Свежих на витрине', 'Продано свежих', 'Просрочено на витрине', 'Продано просроченным'];
+    const header = ['Наименование', 'Остаток', 'Продано', ...dates.map(d => `Получено за ${fmtDateRuShort(d)}`), 'Срок', 'Свежих на витрине', 'Продано свежих', 'Просрочено на витрине', 'Продано просроченным'];
     const data = [header.map(safeExcelCell)];
     tableRows.forEach(row => {
       const calc = computeFIFO(row);
-      data.push([
-        safeExcelCell(row.name),
-        row.salesOnly ? '—' : (row.stock == null ? '' : row.stock),
-        row.sales || 0,
-        ...dates.map(d => {
-          const p = (row.incoming || []).find(x => x.date === d);
-          return p ? p.qty : 0;
-        }),
+      data.push([safeExcelCell(row.name), row.salesOnly ? '—' : (row.stock == null ? '' : row.stock), row.sales || 0,
+        ...dates.map(d => { const p = (row.incoming || []).find(x => x.date === d); return p ? p.qty : 0; }),
         `${row.shelfLife} ч`,
         calc.freshOnShelf === null ? '—' : calc.freshOnShelf,
         calc.freshSold === null ? '—' : calc.freshSold,
@@ -2143,27 +2173,16 @@ function exportExcel() {
       ]);
     });
     if (unknownRows.length) {
-      data.push([]);
-      data.push(['── НЕ В СПРАВОЧНИКЕ ──', '', '', ...dates.map(() => ''), '', '', '', '', '']);
-      data.push([]);
+      data.push([]); data.push(['— НЕ В СПРАВОЧНИКЕ —', '', '', ...dates.map(() => ''), '', '', '', '', '']); data.push([]);
       unknownRows.forEach(row => {
-        data.push([
-          safeExcelCell(row.name),
-          '—',
-          row.sales || 0,
-          ...dates.map(d => {
-            const p = (row.incoming || []).find(x => x.date === d);
-            return p ? p.qty : 0;
-          }),
-          `${row.shelfLife || 0} ч`,
-          '—', '—', '—', '—'
+        data.push([safeExcelCell(row.name), '—', row.sales || 0,
+          ...dates.map(d => { const p = (row.incoming || []).find(x => x.date === d); return p ? p.qty : 0; }),
+          `${row.shelfLife || 0} ч`, '—', '—', '—', '—'
         ]);
       });
     }
     const ws = XLSX.utils.aoa_to_sheet(data);
-    ws['!cols'] = [{ wch: 35 }, { wch: 10 }, { wch: 10 },
-      ...dates.map(() => ({ wch: 14 })),
-      { wch: 8 }, { wch: 14 }, { wch: 14 }, { wch: 18 }, { wch: 18 }];
+    ws['!cols'] = [{ wch: 35 }, { wch: 10 }, { wch: 10 }, ...dates.map(() => ({ wch: 14 })), { wch: 8 }, { wch: 14 }, { wch: 14 }, { wch: 18 }, { wch: 18 }];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'FB Аудит');
     const date = getTodayStr();
@@ -2174,6 +2193,9 @@ function exportExcel() {
   finally { setTimeout(() => { exportBusy = false; if (btn) btn.classList.remove('busy'); }, 500); }
 }
 
+/* ==============================
+   CATALOG MODAL
+   ============================== */
 function renderCatalogList() {
   const list = $('catalogList');
   if (!list) return;
@@ -2181,9 +2203,7 @@ function renderCatalogList() {
   const query = (searchEl && searchEl.value || '').toLowerCase().trim().slice(0, 100);
   list.innerHTML = '';
   if (!PRODUCTS.length) { list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Справочник пуст.</div>'; return; }
-  const filtered = PRODUCTS.map((p, idx) => ({ ...p, _idx: idx }))
-    .filter(p => !query || p.name.toLowerCase().includes(query))
-    .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+  const filtered = PRODUCTS.map((p, idx) => ({ ...p, _idx: idx })).filter(p => !query || p.name.toLowerCase().includes(query)).sort((a, b) => a.name.localeCompare(b.name, 'ru'));
   if (!filtered.length) { list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Ничего не найдено.</div>'; return; }
   const fragment = document.createDocumentFragment();
   filtered.forEach(p => {
@@ -2200,32 +2220,23 @@ function renderCatalogList() {
       PRODUCTS[p._idx].name = newName;
       tableRows.forEach(r => { if (r.name === oldName) r.name = newName; });
       unknownRows.forEach(r => { if (r.name === oldName) r.name = newName; });
-      saveCatalog();
-      scheduleSessionSave();
+      saveCatalog(); scheduleSessionSave();
     };
     const hoursInput = document.createElement('input');
     hoursInput.type = 'text'; hoursInput.inputMode = 'numeric'; hoursInput.pattern = '[0-9]*'; hoursInput.value = String(p.shelfLife);
-    hoursInput.addEventListener('input', () => {
-      const cleaned = onlyDigits(hoursInput.value);
-      if (cleaned !== hoursInput.value) hoursInput.value = cleaned;
-    });
+    hoursInput.addEventListener('input', () => { const cleaned = onlyDigits(hoursInput.value); if (cleaned !== hoursInput.value) hoursInput.value = cleaned; });
     hoursInput.onchange = () => {
       const cleaned = onlyDigits(hoursInput.value);
       let v;
       if (cleaned === '') v = 0;
-      else {
-        const n = Number(cleaned);
-        if (!isFinite(n) || n === 0) v = 0;
-        else v = clampNum(n, 1, 10000, 48);
-      }
+      else { const n = Number(cleaned); if (!isFinite(n) || n === 0) v = 0; else v = clampNum(n, 1, 10000, 48); }
       PRODUCTS[p._idx].shelfLife = v;
       hoursInput.value = String(v);
       tableRows.forEach(r => { if (r.name === PRODUCTS[p._idx].name) r.shelfLife = v; });
-      saveCatalog();
-      scheduleSessionSave();
+      saveCatalog(); scheduleSessionSave();
     };
     const delBtn = document.createElement('button');
-    delBtn.className = 'del-btn'; delBtn.textContent = '✕';
+    delBtn.className = 'del-btn'; delBtn.textContent = '×';
     delBtn.onclick = () => {
       if (!confirm(`Удалить "${PRODUCTS[p._idx].name}"?`)) return;
       PRODUCTS.splice(p._idx, 1);
@@ -2243,50 +2254,44 @@ function resetToFactory() {
   saveCatalog();
   renderCatalogList();
   const el = $('catalogStatus');
-  if (el) { el.className = 'status show ok'; el.textContent = `✅ Справочник восстановлен (${PRODUCTS.length}).`; }
+  if (el) { el.className = 'status show ok'; el.textContent = `Справочник восстановлен (${PRODUCTS.length}).`; }
 }
 function renderIgnoredList() {
   const list = $('ignoredList');
   if (!list) return;
   list.innerHTML = '';
-  if (!IGNORED.length) {
-    list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Игнор-лист пуст.</div>';
-    return;
-  }
+  if (!IGNORED.length) { list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Игнор-лист пуст.</div>'; return; }
   const frag = document.createDocumentFragment();
   IGNORED.slice().sort((a, b) => a.localeCompare(b, 'ru')).forEach((name) => {
-    const row = document.createElement('div');
-    row.className = 'ignored-row';
-    const nameEl = document.createElement('div');
-    nameEl.className = 'name';
-    nameEl.textContent = name;
-    const delBtn = document.createElement('button');
-    delBtn.className = 'del-btn';
-    delBtn.textContent = 'Удалить';
+    const row = document.createElement('div'); row.className = 'ignored-row';
+    const nameEl = document.createElement('div'); nameEl.className = 'name'; nameEl.textContent = name;
+    const delBtn = document.createElement('button'); delBtn.className = 'del-btn'; delBtn.textContent = 'Удалить';
     delBtn.onclick = () => {
       const key = normalizeName(name);
       IGNORED = IGNORED.filter(i => normalizeName(i) !== key);
       saveIgnored();
       renderIgnoredList();
     };
-    row.appendChild(nameEl);
-    row.appendChild(delBtn);
+    row.appendChild(nameEl); row.appendChild(delBtn);
     frag.appendChild(row);
   });
   list.appendChild(frag);
 }
 
+/* ==============================
+   TOAST
+   ============================== */
 function showToast(text) {
   const el = document.createElement('div');
   el.className = 'toast show';
   el.textContent = text;
   document.body.appendChild(el);
-  setTimeout(() => {
-    el.classList.remove('show');
-    setTimeout(() => el.remove(), 300);
-  }, 2500);
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 2400);
 }
 
+/* ==============================
+   PROMPT
+   ============================== */
 function buildPrompt() {
   const checkDate = getTodayStr();
   const checkTime = getCurrentTimeStr();
@@ -2296,7 +2301,7 @@ function buildPrompt() {
 ЗАДАЧА: распознать накладные (ТОРГ-12/УПД) и чек продаж, вернуть единый CSV.
 
 ═══════════════════════════════════════════
-📥 ИСТОЧНИКИ
+ИСТОЧНИКИ
 ═══════════════════════════════════════════
 1. НАКЛАДНЫЕ (ТОРГ-12 / УПД) → приход товара за конкретную дату
 2. ЧЕК ПРОДАЖ → продажи за день
@@ -2307,174 +2312,102 @@ function buildPrompt() {
 - НЕ суммировать приход и продажи между собой
 
 ═══════════════════════════════════════════
-📋 ФИЛЬТР ПО СПРАВОЧНИКУ И НАКЛАДНЫМ
+ФИЛЬТР ПО СПРАВОЧНИКУ И НАКЛАДНЫМ
 ═══════════════════════════════════════════
-
 ШАГ 1. СНАЧАЛА прочитай НАКЛАДНЫЕ.
         Составь список ВСЕХ позиций из накладных (включая новинки).
 
 ШАГ 2. ПОТОМ прочитай ЧЕК ПРОДАЖ.
 
-ШАГ 3. РАЗРЕШЁННЫЙ СПИСОК =
-        справочник ∪ позиции из накладных.
+ШАГ 3. РАЗРЕШЁННЫЙ СПИСОК = справочник ∪ позиции из накладных.
 
 ШАГ 4. ФИЛЬТР ЧЕКА:
-        - Позиция в разрешённом списке → включи её продажи.
-        - Позиция не в списке → игнорируй (чай, кофе, мусор).
-
-ПРИМЕР:
-  Справочник: Круассан с ветчиной, Эклер шоколадный
-  Накладная: Круассан с ветчиной (5), Малиновый чизкейк (10)
-  Чек: Круассан с ветчиной (3), Малиновый чизкейк (2), Чай чёрный (4)
-  
-  Разрешённый список: Круассан с ветчиной, Эклер шоколадный, Малиновый чизкейк
-  
-  В CSV:
-    Круассан с ветчиной;5;0;3;24
-    Малиновый чизкейк;10;0;2;0
-    ← Чай чёрный НЕ включён (нет ни в справочнике, ни в накладной)
+        - Позиция в списке → включи её продажи.
+        - Не в списке → игнорируй (чай, кофе, мусор).
 
 ═══════════════════════════════════════════
-🆕 СРОК ГОДНОСТИ И НОВИНКИ
+СРОК ГОДНОСТИ И НОВИНКИ
 ═══════════════════════════════════════════
-- Позиция есть в справочнике → укажи срок из справочника (в часах).
-- Позиции нет в справочнике → поставь 0.
-  Ноль — это маркер новинки. Приложение её покажет отдельно.
-
-═══════════════════════════════════════════
-❗ ВАЖНО ПРО ОСТАТОК
-═══════════════════════════════════════════
-НЕ добавляй колонку «Остаток» / «Факт» — фактический остаток
-вводит оператор вручную в приложении. Твоя задача — только
-приходы (из накладных) и продажи (из чека).
+- Позиция есть в справочнике → срок из справочника (часы).
+- Нет в справочнике → поставь 0.
 
 ═══════════════════════════════════════════
-🧾 РАСПОЗНАВАНИЕ ЧЕКА ПРОДАЖ
+ВАЖНО ПРО ОСТАТОК
 ═══════════════════════════════════════════
-Структура чека: [№] [Наименование] [К-во] [Цена] [Сумма] [Скидка]
-
-⚠️ ГЛАВНОЕ ПРАВИЛО: бери из чека колонку «К-во» (количество штук),
-НЕ «Сумма» (рубли), НЕ «Цена», НЕ «Скидка».
-
-Пример:
-  1. Эклер шоколадный   2   150.00   300.00
-  → Эклер шоколадный = 2
+НЕ добавляй колонку «Остаток» / «Факт» — остаток вводит оператор вручную.
 
 ═══════════════════════════════════════════
-🧩 СКЛЕЙКА НЕСКОЛЬКИХ ФОТО ОДНОГО ЧЕКА
+РАСПОЗНАВАНИЕ ЧЕКА
 ═══════════════════════════════════════════
-Длинный чек часто фотографируют НЕСКОЛЬКИМИ кадрами с ПЕРЕКРЫТИЕМ:
-несколько строк в конце одного фото повторяются в начале следующего.
-
-ПРИЗНАК ДУБЛЯ — НЕ складывать, взять ОДИН раз:
-- Одна и та же позиция идёт в КОНЦЕ фото 1 и в НАЧАЛЕ фото 2.
-- Совпадает название, К-во и цена.
-- Совпадает порядок следования соседних строк.
-
-ПРИЗНАК РЕАЛЬНОЙ ВТОРОЙ ПРОДАЖИ — складывать:
-- Позиция встречается дважды ВНУТРИ одного фото с разными № строк.
-
-ПРИМЕР:
-  Фото 1 (конец):
-    Пуддинг Манго Чиа  1
-    Ром баба          13
-  Фото 2 (начало):
-    Пуддинг Манго Чиа  1   ← дубль
-    Ром баба          13   ← дубль
-    Сосиска ...        3   ← новая
-
-  ✅ Ром баба = 13 (не 26)
-  ❌ Ром баба = 26
+Структура: [№] [Наименование] [К-во] [Цена] [Сумма] [Скидка]
+Бери колонку «К-во», НЕ «Сумма», НЕ «Цена», НЕ «Скидка».
 
 ═══════════════════════════════════════════
-🚫 ЧТО ИГНОРИРОВАТЬ В ЧЕКЕ
+СКЛЕЙКА ФОТО ОДНОГО ЧЕКА
 ═══════════════════════════════════════════
-НЕ включай в CSV:
-- «Итого», «Всего», «К оплате», «Сумма чека»
-- «Скидка», «Наценка», «НДС»
-- «Наличные», «Безнал», «Карта», «Бонусы»
-- время, дату, № смены, № чека, № кассы
-- ФИО кассира, ИНН, адрес, QR-код, штрих-код
-- любые служебные строки без названия товара
+Длинный чек часто фотографируют несколькими кадрами с перекрытием.
+
+Дубль (НЕ складывать): позиция в КОНЦЕ фото 1 и в НАЧАЛЕ фото 2 с теми же К-во и ценой.
+Реальная вторая продажа (складывать): дважды ВНУТРИ одного фото с разными № строк.
 
 ═══════════════════════════════════════════
-↩️ ВОЗВРАТЫ
+ИГНОРИРОВАТЬ В ЧЕКЕ
 ═══════════════════════════════════════════
-Если позиция идёт со знаком минус (−1) — это ВОЗВРАТ.
-Вычитай из общего количества.
-
-Пример:
-  Эклер фисташковый   3
-  Эклер фисташковый  -1
-  → Эклер фисташковый = 2
+«Итого», «Всего», «К оплате», «Скидка», «НДС», «Наличные», «Карта», «Бонусы»,
+время, дата, № смены, № чека, ФИО кассира, ИНН, адрес, QR-код, штрих-код.
 
 ═══════════════════════════════════════════
-🗂 ГРУППИРОВКА СТРАНИЦ ПО НАКЛАДНЫМ
+ВОЗВРАТЫ
 ═══════════════════════════════════════════
-⚠️ Файлы могут быть загружены в ПРОИЗВОЛЬНОМ порядке.
-
-ПРИЗНАКИ НАКЛАДНОЙ:
-1. НОМЕР (ТОРГ-12 №…, УПД №…). Одинаковый = одна накладная.
-2. ДАТА + ПОСТАВЩИК. Совпадают = одна накладная.
-3. НЕПРЕРЫВНОСТЬ № СТРОК (1–15, 16–30…).
-4. ПРОДОЛЖЕНИЕ ТАБЛИЦЫ. Без заголовка с середины — продолжение.
-5. ИТОГОВАЯ СТРОКА. «Итого» / «Всего» — последняя.
-
-🚫 НЕ смешивай позиции из разных накладных.
+Со знаком минус (−1) — вычитай.
 
 ═══════════════════════════════════════════
-🔍 4 ЭТАПА РАБОТЫ
+ГРУППИРОВКА НАКЛАДНЫХ
 ═══════════════════════════════════════════
-
-ЭТАП 1. ГРУППИРОВКА
-[файл №] | [тип] | [№ документа] | [дата] | [поставщик] | [стр. N из M]
-
-ЭТАП 2. ЧЕРНОВИК
-Накладные: [№] | [название] | [кол-во]
-Чек: [№] | [название] | [К-во]
-
-ЭТАП 3. ПРОВЕРКА
-- Сумма количеств = итогу? Если нет — перечитай.
-- Неоднозначные цифры (6/9, 1/7, 0/О)? Помечай.
-
-ЭТАП 4. СБОРКА CSV
+Файлы могут быть в произвольном порядке.
+Признаки: один № документа, дата+поставщик, непрерывность № строк, итоговая строка в конце.
+НЕ смешивай позиции из разных накладных.
 
 ═══════════════════════════════════════════
-⚠️ ЧАСТЫЕ ОШИБКИ OCR
+4 ЭТАПА РАБОТЫ
 ═══════════════════════════════════════════
-Символы: 0↔О, 1↔l↔7, 5↔S, 8↔В, 6↔б↔9, 3↔З
-Названия: «с ветчиной» ≠ «с курицей»
+1. ГРУППИРОВКА файлов
+2. ЧЕРНОВИК по накладным и чеку
+3. ПРОВЕРКА: сумма = итогу, неоднозначные цифры (6/9, 1/7)
+4. СБОРКА CSV
 
-НЕОДНОЗНАЧНЫЕ ЦИФРЫ: не угадывай. Помечай в «Сомнительные».
+═══════════════════════════════════════════
+ЧАСТЫЕ ОШИБКИ OCR
+═══════════════════════════════════════════
+0↔О, 1↔l↔7, 5↔S, 8↔В, 6↔б↔9, 3↔З.
+«с ветчиной» ≠ «с курицей».
 
 ═══════════════════════════════════════════
-📋 ПРАВИЛА СБОРКИ CSV
+ПРАВИЛА СБОРКИ CSV
 ═══════════════════════════════════════════
-1. Есть в накладной, нет в чеке → Продано = 0.
-2. Есть в чеке, нет в накладной → Получено = 0.
+1. В накладной, нет в чеке → Продано = 0.
+2. В чеке, нет в накладной → Получено = 0.
 3. Дубли в накладной → складывай.
 4. Перекрытие фото чека → бери ОДИН раз.
-5. Дубли внутри чека с разными № → складывай.
+5. Дубли внутри чека → складывай.
 6. Возвраты (−N) → вычитай.
 7. Позиция не в справочнике → срок 0.
-8. 🚫 НЕ ВЫДУМЫВАЙ.
-9. ❗ НЕ добавляй колонку «Остаток» / «Факт».
+8. НЕ ВЫДУМЫВАЙ.
+9. НЕ добавляй «Остаток».
 
 ═══════════════════════════════════════════
-🔢 ПРАВИЛА ЧИСЕЛ
+ЧИСЛА
 ═══════════════════════════════════════════
 - Количество — ВСЕГДА ЦЕЛОЕ.
 - «1.234» = 1234, «1,234» = 1234.
-- Без знаков «+», пробелов, валют.
 
 ═══════════════════════════════════════════
-📅 ФОРМАТ ДАТ
+ФОРМАТ ДАТ
 ═══════════════════════════════════════════
-✅ «Получено за 17.09»  ✅ «Получено за 18.09»
-❌ «2026-09-17», «17/09/2026»
+«Получено за 17.09», «Получено за 18.09»
 
 ═══════════════════════════════════════════
-📤 ФОРМАТ CSV
+ФОРМАТ CSV
 ═══════════════════════════════════════════
 Разделитель: ;
 Кодировка: UTF-8 с BOM
@@ -2484,33 +2417,24 @@ function buildPrompt() {
 Кавычки: если есть ; , " → оберни в "..." и удваивай.
 
 ═══════════════════════════════════════════
-📊 ПОСЛЕ CSV ВЫВЕДИ ОТЧЁТ
-═══════════════════════════════════════════
-1. ДОКУМЕНТЫ: [файл №] | [тип] | [№] | [дата] | [стр. N из M]
-2. СКЛЕЙКА ЧЕКА: [фото №] | [строки] | [перекрытие]
-3. СОМНИТЕЛЬНЫЕ СТРОКИ
-4. ПРОВЕРКА:
-   - Накладных: N, Чеков: N
-   - Строк в CSV: N (справочных: N, новинок: N)
-   - Дат приходов: N
-
-═══════════════════════════════════════════
-📚 СПРАВОЧНИК СРОКОВ (часы)
+СПРАВОЧНИК СРОКОВ (часы)
 ═══════════════════════════════════════════
 ${catalogList}
 
 Момент проверки: ${checkDate} ${checkTime}.
 
-Сейчас определи принадлежность файлов, распознай накладные и чеки,
-склей фото чека без дублей и выдай CSV строго по формату выше.`;
+Выдай CSV строго по формату выше.`;
 }
 
+/* ==============================
+   SHARE TO AI
+   ============================== */
 async function shareToAI() {
   if (shareBusy) return;
   const items = await getPhotos();
   if (!items.length) {
     const el = $('shareStatus');
-    if (el) { el.className = 'status show info'; el.textContent = 'ℹ️ Сначала загрузите файлы.'; }
+    if (el) { el.className = 'status show info'; el.textContent = 'Сначала загрузите материалы.'; }
     return;
   }
   shareBusy = true;
@@ -2534,10 +2458,9 @@ async function shareToAI() {
     const canShare = navigator.share && navigator.canShare && navigator.canShare({ files });
     if (canShare) {
       try {
-        await navigator.share({ files, title: 'French Bakery Аудит — файлы',
-          text: promptCopied ? 'Промпт в буфере — вставьте в чат.' : '' });
+        await navigator.share({ files, title: 'French Bakery Аудит', text: promptCopied ? 'Промпт в буфере — вставьте в чат.' : '' });
         const el = $('shareStatus');
-        if (el) { el.className = 'status show ok'; el.textContent = '✅ Файлы переданы.'; }
+        if (el) { el.className = 'status show ok'; el.textContent = 'Материалы переданы.'; }
         return;
       } catch (e) { if (e.name === 'AbortError') return; }
     }
@@ -2551,7 +2474,7 @@ async function shareToAI() {
       } catch (e) { console.warn('download:', e); }
     }
     const el = $('shareStatus');
-    if (el) { el.className = 'status show info'; el.textContent = 'ℹ️ Файлы скачаны. Прикрепите в чат.'; }
+    if (el) { el.className = 'status show info'; el.textContent = 'Файлы скачаны. Прикрепите в чат.'; }
     try { window.open('https://chat.openai.com/', '_blank'); } catch (e) {}
   } finally {
     shareBusy = false;
@@ -2559,19 +2482,16 @@ async function shareToAI() {
   }
 }
 
+/* ==============================
+   BIND UI
+   ============================== */
 function bindUI() {
   const invBtn = $('uploadInvoicePhotosBtn'); if (invBtn) invBtn.onclick = () => { const i = $('invoicePhotoInput'); if (i) i.click(); };
   const salBtn = $('uploadSalesPhotosBtn'); if (salBtn) salBtn.onclick = () => { const i = $('salesPhotoInput'); if (i) i.click(); };
   const invInput = $('invoicePhotoInput');
-  if (invInput) invInput.onchange = async e => {
-    try { if (e.target.files && e.target.files.length) await addPhotos(e.target.files, 'invoice'); }
-    finally { e.target.value = ''; }
-  };
+  if (invInput) invInput.onchange = async e => { try { if (e.target.files && e.target.files.length) await addPhotos(e.target.files, 'invoice'); } finally { e.target.value = ''; } };
   const salInput = $('salesPhotoInput');
-  if (salInput) salInput.onchange = async e => {
-    try { if (e.target.files && e.target.files.length) await addPhotos(e.target.files, 'sales'); }
-    finally { e.target.value = ''; }
-  };
+  if (salInput) salInput.onchange = async e => { try { if (e.target.files && e.target.files.length) await addPhotos(e.target.files, 'sales'); } finally { e.target.value = ''; } };
   const shareBtn = $('shareToAIBtn'); if (shareBtn) shareBtn.onclick = shareToAI;
   const copyPromptBtn = $('copyPromptBtn');
   if (copyPromptBtn) copyPromptBtn.onclick = async () => {
@@ -2580,12 +2500,9 @@ function bindUI() {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(prompt);
         const el = $('shareStatus');
-        if (el) { el.className = 'status show ok'; el.textContent = '✅ Промпт скопирован.'; }
+        if (el) { el.className = 'status show ok'; el.textContent = 'Промпт скопирован.'; }
       } else throw new Error();
-    } catch (e) {
-      const pc = $('promptContent'); if (pc) pc.textContent = prompt;
-      openModal('promptModal');
-    }
+    } catch (e) { const pc = $('promptContent'); if (pc) pc.textContent = prompt; openModal('promptModal'); }
   };
   const pasteCsvBtn = $('pasteCsvBtn');
   if (pasteCsvBtn) pasteCsvBtn.onclick = async () => {
@@ -2593,16 +2510,12 @@ function bindUI() {
       if (navigator.clipboard && navigator.clipboard.readText) {
         const text = await navigator.clipboard.readText();
         const el = $('csvInput'); if (el) el.value = text.slice(0, MAX_CSV_BYTES);
-        autoResizeTextarea();
-        updateCsvCounter();
+        autoResizeTextarea(); updateCsvCounter();
         const st = $('csvStatus');
-        if (st) { st.className = 'status show ok'; st.textContent = '✅ Вставлено.'; }
+        if (st) { st.className = 'status show ok'; st.textContent = 'Вставлено.'; }
         scheduleSessionSave();
       } else throw new Error();
-    } catch (e) {
-      const st = $('csvStatus');
-      if (st) { st.className = 'status show'; st.textContent = 'Вставьте CSV вручную.'; }
-    }
+    } catch (e) { const st = $('csvStatus'); if (st) { st.className = 'status show'; st.textContent = 'Вставьте CSV вручную.'; } }
   };
   const loadCsvBtn = $('loadCsvFileBtn');
   if (loadCsvBtn) loadCsvBtn.onclick = () => {
@@ -2615,41 +2528,29 @@ function bindUI() {
   if (csvFileInput) csvFileInput.onchange = async e => {
     const f = e.target.files && e.target.files[0];
     if (!f) { e.target.value = ''; return; }
-    if (f.size > MAX_CSV_BYTES) {
-      const st = $('csvStatus');
-      if (st) { st.className = 'status show err'; st.textContent = '❌ Файл слишком большой.'; }
-      e.target.value = ''; return;
-    }
+    if (f.size > MAX_CSV_BYTES) { const st = $('csvStatus'); if (st) { st.className = 'status show err'; st.textContent = 'Файл слишком большой.'; } e.target.value = ''; return; }
     try {
       const text = await f.text();
       const el = $('csvInput'); if (el) el.value = text;
-      autoResizeTextarea();
-      updateCsvCounter();
+      autoResizeTextarea(); updateCsvCounter();
       const st = $('csvStatus');
-      if (st) { st.className = 'status show ok'; st.textContent = '✅ Файл загружен.'; }
+      if (st) { st.className = 'status show ok'; st.textContent = 'Файл загружен.'; }
       scheduleSessionSave();
-    } catch (err) {
-      const st = $('csvStatus');
-      if (st) { st.className = 'status show err'; st.textContent = '❌ Ошибка чтения.'; }
-    } finally { e.target.value = ''; }
+    } catch (err) { const st = $('csvStatus'); if (st) { st.className = 'status show err'; st.textContent = 'Ошибка чтения.'; } }
+    finally { e.target.value = ''; }
   };
   const csvInput = $('csvInput');
   if (csvInput) {
     csvInput.addEventListener('input', () => { autoResizeTextarea(); updateCsvCounter(); });
-    csvInput.addEventListener('blur', () => {
-      if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
-      saveSession();
-    });
+    csvInput.addEventListener('blur', () => { if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; } saveSession(); });
   }
   const tableSearch = $('tableSearch');
   if (tableSearch) tableSearch.addEventListener('input', () => setTableQuery(tableSearch.value));
   const tableSearchClear = $('tableSearchClear');
   if (tableSearchClear) tableSearchClear.addEventListener('click', () => {
-    const s = $('tableSearch');
-    if (s) s.value = '';
+    const s = $('tableSearch'); if (s) s.value = '';
     setTableQuery('');
-    const wrap = $('tableSearchWrap');
-    if (wrap) wrap.classList.remove('has-value');
+    const wrap = $('tableSearchWrap'); if (wrap) wrap.classList.remove('has-value');
   });
   const applyBtn = $('applyCsvBtn'); if (applyBtn) applyBtn.onclick = applyCSV;
   const exportBtn = $('exportBtn'); if (exportBtn) exportBtn.onclick = exportExcel;
@@ -2657,57 +2558,42 @@ function bindUI() {
   if (restoreBtn) restoreBtn.onclick = () => {
     if (pendingSessionReset) return;
     const data = loadSession();
-    if (!data) {
-      const st = $('csvStatus');
-      if (st) { st.className = 'status show info'; st.textContent = 'ℹ️ Сессии не найдено.'; }
-      return;
-    }
+    if (!data) { const st = $('csvStatus'); if (st) { st.className = 'status show info'; st.textContent = 'Сессии не найдено.'; } return; }
     if (!confirm('Восстановить последнюю сессию?')) return;
     applySession(data);
-    autoResizeTextarea();
-    updateCsvCounter();
-    renderTable();
-    updateUnknownBanner();
+    autoResizeTextarea(); updateCsvCounter();
+    renderTable(); updateUnknownBanner();
     const st = $('csvStatus');
-    if (st) { st.className = 'status show ok'; st.textContent = `✅ Сессия восстановлена.`; }
+    if (st) { st.className = 'status show ok'; st.textContent = 'Сессия восстановлена.'; }
   };
   const clearBtn = $('clearBtn');
   if (clearBtn) clearBtn.onclick = async () => {
     if (pendingSessionReset) return;
     if (!confirm('Сбросить все данные?')) return;
-    pendingSessionReset = true;
-    resetToken++;
+    pendingSessionReset = true; resetToken++;
     try {
-      tableRows = [];
-      unknownRows = [];
-      unknownSelected = new Set();
-      _tableQuery = '';
+      tableRows = []; unknownRows = []; unknownSelected = new Set(); _tableQuery = '';
       const ci = $('csvInput'); if (ci) { ci.value = ''; autoResizeTextarea(); updateCsvCounter(); }
       const ts = $('tableSearch'); if (ts) ts.value = '';
       const cs = $('csvStatus'); if (cs) { cs.className = 'status'; cs.textContent = ''; }
       const ss = $('shareStatus'); if (ss) { ss.className = 'status'; ss.textContent = ''; }
       try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
       try { await clearAllPhotos(); } catch (e) {}
-      renderTable();
-      updateUnknownBanner();
-      await renderPhotoQueue();
+      renderTable(); updateUnknownBanner(); await renderPhotoQueue();
       const cs2 = $('csvStatus');
-      if (cs2) { cs2.className = 'status show ok'; cs2.textContent = '✅ Данные очищены.'; }
+      if (cs2) { cs2.className = 'status show ok'; cs2.textContent = 'Данные очищены.'; }
     } finally { setTimeout(() => { pendingSessionReset = false; }, 500); }
   };
   const editCat = $('editCatalogBtn');
   if (editCat) editCat.onclick = () => { renderCatalogList(); openModal('catalogModal'); };
   const closeCat = $('closeCatalogBtn');
   if (closeCat) closeCat.onclick = () => {
-    saveCatalog();
-    closeModal('catalogModal');
+    saveCatalog(); closeModal('catalogModal');
     if (Array.isArray(tableRows) && tableRows.length) {
-      tableRows.forEach(r => {
-        const p = PRODUCTS.find(x => normalizeName(x.name) === normalizeName(r.name));
-        if (p) r.shelfLife = p.shelfLife;
-      });
+      tableRows.forEach(r => { const p = PRODUCTS.find(x => normalizeName(x.name) === normalizeName(r.name)); if (p) r.shelfLife = p.shelfLife; });
       renderTable();
     }
+    updateCatalogMeta();
   };
   const catSearch = $('catalogSearch');
   if (catSearch) catSearch.oninput = renderCatalogList;
@@ -2719,11 +2605,7 @@ function bindUI() {
     const cleaned = onlyDigits(hoursEl ? hoursEl.value : '0');
     let hours;
     if (cleaned === '') hours = 0;
-    else {
-      const n = Number(cleaned);
-      if (!isFinite(n) || n === 0) hours = 0;
-      else hours = clampNum(n, 1, 10000, 0);
-    }
+    else { const n = Number(cleaned); if (!isFinite(n) || n === 0) hours = 0; else hours = clampNum(n, 1, 10000, 0); }
     if (!name) { alert('Введите название.'); return; }
     if (PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) { alert('Такая позиция уже есть.'); return; }
     if (PRODUCTS.length >= MAX_CATALOG) { alert('Справочник переполнен.'); return; }
@@ -2741,9 +2623,7 @@ function bindUI() {
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
-      a.download = `fb_audit_catalog_${getTodayStr()}.json`;
-      a.click();
+      a.href = url; a.download = `fb_audit_catalog_${getTodayStr()}.json`; a.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (e) { alert('Ошибка: ' + e.message); }
   };
@@ -2770,11 +2650,10 @@ function bindUI() {
       }
       renderCatalogList();
       const el = $('catalogStatus');
-      if (el) { el.className = 'status show ok'; el.textContent = `✅ Импортировано ${cleaned.length}.`; }
-    } catch (err) {
-      const el = $('catalogStatus');
-      if (el) { el.className = 'status show err'; el.textContent = '❌ ' + (err.message || 'Ошибка'); }
-    } finally { e.target.value = ''; }
+      if (el) { el.className = 'status show ok'; el.textContent = `Импортировано ${cleaned.length}.`; }
+      updateCatalogMeta();
+    } catch (err) { const el = $('catalogStatus'); if (el) { el.className = 'status show err'; el.textContent = err.message || 'Ошибка'; } }
+    finally { e.target.value = ''; }
   };
   const ignoredBtn = $('ignoredBtn');
   if (ignoredBtn) ignoredBtn.onclick = () => { renderIgnoredList(); openModal('ignoredModal'); };
@@ -2784,58 +2663,83 @@ function bindUI() {
   if (clearIgnoredBtn) clearIgnoredBtn.onclick = () => {
     if (!IGNORED.length) { alert('Игнор-лист уже пуст.'); return; }
     if (!confirm(`Очистить игнор-лист (${IGNORED.length})?`)) return;
-    IGNORED = [];
-    saveIgnored();
-    updateUnknownBanner();
-    showToast('Игнор-лист очищен');
+    IGNORED = []; saveIgnored(); updateUnknownBanner(); showToast('Игнор-лист очищен');
   };
   const openUnknownBtn = $('openUnknownBtn');
   if (openUnknownBtn) openUnknownBtn.onclick = () => openUnknownModal();
-  const unknownAddBtn = $('unknownAddBtn');
-  if (unknownAddBtn) unknownAddBtn.onclick = addSelectedUnknown;
-  const unknownIgnoreBtn = $('unknownIgnoreBtn');
-  if (unknownIgnoreBtn) unknownIgnoreBtn.onclick = ignoreAllUnknown;
-  const unknownCloseBtn = $('unknownCloseBtn');
-  if (unknownCloseBtn) unknownCloseBtn.onclick = () => closeUnknownModal();
+  const unknownAddBtn = $('unknownAddBtn'); if (unknownAddBtn) unknownAddBtn.onclick = addSelectedUnknown;
+  const unknownIgnoreBtn = $('unknownIgnoreBtn'); if (unknownIgnoreBtn) unknownIgnoreBtn.onclick = ignoreAllUnknown;
+  const unknownCloseBtn = $('unknownCloseBtn'); if (unknownCloseBtn) unknownCloseBtn.onclick = () => closeUnknownModal();
   const unknownSearch = $('unknownSearch');
-  if (unknownSearch) unknownSearch.oninput = () => {
-    unknownQuery = unknownSearch.value;
-    unknownVisible = UNKNOWN_PAGE_SIZE;
-    renderUnknownModal();
-  };
+  if (unknownSearch) unknownSearch.oninput = () => { unknownQuery = unknownSearch.value; unknownVisible = UNKNOWN_PAGE_SIZE; renderUnknownModal(); };
   const copyModal = $('copyFromModalBtn');
   if (copyModal) copyModal.onclick = async () => {
     const pc = $('promptContent');
     try {
       if (navigator.clipboard && navigator.clipboard.writeText && pc) {
         await navigator.clipboard.writeText(pc.textContent);
-        copyModal.textContent = '✅ Скопировано!';
-        setTimeout(() => { copyModal.textContent = '📋 Скопировать промпт'; }, 2000);
+        copyModal.textContent = 'Скопировано';
+        setTimeout(() => { copyModal.textContent = 'Скопировать'; }, 2000);
       } else throw new Error();
     } catch (e) { alert('Выделите текст вручную.'); }
   };
-  const closePrompt = $('closePromptModalBtn');
-  if (closePrompt) closePrompt.onclick = () => closeModal('promptModal');
+  const closePrompt = $('closePromptModalBtn'); if (closePrompt) closePrompt.onclick = () => closeModal('promptModal');
+
+  /* SYNC UI */
+  const activateOwnerBtn = $('activateOwnerBtn'); if (activateOwnerBtn) activateOwnerBtn.onclick = activateOwner;
+  const deactivateOwnerBtn = $('deactivateOwnerBtn'); if (deactivateOwnerBtn) deactivateOwnerBtn.onclick = deactivateOwner;
+  const checkUpdatesBtn = $('checkUpdatesBtn');
+  if (checkUpdatesBtn) checkUpdatesBtn.onclick = () => {
+    const metaSyncing = $('metaSyncing');
+    const metaLocal = $('metaLocal');
+    const metaRemote = $('metaRemote');
+    const syncStatus = $('syncStatus');
+    metaLocal.style.display = 'none';
+    metaRemote.style.display = 'none';
+    if (metaSyncing) metaSyncing.style.display = 'flex';
+    if (syncStatus) { syncStatus.className = 'status'; syncStatus.textContent = ''; }
+    setLastCheckTime();
+    setTimeout(() => {
+      if (metaSyncing) metaSyncing.style.display = 'none';
+      updateCatalogMeta();
+      const remote = getRemoteSimulated();
+      const localUpdatedAt = localStorage.getItem(SYNC_LOCAL_UPDATED_AT) || '';
+      if (remote && remote.updatedAt && (!localUpdatedAt || remote.updatedAt > localUpdatedAt)) {
+        _pendingRemote = remote;
+        showCatalogUpdateBanner(remote);
+        if (syncStatus) { syncStatus.className = 'status show purple'; syncStatus.textContent = 'Доступно обновление. Нажмите «Обновить» в уведомлении.'; }
+      } else {
+        if (syncStatus) { syncStatus.className = 'status show ok'; syncStatus.textContent = 'Обновлений нет — у вас последняя версия.'; }
+      }
+    }, 900);
+  };
+  const publishBtn = $('publishBtn');
+  if (publishBtn) publishBtn.onclick = () => {
+    const syncStatus = $('syncStatus');
+    if (syncStatus) { syncStatus.className = 'status show info'; syncStatus.textContent = 'Публикация…'; }
+    setTimeout(() => { syncPushToServer(); showToast('Опубликовано'); }, 600);
+  };
+  const bannerApply = $('bannerApply');
+  if (bannerApply) bannerApply.onclick = () => applyPendingRemote();
+  const bannerLater = $('bannerLater');
+  if (bannerLater) bannerLater.onclick = () => { _pendingRemote = null; hideCatalogUpdateBanner(); };
 }
 
+/* ==============================
+   BIND PRODUCT MODAL
+   ============================== */
 function bindProductModal() {
   const cancel = $('pmCancel'); if (cancel) cancel.onclick = cancelProduct;
   const commit = $('pmCommit'); if (commit) commit.onclick = commitProduct;
   const stock = $('pmStock');
   if (stock) {
     stock.addEventListener('keydown', productKey);
-    stock.addEventListener('input', () => {
-      const cleaned = onlyDigits(stock.value);
-      if (cleaned !== stock.value) stock.value = cleaned;
-    });
+    stock.addEventListener('input', () => { const cleaned = onlyDigits(stock.value); if (cleaned !== stock.value) stock.value = cleaned; });
   }
   const sales = $('pmSales');
   if (sales) {
     sales.addEventListener('keydown', productKey);
-    sales.addEventListener('input', () => {
-      const cleaned = onlyDigits(sales.value);
-      if (cleaned !== sales.value) sales.value = cleaned;
-    });
+    sales.addEventListener('input', () => { const cleaned = onlyDigits(sales.value); if (cleaned !== sales.value) sales.value = cleaned; });
   }
   document.querySelectorAll('.pf-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -2856,25 +2760,28 @@ function bindProductModal() {
       if (!$('productModal').classList.contains('hidden')) cancelProduct();
       else if (!$('unknownModal').classList.contains('hidden')) closeUnknownModal();
       else if (!$('ignoredModal').classList.contains('hidden')) closeModal('ignoredModal');
+      else if (!$('catalogModal').classList.contains('hidden')) closeModal('catalogModal');
+      else if (!$('promptModal').classList.contains('hidden')) closeModal('promptModal');
     }
   });
 }
 
+/* ==============================
+   LOGO FALLBACK
+   ============================== */
 function initLogoFallback() {
   const logo = $('appLogo');
   if (!logo) return;
-  logo.onerror = () => {
-    logo.onerror = null;
-    const parent = logo.parentNode;
-    if (!parent) return;
-    const fallback = document.createElement('div');
-    fallback.className = 'logo';
-    fallback.textContent = 'FB';
-    fallback.style.cssText = 'display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;background:#0a84ff;font-size:14px';
-    parent.replaceChild(fallback, logo);
-  };
+  const img = document.createElement('img');
+  img.src = 'logo.png';
+  img.alt = 'FB';
+  img.onload = () => { logo.innerHTML = ''; logo.appendChild(img); };
+  img.onerror = () => { /* остаётся текст FB */ };
 }
 
+/* ==============================
+   SW
+   ============================== */
 function initSW() {
   if (!('serviceWorker' in navigator)) return;
   window.addEventListener('load', () => {
@@ -2893,6 +2800,9 @@ function initSW() {
   });
 }
 
+/* ==============================
+   INIT
+   ============================== */
 function init() {
   initLogoFallback();
   try { localStorage.removeItem(LEGACY_SESSION_KEY); } catch (e) {}
@@ -2902,19 +2812,21 @@ function init() {
   const session = loadSession();
   if (session) {
     applySession(session);
-    autoResizeTextarea();
-    updateCsvCounter();
+    autoResizeTextarea(); updateCsvCounter();
     const ageMin = Math.max(0, Math.round((Date.now() - session.savedAt) / 60000));
     const st = $('csvStatus');
-    if (st) { st.className = 'status show info'; st.textContent = `ℹ️ Сессия восстановлена (${ageMin} мин назад).`; }
+    if (st) { st.className = 'status show info'; st.textContent = `Сессия восстановлена (${ageMin} мин назад).`; }
   }
   renderTable();
   updateUnknownBanner();
   renderPhotoQueue();
   updateIgnoredCount();
+  updateCatalogMeta();
+  restoreOwnerMode();
   if (pt && !pt.value.trim()) {
     setTimeout(() => { try { pt.focus({ preventScroll: true }); } catch (e) {} }, 300);
   }
+  syncCheckOnStartup();
   window.addEventListener('storage', e => {
     if (e.key === SESSION_KEY && !isRestoring) {
       const data = loadSession();
@@ -2924,6 +2836,9 @@ function init() {
       IGNORED = loadIgnored();
       updateIgnoredCount();
       updateUnknownBanner();
+    }
+    if (e.key === SYNC_REMOTE_KEY) {
+      syncCheckOnStartup();
     }
   });
   window.addEventListener('beforeunload', () => {
@@ -2937,7 +2852,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v8.3 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.0 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
