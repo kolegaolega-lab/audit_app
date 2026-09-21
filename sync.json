@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-22T00:00:00.000Z",
+  "updatedBy": "v9.3.0",
+  "products": [
+    { "name": "Багет французский", "shelfLife": 24 },
+    { "name": "Круассан миндальный", "shelfLife": 12 }
+  ],
+  "ignored": [],
+  "aliases": []
+}
