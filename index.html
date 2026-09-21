@@ -164,10 +164,9 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .table-scroll thead th:first-child{position:sticky;left:0;z-index:25;background:var(--bg-card);transform:translateZ(0);isolation:isolate}
 .table-scroll thead th:first-child::after{content:'';position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--separator);pointer-events:none}
 .table-scroll tbody td{padding:8px 6px;border-bottom:1px solid var(--separator);vertical-align:middle;white-space:nowrap;line-height:1.2;background:var(--bg-card);text-align:center}
-.table-scroll tbody td:first-child{position:sticky;left:0;z-index:15;background:var(--bg-card);text-align:left;white-space:normal;word-break:break-word;padding:8px 10px 8px 14px;transform:translateZ(0);isolation:isolate;cursor:pointer}
+.table-scroll tbody td:first-child{position:sticky;left:0;z-index:15;background:var(--bg-card);text-align:left;white-space:normal;word-break:break-word;padding:8px 10px 8px 14px;transform:translateZ(0);isolation:isolate}
 .table-scroll tbody td:first-child::after{content:'';position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--separator);pointer-events:none}
 .table-scroll tbody tr:last-child td{border-bottom:none}
-.table-scroll tbody tr{cursor:pointer}
 .table-scroll tbody tr.hidden-row{display:none}
 .table-scroll tbody tr.row-fresh td{background:var(--green-row)}
 .table-scroll tbody tr.row-warn td{background:var(--orange-row)}
@@ -200,8 +199,6 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .table-scroll tbody tr.row-info td:first-child::before{background:var(--blue)}
 .name-cell{display:flex;align-items:flex-start;gap:8px;min-width:0}
 .name-cell .name-text{flex:1 1 auto;min-width:0;word-break:break-word;overflow-wrap:anywhere}
-.name-cell .edit-hint{flex:0 0 auto;font-size:13px;opacity:.35;margin-top:1px;display:none}
-@media (max-width:640px){.name-cell .edit-hint{display:inline-block}}
 .num{width:60px;min-width:60px;max-width:60px;height:38px;padding:0 4px;border:0;border-radius:10px;font-size:15px;text-align:center;background:var(--bg-input);color:var(--text);font-weight:600;-webkit-appearance:none;appearance:none;line-height:38px;font-family:inherit;transition:box-shadow .15s,background .15s;margin:0;display:inline-block;vertical-align:middle}
 .num:focus{outline:none;box-shadow:0 0 0 2px var(--accent);background:var(--bg-card)}
 .num-disabled{display:inline-flex;align-items:center;justify-content:center;width:60px;min-width:60px;height:38px;color:var(--text-tertiary);font-weight:600;font-size:15px;user-select:none;vertical-align:middle}
@@ -221,7 +218,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .card.danger::before{background:var(--red)}
 .card.empty::before{background:var(--separator-opaque)}
 .card-head{display:flex;align-items:flex-start;gap:8px;padding:12px 14px 0 18px}
-.card-name{flex:1 1 auto;min-width:0;font-size:14px;font-weight:600;line-height:1.3;word-break:break-word;cursor:pointer}
+.card-name{flex:1 1 auto;min-width:0;font-size:14px;font-weight:600;line-height:1.3;word-break:break-word}
 .card-shelf{flex:0 0 auto;font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums;padding:2px 6px;background:var(--bg-input);border-radius:6px}
 .scroll-wrap{position:relative;overflow:hidden}
 .card .card-row-scroll{display:flex;gap:6px;padding:10px 18px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;-ms-overflow-style:none}
@@ -311,25 +308,9 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .cat-row .inp-wrap .unit{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
 .cat-row .del-btn{min-height:38px;padding:0;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:16px;font-weight:700;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
 .cat-row.add-row .add-btn{background:var(--green-soft);color:var(--green);border:1px solid var(--green-soft);font-size:20px;font-weight:500;min-height:38px;padding:0;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
-#promptModal .modal-content,
-#productModal .modal-content{max-height:calc(100dvh - 32px);padding:22px;overflow:auto;scrollbar-width:none;-ms-overflow-style:none}
-#promptModal .modal-content::-webkit-scrollbar,
-#productModal .modal-content::-webkit-scrollbar{display:none}
+#promptModal .modal-content{max-height:calc(100dvh - 32px);padding:22px;overflow:auto;scrollbar-width:none;-ms-overflow-style:none}
+#promptModal .modal-content::-webkit-scrollbar{display:none}
 pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm);font-size:11.5px;line-height:1.55;overflow:auto;max-height:60vh;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #1e293b}
-.product-form{display:flex;flex-direction:column;gap:14px}
-.pf-section-title{font-size:10.5px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
-.pf-row{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
-.pf-row-dates{display:flex;flex-direction:column;gap:8px}
-.pf-date-row{display:grid;grid-template-columns:70px 1fr;gap:8px;align-items:center}
-.pf-date-label{font-size:13px;font-weight:600;color:var(--text-secondary);font-variant-numeric:tabular-nums}
-.pf-num{width:100%;height:44px;padding:0 12px;border:0;border-radius:12px;background:var(--bg-input);color:var(--text);font-size:17px;font-weight:600;text-align:center;-webkit-appearance:none;appearance:none;font-family:inherit;line-height:44px;transition:box-shadow .15s,background .15s}
-.pf-num:focus{outline:none;box-shadow:0 0 0 2.5px var(--accent);background:var(--bg-card)}
-.pf-btn{width:44px;height:44px;padding:0;border-radius:12px;background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator);font-size:18px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;cursor:pointer;transition:transform .12s,background .12s}
-.pf-btn:active{transform:scale(.94);background:var(--bg-hover)}
-.pf-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
-.pf-actions button{min-height:44px;border:0;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit}
-.pf-cancel{background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator-opaque)!important}
-.pf-commit{background:#0a84ff;color:#fff}
 .photo-queue{display:grid;gap:8px;margin-top:10px}
 .photo-item{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input)}
 .photo-thumb{width:44px;height:44px;object-fit:cover;border-radius:9px;background:var(--bg-elev-2)}
@@ -587,39 +568,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   </div>
 </div>
 
-<div id="productModal" class="modal hidden">
-  <div class="modal-content">
-    <h3 id="pmName">—</h3>
-    <div class="product-shelf" id="pmShelf">Срок: —</div>
-    <div class="product-form">
-      <div>
-        <div class="pf-section-title">Остаток</div>
-        <div class="pf-row">
-          <input type="text" inputmode="numeric" pattern="[0-9]*" class="pf-num" id="pmStock" placeholder="—">
-          <button type="button" class="pf-btn" data-target="pmStock" data-step="-1">−</button>
-          <button type="button" class="pf-btn" data-target="pmStock" data-step="1">+</button>
-        </div>
-      </div>
-      <div>
-        <div class="pf-section-title">Продано</div>
-        <div class="pf-row">
-          <input type="text" inputmode="numeric" pattern="[0-9]*" class="pf-num" id="pmSales">
-          <button type="button" class="pf-btn" data-target="pmSales" data-step="-1">−</button>
-          <button type="button" class="pf-btn" data-target="pmSales" data-step="1">+</button>
-        </div>
-      </div>
-      <div>
-        <div class="pf-section-title">Приходы по датам</div>
-        <div class="pf-row-dates" id="pmIncoming"></div>
-      </div>
-      <div class="pf-actions">
-        <button type="button" class="pf-cancel" id="pmCancel">Отмена</button>
-        <button type="button" class="pf-commit" id="pmCommit">Готово</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div id="unknownModal" class="modal hidden">
   <div class="modal-content" id="unknownModalContent">
     <div class="modal-header">
@@ -714,9 +662,6 @@ let resetToken = 0;
 const _activeDeletes = new Set();
 let _fileBusy = false;
 let _timeUpdater = null;
-let openIdx = -1;
-let openTr = null;
-let openSnapshot = null;
 let _totalsTimer = null;
 let _tableSyncTimer = null;
 let _cardsSyncTimer = null;
@@ -1214,7 +1159,7 @@ function parseCSV(text, referenceDate) {
 function sortRowsAlphabetically(rows) {
   return [...rows].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' }));
 }
-
+  
 function getRemoteSimulated() {
   try {
     const raw = localStorage.getItem(SYNC_REMOTE_KEY);
@@ -1662,6 +1607,9 @@ function makeNumInput(opts) {
   inp.className = opts.className || 'num';
   if (opts.value != null) inp.value = String(opts.value);
   if (opts.placeholder) inp.placeholder = opts.placeholder;
+  inp.addEventListener('focus', () => {
+    requestAnimationFrame(() => { try { inp.select(); } catch (e) {} });
+  });
   inp.addEventListener('input', () => {
     const cleaned = onlyDigits(inp.value);
     if (cleaned !== inp.value) inp.value = cleaned;
@@ -1674,6 +1622,7 @@ function bindTableInput(inp) {
   inp.addEventListener('focus', e => { e.stopPropagation(); requestAnimationFrame(() => scrollIntoContainer(inp)); });
   inp.addEventListener('keydown', tableKey);
 }
+  
 function renderTable() {
   if (isRendering) return;
   isRendering = true;
@@ -1717,11 +1666,7 @@ function renderTable() {
       const nameText = document.createElement('span');
       nameText.className = 'name-text';
       nameText.textContent = row.name;
-      const editHint = document.createElement('span');
-      editHint.className = 'edit-hint';
-      editHint.textContent = '›';
       nameCell.appendChild(nameText);
-      nameCell.appendChild(editHint);
       tdName.appendChild(nameCell);
       tr.appendChild(tdName);
       const tdStock = document.createElement('td');
@@ -1812,11 +1757,6 @@ function renderTable() {
       else if (calc.soldExpired > 0) tdSoldExp.classList.add('positive');
       tdSoldExp.dataset.role = 'soldExpired';
       tr.appendChild(tdSoldExp);
-      tr.addEventListener('click', e => {
-        if (e.target.closest('input')) return;
-        if (e.target.closest('button')) return;
-        openProduct(row, tr);
-      });
       fragment.appendChild(tr);
     });
     tbody.appendChild(fragment);
@@ -1916,7 +1856,7 @@ function updateTotals() {
   `;
   if (_tableQuery) applyTableFilter();
 }
-
+  
 function buildCardInput(row, opts) {
   const inpWrap = document.createElement('div');
   inpWrap.className = 'inp-wrap';
@@ -1929,6 +1869,9 @@ function buildCardInput(row, opts) {
   inp.className = 'num';
   inp.value = opts.value;
   if (opts.placeholder) inp.placeholder = opts.placeholder;
+  inp.addEventListener('focus', () => {
+    requestAnimationFrame(() => { try { inp.select(); } catch (e) {} });
+  });
   inp.addEventListener('input', () => {
     const cleaned = onlyDigits(inp.value);
     if (cleaned !== inp.value) inp.value = cleaned;
@@ -1985,7 +1928,6 @@ function renderCards() {
     const nameEl = document.createElement('div');
     nameEl.className = 'card-name';
     nameEl.textContent = row.name;
-    nameEl.addEventListener('click', () => openProduct(row, null));
     const shelfEl = document.createElement('div');
     shelfEl.className = 'card-shelf';
     shelfEl.textContent = `${row.shelfLife} ч`;
@@ -2072,6 +2014,7 @@ function renderCards() {
   requestAnimationFrame(() => {
     updateCardsOverflow();
     updateCardResults();
+    if (_tableQuery) applyTableFilter();
   });
 }
 function updateCardsOverflow() {
@@ -2125,96 +2068,6 @@ function refreshCardRow(row, card) {
   }
   scheduleTotalsUpdate();
   scheduleTableSync();
-}
-
-function productInputs() {
-  const list = [];
-  const s = $('pmStock'), sl = $('pmSales');
-  if (s) list.push(s); if (sl) list.push(sl);
-  const box = $('pmIncoming');
-  if (box) box.querySelectorAll('input.pf-num').forEach(i => list.push(i));
-  return list;
-}
-function productNav(input, dir) {
-  const list = productInputs();
-  const i = list.indexOf(input);
-  if (i < 0) return;
-  const j = i + dir;
-  if (j < 0 || j >= list.length) return;
-  const t = list[j];
-  t.focus();
-  try { t.select(); } catch (e) {}
-}
-function productKey(e) {
-  const k = e.key;
-  if (k !== 'ArrowUp' && k !== 'ArrowDown' && k !== 'ArrowLeft' && k !== 'ArrowRight') return;
-  if (e.shiftKey || e.metaKey || e.ctrlKey || e.altKey) return;
-  e.preventDefault();
-  productNav(e.target, (k === 'ArrowDown' || k === 'ArrowRight') ? 1 : -1);
-}
-function openProduct(row, tr) {
-  if (!row) return;
-  openIdx = tableRows.indexOf(row);
-  openTr = tr;
-  openSnapshot = { stock: row.stock, sales: row.sales, incoming: (row.incoming || []).map(p => ({ date: p.date, qty: p.qty, _originalQty: p._originalQty })) };
-  $('pmName').textContent = row.name;
-  $('pmShelf').textContent = `Срок годности: ${row.shelfLife} ч`;
-  $('pmStock').value = row.stock == null ? '' : String(row.stock);
-  $('pmSales').value = String(row.sales || 0);
-  const box = $('pmIncoming');
-  box.innerHTML = '';
-  const dates = [...new Set((row.incoming || []).map(p => p.date))].sort((a, b) => b.localeCompare(a));
-  if (!dates.length) {
-    const empty = document.createElement('div'); empty.className = 'pf-date-label'; empty.textContent = 'Нет накладных'; box.appendChild(empty);
-  } else {
-    dates.forEach(d => {
-      const party = row.incoming.find(p => p.date === d);
-      const dateRow = document.createElement('div'); dateRow.className = 'pf-date-row';
-      const lbl = document.createElement('div'); lbl.className = 'pf-date-label'; lbl.textContent = fmtDateRuShort(d);
-      const inp = makeNumInput({ className: 'pf-num', value: party ? (party.qty || 0) : 0 });
-      inp.dataset.date = d;
-      inp.addEventListener('keydown', productKey);
-      dateRow.appendChild(lbl); dateRow.appendChild(inp); box.appendChild(dateRow);
-    });
-  }
-  openModal('productModal');
-  setTimeout(() => { const s = $('pmStock'); if (s) { s.focus({ preventScroll: true }); try { s.select(); } catch (e) {} } }, 100);
-}
-function closeProduct() { closeModal('productModal'); openIdx = -1; openTr = null; openSnapshot = null; }
-function commitProduct() {
-  if (openIdx < 0) { closeProduct(); return; }
-  const row = tableRows[openIdx];
-  if (!row) { closeProduct(); return; }
-  const vStock = onlyDigits($('pmStock').value);
-  row.stock = vStock === '' ? null : clampNum(vStock, 0, MAX_NUM, null);
-  const vSales = onlyDigits($('pmSales').value);
-  row.sales = vSales === '' ? 0 : clampNum(vSales, 0, MAX_NUM, 0);
-  const incBox = $('pmIncoming');
-  if (incBox) {
-    incBox.querySelectorAll('input.pf-num').forEach(inp => {
-      const d = inp.dataset.date;
-      if (!d) return;
-      const party = (row.incoming || []).find(p => p.date === d);
-      const q = clampNum(onlyDigits(inp.value) || '0', 0, MAX_NUM, 0);
-      if (party) party.qty = q; else row.incoming.push({ date: d, qty: q, _originalQty: 0 });
-    });
-  }
-  if (openTr) refreshRow(row, openTr);
-  scheduleSessionSave();
-  renderCards();
-  updateTotals();
-  closeProduct();
-}
-function cancelProduct() {
-  if (openIdx < 0 || !openSnapshot) { closeProduct(); return; }
-  const row = tableRows[openIdx];
-  if (row) {
-    row.stock = openSnapshot.stock;
-    row.sales = openSnapshot.sales;
-    row.incoming = openSnapshot.incoming.map(p => ({ date: p.date, qty: p.qty, _originalQty: p._originalQty }));
-    if (openTr) refreshRow(row, openTr);
-  }
-  closeProduct();
 }
 
 function renderUnknownModal() {
@@ -2930,6 +2783,15 @@ function bindUI() {
   if (csvInput) {
     csvInput.addEventListener('input', () => { autoResizeTextarea(); updateCsvCounter(); });
     csvInput.addEventListener('blur', () => { if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; } saveSession(); });
+    csvInput.addEventListener('focus', () => {
+      setTimeout(() => { try { csvInput.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {} }, 300);
+    });
+  }
+  const pointInput = $('point');
+  if (pointInput) {
+    pointInput.addEventListener('focus', () => {
+      setTimeout(() => { try { pointInput.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {} }, 300);
+    });
   }
   const tableSearch = $('tableSearch');
   if (tableSearch) tableSearch.addEventListener('input', () => setTableQuery(tableSearch.value));
@@ -2960,6 +2822,7 @@ function bindUI() {
     pendingSessionReset = true; resetToken++;
     try {
       tableRows = []; unknownRows = []; unknownSelected = new Set(); _tableQuery = '';
+      const pt = $('point'); if (pt) pt.value = '';
       const ci = $('csvInput'); if (ci) { ci.value = ''; autoResizeTextarea(); updateCsvCounter(); }
       const ts = $('tableSearch'); if (ts) ts.value = '';
       const cs = $('csvStatus'); if (cs) { cs.className = 'status'; cs.textContent = ''; }
@@ -3010,7 +2873,7 @@ function bindUI() {
     if (PRODUCTS.length >= MAX_CATALOG) { alert('Справочник переполнен.'); return; }
     PRODUCTS.push({ name, shelfLife: hours });
     saveCatalog();
-    if (nameEl) { nameEl.value = ''; nameEl.focus(); }
+    if (nameEl) { nameEl.value = ''; }
     if (hoursEl) hoursEl.value = '0';
     if (daysEl) daysEl.value = '0';
     renderCatalogList();
@@ -3163,40 +3026,23 @@ function bindUI() {
   if (bannerLater) bannerLater.onclick = () => { _pendingRemote = null; hideCatalogUpdateBanner(); };
 
   let _resizeTimer = null;
+  let _lastIsMobile = window.innerWidth <= 900;
   window.addEventListener('resize', () => {
     if (_resizeTimer) clearTimeout(_resizeTimer);
-    _resizeTimer = setTimeout(() => { _resizeTimer = null; updateCardsOverflow(); }, 120);
+    _resizeTimer = setTimeout(() => {
+      _resizeTimer = null;
+      updateCardsOverflow();
+      const isMobile = window.innerWidth <= 900;
+      if (isMobile !== _lastIsMobile) {
+        _lastIsMobile = isMobile;
+        if (isMobile) renderCards();
+        else renderTable();
+      }
+    }, 120);
   });
 }
 
 function bindProductModal() {
-  const cancel = $('pmCancel'); if (cancel) cancel.onclick = cancelProduct;
-  const commit = $('pmCommit'); if (commit) commit.onclick = commitProduct;
-  const stock = $('pmStock');
-  if (stock) {
-    stock.addEventListener('keydown', productKey);
-    stock.addEventListener('input', () => { const cleaned = onlyDigits(stock.value); if (cleaned !== stock.value) stock.value = cleaned; });
-  }
-  const sales = $('pmSales');
-  if (sales) {
-    sales.addEventListener('keydown', productKey);
-    sales.addEventListener('input', () => { const cleaned = onlyDigits(sales.value); if (cleaned !== sales.value) sales.value = cleaned; });
-  }
-  document.querySelectorAll('.pf-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const target = $(btn.dataset.target);
-      if (!target) return;
-      const step = Number(btn.dataset.step) || 1;
-      const cur = target.value === '' ? 0 : Number(target.value);
-      const next = Math.max(0, Math.min(MAX_NUM, (isFinite(cur) ? cur : 0) + step));
-      target.value = String(next);
-      target.focus();
-      try { target.select(); } catch (e) {}
-    });
-  });
-  const modal = $('productModal');
-  if (modal) modal.addEventListener('click', e => { if (e.target === modal) cancelProduct(); });
-
   ['catalogModal', 'unknownModal', 'ignoredModal'].forEach(id => {
     const m = $(id);
     if (!m) return;
@@ -3219,8 +3065,7 @@ function bindProductModal() {
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
-      if (!$('productModal').classList.contains('hidden')) cancelProduct();
-      else if (!$('unknownModal').classList.contains('hidden')) closeUnknownModal();
+      if (!$('unknownModal').classList.contains('hidden')) closeUnknownModal();
       else if (!$('ignoredModal').classList.contains('hidden')) closeModal('ignoredModal');
       else if (!$('catalogModal').classList.contains('hidden')) closeModal('catalogModal');
       else if (!$('promptModal').classList.contains('hidden')) closeModal('promptModal');
