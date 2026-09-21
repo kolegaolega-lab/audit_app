@@ -81,7 +81,7 @@ label{display:block;font-size:11px;font-weight:600;color:var(--text-secondary);m
 input[type=text],input[type=password]{width:100%;padding:11px 13px;border:1px solid var(--separator-opaque);border-radius:var(--r-sm);background:var(--bg-input);color:var(--text);font-size:15px;transition:border-color .15s,background .15s;-webkit-appearance:none;appearance:none;min-height:44px;font-family:inherit;outline:none;letter-spacing:-.005em}
 input:focus{border-color:var(--accent);background:var(--bg-card);box-shadow:0 0 0 3px var(--accent-soft)}
 input::placeholder{color:var(--text-tertiary)}
-input:read-only{color:var(--text-secondary);cursor:default}
+input:read-only{cursor:default}
 textarea{width:100%;padding:12px 13px;border:1px solid var(--separator-opaque);border-radius:var(--r-sm);background:var(--bg-input);color:var(--text);font-size:13px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.5;min-height:130px;max-height:400px;resize:vertical;outline:none;transition:border-color .15s,background .15s;letter-spacing:0;overflow-y:auto}
 textarea:focus{border-color:var(--accent);background:var(--bg-card);box-shadow:0 0 0 3px var(--accent-soft)}
 textarea::placeholder{color:var(--text-tertiary)}
@@ -115,6 +115,8 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 .status.info{background:var(--accent-soft);color:var(--accent);font-weight:600}
 .status.warn{background:var(--orange-soft);color:var(--orange);font-weight:600}
 .status.purple{background:var(--purple-soft);color:var(--purple);font-weight:600}
+.totals-box{padding:12px 14px;border-radius:var(--r-sm);font-size:12.5px;line-height:1.6;background:var(--bg-input);color:var(--text-secondary);border:1px solid var(--separator);letter-spacing:-.005em}
+.totals-box b{font-weight:700}
 details.settings{margin-top:14px;border-top:1px solid var(--separator);padding-top:12px}
 details.settings summary{list-style:none;cursor:pointer;font-size:13px;font-weight:500;color:var(--text-secondary);display:flex;align-items:center;gap:6px;user-select:none;-webkit-user-select:none;padding:4px 0;transition:color .12s}
 details.settings summary:hover{color:var(--text)}
@@ -149,16 +151,12 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .kv .v{color:var(--text);font-weight:500;text-align:right}
 .actions-row{display:flex;gap:6px;margin-top:12px}
 .actions-row button{flex:1}
-
-/* Sticky-поиск */
 .sticky-search{position:sticky;top:var(--header-h);z-index:50;background:var(--bg-card);padding:12px 18px 10px;border-bottom:1px solid var(--separator);margin-top:12px}
 .table-search{position:relative}
 .table-search input{padding-left:34px;min-height:40px;font-size:14px}
 .table-search::before{content:'';position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;background:currentColor;opacity:.35;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") center/contain no-repeat;pointer-events:none}
 .table-search-clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:28px;height:28px;padding:0;border-radius:50%;background:transparent;color:var(--text-secondary);font-size:16px;font-weight:400;display:none;min-height:auto;align-items:center;justify-content:center;cursor:pointer;line-height:1}
 .table-search.has-value .table-search-clear{display:inline-flex}
-
-/* Таблица */
 .table-wrap{border-radius:var(--r-md);border:1px solid var(--separator);background:var(--bg-card);overflow:hidden;margin:0 18px 18px;width:calc(100% - 36px);max-width:calc(100% - 36px)}
 .table-scroll{overflow:auto;-webkit-overflow-scrolling:touch;background:var(--bg-card);position:relative;scrollbar-width:thin;scrollbar-color:var(--separator-opaque) transparent;overscroll-behavior:contain;max-width:100%}
 .table-scroll::-webkit-scrollbar{width:8px;height:8px}
@@ -191,9 +189,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .calc-cell{text-align:center;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text-tertiary)}
 .calc-cell.positive{color:var(--red)}
 .calc-cell.zero{color:var(--text-tertiary)}
-
-/* Карточки */
-.cards-view{display:none;padding:12px 18px 18px}
+.cards-view{display:none;padding:12px 18px 10px}
 .card{background:var(--bg-hover);border:1px solid var(--separator);border-radius:var(--r-md);margin-bottom:8px;padding:12px 14px 12px 18px;overflow:hidden;position:relative}
 .card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;z-index:10}
 .card.fresh::before{background:var(--green)}
@@ -225,8 +221,6 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
   .cards-view{display:none}
   .table-scroll table.table-body{table-layout:auto;width:100%}
 }
-
-/* Модалы */
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));height:100vh;height:100dvh;width:100vw;width:100dvw}
 .modal.hidden{display:none}
 .modal-content{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;overflow:hidden}
@@ -261,15 +255,11 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .cat-select-counter b{color:var(--text-secondary);font-weight:600;font-variant-numeric:tabular-nums}
 .cat-select-actions{display:flex;gap:8px}
 .cat-select-actions button{flex:1;min-height:38px;font-size:13.5px;padding:8px 12px}
-
-/* Чекбокс */
 .cb-wrap{width:24px;height:38px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
 .checkbox{width:24px;height:24px;border-radius:50%;border:2px solid var(--separator-opaque);background:transparent;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;box-sizing:border-box}
 .checkbox.checked{border-color:var(--accent);background:var(--accent)}
 .checkbox.checked::after{content:'';width:6px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-2px)}
-
-/* Единый стиль строк в модалах */
-.row-cat{display:grid;gap:8px;align-items:start;padding:10px 12px;margin-bottom:6px;background:var(--bg-hover);border-radius:12px}
+.row-cat{display:grid;gap:8px;align-items:center;padding:10px 12px;margin-bottom:6px;background:var(--bg-hover);border-radius:12px}
 .row-cat:last-child{margin-bottom:0}
 .row-cat.col-4{grid-template-columns:1fr 66px 76px 38px}
 .row-cat.col-5{grid-template-columns:24px 1fr 66px 76px}
@@ -280,6 +270,9 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .row-unk:last-child{margin-bottom:0}
 .row-unk .cb-wrap{align-self:stretch;height:auto;min-height:38px}
 .row.selected{background:var(--accent-soft)}
+.unk-name-field{pointer-events:none}
+.row-cat.col-5 input{pointer-events:none}
+.row-ign input{pointer-events:none}
 .pill{display:block;width:100%;min-height:38px;padding:8px 10px;font-size:13.5px;font-weight:500;border-radius:8px;background:var(--bg-input);border:1px solid var(--separator-opaque);color:var(--text);font-family:inherit;box-sizing:border-box;text-align:left}
 .pill.center{padding:0 22px 0 8px;text-align:center;line-height:38px}
 .pill-wrap{position:relative}
@@ -296,13 +289,9 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .unk-hours{position:relative}
 .unk-hours .pill.center{padding:0 20px 0 6px;text-align:center;line-height:38px;min-height:38px}
 .unk-hours .unit{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
-
-/* Промпт */
 #promptModal .modal-content{max-height:calc(100dvh - 32px);padding:22px;overflow:auto;scrollbar-width:none;-ms-overflow-style:none}
 #promptModal .modal-content::-webkit-scrollbar{display:none}
 pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm);font-size:11.5px;line-height:1.55;overflow:auto;max-height:60vh;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #1e293b}
-
-/* Фото */
 .photo-queue{display:grid;gap:8px;margin-top:10px}
 .photo-item{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input)}
 .photo-thumb{width:44px;height:44px;object-fit:cover;border-radius:9px;background:var(--bg-elev-2)}
@@ -311,14 +300,11 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .photo-type{font-size:11px;color:var(--text-secondary);margin-top:2px}
 .photo-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .photo-actions button{min-height:34px;padding:6px 12px;font-size:12.5px;border-radius:8px}
-
-/* Тост */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(28,28,30,.96);color:#fff;font-size:13.5px;font-weight:500;padding:11px 18px;border-radius:11px;z-index:9999;opacity:0;transition:opacity .25s,transform .25s,bottom .2s;pointer-events:none;max-width:90vw;text-align:center;letter-spacing:-.005em;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;cursor:pointer}
 @media (prefers-color-scheme:dark){
   .toast{background:rgba(58,58,60,.96)}
 }
-
 @media (max-width:420px){
   .cat-row{grid-template-columns:1fr 58px 66px 34px;gap:6px;padding:8px 10px}
   .row-cat.col-4{grid-template-columns:1fr 58px 66px 34px;gap:6px;padding:8px 10px}
@@ -497,7 +483,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 
     <div class="cards-view" id="cardsView"></div>
 
-    <div id="totals" class="status" style="margin:0 18px 12px"></div>
+    <div id="totals" class="totals-box" style="margin:0 18px 12px;display:none"></div>
 
     <div class="legend" style="margin:0 18px 18px">
       <span class="legend-item"><span class="legend-dot fresh"></span> Свежие</span>
@@ -525,7 +511,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint version">French Bakery Аудит · v9.3.0</div>
+  <div class="hint version">French Bakery Аудит · v9.2.6</div>
 
 </main>
 
@@ -605,7 +591,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <div id="unknownRows"></div>
     </div>
     <div class="modal-footer">
-      <div class="unknown-actions" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
         <button id="unknownAddBtn" class="success">Добавить</button>
         <button id="unknownIgnoreBtn" class="warn">Игнорировать</button>
         <button id="unknownCloseBtn" class="secondary" style="grid-column:1/-1">Закрыть</button>
@@ -1693,11 +1679,12 @@ function renderTable() {
     const wrap = $('tableWrap');
     const searchWrap = $('tableSearchWrap');
     const cardsView = $('cardsView');
+    const totalsBox = $('totals');
     if (!tbody || !colgroup || !theadTr || !wrap) return;
     tbody.innerHTML = '';
     if (!Array.isArray(tableRows) || !tableRows.length) {
       if ($('summary')) { $('summary').textContent = 'Загрузите CSV и введите фактический остаток.'; $('summary').dataset.baseSummary = ''; }
-      if ($('totals')) $('totals').className = 'status';
+      if (totalsBox) totalsBox.style.display = 'none';
       wrap.style.display = 'none';
       if (searchWrap) searchWrap.style.display = 'none';
       if (cardsView) cardsView.innerHTML = '';
@@ -1877,6 +1864,7 @@ function scheduleCardsSync() {
 function updateTotals() {
   const summary = $('summary');
   if (!summary) return;
+  const box = $('totals');
   let totalFreshOnShelf = 0, totalFreshSold = 0;
   let totalExpiredOnShelf = 0, totalSoldExpired = 0, totalSales = 0;
   let hasAnyStock = false, cntInfo = 0;
@@ -1897,11 +1885,11 @@ function updateTotals() {
   else base = hasAnyStock ? `${tableRows.length} позиций.` : `${tableRows.length} позиций. Введите остаток.`;
   summary.dataset.baseSummary = base;
   summary.textContent = base;
-  const box = $('totals');
   if (!box) return;
-  box.className = 'status show info';
+  box.style.display = 'block';
+  box.className = 'totals-box';
   if (isSalesOnlyMode) {
-    box.innerHTML = `<b>Режим «только продажи»</b><br>Накладные не загружены.<br>Продано всего: <b>${totalSales}</b> шт.`;
+    box.innerHTML = `<b>Режим «только продажи»</b><br>Накладные не загружены.<br>Продано всего: <b style="color:var(--text)">${totalSales}</b> шт.`;
     return;
   }
   if (!hasAnyStock) {
@@ -1909,9 +1897,9 @@ function updateTotals() {
     return;
   }
   box.innerHTML = `
-    Свежих на витрине: <b>${totalFreshOnShelf}</b> шт · Продано свежих: <b>${totalFreshSold}</b> шт<br>
+    Свежих на витрине: <b style="color:var(--green)">${totalFreshOnShelf}</b> шт · Продано свежих: <b style="color:var(--green)">${totalFreshSold}</b> шт<br>
     Продано просроченным: <b style="color:var(--red)">${totalSoldExpired}</b> шт · Просрочено на витрине: <b style="color:var(--red)">${totalExpiredOnShelf}</b> шт
-    ${cntInfo > 0 ? `<br>Без накладных: <b>${cntInfo}</b> поз.` : ''}
+    ${cntInfo > 0 ? `<br>Без накладных: <b style="color:var(--text)">${cntInfo}</b> поз.` : ''}
   `;
   if (_tableQuery) applyTableFilter();
 }
@@ -2290,7 +2278,6 @@ function ignoreSelectedUnknown() {
   showToast(`Игнорировано: ${count}`);
 }
 
-/* ============ СПРАВОЧНИК ============ */
 function updateCatalogSelectUI() {
   const bar = $('catalogSelectBar');
   const addBlock = $('catalogAddBlock');
@@ -2496,7 +2483,6 @@ function catalogToIgnored() {
   showToast(`Перенесено в игнор: ${removed}`);
 }
 
-/* ============ ИГНОР-ЛИСТ ============ */
 function updateIgnoredSelectUI() {
   const bar = $('ignoredSelectBar');
   const normalActions = $('ignoredNormalActions');
@@ -3459,7 +3445,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.3.0 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.2.6 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
