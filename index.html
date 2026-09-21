@@ -511,7 +511,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint version">French Bakery Аудит · v9.2.6</div>
+  <div class="hint version">French Bakery Аудит · v9.3.0</div>
 
 </main>
 
@@ -656,10 +656,14 @@ const SESSION_VERSION = 6;
 const LEGACY_SESSION_KEY = 'fbAuditSessionV5';
 const CATALOG_KEY = 'fbAuditProducts';
 const IGNORED_KEY = 'fbAuditIgnored';
-const SYNC_REMOTE_KEY = 'fbAuditSyncRemoteSimulate';
+const CATALOG_BACKUP_KEY = 'fbAuditCatalogBackup';
 const SYNC_LOCAL_UPDATED_AT = 'fbAuditSyncLocalUpdatedAt';
 const SYNC_LAST_CHECK = 'fbAuditSyncLastCheck';
 const ACCESS_KEY = 'fbAuditAccessKey';
+const GITHUB_REPO = 'kolegaolega-lab/audit_app';
+const GITHUB_FILE = 'sync.json';
+const GITHUB_API = 'https://api.github.com';
+const APP_VERSION = 'v9.3.0';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -1198,32 +1202,96 @@ function sortRowsAlphabetically(rows) {
   return [...rows].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' }));
 }
   
-function getRemoteSimulated() {
+async function fetchRemoteCatalog() {
   try {
-    const raw = localStorage.getItem(SYNC_REMOTE_KEY);
-    if (!raw) return null;
-    const data = JSON.parse(raw);
+    const url = `./${GITHUB_FILE}?t=${Date.now()}`;
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const data = await res.json();
     if (!data || !Array.isArray(data.products)) return null;
     return data;
-  } catch (e) { return null; }
+  } catch (e) {
+    console.warn('fetchRemoteCatalog:', e);
+    return null;
+  }
 }
-function setRemoteSimulated(data) {
-  try { localStorage.setItem(SYNC_REMOTE_KEY, JSON.stringify(data)); }
-  catch (e) { console.warn('setRemoteSimulated:', e); }
+async function verifyToken(token) {
+  try {
+    const res = await fetch(`${GITHUB_API}/user`, {
+      headers: { 'Authorization': `token ${token}` }
+    });
+    return res.ok;
+  } catch (e) {
+    return false;
+  }
+}
+async function pushToGitHub(token, data) {
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+  const url = `${GITHUB_API}/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+
+  let sha = null;
+  try {
+    const getRes = await fetch(url, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      },
+      cache: 'no-store'
+    });
+    if (getRes.ok) {
+      const info = await getRes.json();
+      sha = info.sha || null;
+    } else if (getRes.status === 401) {
+      return { ok: false, code: 401, message: 'Неверный токен' };
+    } else if (getRes.status === 403) {
+      return { ok: false, code: 403, message: 'Нет прав / лимит' };
+    } else if (getRes.status !== 404) {
+      return { ok: false, code: getRes.status, message: 'Ошибка сервера' };
+    }
+  } catch (e) {
+    return { ok: false, code: 0, message: 'Нет подключения' };
+  }
+
+  const body = {
+    message: `sync: обновление справочника от ${data.updatedAt}`,
+    content,
+    ...(sha ? { sha } : {})
+  };
+
+  try {
+    const putRes = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    if (putRes.ok) return { ok: true };
+    if (putRes.status === 401) return { ok: false, code: 401, message: 'Неверный токен' };
+    if (putRes.status === 403) return { ok: false, code: 403, message: 'Нет прав / лимит' };
+    if (putRes.status === 404) return { ok: false, code: 404, message: 'Файл не найден' };
+    if (putRes.status === 409) return { ok: false, code: 409, message: 'Конфликт версий — повторите' };
+    return { ok: false, code: putRes.status, message: `Ошибка ${putRes.status}` };
+  } catch (e) {
+    return { ok: false, code: 0, message: 'Нет подключения' };
+  }
 }
 function buildSyncPayload() {
   return {
     version: 1,
     updatedAt: new Date().toISOString(),
-    updatedBy: _isOwner ? 'owner' : 'user',
+    updatedBy: APP_VERSION,
     products: PRODUCTS,
-    ignored: IGNORED
+    ignored: IGNORED,
+    aliases: []
   };
 }
 function syncPullFromServer(opts) {
   opts = opts || {};
   const silent = !!opts.silent;
-  const remote = opts.remote || getRemoteSimulated();
+  const remote = opts.remote;
   const statusEl = $('syncStatus');
   if (!remote) {
     if (!silent && statusEl) { statusEl.className = 'status show warn'; statusEl.textContent = 'На сервере нет данных.'; }
@@ -1251,15 +1319,34 @@ function syncPullFromServer(opts) {
   }
   return true;
 }
-function syncPushToServer() {
+async function syncPushToServer() {
   const statusEl = $('syncStatus');
+  const token = localStorage.getItem(ACCESS_KEY);
+  if (!token) {
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Нет токена — активируйте режим владельца.'; }
+    return { ok: false };
+  }
   const payload = buildSyncPayload();
-  setRemoteSimulated(payload);
-  try { localStorage.setItem(SYNC_LOCAL_UPDATED_AT, payload.updatedAt); } catch (e) {}
-  updateCatalogMeta();
-  if (statusEl) {
-    statusEl.className = 'status show ok';
-    statusEl.textContent = `Опубликовано: ${PRODUCTS.length} позиций.`;
+  if (statusEl) { statusEl.className = 'status show info'; statusEl.textContent = 'Публикация…'; }
+  const result = await pushToGitHub(token, payload);
+  if (result.ok) {
+    try { localStorage.setItem(SYNC_LOCAL_UPDATED_AT, payload.updatedAt); } catch (e) {}
+    try {
+      const backup = { version: 1, savedAt: Date.now(), products: PRODUCTS, ignored: IGNORED };
+      localStorage.setItem(CATALOG_BACKUP_KEY, JSON.stringify(backup));
+    } catch (e) {}
+    updateCatalogMeta();
+    if (statusEl) { statusEl.className = 'status show ok'; statusEl.textContent = `Опубликовано: ${PRODUCTS.length} позиций.`; }
+    return { ok: true };
+  } else {
+    let msg = result.message || 'Ошибка публикации';
+    if (result.code === 401) msg = 'Неверный токен';
+    else if (result.code === 403) msg = 'Нет прав или лимит';
+    else if (result.code === 404) msg = 'Файл не найден — создайте sync.json';
+    else if (result.code === 409) msg = 'Конфликт версий — попробуйте ещё раз';
+    else if (result.code === 0) msg = 'Нет подключения';
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = msg; }
+    return { ok: false, message: msg };
   }
 }
 function setLastCheckTime() {
@@ -1287,8 +1374,8 @@ function updateCatalogMeta() {
     }
   } catch (e) {}
 }
-function syncCheckOnStartup() {
-  const remote = getRemoteSimulated();
+async function syncCheckOnStartup() {
+  const remote = await fetchRemoteCatalog();
   if (!remote) return;
   const localUpdatedAt = localStorage.getItem(SYNC_LOCAL_UPDATED_AT) || '';
   const remoteUpdatedAt = String(remote.updatedAt || '');
@@ -1355,12 +1442,21 @@ function setOwnerMode(on) {
   if (badge && badge._t) { clearTimeout(badge._t); badge._t = null; }
   updateHeaderBadge();
 }
-function activateOwner() {
+async function activateOwner() {
   const input = $('tokenInput');
   const statusEl = $('syncStatus');
+  const btn = $('activateOwnerBtn');
   const token = input ? input.value.trim() : '';
   if (!token) {
     if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Введите ключ доступа'; }
+    return;
+  }
+  if (statusEl) { statusEl.className = 'status show info'; statusEl.textContent = 'Проверка токена…'; }
+  if (btn) btn.classList.add('busy');
+  const ok = await verifyToken(token);
+  if (btn) btn.classList.remove('busy');
+  if (!ok) {
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Неверный токен'; }
     return;
   }
   try { localStorage.setItem(ACCESS_KEY, token); } catch (e) {}
@@ -1374,10 +1470,17 @@ function deactivateOwner() {
   if (input) input.value = '';
   showToast('Режим владельца выключен');
 }
-function restoreOwnerMode() {
+async function restoreOwnerMode() {
   try {
     const token = localStorage.getItem(ACCESS_KEY);
-    if (token) setOwnerMode(true);
+    if (!token) return;
+    const ok = await verifyToken(token);
+    if (ok) {
+      setOwnerMode(true);
+    } else {
+      try { localStorage.removeItem(ACCESS_KEY); } catch (e) {}
+      setOwnerMode(false);
+    }
   } catch (e) {}
 }
 
@@ -3255,10 +3358,10 @@ function bindUI() {
   };
   const closePrompt = $('closePromptModalBtn'); if (closePrompt) closePrompt.onclick = () => closeModal('promptModal');
 
-  const activateOwnerBtn = $('activateOwnerBtn'); if (activateOwnerBtn) activateOwnerBtn.onclick = activateOwner;
+  const activateOwnerBtn = $('activateOwnerBtn'); if (activateOwnerBtn) activateOwnerBtn.onclick = () => { activateOwner(); };
   const deactivateOwnerBtn = $('deactivateOwnerBtn'); if (deactivateOwnerBtn) deactivateOwnerBtn.onclick = deactivateOwner;
   const checkUpdatesBtn = $('checkUpdatesBtn');
-  if (checkUpdatesBtn) checkUpdatesBtn.onclick = () => {
+  if (checkUpdatesBtn) checkUpdatesBtn.onclick = async () => {
     const metaSyncing = $('metaSyncing');
     const metaLocal = $('metaLocal');
     const metaRemote = $('metaRemote');
@@ -3268,30 +3371,29 @@ function bindUI() {
     if (metaSyncing) metaSyncing.style.display = 'flex';
     if (syncStatus) { syncStatus.className = 'status'; syncStatus.textContent = ''; }
     setLastCheckTime();
-    setTimeout(() => {
-      try {
-        if (metaSyncing) metaSyncing.style.display = 'none';
-        updateCatalogMeta();
-        const remote = getRemoteSimulated();
-        const localUpdatedAt = localStorage.getItem(SYNC_LOCAL_UPDATED_AT) || '';
-        if (remote && remote.updatedAt && (!localUpdatedAt || remote.updatedAt > localUpdatedAt)) {
-          _pendingRemote = remote;
-          showCatalogUpdateBanner(remote);
-          if (syncStatus) { syncStatus.className = 'status show purple'; syncStatus.textContent = 'Доступно обновление.'; }
-        } else {
-          if (syncStatus) { syncStatus.className = 'status show ok'; syncStatus.textContent = 'Обновлений нет.'; }
-        }
-      } catch (e) {
-        if (metaSyncing) metaSyncing.style.display = 'none';
-        updateCatalogMeta();
-      }
-    }, 900);
+    const remote = await fetchRemoteCatalog();
+    if (metaSyncing) metaSyncing.style.display = 'none';
+    updateCatalogMeta();
+    if (!remote) {
+      if (syncStatus) { syncStatus.className = 'status show'; syncStatus.textContent = 'Обновлений нет.'; }
+      return;
+    }
+    const localUpdatedAt = localStorage.getItem(SYNC_LOCAL_UPDATED_AT) || '';
+    if (remote.updatedAt && (!localUpdatedAt || remote.updatedAt > localUpdatedAt)) {
+      _pendingRemote = remote;
+      showCatalogUpdateBanner(remote);
+      if (syncStatus) { syncStatus.className = 'status show purple'; syncStatus.textContent = 'Доступно обновление.'; }
+    } else {
+      if (syncStatus) { syncStatus.className = 'status show ok'; syncStatus.textContent = 'Обновлений нет.'; }
+    }
   };
   const publishBtn = $('publishBtn');
-  if (publishBtn) publishBtn.onclick = () => {
-    const syncStatus = $('syncStatus');
-    if (syncStatus) { syncStatus.className = 'status show info'; syncStatus.textContent = 'Публикация…'; }
-    setTimeout(() => { syncPushToServer(); showToast('Опубликовано'); }, 600);
+  if (publishBtn) publishBtn.onclick = async () => {
+    publishBtn.classList.add('busy');
+    const result = await syncPushToServer();
+    publishBtn.classList.remove('busy');
+    if (result && result.ok) showToast('Опубликовано');
+    else if (result && result.message) showToast(result.message);
   };
   const bannerApply = $('bannerApply');
   if (bannerApply) bannerApply.onclick = () => applyPendingRemote();
@@ -3430,9 +3532,6 @@ function init() {
       updateIgnoredCount();
       updateUnknownBanner();
     }
-    if (e.key === SYNC_REMOTE_KEY) {
-      syncCheckOnStartup();
-    }
   });
   window.addEventListener('beforeunload', () => {
     if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
@@ -3445,7 +3544,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.2.6 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.3.0 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
