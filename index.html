@@ -1129,18 +1129,18 @@ function computeFIFO(row) {
 function emptyResult() { return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null }; }
 function getRowStatus(calc, row) {
   if (row && row.salesOnly) return { cls: 'row-info', label: 'info' };
+  if (row && (row.stock == null || row.stock === 0)) return { cls: 'row-unknown', label: 'empty' };
   if (!calc || calc.soldExpired === null) return { cls: 'row-unknown', label: 'unknown' };
   if (calc.soldExpired > 0) return { cls: 'row-danger', label: 'danger' };
   if (calc.expiredOnShelf > 0) return { cls: 'row-warn', label: 'warn' };
-  if (row && row.stock === 0) return { cls: 'row-unknown', label: 'empty' };
   return { cls: 'row-fresh', label: 'fresh' };
 }
 function getCardStatus(calc, row) {
   if (row && row.salesOnly) return 'fresh';
+  if (row && (row.stock == null || row.stock === 0)) return 'empty';
   if (!calc || calc.soldExpired === null) return 'fresh';
   if (calc.soldExpired > 0) return 'danger';
   if (calc.expiredOnShelf > 0) return 'warn';
-  if (row && row.stock === 0) return 'empty';
   return 'fresh';
 }
 
@@ -2402,7 +2402,10 @@ function addSelectedUnknown() {
     const hours = clampNum(hInp ? (onlyDigits(hInp.value) || '0') : 0, 0, MAX_SHELF_HOURS, 0);
     toAdd.push({ name, hours });
   });
-  if (!toAdd.length) return;
+  if (!toAdd.length) {
+    showToast('Ничего не выбрано');
+    return;
+  }
   const addKeys = new Set(toAdd.map(x => normalizeName(x.name)));
   toAdd.forEach(({ name, hours }) => { PRODUCTS.push({ name, shelfLife: hours }); });
   saveCatalog();
@@ -2427,17 +2430,33 @@ function addSelectedUnknown() {
   else renderUnknownModal();
   showToast(`Добавлено: ${toAdd.length}`);
 }
-function ignoreAllUnknown() {
-  if (!unknownRows.length) return;
-  const count = unknownRows.length;
+function ignoreSelectedUnknown() {
+  if (!unknownSelected.size) {
+    showToast('Ничего не выбрано');
+    return;
+  }
+  const keys = new Set(unknownSelected);
+  const count = keys.size;
   if (!confirm(`Добавить ${count} позиций в игнор-лист?`)) return;
-  for (const r of unknownRows) { if (!isIgnored(r.name)) IGNORED.push(r.name); }
+
+  unknownRows.forEach(r => {
+    if (keys.has(normalizeName(r.name)) && !isIgnored(r.name)) {
+      IGNORED.push(r.name);
+    }
+  });
   saveIgnored();
-  unknownRows = [];
+
+  unknownRows = unknownRows.filter(r => !keys.has(normalizeName(r.name)));
+
   unknownSelected = new Set();
   scheduleSessionSave();
   updateUnknownBanner();
-  closeModal('unknownModal');
+
+  if (!unknownRows.filter(r => !isIgnored(r.name)).length) {
+    closeModal('unknownModal');
+  } else {
+    renderUnknownModal();
+  }
   showToast(`Игнорировано: ${count}`);
 }
 
@@ -3118,7 +3137,7 @@ function bindUI() {
     renderUnknownModal();
   };
   const unknownAddBtn = $('unknownAddBtn'); if (unknownAddBtn) unknownAddBtn.onclick = addSelectedUnknown;
-  const unknownIgnoreBtn = $('unknownIgnoreBtn'); if (unknownIgnoreBtn) unknownIgnoreBtn.onclick = ignoreAllUnknown;
+  const unknownIgnoreBtn = $('unknownIgnoreBtn'); if (unknownIgnoreBtn) unknownIgnoreBtn.onclick = ignoreSelectedUnknown;
   const unknownCloseBtn = $('unknownCloseBtn'); if (unknownCloseBtn) unknownCloseBtn.onclick = (e) => { e.stopPropagation(); closeUnknownModal(); };
   const unknownSearch = $('unknownSearch');
   if (unknownSearch) unknownSearch.oninput = () => { unknownQuery = unknownSearch.value; unknownVisible = UNKNOWN_PAGE_SIZE; renderUnknownModal(); };
