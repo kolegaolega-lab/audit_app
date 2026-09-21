@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'fb-audit-v23';
+const CACHE_NAME = 'fb-audit-v24';
 const ASSETS = [
   './',
   './index.html',
@@ -37,6 +37,9 @@ self.addEventListener('fetch', e => {
 
   const url = new URL(req.url);
   if (url.hostname === 'api.github.com') return;
+
+  // sync.json — не кэшировать, только сеть
+  if (url.pathname.endsWith('/sync.json')) return;
 
   const isSameOrigin = url.origin === self.location.origin;
   if (!isSameOrigin) return;
