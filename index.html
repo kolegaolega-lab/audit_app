@@ -217,6 +217,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .card.warn::before{background:var(--orange)}
 .card.danger::before{background:var(--red)}
 .card.empty::before{background:var(--separator-opaque)}
+.card.hidden-card{display:none}
 .card-head{display:flex;align-items:flex-start;gap:8px;padding:12px 14px 0 18px}
 .card-name{flex:1 1 auto;min-width:0;font-size:14px;font-weight:600;line-height:1.3;word-break:break-word}
 .card-shelf{flex:0 0 auto;font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums;padding:2px 6px;background:var(--bg-input);border-radius:6px}
@@ -308,6 +309,22 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .cat-row .inp-wrap .unit{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
 .cat-row .del-btn{min-height:38px;padding:0;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:16px;font-weight:700;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
 .cat-row.add-row .add-btn{background:var(--green-soft);color:var(--green);border:1px solid var(--green-soft);font-size:20px;font-weight:500;min-height:38px;padding:0;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
+.cat-select-bar{flex:0 0 auto;padding:0 22px 12px;background:var(--bg-card);border-bottom:1px solid var(--separator);display:flex;flex-direction:column;gap:8px}
+.cat-select-counter{font-size:11.5px;color:var(--text-secondary)}
+.cat-select-counter b{color:var(--text-secondary);font-weight:600;font-variant-numeric:tabular-nums}
+.cat-select-actions{display:flex;gap:8px}
+.cat-select-actions button{flex:1;min-height:38px;font-size:13.5px;padding:8px 12px}
+.cat-row.selectable{cursor:pointer;padding:8px 6px;user-select:none;-webkit-user-select:none;transition:background .12s,border-color .12s;border:1.5px solid transparent}
+.cat-row.selectable.selected{background:var(--accent-soft);border-color:var(--accent)}
+.cat-row.selectable input[type=text],
+.cat-row.selectable .inp-wrap input{pointer-events:none}
+.cat-row.selectable.selected input[type=text],
+.cat-row.selectable.selected .inp-wrap input{background:transparent;border-color:transparent}
+.cat-row.selectable .del-btn{visibility:hidden}
+.ignored-row.selectable{cursor:pointer;user-select:none;-webkit-user-select:none;border:1.5px solid transparent;transition:background .12s,border-color .12s}
+.ignored-row.selectable.selected{background:var(--accent-soft);border-color:var(--accent)}
+.ignored-row.selectable.selected .name{color:var(--accent);font-weight:600}
+.ignored-row.selectable .del-btn{visibility:hidden}
 #promptModal .modal-content{max-height:calc(100dvh - 32px);padding:22px;overflow:auto;scrollbar-width:none;-ms-overflow-style:none}
 #promptModal .modal-content::-webkit-scrollbar{display:none}
 pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm);font-size:11.5px;line-height:1.55;overflow:auto;max-height:60vh;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #1e293b}
@@ -319,7 +336,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .photo-type{font-size:11px;color:var(--text-secondary);margin-top:2px}
 .photo-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .photo-actions button{min-height:34px;padding:6px 12px;font-size:12.5px;border-radius:8px}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(28,28,30,.96);color:#fff;font-size:13.5px;font-weight:500;padding:11px 18px;border-radius:11px;z-index:9999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;max-width:90vw;text-align:center;letter-spacing:-.005em;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(28,28,30,.96);color:#fff;font-size:13.5px;font-weight:500;padding:11px 18px;border-radius:11px;z-index:9999;opacity:0;transition:opacity .25s,transform .25s,bottom .2s;pointer-events:none;max-width:90vw;text-align:center;letter-spacing:-.005em;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;cursor:pointer}
 @media (max-width:420px){
   .unknown-row-grid{grid-template-columns:1fr 54px 62px;gap:6px}
@@ -532,10 +549,20 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     <div class="modal-header">
       <h3>Справочник сроков</h3>
       <p class="hint">Меняйте названия и сроки. Введите часы или сутки — второе пересчитается.</p>
-      <div style="margin:12px 0 0"><input id="catalogSearch" type="text" placeholder="Поиск по названию..." autocomplete="off" maxlength="100"></div>
+      <div style="margin:12px 0 0;display:flex;gap:8px;align-items:center">
+        <input id="catalogSearch" type="text" placeholder="Поиск по названию..." autocomplete="off" maxlength="100" style="flex:1;min-width:0">
+        <button type="button" id="catalogSelectModeBtn" class="secondary" style="flex:0 0 auto;min-height:40px;padding:8px 14px;font-size:13.5px">Выбрать</button>
+      </div>
+    </div>
+    <div class="cat-select-bar" id="catalogSelectBar" style="display:none">
+      <div class="cat-select-counter">Выбрано: <b id="catalogSelectedCount">0</b></div>
+      <div class="cat-select-actions">
+        <button type="button" id="catalogSelectAllBtn" class="secondary">Выбрать все</button>
+        <button type="button" id="catalogClearSelBtn" class="secondary">Снять</button>
+      </div>
     </div>
     <div class="modal-body" id="catalogList"></div>
-    <div class="catalog-add-block">
+    <div class="catalog-add-block" id="catalogAddBlock">
       <label>Добавить позицию</label>
       <div class="cat-row add-row" style="margin-top:6px">
         <input id="newProdName" type="text" placeholder="Название" autocomplete="off" maxlength="100">
@@ -546,11 +573,16 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <p class="hint">Срок в часах (макс. 720) или сутках (макс. 30). <b style="color:var(--text-secondary)">24 ч = 1 сутки</b>.</p>
     </div>
     <div class="modal-footer">
-      <div class="row" style="margin-bottom:8px">
-        <button id="exportCatalogBtn" class="secondary">Экспорт</button>
-        <button id="importCatalogBtn" class="secondary">Импорт</button>
+      <div id="catalogNormalActions">
+        <div class="row" style="margin-bottom:8px">
+          <button id="exportCatalogBtn" class="secondary">Экспорт</button>
+          <button id="importCatalogBtn" class="secondary">Импорт</button>
+        </div>
+        <button id="resetCatalogBtn" class="secondary block" style="margin-bottom:8px">Сбросить к заводскому</button>
       </div>
-      <button id="resetCatalogBtn" class="secondary block" style="margin-bottom:8px">Сбросить к заводскому</button>
+      <div id="catalogSelectActions" style="display:none">
+        <button id="catalogToIgnoredBtn" class="warn block" style="margin-bottom:8px">В игнор-лист (0)</button>
+      </div>
       <input id="importCatalogFile" type="file" accept=".json,application/json" hidden>
       <div id="catalogStatus" class="status"></div>
       <button id="closeCatalogBtn" class="secondary block" style="margin-top:10px">Закрыть</button>
@@ -602,10 +634,25 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     <div class="modal-header">
       <h3>Игнор-лист</h3>
       <p class="hint">Эти позиции не появляются в списке «Не в справочнике».</p>
+      <div style="margin:12px 0 0;display:flex;gap:8px;align-items:center">
+        <button type="button" id="ignoredSelectModeBtn" class="secondary" style="flex:1;min-height:40px;padding:8px 14px;font-size:13.5px">Выбрать</button>
+      </div>
+    </div>
+    <div class="cat-select-bar" id="ignoredSelectBar" style="display:none">
+      <div class="cat-select-counter">Выбрано: <b id="ignoredSelectedCount">0</b></div>
+      <div class="cat-select-actions">
+        <button type="button" id="ignoredSelectAllBtn" class="secondary">Выбрать все</button>
+        <button type="button" id="ignoredClearSelBtn" class="secondary">Снять</button>
+      </div>
     </div>
     <div class="modal-body" id="ignoredList"></div>
     <div class="modal-footer">
-      <button id="clearIgnoredBtn" class="secondary block" style="margin-bottom:8px">Очистить игнор-лист</button>
+      <div id="ignoredNormalActions">
+        <button id="clearIgnoredBtn" class="secondary block" style="margin-bottom:8px">Очистить игнор-лист</button>
+      </div>
+      <div id="ignoredSelectActions" style="display:none">
+        <button id="ignoredToCatalogBtn" class="success block" style="margin-bottom:8px">Вернуть в справочник (0)</button>
+      </div>
       <button id="closeIgnoredBtn" class="secondary block">Закрыть</button>
     </div>
   </div>
@@ -673,6 +720,10 @@ let _tableSearchTimer = null;
 let _pendingRemote = null;
 let _isOwner = false;
 let _currentToast = null;
+let _catalogSelectMode = false;
+let _catalogSelected = new Set();
+let _ignoredSelectMode = false;
+let _ignoredSelected = new Set();
 
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
 
@@ -823,23 +874,39 @@ function updateCsvCounter() {
 }
 function applyTableFilter() {
   const tbody = document.querySelector('#resultTable tbody');
-  if (!tbody) return;
+  const cardsBox = $('cardsView');
   const q = normalizeForSearch(_tableQuery);
-  let visible = 0;
-  const rows = tbody.children;
-  for (let i = 0; i < rows.length; i++) {
-    const tr = rows[i];
-    const nameEl = tr.querySelector('.name-text');
-    const name = nameEl ? normalizeForSearch(nameEl.textContent) : '';
-    if (!q || name.includes(q)) { tr.classList.remove('hidden-row'); visible++; }
-    else tr.classList.add('hidden-row');
+  if (tbody) {
+    const rows = tbody.children;
+    for (let i = 0; i < rows.length; i++) {
+      const tr = rows[i];
+      const nameEl = tr.querySelector('.name-text');
+      const name = nameEl ? normalizeForSearch(nameEl.textContent) : '';
+      if (!q || name.includes(q)) tr.classList.remove('hidden-row');
+      else tr.classList.add('hidden-row');
+    }
+  }
+  if (cardsBox) {
+    const cards = cardsBox.querySelectorAll('.card');
+    cards.forEach(card => {
+      const nameEl = card.querySelector('.card-name');
+      const name = nameEl ? normalizeForSearch(nameEl.textContent) : '';
+      const ok = !q || name.includes(q);
+      card.classList.toggle('hidden-card', !ok);
+    });
   }
   const searchWrap = $('tableSearchWrap');
   if (searchWrap) searchWrap.classList.toggle('has-value', !!q);
   const summary = $('summary');
   if (summary) {
     const base = summary.dataset.baseSummary || '';
-    summary.textContent = q ? `${base} Показано: ${visible}` : base;
+    if (q && Array.isArray(tableRows)) {
+      let visible = 0;
+      tableRows.forEach(r => { if (normalizeForSearch(r.name).includes(q)) visible++; });
+      summary.textContent = `${base} Показано: ${visible}`;
+    } else {
+      summary.textContent = base;
+    }
   }
 }
 function setTableQuery(q) {
@@ -1185,13 +1252,18 @@ function buildSyncPayload() {
 function syncPullFromServer(opts) {
   opts = opts || {};
   const silent = !!opts.silent;
-  const remote = getRemoteSimulated();
+  const remote = opts.remote || getRemoteSimulated();
   const statusEl = $('syncStatus');
   if (!remote) {
     if (!silent && statusEl) { statusEl.className = 'status show warn'; statusEl.textContent = 'На сервере нет данных.'; }
     return false;
   }
-  PRODUCTS = sanitizeProducts(remote.products);
+  const cleaned = sanitizeProducts(remote.products);
+  if (!cleaned.length) {
+    if (!silent && statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Файл на сервере пустой или повреждён.'; }
+    return false;
+  }
+  PRODUCTS = cleaned;
   saveCatalog();
   if (Array.isArray(remote.ignored)) {
     IGNORED = remote.ignored.filter(x => typeof x === 'string').map(x => x.trim()).filter(Boolean).slice(0, MAX_CATALOG);
@@ -1271,7 +1343,8 @@ function hideCatalogUpdateBanner() {
 }
 function applyPendingRemote() {
   if (!_pendingRemote) return;
-  const ok = syncPullFromServer({ silent: true });
+  const remote = _pendingRemote;
+  const ok = syncPullFromServer({ silent: true, remote });
   _pendingRemote = null;
   hideCatalogUpdateBanner();
   if (ok) showToast(`Справочник обновлён: ${PRODUCTS.length} позиций`);
@@ -1294,11 +1367,13 @@ function setOwnerMode(on) {
   const publishBtn = $('publishBtn');
   const activateBlock = $('ownerActivateBlock');
   const deactivateBtn = $('deactivateOwnerBtn');
+  const editCatalogBtn = $('editCatalogBtn');
   const statusEl = $('syncStatus');
   const badge = $('headerBadge');
   if (publishBtn) publishBtn.style.display = _isOwner ? 'inline-flex' : 'none';
   if (activateBlock) activateBlock.style.display = _isOwner ? 'none' : 'block';
   if (deactivateBtn) deactivateBtn.style.display = _isOwner ? 'inline-flex' : 'none';
+  if (editCatalogBtn) editCatalogBtn.style.display = _isOwner ? 'inline-flex' : 'none';
   if (statusEl && _isOwner) {
     statusEl.className = 'status show purple';
     statusEl.textContent = 'Режим владельца активирован';
@@ -1856,7 +1931,7 @@ function updateTotals() {
   `;
   if (_tableQuery) applyTableFilter();
 }
-  
+
 function buildCardInput(row, opts) {
   const inpWrap = document.createElement('div');
   inpWrap.className = 'inp-wrap';
@@ -2069,7 +2144,7 @@ function refreshCardRow(row, card) {
   scheduleTotalsUpdate();
   scheduleTableSync();
 }
-
+  
 function renderUnknownModal() {
   const body = $('unknownRows');
   const totalEl = $('unknownTotal');
@@ -2387,6 +2462,22 @@ function exportExcel() {
   finally { setTimeout(() => { exportBusy = false; if (btn) btn.classList.remove('busy'); }, 500); }
 }
 
+function updateCatalogSelectUI() {
+  const bar = $('catalogSelectBar');
+  const addBlock = $('catalogAddBlock');
+  const normalActions = $('catalogNormalActions');
+  const selectActions = $('catalogSelectActions');
+  const modeBtn = $('catalogSelectModeBtn');
+  const toIgnoredBtn = $('catalogToIgnoredBtn');
+  const countEl = $('catalogSelectedCount');
+  if (bar) bar.style.display = _catalogSelectMode ? 'flex' : 'none';
+  if (addBlock) addBlock.style.display = _catalogSelectMode ? 'none' : 'block';
+  if (normalActions) normalActions.style.display = _catalogSelectMode ? 'none' : 'block';
+  if (selectActions) selectActions.style.display = _catalogSelectMode ? 'block' : 'none';
+  if (modeBtn) modeBtn.textContent = _catalogSelectMode ? 'Готово' : 'Выбрать';
+  if (countEl) countEl.textContent = String(_catalogSelected.size);
+  if (toIgnoredBtn) toIgnoredBtn.textContent = `В игнор-лист (${_catalogSelected.size})`;
+}
 function renderCatalogList() {
   const list = $('catalogList');
   if (!list) return;
@@ -2399,13 +2490,16 @@ function renderCatalogList() {
   const fragment = document.createDocumentFragment();
   filtered.forEach(p => {
     const row = document.createElement('div');
-    row.className = 'cat-row';
+    row.className = 'cat-row' + (_catalogSelectMode ? ' selectable' : '');
+    row.dataset.name = p.name;
+    if (_catalogSelectMode && _catalogSelected.has(normalizeName(p.name))) row.classList.add('selected');
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
     nameInput.value = p.name;
     nameInput.maxLength = 100;
     nameInput.placeholder = 'Название';
     nameInput.onchange = () => {
+      if (_catalogSelectMode) return;
       const oldName = PRODUCTS[p._idx].name;
       const newName = safeStr(nameInput.value.trim(), MAX_NAME);
       if (!newName) { nameInput.value = oldName; return; }
@@ -2448,6 +2542,7 @@ function renderCatalogList() {
       if (cleaned !== hoursInput.value) hoursInput.value = cleaned;
     });
     hoursInput.addEventListener('change', () => {
+      if (_catalogSelectMode) return;
       const cleaned = onlyDigits(hoursInput.value);
       let v;
       if (cleaned === '') v = 0;
@@ -2464,6 +2559,7 @@ function renderCatalogList() {
       if (cleaned !== daysInput.value) daysInput.value = cleaned;
     });
     daysInput.addEventListener('change', () => {
+      if (_catalogSelectMode) return;
       const days = parseDaysInput(daysInput.value);
       const hoursRaw = daysToHours(days);
       if (hoursRaw > MAX_SHELF_HOURS) {
@@ -2485,12 +2581,23 @@ function renderCatalogList() {
     delBtn.type = 'button';
     delBtn.textContent = '×';
     delBtn.onclick = () => {
+      if (_catalogSelectMode) return;
       if (!confirm(`Удалить "${PRODUCTS[p._idx].name}"?`)) return;
       PRODUCTS.splice(p._idx, 1);
       saveCatalog();
       renderCatalogList();
     };
     row.append(nameInput, hoursWrap, daysWrap, delBtn);
+    if (_catalogSelectMode) {
+      row.addEventListener('click', e => {
+        if (e.target.closest('input') || e.target.closest('button')) return;
+        const key = normalizeName(p.name);
+        if (_catalogSelected.has(key)) _catalogSelected.delete(key);
+        else _catalogSelected.add(key);
+        row.classList.toggle('selected', _catalogSelected.has(key));
+        updateCatalogSelectUI();
+      });
+    }
     fragment.appendChild(row);
   });
   list.appendChild(fragment);
@@ -2503,6 +2610,48 @@ function resetToFactory() {
   const el = $('catalogStatus');
   if (el) { el.className = 'status show ok'; el.textContent = `Справочник восстановлен (${PRODUCTS.length}).`; }
 }
+function catalogToIgnored() {
+  if (!_catalogSelected.size) { showToast('Ничего не выбрано'); return; }
+  const count = _catalogSelected.size;
+  if (!confirm(`Удалить ${count} позиций из справочника и добавить в игнор-лист?`)) return;
+  const keys = new Set(_catalogSelected);
+  const beforeLen = PRODUCTS.length;
+  PRODUCTS = PRODUCTS.filter(p => !keys.has(normalizeName(p.name)));
+  const removed = beforeLen - PRODUCTS.length;
+  keys.forEach(k => {
+    const found = tableRows.find(r => normalizeName(r.name) === k);
+    if (found && !isIgnored(found.name)) IGNORED.push(found.name);
+    const foundUnknown = unknownRows.find(r => normalizeName(r.name) === k);
+    if (foundUnknown && !isIgnored(foundUnknown.name)) IGNORED.push(foundUnknown.name);
+  });
+  tableRows = tableRows.filter(r => !keys.has(normalizeName(r.name)));
+  unknownRows = unknownRows.filter(r => !keys.has(normalizeName(r.name)));
+  saveCatalog();
+  saveIgnored();
+  _catalogSelected = new Set();
+  _catalogSelectMode = false;
+  updateCatalogSelectUI();
+  renderCatalogList();
+  renderTable();
+  updateUnknownBanner();
+  scheduleSessionSave();
+  showToast(`Перенесено в игнор: ${removed}`);
+}
+
+function updateIgnoredSelectUI() {
+  const bar = $('ignoredSelectBar');
+  const normalActions = $('ignoredNormalActions');
+  const selectActions = $('ignoredSelectActions');
+  const modeBtn = $('ignoredSelectModeBtn');
+  const toCatalogBtn = $('ignoredToCatalogBtn');
+  const countEl = $('ignoredSelectedCount');
+  if (bar) bar.style.display = _ignoredSelectMode ? 'flex' : 'none';
+  if (normalActions) normalActions.style.display = _ignoredSelectMode ? 'none' : 'block';
+  if (selectActions) selectActions.style.display = _ignoredSelectMode ? 'block' : 'none';
+  if (modeBtn) modeBtn.textContent = _ignoredSelectMode ? 'Готово' : 'Выбрать';
+  if (countEl) countEl.textContent = String(_ignoredSelected.size);
+  if (toCatalogBtn) toCatalogBtn.textContent = `Вернуть в справочник (${_ignoredSelected.size})`;
+}
 function renderIgnoredList() {
   const list = $('ignoredList');
   if (!list) return;
@@ -2510,26 +2659,77 @@ function renderIgnoredList() {
   if (!IGNORED.length) { list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Игнор-лист пуст.</div>'; return; }
   const frag = document.createDocumentFragment();
   IGNORED.slice().sort((a, b) => a.localeCompare(b, 'ru')).forEach((name) => {
-    const row = document.createElement('div'); row.className = 'ignored-row';
+    const row = document.createElement('div'); row.className = 'ignored-row' + (_ignoredSelectMode ? ' selectable' : '');
+    if (_ignoredSelectMode && _ignoredSelected.has(normalizeName(name))) row.classList.add('selected');
     const nameEl = document.createElement('div'); nameEl.className = 'name'; nameEl.textContent = name;
     const delBtn = document.createElement('button'); delBtn.className = 'del-btn'; delBtn.textContent = 'Удалить';
     delBtn.onclick = () => {
+      if (_ignoredSelectMode) return;
       const key = normalizeName(name);
       IGNORED = IGNORED.filter(i => normalizeName(i) !== key);
       saveIgnored();
       renderIgnoredList();
     };
     row.appendChild(nameEl); row.appendChild(delBtn);
+    if (_ignoredSelectMode) {
+      row.addEventListener('click', e => {
+        if (e.target.closest('button')) return;
+        const key = normalizeName(name);
+        if (_ignoredSelected.has(key)) _ignoredSelected.delete(key);
+        else _ignoredSelected.add(key);
+        row.classList.toggle('selected', _ignoredSelected.has(key));
+        updateIgnoredSelectUI();
+      });
+    }
     frag.appendChild(row);
   });
   list.appendChild(frag);
 }
+function ignoredToCatalog() {
+  if (!_ignoredSelected.size) { showToast('Ничего не выбрано'); return; }
+  const count = _ignoredSelected.size;
+  if (!confirm(`Вернуть ${count} позиций в справочник?`)) return;
+  const keys = new Set(_ignoredSelected);
+  const returned = [];
+  IGNORED = IGNORED.filter(i => {
+    const k = normalizeName(i);
+    if (keys.has(k)) { returned.push(i); return false; }
+    return true;
+  });
+  returned.forEach(name => {
+    if (!PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) {
+      PRODUCTS.push({ name, shelfLife: 0 });
+    }
+  });
+  saveIgnored();
+  saveCatalog();
+  _ignoredSelected = new Set();
+  _ignoredSelectMode = false;
+  updateIgnoredSelectUI();
+  renderIgnoredList();
+  updateUnknownBanner();
+  scheduleSessionSave();
+  showToast(`Возвращено в справочник: ${returned.length}`);
+}
 
+function getToastBottom() {
+  const safeBottom = 0;
+  const base = 24;
+  const vv = window.visualViewport;
+  if (!vv) return base + safeBottom;
+  const keyboardHeight = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+  return base + keyboardHeight + safeBottom;
+}
+function repositionToast() {
+  if (!_currentToast) return;
+  _currentToast.style.bottom = getToastBottom() + 'px';
+}
 function showToast(text) {
   if (_currentToast) { _currentToast.remove(); _currentToast = null; }
   const el = document.createElement('div');
   el.className = 'toast show';
   el.textContent = text;
+  el.style.bottom = getToastBottom() + 'px';
   document.body.appendChild(el);
   _currentToast = el;
   setTimeout(() => {
@@ -2725,6 +2925,20 @@ async function shareToAI() {
   }
 }
 
+function scrollFieldIntoView(el) {
+  if (!el) return;
+  setTimeout(() => {
+    try {
+      const vv = window.visualViewport;
+      const viewBottom = vv ? (vv.height + vv.offsetTop) : window.innerHeight;
+      const rect = el.getBoundingClientRect();
+      const margin = 40;
+      const delta = rect.bottom - (viewBottom - margin);
+      if (delta > 0) window.scrollBy(0, delta);
+    } catch (e) {}
+  }, 350);
+}
+
 function bindUI() {
   const invBtn = $('uploadInvoicePhotosBtn'); if (invBtn) invBtn.onclick = () => { const i = $('invoicePhotoInput'); if (i) i.click(); };
   const salBtn = $('uploadSalesPhotosBtn'); if (salBtn) salBtn.onclick = () => { const i = $('salesPhotoInput'); if (i) i.click(); };
@@ -2783,15 +2997,11 @@ function bindUI() {
   if (csvInput) {
     csvInput.addEventListener('input', () => { autoResizeTextarea(); updateCsvCounter(); });
     csvInput.addEventListener('blur', () => { if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; } saveSession(); });
-    csvInput.addEventListener('focus', () => {
-      setTimeout(() => { try { csvInput.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {} }, 300);
-    });
+    csvInput.addEventListener('focus', () => scrollFieldIntoView(csvInput));
   }
   const pointInput = $('point');
   if (pointInput) {
-    pointInput.addEventListener('focus', () => {
-      setTimeout(() => { try { pointInput.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {} }, 300);
-    });
+    pointInput.addEventListener('focus', () => scrollFieldIntoView(pointInput));
   }
   const tableSearch = $('tableSearch');
   if (tableSearch) tableSearch.addEventListener('input', () => setTableQuery(tableSearch.value));
@@ -2837,12 +3047,18 @@ function bindUI() {
   const editCat = $('editCatalogBtn');
   if (editCat) editCat.onclick = () => {
     const cs = $('catalogStatus'); if (cs) { cs.className = 'status'; cs.textContent = ''; }
+    _catalogSelectMode = false;
+    _catalogSelected = new Set();
+    updateCatalogSelectUI();
     renderCatalogList();
     openModal('catalogModal');
   };
   const closeCat = $('closeCatalogBtn');
   if (closeCat) closeCat.onclick = (e) => {
     e.stopPropagation();
+    _catalogSelectMode = false;
+    _catalogSelected = new Set();
+    updateCatalogSelectUI();
     saveCatalog(); closeModal('catalogModal');
     if (Array.isArray(tableRows) && tableRows.length) {
       tableRows.forEach(r => { const p = PRODUCTS.find(x => normalizeName(x.name) === normalizeName(r.name)); if (p) r.shelfLife = p.shelfLife; });
@@ -2850,10 +3066,41 @@ function bindUI() {
     }
     updateCatalogMeta();
   };
+  const catalogSelectModeBtn = $('catalogSelectModeBtn');
+  if (catalogSelectModeBtn) catalogSelectModeBtn.onclick = (e) => {
+    e.stopPropagation();
+    _catalogSelectMode = !_catalogSelectMode;
+    if (!_catalogSelectMode) _catalogSelected = new Set();
+    updateCatalogSelectUI();
+    renderCatalogList();
+  };
+  const catalogSelectAllBtn = $('catalogSelectAllBtn');
+  if (catalogSelectAllBtn) catalogSelectAllBtn.onclick = (e) => {
+    e.stopPropagation();
+    const searchEl = $('catalogSearch');
+    const query = (searchEl && searchEl.value || '').toLowerCase().trim().slice(0, 100);
+    const filtered = PRODUCTS.filter(p => !query || p.name.toLowerCase().includes(query));
+    filtered.forEach(p => _catalogSelected.add(normalizeName(p.name)));
+    updateCatalogSelectUI();
+    renderCatalogList();
+  };
+  const catalogClearSelBtn = $('catalogClearSelBtn');
+  if (catalogClearSelBtn) catalogClearSelBtn.onclick = (e) => {
+    e.stopPropagation();
+    _catalogSelected = new Set();
+    updateCatalogSelectUI();
+    renderCatalogList();
+  };
+  const catalogToIgnoredBtn = $('catalogToIgnoredBtn');
+  if (catalogToIgnoredBtn) catalogToIgnoredBtn.onclick = (e) => {
+    e.stopPropagation();
+    catalogToIgnored();
+  };
   const catSearch = $('catalogSearch');
   if (catSearch) catSearch.oninput = renderCatalogList;
   const addProd = $('addProdBtn');
   if (addProd) addProd.onclick = () => {
+    if (_catalogSelectMode) return;
     const nameEl = $('newProdName');
     const hoursEl = $('newProdHours');
     const daysEl = $('newProdDays');
@@ -2939,9 +3186,49 @@ function bindUI() {
     finally { e.target.value = ''; }
   };
   const ignoredBtn = $('ignoredBtn');
-  if (ignoredBtn) ignoredBtn.onclick = () => { renderIgnoredList(); openModal('ignoredModal'); };
+  if (ignoredBtn) ignoredBtn.onclick = () => {
+    _ignoredSelectMode = false;
+    _ignoredSelected = new Set();
+    updateIgnoredSelectUI();
+    renderIgnoredList();
+    openModal('ignoredModal');
+  };
   const closeIgnored = $('closeIgnoredBtn');
-  if (closeIgnored) closeIgnored.onclick = (e) => { e.stopPropagation(); closeModal('ignoredModal'); updateUnknownBanner(); };
+  if (closeIgnored) closeIgnored.onclick = (e) => {
+    e.stopPropagation();
+    _ignoredSelectMode = false;
+    _ignoredSelected = new Set();
+    updateIgnoredSelectUI();
+    closeModal('ignoredModal');
+    updateUnknownBanner();
+  };
+  const ignoredSelectModeBtn = $('ignoredSelectModeBtn');
+  if (ignoredSelectModeBtn) ignoredSelectModeBtn.onclick = (e) => {
+    e.stopPropagation();
+    _ignoredSelectMode = !_ignoredSelectMode;
+    if (!_ignoredSelectMode) _ignoredSelected = new Set();
+    updateIgnoredSelectUI();
+    renderIgnoredList();
+  };
+  const ignoredSelectAllBtn = $('ignoredSelectAllBtn');
+  if (ignoredSelectAllBtn) ignoredSelectAllBtn.onclick = (e) => {
+    e.stopPropagation();
+    IGNORED.forEach(name => _ignoredSelected.add(normalizeName(name)));
+    updateIgnoredSelectUI();
+    renderIgnoredList();
+  };
+  const ignoredClearSelBtn = $('ignoredClearSelBtn');
+  if (ignoredClearSelBtn) ignoredClearSelBtn.onclick = (e) => {
+    e.stopPropagation();
+    _ignoredSelected = new Set();
+    updateIgnoredSelectUI();
+    renderIgnoredList();
+  };
+  const ignoredToCatalogBtn = $('ignoredToCatalogBtn');
+  if (ignoredToCatalogBtn) ignoredToCatalogBtn.onclick = (e) => {
+    e.stopPropagation();
+    ignoredToCatalog();
+  };
   const clearIgnoredBtn = $('clearIgnoredBtn');
   if (clearIgnoredBtn) clearIgnoredBtn.onclick = () => {
     if (!IGNORED.length) { alert('Игнор-лист уже пуст.'); return; }
@@ -3049,6 +3336,9 @@ function bindProductModal() {
     m.addEventListener('click', e => {
       if (e.target !== m) return;
       if (id === 'catalogModal') {
+        _catalogSelectMode = false;
+        _catalogSelected = new Set();
+        updateCatalogSelectUI();
         saveCatalog(); closeModal('catalogModal');
         if (Array.isArray(tableRows) && tableRows.length) {
           tableRows.forEach(r => { const p = PRODUCTS.find(x => normalizeName(x.name) === normalizeName(r.name)); if (p) r.shelfLife = p.shelfLife; });
@@ -3058,6 +3348,9 @@ function bindProductModal() {
       } else if (id === 'unknownModal') {
         closeUnknownModal();
       } else if (id === 'ignoredModal') {
+        _ignoredSelectMode = false;
+        _ignoredSelected = new Set();
+        updateIgnoredSelectUI();
         closeModal('ignoredModal'); updateUnknownBanner();
       }
     });
@@ -3156,6 +3449,10 @@ function init() {
       saveSession();
     }
   });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', repositionToast);
+    window.visualViewport.addEventListener('scroll', repositionToast);
+  }
   window.addEventListener('error', e => console.warn('Global error:', e.message));
   console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.2.5 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
