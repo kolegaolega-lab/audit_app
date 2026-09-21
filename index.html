@@ -25,6 +25,7 @@
   --r-lg:18px;--r-md:12px;--r-sm:9px;
   --page-max:840px;
   --page-pad:14px;
+  --header-h:58px;
 }
 @media (prefers-color-scheme:dark){
   :root{
@@ -69,7 +70,7 @@ body.modal-open{overflow:hidden}
 .header-badge.owner{background:var(--purple-soft);color:var(--purple)}
 .header-badge.saved{background:var(--green-soft);color:var(--green)}
 main{max-width:var(--page-max);margin:0 auto;padding:14px var(--page-pad) calc(12px + env(safe-area-inset-bottom,0px))}
-.section{background:var(--bg-card);border-radius:var(--r-lg);margin-bottom:10px;border:1px solid var(--separator);overflow:hidden}
+.section{background:var(--bg-card);border-radius:var(--r-lg);margin-bottom:10px;border:1px solid var(--separator);overflow:clip}
 .section-header{padding:16px 18px 0}
 .section-header h2{font-size:14.5px;font-weight:600;margin:0 0 3px;letter-spacing:-.2px;color:var(--text)}
 .section-header .desc{font-size:12.5px;color:var(--text-secondary);margin:0;line-height:1.45;font-weight:400}
@@ -148,99 +149,71 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .kv .v{color:var(--text);font-weight:500;text-align:right}
 .actions-row{display:flex;gap:6px;margin-top:12px}
 .actions-row button{flex:1}
-.table-search{margin-bottom:10px;position:relative}
+
+/* Sticky-поиск */
+.sticky-search{position:sticky;top:var(--header-h);z-index:50;background:var(--bg-card);padding:12px 18px 10px;border-bottom:1px solid var(--separator);margin-top:12px}
+.table-search{position:relative}
 .table-search input{padding-left:34px;min-height:40px;font-size:14px}
 .table-search::before{content:'';position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;background:currentColor;opacity:.35;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") center/contain no-repeat;pointer-events:none}
 .table-search-clear{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:28px;height:28px;padding:0;border-radius:50%;background:transparent;color:var(--text-secondary);font-size:16px;font-weight:400;display:none;min-height:auto;align-items:center;justify-content:center;cursor:pointer;line-height:1}
 .table-search.has-value .table-search-clear{display:inline-flex}
-.table-wrap{border-radius:var(--r-md);border:1px solid var(--separator);background:var(--bg-card);overflow:hidden;margin-bottom:4px;width:100%;max-width:100%}
+
+/* Таблица */
+.table-wrap{border-radius:var(--r-md);border:1px solid var(--separator);background:var(--bg-card);overflow:hidden;margin:0 18px 18px;width:calc(100% - 36px);max-width:calc(100% - 36px)}
 .table-scroll{overflow:auto;-webkit-overflow-scrolling:touch;background:var(--bg-card);position:relative;scrollbar-width:thin;scrollbar-color:var(--separator-opaque) transparent;overscroll-behavior:contain;max-width:100%}
 .table-scroll::-webkit-scrollbar{width:8px;height:8px}
 .table-scroll::-webkit-scrollbar-track{background:transparent}
 .table-scroll::-webkit-scrollbar-thumb{background:var(--separator-opaque);border-radius:4px}
 .table-scroll table.table-body{border-collapse:separate;border-spacing:0;font-size:13px;width:max-content;min-width:100%}
-.table-scroll thead th{position:sticky;top:0;z-index:20;font-size:10.5px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;background:var(--bg-card);padding:8px 6px;text-align:center;vertical-align:middle;line-height:1.25;white-space:normal;word-wrap:break-word;overflow-wrap:anywhere;border-bottom:1px solid var(--separator);transform:translateZ(0)}
-.table-scroll thead th.col-name{text-align:left;padding-left:14px;padding-right:8px}
+.table-scroll thead th{position:sticky;top:0;z-index:20;font-size:10.5px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.04em;background:var(--bg-card);padding:14px 8px 12px;text-align:center;vertical-align:middle;line-height:1.25;white-space:normal;word-wrap:break-word;overflow-wrap:anywhere;border-bottom:1px solid var(--separator);transform:translateZ(0)}
+.table-scroll thead th.col-name{text-align:left;padding-left:18px;padding-right:8px}
 .table-scroll thead th:first-child{position:sticky;left:0;z-index:25;background:var(--bg-card);transform:translateZ(0);isolation:isolate}
 .table-scroll thead th:first-child::after{content:'';position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--separator);pointer-events:none}
-.table-scroll tbody td{padding:8px 6px;border-bottom:1px solid var(--separator);vertical-align:middle;white-space:nowrap;line-height:1.2;background:var(--bg-card);text-align:center}
-.table-scroll tbody td:first-child{position:sticky;left:0;z-index:15;background:var(--bg-card);text-align:left;white-space:normal;word-break:break-word;padding:8px 10px 8px 14px;transform:translateZ(0);isolation:isolate}
+.table-scroll tbody td{padding:10px 6px;border-bottom:1px solid var(--separator);vertical-align:middle;white-space:nowrap;line-height:1.2;background:var(--bg-card);text-align:center}
+.table-scroll tbody td:first-child{position:sticky;left:0;z-index:15;background:var(--bg-card);text-align:left;white-space:normal;word-break:break-word;padding:10px 10px 10px 18px;transform:translateZ(0);isolation:isolate;font-weight:600;max-width:220px}
 .table-scroll tbody td:first-child::after{content:'';position:absolute;right:0;top:0;bottom:0;width:1px;background:var(--separator);pointer-events:none}
 .table-scroll tbody tr:last-child td{border-bottom:none}
 .table-scroll tbody tr.hidden-row{display:none}
-.table-scroll tbody tr.row-fresh td{background:var(--green-row)}
-.table-scroll tbody tr.row-warn td{background:var(--orange-row)}
-.table-scroll tbody tr.row-danger td{background:var(--red-row)}
-.table-scroll tbody tr.row-info td{background:var(--blue-row)}
-.table-scroll tbody tr.row-unknown td{background:var(--bg-card)}
-.table-scroll tbody tr.row-fresh td:first-child{background:linear-gradient(var(--green-row),var(--green-row)),var(--bg-card)}
-.table-scroll tbody tr.row-warn td:first-child{background:linear-gradient(var(--orange-row),var(--orange-row)),var(--bg-card)}
-.table-scroll tbody tr.row-danger td:first-child{background:linear-gradient(var(--red-row),var(--red-row)),var(--bg-card)}
-.table-scroll tbody tr.row-info td:first-child{background:linear-gradient(var(--blue-row),var(--blue-row)),var(--bg-card)}
-.table-scroll tbody tr.row-unknown td:first-child{background:var(--bg-card)}
-.table-scroll tbody tr:hover td:first-child{background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card)}
-.table-scroll tbody tr.row-fresh:hover td:first-child{background:linear-gradient(var(--green-row-hover),var(--green-row-hover)),var(--bg-card)}
-.table-scroll tbody tr.row-warn:hover td:first-child{background:linear-gradient(var(--orange-row-hover),var(--orange-row-hover)),var(--bg-card)}
-.table-scroll tbody tr.row-danger:hover td:first-child{background:linear-gradient(var(--red-row-hover),var(--red-row-hover)),var(--bg-card)}
-.table-scroll tbody tr.row-info:hover td:first-child{background:linear-gradient(var(--blue-row-hover),var(--blue-row-hover)),var(--bg-card)}
-.table-scroll tbody tr.row-unknown:hover td:first-child{background:linear-gradient(var(--bg-hover),var(--bg-hover)),var(--bg-card)}
-.table-scroll tbody tr.row-fresh:hover td{background:var(--green-row-hover)}
-.table-scroll tbody tr.row-warn:hover td{background:var(--orange-row-hover)}
-.table-scroll tbody tr.row-danger:hover td{background:var(--red-row-hover)}
-.table-scroll tbody tr.row-info:hover td{background:var(--blue-row-hover)}
-.table-scroll tbody tr.row-unknown:hover td{background:var(--bg-hover)}
-.table-scroll tbody tr.row-fresh td:first-child::before,
-.table-scroll tbody tr.row-warn td:first-child::before,
-.table-scroll tbody tr.row-danger td:first-child::before,
-.table-scroll tbody tr.row-info td:first-child::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:2px}
+.table-scroll tbody tr td:first-child::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:10px;vertical-align:middle;position:relative;top:-1px}
 .table-scroll tbody tr.row-fresh td:first-child::before{background:var(--green)}
 .table-scroll tbody tr.row-warn td:first-child::before{background:var(--orange)}
 .table-scroll tbody tr.row-danger td:first-child::before{background:var(--red)}
 .table-scroll tbody tr.row-info td:first-child::before{background:var(--blue)}
-.name-cell{display:flex;align-items:flex-start;gap:8px;min-width:0}
-.name-cell .name-text{flex:1 1 auto;min-width:0;word-break:break-word;overflow-wrap:anywhere}
-.num{width:60px;min-width:60px;max-width:60px;height:38px;padding:0 4px;border:0;border-radius:10px;font-size:15px;text-align:center;background:var(--bg-input);color:var(--text);font-weight:600;-webkit-appearance:none;appearance:none;line-height:38px;font-family:inherit;transition:box-shadow .15s,background .15s;margin:0;display:inline-block;vertical-align:middle}
-.num:focus{outline:none;box-shadow:0 0 0 2px var(--accent);background:var(--bg-card)}
-.num-disabled{display:inline-flex;align-items:center;justify-content:center;width:60px;min-width:60px;height:38px;color:var(--text-tertiary);font-weight:600;font-size:15px;user-select:none;vertical-align:middle}
+.table-scroll tbody tr.row-unknown td:first-child::before{background:var(--text-tertiary)}
+.table-scroll tbody td.num-cell{padding:8px 6px}
+.num{width:60px;min-width:60px;max-width:60px;height:38px;padding:0 4px;border:1px solid var(--separator-opaque);border-radius:10px;font-size:14px;text-align:center;background:var(--bg-input);color:var(--text);font-weight:600;-webkit-appearance:none;appearance:none;line-height:38px;font-family:inherit;transition:box-shadow .15s,background .15s,border-color .15s;margin:0;display:inline-block;vertical-align:middle;box-sizing:border-box}
+.num:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);background:var(--bg-card)}
+.num-disabled{display:inline-flex;align-items:center;justify-content:center;width:60px;min-width:60px;height:38px;color:var(--text-tertiary);font-weight:600;font-size:14px;user-select:none;vertical-align:middle}
 .income-cell{position:relative;padding:8px 4px !important;text-align:center}
-.income-cell.edited .num{background:var(--orange-soft);box-shadow:0 0 0 1.5px var(--orange)}
-.income-cell .reset-btn{position:absolute;top:0;right:4px;width:20px;height:20px;padding:0;border-radius:50%;background:var(--orange);color:#fff;font-size:11px;font-weight:800;display:none;z-index:3;min-height:auto;border:2px solid var(--bg-card);line-height:1;align-items:center;justify-content:center}
+.income-cell.edited .num{background:var(--orange-soft);border-color:var(--orange)}
+.income-cell .reset-btn{position:absolute;top:2px;right:6px;width:20px;height:20px;padding:0;border-radius:50%;background:var(--orange);color:#fff;font-size:11px;font-weight:800;display:none;z-index:3;min-height:auto;border:2px solid var(--bg-card);line-height:1;align-items:center;justify-content:center}
 .income-cell.edited .reset-btn{display:inline-flex}
-.calc-cell{text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.calc-cell{text-align:center;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text-tertiary)}
+.calc-cell.positive{color:var(--red)}
 .calc-cell.zero{color:var(--text-tertiary)}
-.calc-cell[data-role="expiredOnShelf"].positive,
-.calc-cell[data-role="soldExpired"].positive{color:var(--red)}
-.cards-view{display:none}
-.card{background:var(--bg-card);border:1px solid var(--separator);border-radius:var(--r-md);margin-bottom:8px;overflow:hidden;position:relative}
-.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;z-index:10;border-radius:var(--r-md) 0 0 var(--r-md)}
+
+/* Карточки */
+.cards-view{display:none;padding:12px 18px 18px}
+.card{background:var(--bg-hover);border:1px solid var(--separator);border-radius:var(--r-md);margin-bottom:8px;padding:12px 14px 12px 18px;overflow:hidden;position:relative}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;z-index:10}
 .card.fresh::before{background:var(--green)}
 .card.warn::before{background:var(--orange)}
 .card.danger::before{background:var(--red)}
 .card.empty::before{background:var(--separator-opaque)}
 .card.hidden-card{display:none}
-.card-head{display:flex;align-items:flex-start;gap:8px;padding:12px 14px 0 18px}
-.card-name{flex:1 1 auto;min-width:0;font-size:14px;font-weight:600;line-height:1.3;word-break:break-word}
-.card-shelf{flex:0 0 auto;font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums;padding:2px 6px;background:var(--bg-input);border-radius:6px}
-.scroll-wrap{position:relative;overflow:hidden}
-.card .card-row-scroll{display:flex;gap:6px;padding:10px 18px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none;-ms-overflow-style:none}
-.card .card-row-scroll::-webkit-scrollbar{display:none;height:0}
-.scroll-wrap.has-overflow .card-row-scroll{padding-right:44px}
-.card .cell{flex:0 0 auto;display:flex;flex-direction:column;gap:4px;width:62px}
-.card .cell .lbl{font-size:9px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em;padding-left:.04em;text-align:center;white-space:nowrap}
-.card .card-row-scroll.fit .cell{flex:1 1 0;min-width:0;width:auto}
-.card .num{width:62px;min-width:62px;max-width:none;height:38px;font-size:15px;line-height:38px;border-radius:8px;display:block;margin:0 auto}
-.card .card-row-scroll.fit .num{width:100%}
-.card .inp-wrap{position:relative}
-.card .inp-wrap.edited .num{background:var(--orange-soft);box-shadow:0 0 0 1.5px var(--orange)}
-.card .inp-wrap .reset-btn{position:absolute;top:2px;right:2px;width:16px;height:16px;min-height:0;padding:0;border-radius:50%;background:var(--orange);color:#fff;font-size:9px;font-weight:800;display:none;z-index:3;border:1.5px solid var(--bg-card);line-height:1;align-items:center;justify-content:center;cursor:pointer}
-.card .inp-wrap.edited .reset-btn{display:inline-flex}
-.scroll-fade{display:none;position:absolute;top:0;right:0;bottom:0;width:44px;pointer-events:none;background:linear-gradient(to right, transparent, var(--bg-card) 80%);z-index:5}
-.scroll-wrap.has-overflow .scroll-fade{display:block}
-.scroll-wrap.at-end .scroll-fade{display:none}
-.scroll-arrow{display:none;position:absolute;right:8px;top:calc(50% + 9px);transform:translateY(-50%);width:26px;height:26px;border-radius:50%;background:var(--bg-card);border:1px solid var(--separator-opaque);color:var(--text-secondary);font-size:14px;font-weight:700;align-items:center;justify-content:center;z-index:6;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.10);line-height:1;padding-bottom:2px}
-.scroll-wrap.has-overflow .scroll-arrow{display:flex}
-.scroll-wrap.at-end .scroll-arrow{display:none}
-.card-result{padding:10px 14px 10px 18px;border-top:1px solid var(--separator);font-size:12px;color:var(--text-secondary);display:flex;flex-direction:column;gap:4px}
+.card-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.card-name{flex:1 1 auto;min-width:0;font-size:14px;font-weight:600;line-height:1.3;word-break:break-word;color:var(--text)}
+.card-shelf{flex:0 0 auto;font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums;padding-top:2px}
+.card-row{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;padding-bottom:2px}
+.card-row::-webkit-scrollbar{display:none;height:0}
+.card-cell{flex:0 0 auto;display:flex;flex-direction:column;gap:4px;width:62px}
+.card-cell .lbl{font-size:9px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em;text-align:center;white-space:nowrap}
+.card-cell .num{width:100%;min-width:0;max-width:none;display:block;margin:0 auto;box-sizing:border-box}
+.card-cell .inp-wrap{position:relative}
+.card-cell .inp-wrap.edited .num{background:var(--orange-soft);border-color:var(--orange)}
+.card-cell .inp-wrap .reset-btn{position:absolute;top:-2px;right:-2px;width:16px;height:16px;min-height:0;padding:0;border-radius:50%;background:var(--orange);color:#fff;font-size:9px;font-weight:800;display:none;z-index:3;border:1.5px solid var(--bg-card);line-height:1;align-items:center;justify-content:center;cursor:pointer}
+.card-cell .inp-wrap.edited .reset-btn{display:inline-flex}
+.card-result{padding-top:10px;margin-top:10px;border-top:1px solid var(--separator);font-size:12px;color:var(--text-secondary);display:flex;flex-direction:column;gap:4px}
 .card-result .rv{font-weight:600}
 .card-result .rv.positive{color:var(--red)}
 .card-result .rv.zero{color:var(--text-tertiary)}
@@ -252,6 +225,8 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
   .cards-view{display:none}
   .table-scroll table.table-body{table-layout:auto;width:100%}
 }
+
+/* Модалы */
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));height:100vh;height:100dvh;width:100vw;width:100dvw}
 .modal.hidden{display:none}
 .modal-content{background:var(--bg-card);border-radius:16px;width:100%;max-width:520px;overflow:hidden}
@@ -281,53 +256,53 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .unknown-counter b{color:var(--text-secondary);font-weight:600;font-variant-numeric:tabular-nums}
 .unknown-toolbar{display:flex;gap:8px}
 .unknown-toolbar button{flex:1;min-height:38px;font-size:13.5px;padding:8px 12px}
-.unknown-row{background:var(--bg-input);border:1.5px solid transparent;border-radius:var(--r-md);padding:10px 12px;margin-bottom:6px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .12s,border-color .12s}
-.unknown-row:last-child{margin-bottom:0}
-.unknown-row:active{background:var(--bg-hover)}
-.unknown-row.selected{border-color:var(--accent);background:var(--accent-soft)}
-.unknown-row.selected .unknown-row-name{color:var(--accent)}
-.unknown-row-grid{display:grid;grid-template-columns:1fr 60px 70px;gap:8px;align-items:center}
-.unknown-row-main{min-width:0}
-.unknown-row-name{font-size:14px;font-weight:600;line-height:1.3;word-break:break-word;overflow-wrap:anywhere;margin-bottom:3px}
-.unknown-row-info{font-size:11.5px;color:var(--text-secondary);line-height:1.35;display:flex;flex-wrap:wrap;gap:2px 10px}
-.unknown-row-info .kv{white-space:nowrap}
-.unknown-row-info .kv b{color:var(--text);font-weight:600}
-.unknown-row-hours{position:relative;display:block}
-.unknown-row-hours input{width:100%;min-height:38px;padding:0 20px 0 6px;font-size:14px;font-weight:500;text-align:center;color:var(--text);border-radius:8px;background:var(--bg-card);border:1px solid var(--separator-opaque)}
-.unknown-row-hours input:focus{background:var(--bg-card);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-.unknown-row-hours .unit{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
-.unknown-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.unknown-actions .full{grid-column:1 / -1}
-.ignored-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px;border-radius:var(--r-sm)}
-.ignored-row:hover{background:var(--bg-hover)}
-.ignored-row .name{font-size:14px;word-break:break-word;overflow-wrap:anywhere}
-.ignored-row .del-btn{min-height:36px;padding:6px 12px;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:12.5px;font-weight:600;border-radius:8px}
-.cat-row{display:grid;grid-template-columns:1fr 66px 76px 38px;gap:6px;align-items:center;padding:6px 0;border-radius:var(--r-sm)}
-.cat-row input[type=text]{padding:8px 10px;font-size:13.5px;min-height:38px;border-radius:8px;font-family:inherit}
-.cat-row .inp-wrap{position:relative;display:block}
-.cat-row .inp-wrap input{padding-right:22px;text-align:center;font-weight:500;color:var(--text)}
-.cat-row .inp-wrap .unit{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
-.cat-row .del-btn{min-height:38px;padding:0;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:16px;font-weight:700;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
-.cat-row.add-row .add-btn{background:var(--green-soft);color:var(--green);border:1px solid var(--green-soft);font-size:20px;font-weight:500;min-height:38px;padding:0;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
 .cat-select-bar{flex:0 0 auto;padding:0 22px 12px;background:var(--bg-card);border-bottom:1px solid var(--separator);display:flex;flex-direction:column;gap:8px}
 .cat-select-counter{font-size:11.5px;color:var(--text-secondary)}
 .cat-select-counter b{color:var(--text-secondary);font-weight:600;font-variant-numeric:tabular-nums}
 .cat-select-actions{display:flex;gap:8px}
 .cat-select-actions button{flex:1;min-height:38px;font-size:13.5px;padding:8px 12px}
-.cat-row.selectable{cursor:pointer;padding:8px 6px;user-select:none;-webkit-user-select:none;transition:background .12s,border-color .12s;border:1.5px solid transparent}
-.cat-row.selectable.selected{background:var(--accent-soft);border-color:var(--accent)}
-.cat-row.selectable input[type=text],
-.cat-row.selectable .inp-wrap input{pointer-events:none}
-.cat-row.selectable.selected input[type=text],
-.cat-row.selectable.selected .inp-wrap input{background:transparent;border-color:transparent}
-.cat-row.selectable .del-btn{visibility:hidden}
-.ignored-row.selectable{cursor:pointer;user-select:none;-webkit-user-select:none;border:1.5px solid transparent;transition:background .12s,border-color .12s}
-.ignored-row.selectable.selected{background:var(--accent-soft);border-color:var(--accent)}
-.ignored-row.selectable.selected .name{color:var(--accent);font-weight:600}
-.ignored-row.selectable .del-btn{visibility:hidden}
+
+/* Чекбокс */
+.cb-wrap{width:24px;height:38px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+.checkbox{width:24px;height:24px;border-radius:50%;border:2px solid var(--separator-opaque);background:transparent;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;box-sizing:border-box}
+.checkbox.checked{border-color:var(--accent);background:var(--accent)}
+.checkbox.checked::after{content:'';width:6px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-2px)}
+
+/* Единый стиль строк в модалах */
+.row-cat{display:grid;gap:8px;align-items:start;padding:10px 12px;margin-bottom:6px;background:var(--bg-hover);border-radius:12px}
+.row-cat:last-child{margin-bottom:0}
+.row-cat.col-4{grid-template-columns:1fr 66px 76px 38px}
+.row-cat.col-5{grid-template-columns:24px 1fr 66px 76px}
+.row-ign{display:grid;grid-template-columns:1fr 38px;gap:8px;align-items:center;padding:10px 12px;margin-bottom:6px;background:var(--bg-hover);border-radius:12px}
+.row-ign:last-child{margin-bottom:0}
+.row-ign.col-3{grid-template-columns:24px 1fr}
+.row-unk{display:grid;grid-template-columns:24px 1fr 62px 72px;gap:8px;align-items:start;padding:10px 12px;margin-bottom:6px;background:var(--bg-hover);border-radius:12px}
+.row-unk:last-child{margin-bottom:0}
+.row-unk .cb-wrap{align-self:stretch;height:auto;min-height:38px}
+.row.selected{background:var(--accent-soft)}
+.pill{display:block;width:100%;min-height:38px;padding:8px 10px;font-size:13.5px;font-weight:500;border-radius:8px;background:var(--bg-input);border:1px solid var(--separator-opaque);color:var(--text);font-family:inherit;box-sizing:border-box;text-align:left}
+.pill.center{padding:0 22px 0 8px;text-align:center;line-height:38px}
+.pill-wrap{position:relative}
+.pill-wrap .unit{position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
+.cat-row{display:grid;grid-template-columns:1fr 66px 76px 38px;gap:8px;align-items:center;padding:10px 12px;margin-bottom:6px;background:var(--bg-hover);border-radius:12px}
+.cat-row:last-child{margin-bottom:0}
+.cat-row.add-row{background:transparent;padding:0;margin-top:6px}
+.cat-row .add-btn{background:var(--green-soft);color:var(--green);border:1px solid var(--green-soft);font-size:20px;font-weight:500;min-height:38px;padding:0;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
+.del-btn{width:38px;height:38px;padding:0;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:16px;font-weight:700;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;flex:0 0 auto}
+.unk-main{min-width:0}
+.unk-name-field{display:block;width:100%;min-height:38px;padding:8px 10px;font-size:13.5px;font-weight:600;border-radius:8px;background:var(--bg-input);border:1px solid var(--separator-opaque);color:var(--text);font-family:inherit;margin:0 0 4px 0;box-sizing:border-box;text-align:left}
+.unk-info{font-size:11.5px;color:var(--text-secondary);line-height:1.35;padding-left:2px}
+.unk-info b{color:var(--text);font-weight:600}
+.unk-hours{position:relative}
+.unk-hours .pill.center{padding:0 20px 0 6px;text-align:center;line-height:38px;min-height:38px}
+.unk-hours .unit{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-secondary);font-weight:500;pointer-events:none;letter-spacing:0}
+
+/* Промпт */
 #promptModal .modal-content{max-height:calc(100dvh - 32px);padding:22px;overflow:auto;scrollbar-width:none;-ms-overflow-style:none}
 #promptModal .modal-content::-webkit-scrollbar{display:none}
 pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm);font-size:11.5px;line-height:1.55;overflow:auto;max-height:60vh;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #1e293b}
+
+/* Фото */
 .photo-queue{display:grid;gap:8px;margin-top:10px}
 .photo-item{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input)}
 .photo-thumb{width:44px;height:44px;object-fit:cover;border-radius:9px;background:var(--bg-elev-2)}
@@ -336,22 +311,25 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .photo-type{font-size:11px;color:var(--text-secondary);margin-top:2px}
 .photo-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .photo-actions button{min-height:34px;padding:6px 12px;font-size:12.5px;border-radius:8px}
+
+/* Тост */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(28,28,30,.96);color:#fff;font-size:13.5px;font-weight:500;padding:11px 18px;border-radius:11px;z-index:9999;opacity:0;transition:opacity .25s,transform .25s,bottom .2s;pointer-events:none;max-width:90vw;text-align:center;letter-spacing:-.005em;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;cursor:pointer}
+@media (prefers-color-scheme:dark){
+  .toast{background:rgba(58,58,60,.96)}
+}
+
 @media (max-width:420px){
-  .unknown-row-grid{grid-template-columns:1fr 54px 62px;gap:6px}
-  .unknown-row-name{font-size:13.5px}
-  .unknown-row-hours input{font-size:13.5px;padding-right:18px}
-  .unknown-row-hours .unit{font-size:9.5px;right:5px}
-  .cat-row{grid-template-columns:1fr 58px 66px 34px;gap:5px}
-  .cat-row input[type=text]{font-size:13px;padding:8px 8px}
-  .cat-row .inp-wrap input{padding-right:18px;font-size:13px}
+  .cat-row{grid-template-columns:1fr 58px 66px 34px;gap:6px;padding:8px 10px}
+  .row-cat.col-4{grid-template-columns:1fr 58px 66px 34px;gap:6px;padding:8px 10px}
+  .row-cat.col-5{grid-template-columns:24px 1fr 58px 66px;gap:6px;padding:8px 10px}
+  .row-unk{grid-template-columns:24px 1fr 54px 62px;gap:6px;padding:8px 10px}
 }
 </style>
 </head>
 <body>
 
-<div class="app-header">
+<div class="app-header" id="appHeader">
   <div class="header-inner">
     <div class="logo" id="appLogo">FB</div>
     <div class="header-text">
@@ -490,37 +468,44 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <h2>Результат</h2>
       <p id="summary" class="desc">Загрузите CSV и введите фактический остаток.</p>
     </div>
-    <div class="section-body">
-      <div id="resultMeta" class="kv" style="display:none">
-        <span class="k">Дата проверки</span><span class="v" id="metaDate">—</span>
-        <span class="k">Точка</span><span class="v" id="metaPoint">—</span>
-      </div>
-      <div id="unknownBanner" style="display:none;margin-top:12px">
-        <button id="openUnknownBtn" class="warn block">Не в справочнике (<span id="unknownCount">0</span>)</button>
-      </div>
-      <div id="tableSearchWrap" class="table-search" style="display:none;margin-top:12px">
+
+    <div id="tableSearchWrap" class="sticky-search" style="display:none">
+      <div class="table-search">
         <input id="tableSearch" type="text" placeholder="Поиск по таблице..." autocomplete="off" maxlength="100">
         <button type="button" class="table-search-clear" id="tableSearchClear">×</button>
       </div>
-      <div class="table-wrap" id="tableWrap" style="display:none;margin-top:12px">
-        <div class="table-scroll" id="tableScroll">
-          <table id="resultTable" class="table-body">
-            <colgroup id="resultColgroup"></colgroup>
-            <thead id="resultThead"><tr></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
+    </div>
+
+    <div id="resultMeta" class="kv" style="display:none;padding:12px 18px 0">
+      <span class="k">Дата проверки</span><span class="v" id="metaDate">—</span>
+      <span class="k">Точка</span><span class="v" id="metaPoint">—</span>
+    </div>
+
+    <div id="unknownBanner" style="display:none;padding:12px 18px 0">
+      <button id="openUnknownBtn" class="warn block">Не в справочнике (<span id="unknownCount">0</span>)</button>
+    </div>
+
+    <div class="table-wrap" id="tableWrap" style="display:none">
+      <div class="table-scroll" id="tableScroll">
+        <table id="resultTable" class="table-body">
+          <colgroup id="resultColgroup"></colgroup>
+          <thead id="resultThead"><tr></tr></thead>
+          <tbody></tbody>
+        </table>
       </div>
-      <div class="cards-view" id="cardsView"></div>
-      <div id="totals" class="status" style="margin-top:12px"></div>
-      <div class="legend" style="margin-top:12px">
-        <span class="legend-item"><span class="legend-dot fresh"></span> Свежие</span>
-        <span class="legend-item"><span class="legend-dot warn"></span> Просрочка на витрине</span>
-        <span class="legend-item"><span class="legend-dot danger"></span> Продано просрочки</span>
-        <span class="legend-item"><span class="legend-dot unknown"></span> Срок не задан</span>
-        <span class="legend-item"><span class="legend-dot info"></span> Только продажи</span>
-        <span class="legend-item"><span class="legend-dot edited"></span> Приход исправлен</span>
-      </div>
+    </div>
+
+    <div class="cards-view" id="cardsView"></div>
+
+    <div id="totals" class="status" style="margin:0 18px 12px"></div>
+
+    <div class="legend" style="margin:0 18px 18px">
+      <span class="legend-item"><span class="legend-dot fresh"></span> Свежие</span>
+      <span class="legend-item"><span class="legend-dot warn"></span> Просрочка на витрине</span>
+      <span class="legend-item"><span class="legend-dot danger"></span> Продано просрочки</span>
+      <span class="legend-item"><span class="legend-dot unknown"></span> Срок не задан</span>
+      <span class="legend-item"><span class="legend-dot info"></span> Только продажи</span>
+      <span class="legend-item"><span class="legend-dot edited"></span> Приход исправлен</span>
     </div>
   </div>
 
@@ -540,7 +525,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint version">French Bakery Аудит · v9.2.5</div>
+  <div class="hint version">French Bakery Аудит · v9.3.0</div>
 
 </main>
 
@@ -564,10 +549,10 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     <div class="modal-body" id="catalogList"></div>
     <div class="catalog-add-block" id="catalogAddBlock">
       <label>Добавить позицию</label>
-      <div class="cat-row add-row" style="margin-top:6px">
+      <div class="cat-row add-row">
         <input id="newProdName" type="text" placeholder="Название" autocomplete="off" maxlength="100">
-        <div class="inp-wrap"><input id="newProdHours" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" value="0" maxlength="3"><span class="unit">ч</span></div>
-        <div class="inp-wrap"><input id="newProdDays" type="text" inputmode="decimal" placeholder="0" value="0" maxlength="4"><span class="unit">сут</span></div>
+        <div class="pill-wrap"><input id="newProdHours" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0" value="0" maxlength="3"><span class="unit">ч</span></div>
+        <div class="pill-wrap"><input id="newProdDays" type="text" inputmode="decimal" placeholder="0" value="0" maxlength="4"><span class="unit">сут</span></div>
         <button id="addProdBtn" class="add-btn" type="button" aria-label="Добавить">+</button>
       </div>
       <p class="hint">Срок в часах (макс. 720) или сутках (макс. 30). <b style="color:var(--text-secondary)">24 ч = 1 сутки</b>.</p>
@@ -610,7 +595,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <div class="unknown-counter">Всего: <b id="unknownTotal">0</b> · Выбрано: <b id="unknownSelectedCount">0</b></div>
       <div class="unknown-toolbar">
         <button type="button" id="unknownSelectAllBtn" class="secondary">Выбрать все</button>
-        <button type="button" id="unknownClearSelBtn" class="secondary">Снять выделение</button>
+        <button type="button" id="unknownClearSelBtn" class="secondary">Снять</button>
       </div>
       <div class="unknown-search" id="unknownSearchWrap" style="display:none;margin-top:10px">
         <input id="unknownSearch" type="text" placeholder="Поиск по названию..." autocomplete="off" maxlength="100">
@@ -620,10 +605,10 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <div id="unknownRows"></div>
     </div>
     <div class="modal-footer">
-      <div class="unknown-actions">
+      <div class="unknown-actions" style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
         <button id="unknownAddBtn" class="success">Добавить</button>
         <button id="unknownIgnoreBtn" class="warn">Игнорировать</button>
-        <button id="unknownCloseBtn" class="secondary full">Закрыть</button>
+        <button id="unknownCloseBtn" class="secondary" style="grid-column:1/-1">Закрыть</button>
       </div>
     </div>
   </div>
@@ -1697,7 +1682,7 @@ function bindTableInput(inp) {
   inp.addEventListener('focus', e => { e.stopPropagation(); requestAnimationFrame(() => scrollIntoContainer(inp)); });
   inp.addEventListener('keydown', tableKey);
 }
-  
+
 function renderTable() {
   if (isRendering) return;
   isRendering = true;
@@ -1736,15 +1721,13 @@ function renderTable() {
       tr.dataset.status = status.label;
       const tdName = document.createElement('td');
       tdName.title = row.name;
-      const nameCell = document.createElement('div');
-      nameCell.className = 'name-cell';
       const nameText = document.createElement('span');
       nameText.className = 'name-text';
       nameText.textContent = row.name;
-      nameCell.appendChild(nameText);
-      tdName.appendChild(nameCell);
+      tdName.appendChild(nameText);
       tr.appendChild(tdName);
       const tdStock = document.createElement('td');
+      tdStock.className = 'num-cell';
       if (row.salesOnly) {
         const span = document.createElement('span'); span.className = 'num-disabled'; span.textContent = '—'; tdStock.appendChild(span);
       } else {
@@ -1758,6 +1741,7 @@ function renderTable() {
       }
       tr.appendChild(tdStock);
       const tdSales = document.createElement('td');
+      tdSales.className = 'num-cell';
       const inputSales = makeNumInput({
         value: row.sales || 0,
         onInput: (cleaned) => { row.sales = cleaned === '' ? 0 : clampNum(cleaned, 0, MAX_NUM, 0); refreshRow(row, tr); scheduleSessionSave(); scheduleCardsSync(); }
@@ -1768,7 +1752,7 @@ function renderTable() {
       tr.appendChild(tdSales);
       dates.forEach(d => {
         const td = document.createElement('td');
-        td.className = 'income-cell';
+        td.className = 'income-cell num-cell';
         const party = (row.incoming || []).find(p => p.date === d);
         if (row.salesOnly) {
           const span = document.createElement('span'); span.className = 'num-disabled'; span.textContent = '—'; td.appendChild(span);
@@ -1931,7 +1915,7 @@ function updateTotals() {
   `;
   if (_tableQuery) applyTableFilter();
 }
-
+  
 function buildCardInput(row, opts) {
   const inpWrap = document.createElement('div');
   inpWrap.className = 'inp-wrap';
@@ -1973,7 +1957,7 @@ function buildCardInput(row, opts) {
 }
 function buildCardCell(label, inputEl) {
   const cell = document.createElement('div');
-  cell.className = 'cell';
+  cell.className = 'card-cell';
   const lbl = document.createElement('div');
   lbl.className = 'lbl';
   lbl.textContent = label;
@@ -2010,11 +1994,8 @@ function renderCards() {
     head.appendChild(shelfEl);
     card.appendChild(head);
 
-    const wrap = document.createElement('div');
-    wrap.className = 'scroll-wrap';
-
     const scroll = document.createElement('div');
-    scroll.className = 'card-row-scroll';
+    scroll.className = 'card-row';
 
     if (row.salesOnly) {
       scroll.appendChild(buildCardCell('Прод.', buildCardInput(row, {
@@ -2060,23 +2041,7 @@ function renderCards() {
       });
     }
 
-    wrap.appendChild(scroll);
-
-    const fade = document.createElement('div');
-    fade.className = 'scroll-fade';
-    wrap.appendChild(fade);
-
-    const arrow = document.createElement('div');
-    arrow.className = 'scroll-arrow';
-    arrow.textContent = '›';
-    wrap.appendChild(arrow);
-
-    scroll.addEventListener('scroll', () => {
-      const atEnd = scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 2;
-      wrap.classList.toggle('at-end', atEnd);
-    }, { passive: true });
-
-    card.appendChild(wrap);
+    card.appendChild(scroll);
 
     const res = document.createElement('div');
     res.className = 'card-result';
@@ -2087,23 +2052,8 @@ function renderCards() {
   });
 
   requestAnimationFrame(() => {
-    updateCardsOverflow();
     updateCardResults();
     if (_tableQuery) applyTableFilter();
-  });
-}
-function updateCardsOverflow() {
-  const box = $('cardsView');
-  if (!box) return;
-  box.querySelectorAll('.card').forEach(card => {
-    const scroll = card.querySelector('.card-row-scroll');
-    const wrap = card.querySelector('.scroll-wrap');
-    if (!scroll || !wrap) return;
-    scroll.classList.remove('fit');
-    wrap.classList.remove('has-overflow', 'at-end');
-    const hasOverflow = scroll.scrollWidth > scroll.clientWidth + 1;
-    if (hasOverflow) wrap.classList.add('has-overflow');
-    else scroll.classList.add('fit');
   });
 }
 function updateCardResults() {
@@ -2144,7 +2094,7 @@ function refreshCardRow(row, card) {
   scheduleTotalsUpdate();
   scheduleTableSync();
 }
-  
+
 function renderUnknownModal() {
   const body = $('unknownRows');
   const totalEl = $('unknownTotal');
@@ -2162,52 +2112,57 @@ function renderUnknownModal() {
   const frag = document.createDocumentFragment();
   visible.forEach(r => {
     const row = document.createElement('div');
-    row.className = 'unknown-row';
+    row.className = 'row-unk';
     row.dataset.name = r.name;
-    if (unknownSelected.has(normalizeName(r.name))) row.classList.add('selected');
+    const selKey = normalizeName(r.name);
+    const isSel = unknownSelected.has(selKey);
+    if (isSel) row.classList.add('selected');
 
-    const grid = document.createElement('div');
-    grid.className = 'unknown-row-grid';
+    const cbWrap = document.createElement('span');
+    cbWrap.className = 'cb-wrap';
+    const cb = document.createElement('span');
+    cb.className = 'checkbox' + (isSel ? ' checked' : '');
+    cbWrap.appendChild(cb);
+    row.appendChild(cbWrap);
 
     const main = document.createElement('div');
-    main.className = 'unknown-row-main';
-    const nameEl = document.createElement('div');
-    nameEl.className = 'unknown-row-name';
-    nameEl.textContent = r.name;
-    main.appendChild(nameEl);
+    main.className = 'unk-main';
+    const nameField = document.createElement('input');
+    nameField.type = 'text';
+    nameField.className = 'unk-name-field';
+    nameField.value = r.name;
+    nameField.readOnly = true;
+    nameField.addEventListener('click', e => e.stopPropagation());
+    main.appendChild(nameField);
 
     const infoEl = document.createElement('div');
-    infoEl.className = 'unknown-row-info';
-    const salesKv = document.createElement('span');
-    salesKv.className = 'kv';
-    salesKv.innerHTML = `Продано: <b>${r.sales || 0}</b>`;
-    infoEl.appendChild(salesKv);
+    infoEl.className = 'unk-info';
+    let infoStr = `Продано: <b>${r.sales || 0}</b>`;
     if (r.incoming && r.incoming.length) {
       const datesWithQty = r.incoming.filter(p => p.qty > 0).sort((a, b) => b.date.localeCompare(a.date));
-      datesWithQty.forEach(p => {
-        const kv = document.createElement('span');
-        kv.className = 'kv';
-        kv.innerHTML = `За ${fmtDateRuShort(p.date)}: <b>${p.qty}</b>`;
-        infoEl.appendChild(kv);
-      });
+      datesWithQty.forEach(p => { infoStr += ` · За ${fmtDateRuShort(p.date)}: <b>${p.qty}</b>`; });
     }
+    infoEl.innerHTML = infoStr;
     main.appendChild(infoEl);
+    row.appendChild(main);
 
     const hoursWrap = document.createElement('div');
-    hoursWrap.className = 'unknown-row-hours';
-    const hInp = makeNumInput({ className: '', value: r.shelfLife && r.shelfLife > 0 ? r.shelfLife : 0 });
+    hoursWrap.className = 'unk-hours';
+    const hInp = makeNumInput({ className: 'pill center', value: r.shelfLife && r.shelfLife > 0 ? r.shelfLife : 0 });
     hInp.dataset.role = 'shelfHours';
     hInp.addEventListener('click', e => e.stopPropagation());
     hInp.addEventListener('focus', e => e.stopPropagation());
-    const hUnit = document.createElement('span'); hUnit.className = 'unit'; hUnit.textContent = 'ч';
     hoursWrap.appendChild(hInp);
+    const hUnit = document.createElement('span'); hUnit.className = 'unit'; hUnit.textContent = 'ч';
     hoursWrap.appendChild(hUnit);
+    row.appendChild(hoursWrap);
 
     const daysWrap = document.createElement('div');
-    daysWrap.className = 'unknown-row-hours';
+    daysWrap.className = 'unk-hours';
     const dInp = document.createElement('input');
     dInp.type = 'text';
     dInp.inputMode = 'decimal';
+    dInp.className = 'pill center';
     dInp.dataset.role = 'shelfDays';
     dInp.placeholder = '—';
     dInp.value = formatDays(r.shelfLife);
@@ -2217,9 +2172,10 @@ function renderUnknownModal() {
     });
     dInp.addEventListener('click', e => e.stopPropagation());
     dInp.addEventListener('focus', e => e.stopPropagation());
-    const dUnit = document.createElement('span'); dUnit.className = 'unit'; dUnit.textContent = 'сут';
     daysWrap.appendChild(dInp);
+    const dUnit = document.createElement('span'); dUnit.className = 'unit'; dUnit.textContent = 'сут';
     daysWrap.appendChild(dUnit);
+    row.appendChild(daysWrap);
 
     hInp.addEventListener('input', () => {
       const h = Number(onlyDigits(hInp.value) || '0');
@@ -2231,20 +2187,17 @@ function renderUnknownModal() {
       if (d > 0) hInp.value = String(daysToHours(d));
     });
 
-    grid.appendChild(main);
-    grid.appendChild(hoursWrap);
-    grid.appendChild(daysWrap);
-    row.appendChild(grid);
-
     row.addEventListener('click', e => {
       if (e.target.closest('input')) return;
       const key = normalizeName(r.name);
       if (unknownSelected.has(key)) {
         unknownSelected.delete(key);
         row.classList.remove('selected');
+        cb.classList.remove('checked');
       } else {
         unknownSelected.add(key);
         row.classList.add('selected');
+        cb.classList.add('checked');
       }
       if (selectedEl) selectedEl.textContent = String(unknownSelected.size);
     });
@@ -2255,7 +2208,6 @@ function renderUnknownModal() {
   body.appendChild(frag);
   if (filtered.length > visible.length) {
     const more = document.createElement('div');
-    more.className = 'unknown-load-more';
     more.style.cssText = 'text-align:center;padding:12px;cursor:pointer;color:var(--accent);font-weight:600';
     more.textContent = `Показать ещё ${Math.min(UNKNOWN_PAGE_SIZE, filtered.length - visible.length)}`;
     more.onclick = () => { unknownVisible += UNKNOWN_PAGE_SIZE; renderUnknownModal(); };
@@ -2285,7 +2237,7 @@ function updateUnknownBanner() {
   if (banner) banner.style.display = filter.length ? 'block' : 'none';
 }
 function addSelectedUnknown() {
-  const items = document.querySelectorAll('#unknownRows .unknown-row.selected');
+  const items = document.querySelectorAll('#unknownRows .row-unk.selected');
   const toAdd = [];
   items.forEach(item => {
     const name = safeStr(item.dataset.name, MAX_NAME);
@@ -2295,10 +2247,7 @@ function addSelectedUnknown() {
     const hours = clampNum(hInp ? (onlyDigits(hInp.value) || '0') : 0, 0, MAX_SHELF_HOURS, 0);
     toAdd.push({ name, hours });
   });
-  if (!toAdd.length) {
-    showToast('Ничего не выбрано');
-    return;
-  }
+  if (!toAdd.length) { showToast('Ничего не выбрано'); return; }
   const addKeys = new Set(toAdd.map(x => normalizeName(x.name)));
   toAdd.forEach(({ name, hours }) => { PRODUCTS.push({ name, shelfLife: hours }); });
   saveCatalog();
@@ -2324,35 +2273,333 @@ function addSelectedUnknown() {
   showToast(`Добавлено: ${toAdd.length}`);
 }
 function ignoreSelectedUnknown() {
-  if (!unknownSelected.size) {
-    showToast('Ничего не выбрано');
-    return;
-  }
+  if (!unknownSelected.size) { showToast('Ничего не выбрано'); return; }
   const keys = new Set(unknownSelected);
   const count = keys.size;
   if (!confirm(`Добавить ${count} позиций в игнор-лист?`)) return;
-
   unknownRows.forEach(r => {
-    if (keys.has(normalizeName(r.name)) && !isIgnored(r.name)) {
-      IGNORED.push(r.name);
-    }
+    if (keys.has(normalizeName(r.name)) && !isIgnored(r.name)) IGNORED.push(r.name);
   });
   saveIgnored();
-
   unknownRows = unknownRows.filter(r => !keys.has(normalizeName(r.name)));
-
   unknownSelected = new Set();
   scheduleSessionSave();
   updateUnknownBanner();
-
-  if (!unknownRows.filter(r => !isIgnored(r.name)).length) {
-    closeModal('unknownModal');
-  } else {
-    renderUnknownModal();
-  }
+  if (!unknownRows.filter(r => !isIgnored(r.name)).length) closeModal('unknownModal');
+  else renderUnknownModal();
   showToast(`Игнорировано: ${count}`);
 }
 
+/* ============ СПРАВОЧНИК ============ */
+function updateCatalogSelectUI() {
+  const bar = $('catalogSelectBar');
+  const addBlock = $('catalogAddBlock');
+  const normalActions = $('catalogNormalActions');
+  const selectActions = $('catalogSelectActions');
+  const modeBtn = $('catalogSelectModeBtn');
+  const toIgnoredBtn = $('catalogToIgnoredBtn');
+  const countEl = $('catalogSelectedCount');
+  if (bar) bar.style.display = _catalogSelectMode ? 'flex' : 'none';
+  if (addBlock) addBlock.style.display = _catalogSelectMode ? 'none' : 'block';
+  if (normalActions) normalActions.style.display = _catalogSelectMode ? 'none' : 'block';
+  if (selectActions) selectActions.style.display = _catalogSelectMode ? 'block' : 'none';
+  if (modeBtn) {
+    modeBtn.textContent = _catalogSelectMode ? 'Готово' : 'Выбрать';
+    modeBtn.className = _catalogSelectMode ? 'primary' : 'secondary';
+  }
+  if (countEl) countEl.textContent = String(_catalogSelected.size);
+  if (toIgnoredBtn) toIgnoredBtn.textContent = `В игнор-лист (${_catalogSelected.size})`;
+  const hint = document.querySelector('#catalogModalContent .modal-header .hint');
+  if (hint) hint.style.display = _catalogSelectMode ? 'none' : '';
+}
+function renderCatalogList() {
+  const list = $('catalogList');
+  if (!list) return;
+  const searchEl = $('catalogSearch');
+  const query = (searchEl && searchEl.value || '').toLowerCase().trim().slice(0, 100);
+  list.innerHTML = '';
+  if (!PRODUCTS.length) { list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Справочник пуст.</div>'; return; }
+  const filtered = PRODUCTS.map((p, idx) => ({ ...p, _idx: idx })).filter(p => !query || p.name.toLowerCase().includes(query)).sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+  if (!filtered.length) { list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Ничего не найдено.</div>'; return; }
+  const fragment = document.createDocumentFragment();
+  filtered.forEach(p => {
+    const isSel = _catalogSelected.has(normalizeName(p.name));
+    const row = document.createElement('div');
+    row.className = 'row-cat ' + (_catalogSelectMode ? 'col-5' : 'col-4');
+    if (_catalogSelectMode && isSel) row.classList.add('selected');
+
+    if (_catalogSelectMode) {
+      const cbWrap = document.createElement('span'); cbWrap.className = 'cb-wrap';
+      const cb = document.createElement('span'); cb.className = 'checkbox' + (isSel ? ' checked' : '');
+      cbWrap.appendChild(cb);
+      row.appendChild(cbWrap);
+    }
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.className = 'pill text';
+    nameInput.value = p.name;
+    nameInput.maxLength = 100;
+    nameInput.placeholder = 'Название';
+    nameInput.readOnly = _catalogSelectMode;
+    nameInput.onchange = () => {
+      if (_catalogSelectMode) return;
+      const oldName = PRODUCTS[p._idx].name;
+      const newName = safeStr(nameInput.value.trim(), MAX_NAME);
+      if (!newName) { nameInput.value = oldName; return; }
+      const dup = PRODUCTS.findIndex((x, i) => i !== p._idx && normalizeName(x.name) === normalizeName(newName));
+      if (dup >= 0) { alert('Такая позиция уже есть.'); nameInput.value = oldName; return; }
+      PRODUCTS[p._idx].name = newName;
+      tableRows.forEach(r => { if (r.name === oldName) r.name = newName; });
+      unknownRows.forEach(r => { if (r.name === oldName) r.name = newName; });
+      saveCatalog(); scheduleSessionSave();
+    };
+    nameInput.addEventListener('click', e => e.stopPropagation());
+    row.appendChild(nameInput);
+
+    const hoursWrap = document.createElement('div');
+    hoursWrap.className = 'pill-wrap';
+    const hoursInput = document.createElement('input');
+    hoursInput.type = 'text';
+    hoursInput.className = 'pill center';
+    hoursInput.inputMode = 'numeric';
+    hoursInput.pattern = '[0-9]*';
+    hoursInput.value = String(p.shelfLife);
+    hoursInput.placeholder = '0';
+    hoursInput.maxLength = 3;
+    hoursInput.readOnly = _catalogSelectMode;
+    hoursWrap.appendChild(hoursInput);
+    const hoursUnit = document.createElement('span'); hoursUnit.className = 'unit'; hoursUnit.textContent = 'ч';
+    hoursWrap.appendChild(hoursUnit);
+    hoursInput.addEventListener('click', e => e.stopPropagation());
+    hoursInput.addEventListener('input', () => {
+      const cleaned = onlyDigits(hoursInput.value);
+      if (cleaned !== hoursInput.value) hoursInput.value = cleaned;
+    });
+    hoursInput.addEventListener('change', () => {
+      if (_catalogSelectMode) return;
+      const cleaned = onlyDigits(hoursInput.value);
+      let v;
+      if (cleaned === '') v = 0;
+      else { const n = Number(cleaned); if (!isFinite(n) || n === 0) v = 0; else v = clampNum(n, 1, MAX_SHELF_HOURS, 48); }
+      if (cleaned !== '' && Number(cleaned) > MAX_SHELF_HOURS) showToast(`Максимум ${MAX_SHELF_HOURS} ч (${MAX_SHELF_DAYS} суток)`);
+      PRODUCTS[p._idx].shelfLife = v;
+      hoursInput.value = String(v);
+      daysInput.value = formatDays(v);
+      tableRows.forEach(r => { if (r.name === PRODUCTS[p._idx].name) r.shelfLife = v; });
+      saveCatalog(); scheduleSessionSave();
+    });
+    row.appendChild(hoursWrap);
+
+    const daysWrap = document.createElement('div');
+    daysWrap.className = 'pill-wrap';
+    const daysInput = document.createElement('input');
+    daysInput.type = 'text';
+    daysInput.className = 'pill center';
+    daysInput.inputMode = 'decimal';
+    daysInput.value = formatDays(p.shelfLife);
+    daysInput.placeholder = '—';
+    daysInput.maxLength = 4;
+    daysInput.readOnly = _catalogSelectMode;
+    daysWrap.appendChild(daysInput);
+    const daysUnit = document.createElement('span'); daysUnit.className = 'unit'; daysUnit.textContent = 'сут';
+    daysWrap.appendChild(daysUnit);
+    daysInput.addEventListener('click', e => e.stopPropagation());
+    daysInput.addEventListener('input', () => {
+      const cleaned = String(daysInput.value).replace(',', '.').replace(/[^\d.]/g, '');
+      if (cleaned !== daysInput.value) daysInput.value = cleaned;
+    });
+    daysInput.addEventListener('change', () => {
+      if (_catalogSelectMode) return;
+      const days = parseDaysInput(daysInput.value);
+      const hoursRaw = daysToHours(days);
+      if (hoursRaw > MAX_SHELF_HOURS) {
+        showToast(`Максимум ${MAX_SHELF_DAYS} суток (${MAX_SHELF_HOURS} часов)`);
+        const oldHours = PRODUCTS[p._idx].shelfLife;
+        hoursInput.value = String(oldHours);
+        daysInput.value = formatDays(oldHours);
+        return;
+      }
+      const hours = clampNum(hoursRaw, 0, MAX_SHELF_HOURS, 0);
+      PRODUCTS[p._idx].shelfLife = hours;
+      hoursInput.value = String(hours);
+      daysInput.value = formatDays(hours);
+      tableRows.forEach(r => { if (r.name === PRODUCTS[p._idx].name) r.shelfLife = hours; });
+      saveCatalog(); scheduleSessionSave();
+    });
+    row.appendChild(daysWrap);
+
+    if (!_catalogSelectMode) {
+      const delBtn = document.createElement('button');
+      delBtn.className = 'del-btn';
+      delBtn.type = 'button';
+      delBtn.textContent = '×';
+      delBtn.onclick = (e) => {
+        e.stopPropagation();
+        if (!confirm(`Удалить "${PRODUCTS[p._idx].name}"?`)) return;
+        PRODUCTS.splice(p._idx, 1);
+        saveCatalog();
+        renderCatalogList();
+      };
+      row.appendChild(delBtn);
+    }
+
+    if (_catalogSelectMode) {
+      row.addEventListener('click', e => {
+        if (e.target.closest('input') || e.target.closest('button')) return;
+        const key = normalizeName(p.name);
+        if (_catalogSelected.has(key)) _catalogSelected.delete(key);
+        else _catalogSelected.add(key);
+        row.classList.toggle('selected', _catalogSelected.has(key));
+        const cb = row.querySelector('.checkbox');
+        if (cb) cb.classList.toggle('checked', _catalogSelected.has(key));
+        updateCatalogSelectUI();
+      });
+    }
+    fragment.appendChild(row);
+  });
+  list.appendChild(fragment);
+}
+function resetToFactory() {
+  if (!confirm('Сбросить справочник к заводскому?')) return;
+  PRODUCTS = FACTORY_CATALOG.map(([name, hours]) => ({ name, shelfLife: hours }));
+  saveCatalog();
+  renderCatalogList();
+  const el = $('catalogStatus');
+  if (el) { el.className = 'status show ok'; el.textContent = `Справочник восстановлен (${PRODUCTS.length}).`; }
+}
+function catalogToIgnored() {
+  if (!_catalogSelected.size) { showToast('Ничего не выбрано'); return; }
+  const count = _catalogSelected.size;
+  if (!confirm(`Удалить ${count} позиций из справочника и добавить в игнор-лист?`)) return;
+  const keys = new Set(_catalogSelected);
+  const beforeLen = PRODUCTS.length;
+  PRODUCTS = PRODUCTS.filter(p => !keys.has(normalizeName(p.name)));
+  const removed = beforeLen - PRODUCTS.length;
+  keys.forEach(k => {
+    const found = tableRows.find(r => normalizeName(r.name) === k);
+    if (found && !isIgnored(found.name)) IGNORED.push(found.name);
+    const foundUnknown = unknownRows.find(r => normalizeName(r.name) === k);
+    if (foundUnknown && !isIgnored(foundUnknown.name)) IGNORED.push(foundUnknown.name);
+  });
+  tableRows = tableRows.filter(r => !keys.has(normalizeName(r.name)));
+  unknownRows = unknownRows.filter(r => !keys.has(normalizeName(r.name)));
+  saveCatalog();
+  saveIgnored();
+  _catalogSelected = new Set();
+  _catalogSelectMode = false;
+  updateCatalogSelectUI();
+  renderCatalogList();
+  renderTable();
+  updateUnknownBanner();
+  scheduleSessionSave();
+  showToast(`Перенесено в игнор: ${removed}`);
+}
+
+/* ============ ИГНОР-ЛИСТ ============ */
+function updateIgnoredSelectUI() {
+  const bar = $('ignoredSelectBar');
+  const normalActions = $('ignoredNormalActions');
+  const selectActions = $('ignoredSelectActions');
+  const modeBtn = $('ignoredSelectModeBtn');
+  const toCatalogBtn = $('ignoredToCatalogBtn');
+  const countEl = $('ignoredSelectedCount');
+  if (bar) bar.style.display = _ignoredSelectMode ? 'flex' : 'none';
+  if (normalActions) normalActions.style.display = _ignoredSelectMode ? 'none' : 'block';
+  if (selectActions) selectActions.style.display = _ignoredSelectMode ? 'block' : 'none';
+  if (modeBtn) {
+    modeBtn.textContent = _ignoredSelectMode ? 'Готово' : 'Выбрать';
+    modeBtn.className = _ignoredSelectMode ? 'primary' : 'secondary';
+  }
+  if (countEl) countEl.textContent = String(_ignoredSelected.size);
+  if (toCatalogBtn) toCatalogBtn.textContent = `Вернуть в справочник (${_ignoredSelected.size})`;
+  const hint = document.querySelector('#ignoredModalContent .modal-header .hint');
+  if (hint) hint.style.display = _ignoredSelectMode ? 'none' : '';
+}
+function renderIgnoredList() {
+  const list = $('ignoredList');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!IGNORED.length) { list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Игнор-лист пуст.</div>'; return; }
+  const frag = document.createDocumentFragment();
+  IGNORED.slice().sort((a, b) => a.localeCompare(b, 'ru')).forEach((name) => {
+    const key = normalizeName(name);
+    const isSel = _ignoredSelected.has(key);
+    const row = document.createElement('div');
+    row.className = 'row-ign' + (_ignoredSelectMode ? ' col-3' : '');
+    if (_ignoredSelectMode && isSel) row.classList.add('selected');
+
+    if (_ignoredSelectMode) {
+      const cbWrap = document.createElement('span'); cbWrap.className = 'cb-wrap';
+      const cb = document.createElement('span'); cb.className = 'checkbox' + (isSel ? ' checked' : '');
+      cbWrap.appendChild(cb);
+      row.appendChild(cbWrap);
+    }
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.className = 'pill text';
+    nameInput.value = name;
+    nameInput.readOnly = true;
+    nameInput.addEventListener('click', e => e.stopPropagation());
+    row.appendChild(nameInput);
+
+    if (!_ignoredSelectMode) {
+      const delBtn = document.createElement('button');
+      delBtn.className = 'del-btn';
+      delBtn.type = 'button';
+      delBtn.textContent = '×';
+      delBtn.onclick = (e) => {
+        e.stopPropagation();
+        IGNORED = IGNORED.filter(i => normalizeName(i) !== key);
+        saveIgnored();
+        renderIgnoredList();
+      };
+      row.appendChild(delBtn);
+    }
+
+    if (_ignoredSelectMode) {
+      row.addEventListener('click', e => {
+        if (e.target.closest('input') || e.target.closest('button')) return;
+        if (_ignoredSelected.has(key)) _ignoredSelected.delete(key);
+        else _ignoredSelected.add(key);
+        row.classList.toggle('selected', _ignoredSelected.has(key));
+        const cb = row.querySelector('.checkbox');
+        if (cb) cb.classList.toggle('checked', _ignoredSelected.has(key));
+        updateIgnoredSelectUI();
+      });
+    }
+    frag.appendChild(row);
+  });
+  list.appendChild(frag);
+}
+function ignoredToCatalog() {
+  if (!_ignoredSelected.size) { showToast('Ничего не выбрано'); return; }
+  const count = _ignoredSelected.size;
+  if (!confirm(`Вернуть ${count} позиций в справочник?`)) return;
+  const keys = new Set(_ignoredSelected);
+  const returned = [];
+  IGNORED = IGNORED.filter(i => {
+    const k = normalizeName(i);
+    if (keys.has(k)) { returned.push(i); return false; }
+    return true;
+  });
+  returned.forEach(name => {
+    if (!PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) {
+      PRODUCTS.push({ name, shelfLife: 0 });
+    }
+  });
+  saveIgnored();
+  saveCatalog();
+  _ignoredSelected = new Set();
+  _ignoredSelectMode = false;
+  updateIgnoredSelectUI();
+  renderIgnoredList();
+  updateUnknownBanner();
+  scheduleSessionSave();
+  showToast(`Возвращено в справочник: ${returned.length}`);
+}
+  
 function applyCSV() {
   if (applyBusy) return;
   applyBusy = true;
@@ -2462,263 +2709,12 @@ function exportExcel() {
   finally { setTimeout(() => { exportBusy = false; if (btn) btn.classList.remove('busy'); }, 500); }
 }
 
-function updateCatalogSelectUI() {
-  const bar = $('catalogSelectBar');
-  const addBlock = $('catalogAddBlock');
-  const normalActions = $('catalogNormalActions');
-  const selectActions = $('catalogSelectActions');
-  const modeBtn = $('catalogSelectModeBtn');
-  const toIgnoredBtn = $('catalogToIgnoredBtn');
-  const countEl = $('catalogSelectedCount');
-  if (bar) bar.style.display = _catalogSelectMode ? 'flex' : 'none';
-  if (addBlock) addBlock.style.display = _catalogSelectMode ? 'none' : 'block';
-  if (normalActions) normalActions.style.display = _catalogSelectMode ? 'none' : 'block';
-  if (selectActions) selectActions.style.display = _catalogSelectMode ? 'block' : 'none';
-  if (modeBtn) modeBtn.textContent = _catalogSelectMode ? 'Готово' : 'Выбрать';
-  if (countEl) countEl.textContent = String(_catalogSelected.size);
-  if (toIgnoredBtn) toIgnoredBtn.textContent = `В игнор-лист (${_catalogSelected.size})`;
-}
-function renderCatalogList() {
-  const list = $('catalogList');
-  if (!list) return;
-  const searchEl = $('catalogSearch');
-  const query = (searchEl && searchEl.value || '').toLowerCase().trim().slice(0, 100);
-  list.innerHTML = '';
-  if (!PRODUCTS.length) { list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Справочник пуст.</div>'; return; }
-  const filtered = PRODUCTS.map((p, idx) => ({ ...p, _idx: idx })).filter(p => !query || p.name.toLowerCase().includes(query)).sort((a, b) => a.name.localeCompare(b.name, 'ru'));
-  if (!filtered.length) { list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Ничего не найдено.</div>'; return; }
-  const fragment = document.createDocumentFragment();
-  filtered.forEach(p => {
-    const row = document.createElement('div');
-    row.className = 'cat-row' + (_catalogSelectMode ? ' selectable' : '');
-    row.dataset.name = p.name;
-    if (_catalogSelectMode && _catalogSelected.has(normalizeName(p.name))) row.classList.add('selected');
-    const nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.value = p.name;
-    nameInput.maxLength = 100;
-    nameInput.placeholder = 'Название';
-    nameInput.onchange = () => {
-      if (_catalogSelectMode) return;
-      const oldName = PRODUCTS[p._idx].name;
-      const newName = safeStr(nameInput.value.trim(), MAX_NAME);
-      if (!newName) { nameInput.value = oldName; return; }
-      const dup = PRODUCTS.findIndex((x, i) => i !== p._idx && normalizeName(x.name) === normalizeName(newName));
-      if (dup >= 0) { alert('Такая позиция уже есть.'); nameInput.value = oldName; return; }
-      PRODUCTS[p._idx].name = newName;
-      tableRows.forEach(r => { if (r.name === oldName) r.name = newName; });
-      unknownRows.forEach(r => { if (r.name === oldName) r.name = newName; });
-      saveCatalog(); scheduleSessionSave();
-    };
-    const hoursWrap = document.createElement('div');
-    hoursWrap.className = 'inp-wrap';
-    const hoursInput = document.createElement('input');
-    hoursInput.type = 'text';
-    hoursInput.inputMode = 'numeric';
-    hoursInput.pattern = '[0-9]*';
-    hoursInput.value = String(p.shelfLife);
-    hoursInput.placeholder = '0';
-    hoursInput.maxLength = 3;
-    const hoursUnit = document.createElement('span');
-    hoursUnit.className = 'unit';
-    hoursUnit.textContent = 'ч';
-    hoursWrap.appendChild(hoursInput);
-    hoursWrap.appendChild(hoursUnit);
-    const daysWrap = document.createElement('div');
-    daysWrap.className = 'inp-wrap';
-    const daysInput = document.createElement('input');
-    daysInput.type = 'text';
-    daysInput.inputMode = 'decimal';
-    daysInput.value = formatDays(p.shelfLife);
-    daysInput.placeholder = '—';
-    daysInput.maxLength = 4;
-    const daysUnit = document.createElement('span');
-    daysUnit.className = 'unit';
-    daysUnit.textContent = 'сут';
-    daysWrap.appendChild(daysInput);
-    daysWrap.appendChild(daysUnit);
-    hoursInput.addEventListener('input', () => {
-      const cleaned = onlyDigits(hoursInput.value);
-      if (cleaned !== hoursInput.value) hoursInput.value = cleaned;
-    });
-    hoursInput.addEventListener('change', () => {
-      if (_catalogSelectMode) return;
-      const cleaned = onlyDigits(hoursInput.value);
-      let v;
-      if (cleaned === '') v = 0;
-      else { const n = Number(cleaned); if (!isFinite(n) || n === 0) v = 0; else v = clampNum(n, 1, MAX_SHELF_HOURS, 48); }
-      if (cleaned !== '' && Number(cleaned) > MAX_SHELF_HOURS) showToast(`Максимум ${MAX_SHELF_HOURS} ч (${MAX_SHELF_DAYS} суток)`);
-      PRODUCTS[p._idx].shelfLife = v;
-      hoursInput.value = String(v);
-      daysInput.value = formatDays(v);
-      tableRows.forEach(r => { if (r.name === PRODUCTS[p._idx].name) r.shelfLife = v; });
-      saveCatalog(); scheduleSessionSave();
-    });
-    daysInput.addEventListener('input', () => {
-      const cleaned = String(daysInput.value).replace(',', '.').replace(/[^\d.]/g, '');
-      if (cleaned !== daysInput.value) daysInput.value = cleaned;
-    });
-    daysInput.addEventListener('change', () => {
-      if (_catalogSelectMode) return;
-      const days = parseDaysInput(daysInput.value);
-      const hoursRaw = daysToHours(days);
-      if (hoursRaw > MAX_SHELF_HOURS) {
-        showToast(`Максимум ${MAX_SHELF_DAYS} суток (${MAX_SHELF_HOURS} часов)`);
-        const oldHours = PRODUCTS[p._idx].shelfLife;
-        hoursInput.value = String(oldHours);
-        daysInput.value = formatDays(oldHours);
-        return;
-      }
-      const hours = clampNum(hoursRaw, 0, MAX_SHELF_HOURS, 0);
-      PRODUCTS[p._idx].shelfLife = hours;
-      hoursInput.value = String(hours);
-      daysInput.value = formatDays(hours);
-      tableRows.forEach(r => { if (r.name === PRODUCTS[p._idx].name) r.shelfLife = hours; });
-      saveCatalog(); scheduleSessionSave();
-    });
-    const delBtn = document.createElement('button');
-    delBtn.className = 'del-btn';
-    delBtn.type = 'button';
-    delBtn.textContent = '×';
-    delBtn.onclick = () => {
-      if (_catalogSelectMode) return;
-      if (!confirm(`Удалить "${PRODUCTS[p._idx].name}"?`)) return;
-      PRODUCTS.splice(p._idx, 1);
-      saveCatalog();
-      renderCatalogList();
-    };
-    row.append(nameInput, hoursWrap, daysWrap, delBtn);
-    if (_catalogSelectMode) {
-      row.addEventListener('click', e => {
-        if (e.target.closest('input') || e.target.closest('button')) return;
-        const key = normalizeName(p.name);
-        if (_catalogSelected.has(key)) _catalogSelected.delete(key);
-        else _catalogSelected.add(key);
-        row.classList.toggle('selected', _catalogSelected.has(key));
-        updateCatalogSelectUI();
-      });
-    }
-    fragment.appendChild(row);
-  });
-  list.appendChild(fragment);
-}
-function resetToFactory() {
-  if (!confirm('Сбросить справочник к заводскому?')) return;
-  PRODUCTS = FACTORY_CATALOG.map(([name, hours]) => ({ name, shelfLife: hours }));
-  saveCatalog();
-  renderCatalogList();
-  const el = $('catalogStatus');
-  if (el) { el.className = 'status show ok'; el.textContent = `Справочник восстановлен (${PRODUCTS.length}).`; }
-}
-function catalogToIgnored() {
-  if (!_catalogSelected.size) { showToast('Ничего не выбрано'); return; }
-  const count = _catalogSelected.size;
-  if (!confirm(`Удалить ${count} позиций из справочника и добавить в игнор-лист?`)) return;
-  const keys = new Set(_catalogSelected);
-  const beforeLen = PRODUCTS.length;
-  PRODUCTS = PRODUCTS.filter(p => !keys.has(normalizeName(p.name)));
-  const removed = beforeLen - PRODUCTS.length;
-  keys.forEach(k => {
-    const found = tableRows.find(r => normalizeName(r.name) === k);
-    if (found && !isIgnored(found.name)) IGNORED.push(found.name);
-    const foundUnknown = unknownRows.find(r => normalizeName(r.name) === k);
-    if (foundUnknown && !isIgnored(foundUnknown.name)) IGNORED.push(foundUnknown.name);
-  });
-  tableRows = tableRows.filter(r => !keys.has(normalizeName(r.name)));
-  unknownRows = unknownRows.filter(r => !keys.has(normalizeName(r.name)));
-  saveCatalog();
-  saveIgnored();
-  _catalogSelected = new Set();
-  _catalogSelectMode = false;
-  updateCatalogSelectUI();
-  renderCatalogList();
-  renderTable();
-  updateUnknownBanner();
-  scheduleSessionSave();
-  showToast(`Перенесено в игнор: ${removed}`);
-}
-
-function updateIgnoredSelectUI() {
-  const bar = $('ignoredSelectBar');
-  const normalActions = $('ignoredNormalActions');
-  const selectActions = $('ignoredSelectActions');
-  const modeBtn = $('ignoredSelectModeBtn');
-  const toCatalogBtn = $('ignoredToCatalogBtn');
-  const countEl = $('ignoredSelectedCount');
-  if (bar) bar.style.display = _ignoredSelectMode ? 'flex' : 'none';
-  if (normalActions) normalActions.style.display = _ignoredSelectMode ? 'none' : 'block';
-  if (selectActions) selectActions.style.display = _ignoredSelectMode ? 'block' : 'none';
-  if (modeBtn) modeBtn.textContent = _ignoredSelectMode ? 'Готово' : 'Выбрать';
-  if (countEl) countEl.textContent = String(_ignoredSelected.size);
-  if (toCatalogBtn) toCatalogBtn.textContent = `Вернуть в справочник (${_ignoredSelected.size})`;
-}
-function renderIgnoredList() {
-  const list = $('ignoredList');
-  if (!list) return;
-  list.innerHTML = '';
-  if (!IGNORED.length) { list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Игнор-лист пуст.</div>'; return; }
-  const frag = document.createDocumentFragment();
-  IGNORED.slice().sort((a, b) => a.localeCompare(b, 'ru')).forEach((name) => {
-    const row = document.createElement('div'); row.className = 'ignored-row' + (_ignoredSelectMode ? ' selectable' : '');
-    if (_ignoredSelectMode && _ignoredSelected.has(normalizeName(name))) row.classList.add('selected');
-    const nameEl = document.createElement('div'); nameEl.className = 'name'; nameEl.textContent = name;
-    const delBtn = document.createElement('button'); delBtn.className = 'del-btn'; delBtn.textContent = 'Удалить';
-    delBtn.onclick = () => {
-      if (_ignoredSelectMode) return;
-      const key = normalizeName(name);
-      IGNORED = IGNORED.filter(i => normalizeName(i) !== key);
-      saveIgnored();
-      renderIgnoredList();
-    };
-    row.appendChild(nameEl); row.appendChild(delBtn);
-    if (_ignoredSelectMode) {
-      row.addEventListener('click', e => {
-        if (e.target.closest('button')) return;
-        const key = normalizeName(name);
-        if (_ignoredSelected.has(key)) _ignoredSelected.delete(key);
-        else _ignoredSelected.add(key);
-        row.classList.toggle('selected', _ignoredSelected.has(key));
-        updateIgnoredSelectUI();
-      });
-    }
-    frag.appendChild(row);
-  });
-  list.appendChild(frag);
-}
-function ignoredToCatalog() {
-  if (!_ignoredSelected.size) { showToast('Ничего не выбрано'); return; }
-  const count = _ignoredSelected.size;
-  if (!confirm(`Вернуть ${count} позиций в справочник?`)) return;
-  const keys = new Set(_ignoredSelected);
-  const returned = [];
-  IGNORED = IGNORED.filter(i => {
-    const k = normalizeName(i);
-    if (keys.has(k)) { returned.push(i); return false; }
-    return true;
-  });
-  returned.forEach(name => {
-    if (!PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) {
-      PRODUCTS.push({ name, shelfLife: 0 });
-    }
-  });
-  saveIgnored();
-  saveCatalog();
-  _ignoredSelected = new Set();
-  _ignoredSelectMode = false;
-  updateIgnoredSelectUI();
-  renderIgnoredList();
-  updateUnknownBanner();
-  scheduleSessionSave();
-  showToast(`Возвращено в справочник: ${returned.length}`);
-}
-
 function getToastBottom() {
-  const safeBottom = 0;
   const base = 24;
   const vv = window.visualViewport;
-  if (!vv) return base + safeBottom;
+  if (!vv) return base;
   const keyboardHeight = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-  return base + keyboardHeight + safeBottom;
+  return base + keyboardHeight;
 }
 function repositionToast() {
   if (!_currentToast) return;
@@ -2939,6 +2935,13 @@ function scrollFieldIntoView(el) {
   }, 350);
 }
 
+function measureHeader() {
+  const h = $('appHeader');
+  if (!h) return;
+  const height = h.getBoundingClientRect().height;
+  document.documentElement.style.setProperty('--header-h', height + 'px');
+}
+
 function bindUI() {
   const invBtn = $('uploadInvoicePhotosBtn'); if (invBtn) invBtn.onclick = () => { const i = $('invoicePhotoInput'); if (i) i.click(); };
   const salBtn = $('uploadSalesPhotosBtn'); if (salBtn) salBtn.onclick = () => { const i = $('salesPhotoInput'); if (i) i.click(); };
@@ -3111,16 +3114,13 @@ function bindUI() {
     if (daysVal > 0) hours = daysToHours(daysVal);
     else if (hoursVal > 0) hours = clampNum(hoursVal, 1, MAX_SHELF_HOURS, 0);
     else hours = 0;
-    if (hours > MAX_SHELF_HOURS) {
-      showToast(`Максимум ${MAX_SHELF_DAYS} суток (${MAX_SHELF_HOURS} часов)`);
-      return;
-    }
-    if (!name) { alert('Введите название.'); if (nameEl) nameEl.focus(); return; }
+    if (hours > MAX_SHELF_HOURS) { showToast(`Максимум ${MAX_SHELF_DAYS} суток (${MAX_SHELF_HOURS} часов)`); return; }
+    if (!name) { alert('Введите название.'); return; }
     if (PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) { alert('Такая позиция уже есть.'); return; }
     if (PRODUCTS.length >= MAX_CATALOG) { alert('Справочник переполнен.'); return; }
     PRODUCTS.push({ name, shelfLife: hours });
     saveCatalog();
-    if (nameEl) { nameEl.value = ''; }
+    if (nameEl) nameEl.value = '';
     if (hoursEl) hoursEl.value = '0';
     if (daysEl) daysEl.value = '0';
     renderCatalogList();
@@ -3318,7 +3318,6 @@ function bindUI() {
     if (_resizeTimer) clearTimeout(_resizeTimer);
     _resizeTimer = setTimeout(() => {
       _resizeTimer = null;
-      updateCardsOverflow();
       const isMobile = window.innerWidth <= 900;
       if (isMobile !== _lastIsMobile) {
         _lastIsMobile = isMobile;
@@ -3329,7 +3328,7 @@ function bindUI() {
   });
 }
 
-function bindProductModal() {
+function bindModalBackdrops() {
   ['catalogModal', 'unknownModal', 'ignoredModal'].forEach(id => {
     const m = $(id);
     if (!m) return;
@@ -3408,6 +3407,16 @@ function init() {
   initLogoFallback();
   try { localStorage.removeItem(LEGACY_SESSION_KEY); } catch (e) {}
   startAutoDateTime();
+  measureHeader();
+  window.addEventListener('resize', measureHeader);
+  window.addEventListener('orientationchange', measureHeader);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', measureHeader);
+    window.visualViewport.addEventListener('resize', repositionToast);
+    window.visualViewport.addEventListener('scroll', repositionToast);
+  }
+  window.addEventListener('load', () => { measureHeader(); setTimeout(measureHeader, 100); setTimeout(measureHeader, 500); });
+
   const pt = $('point');
   if (pt) pt.addEventListener('input', () => { scheduleSessionSave(); updateResultMeta(); });
   const session = loadSession();
@@ -3449,18 +3458,14 @@ function init() {
       saveSession();
     }
   });
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', repositionToast);
-    window.visualViewport.addEventListener('scroll', repositionToast);
-  }
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.2.5 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.3.0 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
 IGNORED = loadIgnored();
 bindUI();
-bindProductModal();
+bindModalBackdrops();
 init();
 initSW();
 </script>
