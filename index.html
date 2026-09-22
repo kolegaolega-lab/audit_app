@@ -50,6 +50,7 @@ body{
   -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
   letter-spacing:-.005em;
 }
+body.modal-open{overflow:hidden}
 .app-header{
   position:sticky;top:0;z-index:100;
   padding:11px var(--page-pad);
@@ -695,23 +696,13 @@ let _catalogSelectMode = false;
 let _catalogSelected = new Set();
 let _ignoredSelectMode = false;
 let _ignoredSelected = new Set();
-let _scrollLockY = 0;
 
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
 
 function openModal(id) {
   const el = $(id);
   if (!el) return;
-  const anyOpen = document.querySelector('.modal:not(.hidden)');
-  if (!anyOpen) {
-    _scrollLockY = window.scrollY || window.pageYOffset || 0;
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${_scrollLockY}px`;
-    document.body.style.left = '0';
-    document.body.style.right = '0';
-    document.body.style.width = '100%';
-    document.body.style.overflow = 'hidden';
-  }
+  document.body.style.overflow = 'hidden';
   document.body.classList.add('modal-open');
   el.classList.remove('hidden');
 }
@@ -721,15 +712,7 @@ function closeModal(id) {
   el.classList.add('hidden');
   const anyOpen = document.querySelector('.modal:not(.hidden)');
   if (!anyOpen) {
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.left = '';
-    document.body.style.right = '';
-    document.body.style.width = '';
     document.body.style.overflow = '';
-    window.scrollTo(0, _scrollLockY);
-  }
-  if (!document.querySelector('.modal:not(.hidden)')) {
     document.body.classList.remove('modal-open');
   }
 }
