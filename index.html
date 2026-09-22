@@ -14,13 +14,13 @@
 <style>
 :root{
   --bg:#f5f5f7;--bg-card:#ffffff;--bg-elev-2:#f2f2f7;--bg-input:#f2f2f7;
-  --bg-hover:rgba(0,0,0,.04);--separator:rgba(0,0,0,.08);--separator-opaque:#d1d1d6;
+  --separator:rgba(0,0,0,.08);--separator-opaque:#d1d1d6;
   --text:#000000;--text-secondary:rgba(0,0,0,.55);--text-tertiary:rgba(0,0,0,.3);
   --accent:#0a84ff;--accent-soft:rgba(10,132,255,.10);
   --green:#34c759;--green-soft:rgba(52,199,89,.12);
   --orange:#ff9500;--orange-soft:rgba(255,149,0,.12);
   --red:#ff3b30;--red-soft:rgba(255,59,48,.12);
-  --blue:#0a84ff;--blue-soft:rgba(10,132,255,.10);
+  --blue:#0a84ff;
   --purple:#af52de;--purple-soft:rgba(175,82,222,.12);
   --r-lg:18px;--r-md:12px;--r-sm:9px;
   --page-max:840px;--page-pad:12px;--header-h:58px;
@@ -28,13 +28,13 @@
 @media (prefers-color-scheme:dark){
   :root{
     --bg:#000000;--bg-card:#1c1c1e;--bg-elev-2:#2c2c2e;--bg-input:#2c2c2e;
-    --bg-hover:rgba(255,255,255,.06);--separator:rgba(255,255,255,.09);--separator-opaque:#38383a;
+    --separator:rgba(255,255,255,.09);--separator-opaque:#38383a;
     --text:#ffffff;--text-secondary:rgba(255,255,255,.55);--text-tertiary:rgba(255,255,255,.3);
     --accent:#0a84ff;--accent-soft:rgba(10,132,255,.18);
     --green:#30d158;--green-soft:rgba(48,209,88,.18);
     --orange:#ff9f0a;--orange-soft:rgba(255,159,10,.18);
     --red:#ff453a;--red-soft:rgba(255,69,58,.18);
-    --blue:#0a84ff;--blue-soft:rgba(10,132,255,.18);
+    --blue:#0a84ff;
     --purple:#bf5af2;--purple-soft:rgba(191,90,242,.18);
   }
 }
@@ -500,7 +500,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint version">French Bakery Аудит · v9.3.1</div>
+  <div class="hint version">French Bakery Аудит · v9.3.2</div>
 
 </main>
 
@@ -660,7 +660,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.3.1';
+const APP_VERSION = 'v9.3.2';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -1196,7 +1196,7 @@ function parseCSV(text, referenceDate) {
 function sortRowsAlphabetically(rows) {
   return [...rows].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' }));
 }
-  
+
 async function fetchRemoteCatalog() {
   try {
     const url = `./${GITHUB_FILE}?t=${Date.now()}`;
@@ -1289,11 +1289,13 @@ function syncPullFromServer(opts) {
   const remote = opts.remote;
   const statusEl = $('syncStatus');
   if (!remote) {
+    _pendingRemote = null;
     if (!silent && statusEl) { statusEl.className = 'status show warn'; statusEl.textContent = 'На сервере нет данных.'; }
     return false;
   }
   const cleaned = sanitizeProducts(remote.products);
   if (!cleaned.length) {
+    _pendingRemote = null;
     if (!silent && statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Файл на сервере пустой или повреждён.'; }
     return false;
   }
@@ -1427,13 +1429,7 @@ function setOwnerMode(on) {
   if (activateBlock) activateBlock.style.display = _isOwner ? 'none' : 'block';
   if (deactivateBtn) deactivateBtn.style.display = _isOwner ? 'inline-flex' : 'none';
   if (editCatalogBtn) editCatalogBtn.style.display = _isOwner ? 'inline-flex' : 'none';
-  if (statusEl && _isOwner) {
-    statusEl.className = 'status show purple';
-    statusEl.textContent = 'Режим владельца активирован';
-  } else if (statusEl && !_isOwner) {
-    statusEl.className = 'status';
-    statusEl.textContent = '';
-  }
+  if (statusEl) { statusEl.className = 'status'; statusEl.textContent = ''; }
   if (badge && badge._t) { clearTimeout(badge._t); badge._t = null; }
   updateHeaderBadge();
 }
@@ -2001,7 +1997,7 @@ function updateTotals() {
   `;
   if (_tableQuery) applyTableFilter();
 }
-  
+
 function buildCardInput(row, opts) {
   const inpWrap = document.createElement('div');
   inpWrap.className = 'inp-wrap';
@@ -2565,17 +2561,23 @@ function catalogToIgnored() {
   const count = _catalogSelected.size;
   if (!confirm(`Удалить ${count} позиций из справочника и добавить в игнор-лист?`)) return;
   const keys = new Set(_catalogSelected);
-  const beforeLen = PRODUCTS.length;
-  PRODUCTS = PRODUCTS.filter(p => !keys.has(normalizeName(p.name)));
-  const removed = beforeLen - PRODUCTS.length;
+  // Собираем имена из справочника ДО фильтрации — это главное.
+  const toIgnore = [];
+  PRODUCTS.forEach(p => { if (keys.has(normalizeName(p.name))) toIgnore.push(p.name); });
+  // На случай, если позиция есть в сессии, но по какой-то причине не в PRODUCTS
   keys.forEach(k => {
-    const found = tableRows.find(r => normalizeName(r.name) === k);
-    if (found && !isIgnored(found.name)) IGNORED.push(found.name);
-    const foundUnknown = unknownRows.find(r => normalizeName(r.name) === k);
-    if (foundUnknown && !isIgnored(foundUnknown.name)) IGNORED.push(foundUnknown.name);
+    const t = tableRows.find(r => normalizeName(r.name) === k);
+    if (t && !toIgnore.some(n => normalizeName(n) === k)) toIgnore.push(t.name);
+    const u = unknownRows.find(r => normalizeName(r.name) === k);
+    if (u && !toIgnore.some(n => normalizeName(n) === k)) toIgnore.push(u.name);
   });
+  PRODUCTS = PRODUCTS.filter(p => !keys.has(normalizeName(p.name)));
   tableRows = tableRows.filter(r => !keys.has(normalizeName(r.name)));
   unknownRows = unknownRows.filter(r => !keys.has(normalizeName(r.name)));
+  let added = 0;
+  toIgnore.forEach(name => {
+    if (!isIgnored(name)) { IGNORED.push(name); added++; }
+  });
   saveCatalog();
   saveIgnored();
   _catalogSelected = new Set();
@@ -2584,8 +2586,9 @@ function catalogToIgnored() {
   renderCatalogList();
   renderTable();
   updateUnknownBanner();
+  if ($('ignoredModal') && !$('ignoredModal').classList.contains('hidden')) renderIgnoredList();
   scheduleSessionSave();
-  showToast(`Перенесено в игнор: ${removed}`);
+  showToast(`Перенесено в игнор: ${added}`);
 }
 
 function updateIgnoredSelectUI() {
@@ -2693,7 +2696,7 @@ function ignoredToCatalog() {
   scheduleSessionSave();
   showToast(`Возвращено в справочник: ${returned.length}`);
 }
-  
+
 function applyCSV() {
   if (applyBusy) return;
   applyBusy = true;
@@ -3445,6 +3448,19 @@ function bindUI() {
       }
     }, 120);
   });
+
+  // Выделять содержимое числовых полей при фокусе во всех модалах.
+  // Ловит поля, созданные вручную (сутки в «Не в справочнике», часы/сутки
+  // в справочнике, поля «Добавить позицию»), которые не проходят через makeNumInput.
+  document.addEventListener('focusin', e => {
+    const el = e.target;
+    if (!el || el.tagName !== 'INPUT') return;
+    if (!el.closest('.modal')) return;
+    if (el.readOnly) return;
+    const im = (el.inputMode || '').toLowerCase();
+    if (im !== 'numeric' && im !== 'decimal') return;
+    requestAnimationFrame(() => { try { el.select(); } catch (_) {} });
+  });
 }
 
 function bindModalBackdrops() {
@@ -3575,7 +3591,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.3.1 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.3.2 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
