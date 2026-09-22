@@ -83,6 +83,8 @@ input[type=text],input[type=password]{width:100%;padding:11px 13px;border:1px so
 input:focus{border-color:var(--accent);background:var(--bg-card);box-shadow:0 0 0 3px var(--accent-soft)}
 input::placeholder{color:var(--text-tertiary)}
 input:read-only{cursor:default}
+#autoDate,#autoTime{pointer-events:none;color:var(--text-secondary);background:var(--bg-card);border-color:var(--separator);cursor:default;-webkit-user-select:none;user-select:none}
+#autoDate:focus,#autoTime:focus{border-color:var(--separator);background:var(--bg-card);box-shadow:none;outline:none}
 textarea{width:100%;padding:12px 13px;border:1px solid var(--separator-opaque);border-radius:var(--r-sm);background:var(--bg-input);color:var(--text);font-size:13px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.5;min-height:130px;max-height:400px;resize:vertical;outline:none;transition:border-color .15s,background .15s;overflow-y:auto}
 textarea:focus{border-color:var(--accent);background:var(--bg-card);box-shadow:0 0 0 3px var(--accent-soft)}
 textarea::placeholder{color:var(--text-tertiary)}
@@ -180,10 +182,10 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .num{width:60px;min-width:60px;max-width:60px;height:38px;padding:0 4px;border:1px solid var(--separator-opaque);border-radius:10px;font-size:14px;text-align:center;background:var(--bg-input);color:var(--text);font-weight:600;-webkit-appearance:none;appearance:none;line-height:38px;font-family:inherit;transition:box-shadow .15s,background .15s,border-color .15s;margin:0;display:inline-block;vertical-align:middle;box-sizing:border-box}
 .num:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);background:var(--bg-card)}
 .num-disabled{display:inline-flex;align-items:center;justify-content:center;width:60px;min-width:60px;height:38px;color:var(--text-tertiary);font-weight:600;font-size:14px;user-select:none;vertical-align:middle}
-.income-cell{position:relative;padding:8px 4px !important;text-align:center}
-.income-cell.edited .num{background:var(--orange-soft);border-color:var(--orange)}
-.income-cell .reset-btn{position:absolute;top:2px;right:6px;width:20px;height:20px;padding:0;border-radius:50%;background:var(--orange);color:#fff;font-size:11px;font-weight:800;display:none;z-index:3;min-height:auto;border:2px solid var(--bg-card);line-height:1;align-items:center;justify-content:center}
-.income-cell.edited .reset-btn{display:inline-flex}
+.income-cell,.edited-num-cell{position:relative;padding:8px 4px !important;text-align:center}
+.income-cell.edited .num,.edited-num-cell.edited .num{background:var(--orange-soft);border-color:var(--orange)}
+.income-cell .reset-btn,.edited-num-cell .reset-btn{position:absolute;top:2px;right:6px;width:20px;height:20px;padding:0;border-radius:50%;background:var(--orange);color:#fff;font-size:11px;font-weight:800;display:none;z-index:3;min-height:auto;border:2px solid var(--bg-card);line-height:1;align-items:center;justify-content:center}
+.income-cell.edited .reset-btn,.edited-num-cell.edited .reset-btn{display:inline-flex}
 .calc-cell{text-align:center;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text-tertiary)}
 .calc-cell.positive{color:var(--red)}
 .calc-cell.zero{color:var(--text-tertiary)}
@@ -206,7 +208,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .card-cell .num{width:100%;min-width:0;max-width:none;display:block;margin:0 auto}
 .card-cell .inp-wrap{position:relative}
 .card-cell .inp-wrap.edited .num{background:var(--orange-soft);border-color:var(--orange)}
-.card-cell .inp-wrap .reset-btn{position:absolute;top:-2px;right:-2px;width:16px;height:16px;min-height:0;padding:0;border-radius:50%;background:var(--orange);color:#fff;font-size:9px;font-weight:800;display:none;z-index:3;border:1.5px solid var(--bg-card);line-height:1;align-items:center;justify-content:center;cursor:pointer}
+.card-cell .inp-wrap .reset-btn{position:absolute;top:1px;right:1px;width:14px;height:14px;min-height:0;padding:0;border-radius:50%;background:var(--orange);color:#fff;font-size:8px;font-weight:800;display:none;z-index:3;line-height:1;align-items:center;justify-content:center;cursor:pointer}
 .card-cell .inp-wrap.edited .reset-btn{display:inline-flex}
 .card-result{padding-top:10px;margin-top:10px;border-top:1px solid var(--separator);font-size:12px;color:var(--text-secondary);display:flex;flex-direction:column;gap:4px}
 .card-result .rv{font-weight:600}
@@ -500,7 +502,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint version">French Bakery Аудит · v9.3.3</div>
+  <div class="hint version">French Bakery Аудит · v9.3.4</div>
 
 </main>
 
@@ -660,7 +662,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.3.3';
+const APP_VERSION = 'v9.3.4';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -1484,12 +1486,10 @@ async function restoreOwnerMode() {
     if (status === 'ok') {
       setOwnerMode(true);
     } else if (status === 'invalid') {
-      // Токен точно недействителен — удаляем
       try { localStorage.removeItem(ACCESS_KEY); } catch (e) {}
       setOwnerMode(false);
     }
     // status === 'network' — токен не трогаем, интерфейс не меняем.
-    // Владелец сам увидит подсказку, когда нажмёт «Активировать».
   } catch (e) {}
 }
 
@@ -1840,14 +1840,38 @@ function renderTable() {
       }
       tr.appendChild(tdStock);
       const tdSales = document.createElement('td');
-      tdSales.className = 'num-cell';
+      tdSales.className = 'edited-num-cell num-cell';
       const inputSales = makeNumInput({
         value: row.sales || 0,
-        onInput: (cleaned) => { row.sales = cleaned === '' ? 0 : clampNum(cleaned, 0, MAX_NUM, 0); refreshRow(row, tr); scheduleSessionSave(); scheduleCardsSync(); }
+        onInput: (cleaned) => {
+          row.sales = cleaned === '' ? 0 : clampNum(cleaned, 0, MAX_NUM, 0);
+          if (row._originalSales != null && row._originalSales !== row.sales) tdSales.classList.add('edited');
+          else tdSales.classList.remove('edited');
+          refreshRow(row, tr);
+          scheduleSessionSave();
+          scheduleCardsSync();
+        }
       });
       inputSales.addEventListener('change', () => { if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; } saveSession(); });
       bindTableInput(inputSales);
       tdSales.appendChild(inputSales);
+      if (row._originalSales != null && row._originalSales !== row.sales) tdSales.classList.add('edited');
+      const salesReset = document.createElement('button');
+      salesReset.className = 'reset-btn';
+      salesReset.type = 'button';
+      salesReset.title = 'Сбросить';
+      salesReset.textContent = '↺';
+      salesReset.addEventListener('click', e => {
+        e.stopPropagation();
+        if (row._originalSales == null) return;
+        row.sales = row._originalSales;
+        inputSales.value = String(row._originalSales);
+        tdSales.classList.remove('edited');
+        refreshRow(row, tr);
+        scheduleSessionSave();
+        scheduleCardsSync();
+      });
+      tdSales.appendChild(salesReset);
       tr.appendChild(tdSales);
       dates.forEach(d => {
         const td = document.createElement('td');
@@ -2579,10 +2603,8 @@ function catalogToIgnored() {
   const count = _catalogSelected.size;
   if (!confirm(`Удалить ${count} позиций из справочника и добавить в игнор-лист?`)) return;
   const keys = new Set(_catalogSelected);
-  // Собираем имена из справочника ДО фильтрации — это главное.
   const toIgnore = [];
   PRODUCTS.forEach(p => { if (keys.has(normalizeName(p.name))) toIgnore.push(p.name); });
-  // На случай, если позиция есть в сессии, но по какой-то причине не в PRODUCTS
   keys.forEach(k => {
     const t = tableRows.find(r => normalizeName(r.name) === k);
     if (t && !toIgnore.some(n => normalizeName(n) === k)) toIgnore.push(t.name);
@@ -3467,9 +3489,6 @@ function bindUI() {
     }, 120);
   });
 
-  // Выделять содержимое числовых полей при фокусе во всех модалах.
-  // Ловит поля, созданные вручную (сутки в «Не в справочнике», часы/сутки
-  // в справочнике, поля «Добавить позицию»), которые не проходят через makeNumInput.
   document.addEventListener('focusin', e => {
     const el = e.target;
     if (!el || el.tagName !== 'INPUT') return;
@@ -3609,7 +3628,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.3.3 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.3.4 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
