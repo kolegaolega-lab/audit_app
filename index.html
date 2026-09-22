@@ -294,6 +294,18 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:rgba(28,28,30,.96);color:#fff;font-size:13.5px;font-weight:500;padding:11px 18px;border-radius:11px;z-index:9999;opacity:0;transition:opacity .25s,transform .25s,bottom .2s;pointer-events:none;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;cursor:pointer}
 @media (prefers-color-scheme:dark){.toast{background:rgba(58,58,60,.96)}}
+#aliasesModalContent,#aliasTargetModalContent{display:flex;flex-direction:column;padding:0 !important;height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden}
+.ali-counter{font-size:11.5px;color:var(--text-secondary);padding:0 12px 10px}
+.ali-counter b{color:var(--text);font-weight:600}
+.ali-card{background:var(--bg-elev-2);border-radius:10px;padding:11px 12px;margin-bottom:8px;position:relative}
+.ali-card .src{font-size:12px;color:var(--text-secondary);line-height:1.35;word-break:break-word;padding-right:30px}
+.ali-card .dst{margin-top:5px;font-size:13px;font-weight:600;color:var(--text);line-height:1.35;word-break:break-word;padding-right:30px;display:flex;align-items:baseline;gap:6px}
+.ali-card .dst .ar{color:var(--green);font-size:11px;flex:0 0 auto}
+.ali-card .del{position:absolute;top:10px;right:10px;width:26px;height:26px;border:0;border-radius:50%;background:var(--red-soft);color:var(--red);font-size:14px;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0}
+.alias-target-row{padding:10px 12px;border-radius:8px;background:var(--bg-input);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;font-family:inherit;border:0;width:100%;text-align:left}
+.alias-target-row .cn{font-weight:500;font-size:13px;line-height:1.35;color:var(--text);flex:1;min-width:0;word-break:break-word}
+.alias-target-row .ch{font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums;flex:0 0 auto}
+.alias-target-row:hover{background:var(--bg-elev-2)}
 @media (max-width:420px){
   .cat-row{grid-template-columns:1fr 58px 66px 34px;gap:6px}
   .row-cat.col-4{grid-template-columns:1fr 58px 66px 34px;gap:6px}
@@ -422,6 +434,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
         <button id="editCatalogBtn" class="secondary">Редактировать</button>
         <button id="ignoredBtn" class="secondary">Игнор-лист (<span id="ignoredCount">0</span>)</button>
       </div>
+      <button id="aliasesBtn" class="secondary block" style="display:none;margin-top:8px">Алиасы (<span id="aliasesCount">0</span>)</button>
       <details class="settings">
         <summary>Настройки синхронизации</summary>
         <div class="content">
@@ -502,7 +515,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint version">French Bakery Аудит · v9.3.4</div>
+  <div class="hint version">French Bakery Аудит · v9.4.0</div>
 
 </main>
 
@@ -595,6 +608,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
         <button id="unknownAddBtn" class="success">Добавить</button>
         <button id="unknownIgnoreBtn" class="warn">Игнорировать</button>
+        <button id="unknownMatchBtn" class="primary" style="display:none;grid-column:1/-1">Сопоставить с позицией справочника</button>
         <button id="unknownCloseBtn" class="secondary" style="grid-column:1/-1">Закрыть</button>
       </div>
     </div>
@@ -628,6 +642,48 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   </div>
 </div>
 
+<div id="aliasesModal" class="modal hidden">
+  <div class="modal-content" id="aliasesModalContent">
+    <div class="modal-header">
+      <h3>Алиасы</h3>
+      <p class="hint">Правила переименования при импорте CSV.</p>
+    </div>
+    <div class="cat-select-bar" style="display:block">
+      <div class="search-input-wrap">
+        <input id="aliasesSearch" type="text" placeholder="Поиск по алиасам..." autocomplete="off" maxlength="100">
+        <button type="button" class="search-clear" id="aliasesSearchClear" aria-label="Очистить">
+          <span class="x-icon"></span>
+        </button>
+      </div>
+    </div>
+    <div class="modal-body" id="aliasesList"></div>
+    <div class="modal-footer">
+      <button id="closeAliasesBtn" class="secondary block">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<div id="aliasTargetModal" class="modal hidden">
+  <div class="modal-content" id="aliasTargetModalContent">
+    <div class="modal-header">
+      <h3>Сопоставить</h3>
+      <p class="hint" id="aliasTargetHint">Выберите позицию справочника</p>
+    </div>
+    <div class="cat-select-bar" style="display:block">
+      <div class="search-input-wrap">
+        <input id="aliasTargetSearch" type="text" placeholder="Поиск по справочнику..." autocomplete="off" maxlength="100">
+        <button type="button" class="search-clear" id="aliasTargetSearchClear" aria-label="Очистить">
+          <span class="x-icon"></span>
+        </button>
+      </div>
+    </div>
+    <div class="modal-body" id="aliasTargetList"></div>
+    <div class="modal-footer">
+      <button id="closeAliasTargetBtn" class="secondary block">Отмена</button>
+    </div>
+  </div>
+</div>
+
 <div id="updateBanner" class="toast">Доступно обновление · нажмите, чтобы перезагрузить</div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -655,6 +711,7 @@ const SESSION_VERSION = 6;
 const LEGACY_SESSION_KEY = 'fbAuditSessionV5';
 const CATALOG_KEY = 'fbAuditProducts';
 const IGNORED_KEY = 'fbAuditIgnored';
+const ALIASES_KEY = 'fbAuditAliases';
 const CATALOG_BACKUP_KEY = 'fbAuditCatalogBackup';
 const SYNC_LOCAL_UPDATED_AT = 'fbAuditSyncLocalUpdatedAt';
 const SYNC_LAST_CHECK = 'fbAuditSyncLastCheck';
@@ -662,7 +719,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.3.4';
+const APP_VERSION = 'v9.4.0';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -670,6 +727,7 @@ const UNKNOWN_SEARCH_THRESHOLD = 20;
 
 let PRODUCTS = [];
 let IGNORED = [];
+let ALIASES = [];
 let tableRows = [];
 let unknownRows = [];
 let unknownSelected = new Set();
@@ -698,6 +756,7 @@ let _catalogSelectMode = false;
 let _catalogSelected = new Set();
 let _ignoredSelectMode = false;
 let _ignoredSelected = new Set();
+let _aliasTargetFor = null;
 
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
 
@@ -1007,6 +1066,62 @@ function updateIgnoredCount() {
   if (el) el.textContent = String(IGNORED.length);
 }
 
+function loadAliases() {
+  try {
+    const raw = localStorage.getItem(ALIASES_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    const seen = new Set();
+    const out = [];
+    for (const item of arr.slice(0, MAX_CATALOG)) {
+      if (!item || typeof item !== 'object') continue;
+      if (typeof item.alias !== 'string' || typeof item.target !== 'string') continue;
+      const alias = item.alias.trim().slice(0, MAX_NAME);
+      const target = item.target.trim().slice(0, MAX_NAME);
+      if (!alias || !target) continue;
+      const key = normalizeName(alias);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push({ alias, target });
+    }
+    return out;
+  } catch (e) { return []; }
+}
+function saveAliases() {
+  try { localStorage.setItem(ALIASES_KEY, JSON.stringify(ALIASES)); }
+  catch (e) { console.warn('saveAliases:', e); }
+  updateAliasesCount();
+}
+function updateAliasesCount() {
+  const el = $('aliasesCount');
+  if (el) el.textContent = String(ALIASES.length);
+}
+function findAlias(name) {
+  const key = normalizeName(name);
+  return ALIASES.find(a => normalizeName(a.alias) === key);
+}
+function applyAliases(name) {
+  const a = findAlias(name);
+  return a ? a.target : name;
+}
+function addOrUpdateAlias(alias, target) {
+  const aliasName = safeStr(alias, MAX_NAME).trim();
+  const targetName = safeStr(target, MAX_NAME).trim();
+  if (!aliasName || !targetName) return false;
+  const key = normalizeName(aliasName);
+  const idx = ALIASES.findIndex(a => normalizeName(a.alias) === key);
+  if (idx >= 0) ALIASES[idx].target = targetName;
+  else ALIASES.push({ alias: aliasName, target: targetName });
+  saveAliases();
+  return true;
+}
+function removeAlias(aliasName) {
+  const key = normalizeName(aliasName);
+  ALIASES = ALIASES.filter(a => normalizeName(a.alias) !== key);
+  saveAliases();
+}
+
 function getCheckMoment() { return new Date(); }
 function getWriteOffMoment(partyDate, shelfLife) {
   const [y, m, day] = partyDate.split('-').map(Number);
@@ -1293,7 +1408,7 @@ function buildSyncPayload() {
     updatedBy: APP_VERSION,
     products: PRODUCTS,
     ignored: IGNORED,
-    aliases: []
+    aliases: ALIASES
   };
 }
 function syncPullFromServer(opts) {
@@ -1317,6 +1432,14 @@ function syncPullFromServer(opts) {
   if (Array.isArray(remote.ignored)) {
     IGNORED = remote.ignored.filter(x => typeof x === 'string').map(x => x.trim()).filter(Boolean).slice(0, MAX_CATALOG);
     saveIgnored();
+  }
+  if (Array.isArray(remote.aliases)) {
+    ALIASES = remote.aliases
+      .filter(x => x && typeof x === 'object' && typeof x.alias === 'string' && typeof x.target === 'string')
+      .map(x => ({ alias: x.alias.trim().slice(0, MAX_NAME), target: x.target.trim().slice(0, MAX_NAME) }))
+      .filter(x => x.alias && x.target)
+      .slice(0, MAX_CATALOG);
+    saveAliases();
   }
   try { localStorage.setItem(SYNC_LOCAL_UPDATED_AT, String(remote.updatedAt || '')); } catch (e) {}
   _pendingRemote = null;
@@ -1342,7 +1465,7 @@ async function syncPushToServer() {
   if (result.ok) {
     try { localStorage.setItem(SYNC_LOCAL_UPDATED_AT, payload.updatedAt); } catch (e) {}
     try {
-      const backup = { version: 1, savedAt: Date.now(), products: PRODUCTS, ignored: IGNORED };
+      const backup = { version: 1, savedAt: Date.now(), products: PRODUCTS, ignored: IGNORED, aliases: ALIASES };
       localStorage.setItem(CATALOG_BACKUP_KEY, JSON.stringify(backup));
     } catch (e) {}
     updateCatalogMeta();
@@ -1436,15 +1559,18 @@ function setOwnerMode(on) {
   const activateBlock = $('ownerActivateBlock');
   const deactivateBtn = $('deactivateOwnerBtn');
   const editCatalogBtn = $('editCatalogBtn');
+  const aliasesBtn = $('aliasesBtn');
   const statusEl = $('syncStatus');
   const badge = $('headerBadge');
   if (publishBtn) publishBtn.style.display = _isOwner ? 'inline-flex' : 'none';
   if (activateBlock) activateBlock.style.display = _isOwner ? 'none' : 'block';
   if (deactivateBtn) deactivateBtn.style.display = _isOwner ? 'inline-flex' : 'none';
   if (editCatalogBtn) editCatalogBtn.style.display = _isOwner ? 'inline-flex' : 'none';
+  if (aliasesBtn) aliasesBtn.style.display = _isOwner ? 'inline-flex' : 'none';
   if (statusEl) { statusEl.className = 'status'; statusEl.textContent = ''; }
   if (badge && badge._t) { clearTimeout(badge._t); badge._t = null; }
   updateHeaderBadge();
+  if (typeof updateUnknownMatchBtn === 'function') updateUnknownMatchBtn();
 }
 async function activateOwner() {
   const input = $('tokenInput');
@@ -1489,7 +1615,6 @@ async function restoreOwnerMode() {
       try { localStorage.removeItem(ACCESS_KEY); } catch (e) {}
       setOwnerMode(false);
     }
-    // status === 'network' — токен не трогаем, интерфейс не меняем.
   } catch (e) {}
 }
 
@@ -2233,7 +2358,7 @@ function renderUnknownModal() {
   if (searchClear) searchClear.classList.toggle('show', !!unknownQuery);
   const q = normalizeName(unknownQuery);
   const filtered = q ? unknownRows.filter(r => normalizeName(r.name).includes(q)) : unknownRows;
-  if (!filtered.length) { body.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Список пуст.</div>'; return; }
+  if (!filtered.length) { body.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Список пуст.</div>'; updateUnknownMatchBtn(); return; }
   const visible = filtered.slice(0, unknownVisible);
   const frag = document.createDocumentFragment();
   visible.forEach(r => {
@@ -2326,6 +2451,7 @@ function renderUnknownModal() {
         cb.classList.add('checked');
       }
       if (selectedEl) selectedEl.textContent = String(unknownSelected.size);
+      updateUnknownMatchBtn();
     });
 
     frag.appendChild(row);
@@ -2339,6 +2465,7 @@ function renderUnknownModal() {
     more.onclick = () => { unknownVisible += UNKNOWN_PAGE_SIZE; renderUnknownModal(); };
     body.appendChild(more);
   }
+  updateUnknownMatchBtn();
 }
 function openUnknownModal() {
   if (!unknownRows.filter(r => !isIgnored(r.name)).length) return;
@@ -2361,6 +2488,12 @@ function updateUnknownBanner() {
   const filter = unknownRows.filter(r => !isIgnored(r.name));
   if (countEl) countEl.textContent = String(filter.length);
   if (banner) banner.style.display = filter.length ? 'block' : 'none';
+}
+function updateUnknownMatchBtn() {
+  const btn = $('unknownMatchBtn');
+  if (!btn) return;
+  const canMatch = _isOwner && unknownSelected.size === 1;
+  btn.style.display = canMatch ? 'inline-flex' : 'none';
 }
 function addSelectedUnknown() {
   const items = document.querySelectorAll('#unknownRows .row-unk.selected');
@@ -2479,6 +2612,12 @@ function renderCatalogList() {
       PRODUCTS[p._idx].name = newName;
       tableRows.forEach(r => { if (r.name === oldName) r.name = newName; });
       unknownRows.forEach(r => { if (r.name === oldName) r.name = newName; });
+      const oldKey = normalizeName(oldName);
+      let aliasesChanged = false;
+      ALIASES.forEach(a => {
+        if (normalizeName(a.target) === oldKey) { a.target = newName; aliasesChanged = true; }
+      });
+      if (aliasesChanged) saveAliases();
       saveCatalog(); scheduleSessionSave();
     };
     nameInput.addEventListener('click', e => e.stopPropagation());
@@ -2737,6 +2876,162 @@ function ignoredToCatalog() {
   showToast(`Возвращено в справочник: ${returned.length}`);
 }
 
+function renderAliasesList() {
+  const list = $('aliasesList');
+  if (!list) return;
+  const searchEl = $('aliasesSearch');
+  const searchClear = $('aliasesSearchClear');
+  const q = (searchEl && searchEl.value || '').toLowerCase().trim().slice(0, 100);
+  if (searchClear) searchClear.classList.toggle('show', !!q);
+  list.innerHTML = '';
+  const counter = document.createElement('div');
+  counter.className = 'ali-counter';
+  counter.innerHTML = `Всего: <b>${ALIASES.length}</b>`;
+  list.appendChild(counter);
+  if (!ALIASES.length) {
+    const empty = document.createElement('div');
+    empty.className = 'hint';
+    empty.style.cssText = 'text-align:center;padding:20px';
+    empty.textContent = 'Алиасов нет. Создайте их в модале «Не в справочнике» — выберите одну позицию и нажмите «Сопоставить».';
+    list.appendChild(empty);
+    return;
+  }
+  const filtered = q
+    ? ALIASES.filter(a => a.alias.toLowerCase().includes(q) || a.target.toLowerCase().includes(q))
+    : ALIASES;
+  if (!filtered.length) {
+    const empty = document.createElement('div');
+    empty.className = 'hint';
+    empty.style.cssText = 'text-align:center;padding:20px';
+    empty.textContent = 'Ничего не найдено.';
+    list.appendChild(empty);
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  filtered.slice().sort((a, b) => a.alias.localeCompare(b.alias, 'ru')).forEach(a => {
+    const card = document.createElement('div');
+    card.className = 'ali-card';
+    const del = document.createElement('button');
+    del.className = 'del';
+    del.type = 'button';
+    del.setAttribute('aria-label', 'Удалить');
+    del.textContent = '✕';
+    del.onclick = (e) => {
+      e.stopPropagation();
+      if (!confirm(`Удалить алиас "${a.alias}"?`)) return;
+      removeAlias(a.alias);
+      renderAliasesList();
+    };
+    const src = document.createElement('div');
+    src.className = 'src';
+    src.textContent = a.alias;
+    const dst = document.createElement('div');
+    dst.className = 'dst';
+    const ar = document.createElement('span');
+    ar.className = 'ar';
+    ar.textContent = '→';
+    const dstText = document.createElement('span');
+    dstText.textContent = a.target;
+    dst.appendChild(ar);
+    dst.appendChild(dstText);
+    card.appendChild(del);
+    card.appendChild(src);
+    card.appendChild(dst);
+    frag.appendChild(card);
+  });
+  list.appendChild(frag);
+}
+function openAliasesModal() {
+  if (!_isOwner) return;
+  const searchEl = $('aliasesSearch');
+  if (searchEl) searchEl.value = '';
+  renderAliasesList();
+  openModal('aliasesModal');
+}
+function closeAliasesModal() {
+  closeModal('aliasesModal');
+}
+
+function renderAliasTargetList() {
+  const list = $('aliasTargetList');
+  if (!list) return;
+  const searchEl = $('aliasTargetSearch');
+  const searchClear = $('aliasTargetSearchClear');
+  const q = (searchEl && searchEl.value || '').toLowerCase().trim().slice(0, 100);
+  if (searchClear) searchClear.classList.toggle('show', !!q);
+  list.innerHTML = '';
+  const filtered = PRODUCTS
+    .filter(p => !q || p.name.toLowerCase().includes(q))
+    .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+  if (!filtered.length) {
+    const empty = document.createElement('div');
+    empty.className = 'hint';
+    empty.style.cssText = 'text-align:center;padding:20px';
+    empty.textContent = 'Ничего не найдено.';
+    list.appendChild(empty);
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  filtered.forEach(p => {
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'alias-target-row';
+    const cn = document.createElement('span');
+    cn.className = 'cn';
+    cn.textContent = p.name;
+    const ch = document.createElement('span');
+    ch.className = 'ch';
+    ch.textContent = `${p.shelfLife} ч`;
+    row.appendChild(cn);
+    row.appendChild(ch);
+    row.onclick = () => {
+      if (!_aliasTargetFor) return;
+      const aliasName = _aliasTargetFor;
+      const ok = addOrUpdateAlias(aliasName, p.name);
+      if (!ok) { closeAliasTargetModal(); return; }
+      showToast(`Алиас создан: ${aliasName} → ${p.name}`);
+      closeAliasTargetModal();
+      const aliasKey = normalizeName(aliasName);
+      const idx = unknownRows.findIndex(r => normalizeName(r.name) === aliasKey);
+      if (idx >= 0) {
+        const row = unknownRows[idx];
+        const p2 = PRODUCTS.find(x => normalizeName(x.name) === normalizeName(p.name));
+        row.name = p.name;
+        row.shelfLife = p2 ? p2.shelfLife : row.shelfLife;
+        if (Array.isArray(row.incoming)) row.incoming.forEach(x => { x._originalQty = x.qty; });
+        unknownRows.splice(idx, 1);
+        tableRows = sortRowsAlphabetically(tableRows.concat([row]));
+        tableRows.forEach(r => { if (r.name === p.name && p2) r.shelfLife = p2.shelfLife; });
+        renderTable();
+        updateUnknownBanner();
+        scheduleSessionSave();
+      }
+      unknownSelected = new Set();
+      if ($('unknownModal') && !$('unknownModal').classList.contains('hidden')) {
+        if (!unknownRows.filter(r => !isIgnored(r.name)).length) closeModal('unknownModal');
+        else renderUnknownModal();
+      }
+      _aliasTargetFor = null;
+    };
+    frag.appendChild(row);
+  });
+  list.appendChild(frag);
+}
+function openAliasTargetModal(aliasName) {
+  if (!_isOwner) return;
+  _aliasTargetFor = aliasName;
+  const hint = $('aliasTargetHint');
+  if (hint) hint.innerHTML = `<b>${escapeHtml(aliasName)}</b> → выберите позицию справочника`;
+  const searchEl = $('aliasTargetSearch');
+  if (searchEl) searchEl.value = '';
+  renderAliasTargetList();
+  openModal('aliasTargetModal');
+}
+function closeAliasTargetModal() {
+  closeModal('aliasTargetModal');
+  _aliasTargetFor = null;
+}
+
 function applyCSV() {
   if (applyBusy) return;
   applyBusy = true;
@@ -2757,6 +3052,8 @@ function applyCSV() {
     if (myToken !== resetToken) return;
     const inCatalog = [], notInCatalog = [];
     for (const r of rows) {
+      const aliased = applyAliases(r.name);
+      if (aliased !== r.name) r.name = aliased;
       const key = normalizeName(r.name);
       const p = PRODUCTS.find(x => normalizeName(x.name) === key);
       if (p) {
@@ -3302,7 +3599,7 @@ function bindUI() {
   const expCat = $('exportCatalogBtn');
   if (expCat) expCat.onclick = () => {
     try {
-      const data = JSON.stringify({ version: 1, products: PRODUCTS, ignored: IGNORED }, null, 2);
+      const data = JSON.stringify({ version: 1, products: PRODUCTS, ignored: IGNORED, aliases: ALIASES }, null, 2);
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -3330,6 +3627,14 @@ function bindUI() {
       if (Array.isArray(parsed.ignored)) {
         IGNORED = parsed.ignored.filter(x => typeof x === 'string').map(x => x.trim()).filter(Boolean).slice(0, MAX_CATALOG);
         saveIgnored();
+      }
+      if (Array.isArray(parsed.aliases)) {
+        ALIASES = parsed.aliases
+          .filter(x => x && typeof x === 'object' && typeof x.alias === 'string' && typeof x.target === 'string')
+          .map(x => ({ alias: x.alias.trim().slice(0, MAX_NAME), target: x.target.trim().slice(0, MAX_NAME) }))
+          .filter(x => x.alias && x.target)
+          .slice(0, MAX_CATALOG);
+        saveAliases();
       }
       renderCatalogList();
       const el = $('catalogStatus');
@@ -3409,6 +3714,14 @@ function bindUI() {
   const unknownAddBtn = $('unknownAddBtn'); if (unknownAddBtn) unknownAddBtn.onclick = addSelectedUnknown;
   const unknownIgnoreBtn = $('unknownIgnoreBtn'); if (unknownIgnoreBtn) unknownIgnoreBtn.onclick = ignoreSelectedUnknown;
   const unknownCloseBtn = $('unknownCloseBtn'); if (unknownCloseBtn) unknownCloseBtn.onclick = (e) => { e.stopPropagation(); closeUnknownModal(); };
+  const unknownMatchBtn = $('unknownMatchBtn');
+  if (unknownMatchBtn) unknownMatchBtn.onclick = (e) => {
+    e.stopPropagation();
+    if (unknownSelected.size !== 1) return;
+    const key = [...unknownSelected][0];
+    const found = unknownRows.find(r => normalizeName(r.name) === key);
+    if (found) openAliasTargetModal(found.name);
+  };
   const unknownSearch = $('unknownSearch');
   if (unknownSearch) unknownSearch.oninput = () => { unknownQuery = unknownSearch.value; unknownVisible = UNKNOWN_PAGE_SIZE; renderUnknownModal(); };
   const unknownSearchClear = $('unknownSearchClear');
@@ -3418,6 +3731,27 @@ function bindUI() {
     unknownVisible = UNKNOWN_PAGE_SIZE;
     renderUnknownModal();
   };
+
+  const aliasesBtn = $('aliasesBtn');
+  if (aliasesBtn) aliasesBtn.onclick = () => openAliasesModal();
+  const closeAliases = $('closeAliasesBtn');
+  if (closeAliases) closeAliases.onclick = (e) => { e.stopPropagation(); closeAliasesModal(); };
+  const aliasesSearch = $('aliasesSearch');
+  if (aliasesSearch) aliasesSearch.oninput = renderAliasesList;
+  const aliasesSearchClear = $('aliasesSearchClear');
+  if (aliasesSearchClear) aliasesSearchClear.onclick = () => {
+    const s = $('aliasesSearch'); if (s) s.value = '';
+    renderAliasesList();
+  };
+  const aliasTargetSearch = $('aliasTargetSearch');
+  if (aliasTargetSearch) aliasTargetSearch.oninput = renderAliasTargetList;
+  const aliasTargetSearchClear = $('aliasTargetSearchClear');
+  if (aliasTargetSearchClear) aliasTargetSearchClear.onclick = () => {
+    const s = $('aliasTargetSearch'); if (s) s.value = '';
+    renderAliasTargetList();
+  };
+  const closeAliasTarget = $('closeAliasTargetBtn');
+  if (closeAliasTarget) closeAliasTarget.onclick = (e) => { e.stopPropagation(); closeAliasTargetModal(); };
 
   const copyModal = $('copyFromModalBtn');
   if (copyModal) copyModal.onclick = async () => {
@@ -3501,7 +3835,7 @@ function bindUI() {
 }
 
 function bindModalBackdrops() {
-  ['catalogModal', 'unknownModal', 'ignoredModal'].forEach(id => {
+  ['catalogModal', 'unknownModal', 'ignoredModal', 'aliasesModal', 'aliasTargetModal'].forEach(id => {
     const m = $(id);
     if (!m) return;
     m.addEventListener('click', e => {
@@ -3523,13 +3857,19 @@ function bindModalBackdrops() {
         _ignoredSelected = new Set();
         updateIgnoredSelectUI();
         closeModal('ignoredModal'); updateUnknownBanner();
+      } else if (id === 'aliasesModal') {
+        closeAliasesModal();
+      } else if (id === 'aliasTargetModal') {
+        closeAliasTargetModal();
       }
     });
   });
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
-      if (!$('unknownModal').classList.contains('hidden')) closeUnknownModal();
+      if (!$('aliasTargetModal').classList.contains('hidden')) closeAliasTargetModal();
+      else if (!$('aliasesModal').classList.contains('hidden')) closeAliasesModal();
+      else if (!$('unknownModal').classList.contains('hidden')) closeUnknownModal();
       else if (!$('ignoredModal').classList.contains('hidden')) closeModal('ignoredModal');
       else if (!$('catalogModal').classList.contains('hidden')) closeModal('catalogModal');
       else if (!$('promptModal').classList.contains('hidden')) closeModal('promptModal');
@@ -3603,6 +3943,7 @@ function init() {
   updateUnknownBanner();
   renderPhotoQueue();
   updateIgnoredCount();
+  updateAliasesCount();
   updateCatalogMeta();
   restoreOwnerMode();
   syncCheckOnStartup();
@@ -3616,6 +3957,10 @@ function init() {
       updateIgnoredCount();
       updateUnknownBanner();
     }
+    if (e.key === ALIASES_KEY) {
+      ALIASES = loadAliases();
+      updateAliasesCount();
+    }
   });
   window.addEventListener('beforeunload', () => {
     if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
@@ -3628,11 +3973,12 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.3.4 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.4.0 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length, '· aliases:', ALIASES.length);
 }
 
 PRODUCTS = loadCatalog();
 IGNORED = loadIgnored();
+ALIASES = loadAliases();
 bindUI();
 bindModalBackdrops();
 init();
