@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-22T08:21:43.493Z",
+  "updatedAt": "2026-09-22T08:22:12.070Z",
   "updatedBy": "v9.3.2",
   "products": [
     {
@@ -726,10 +726,6 @@
     {
       "name": "Киш с ветчиной и грибами",
       "shelfLife": 48
-    },
-    {
-      "name": "123",
-      "shelfLife": 0
     }
   ],
   "ignored": [
