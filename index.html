@@ -500,7 +500,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint version">French Bakery Аудит · v9.3.2</div>
+  <div class="hint version">French Bakery Аудит · v9.3.3</div>
 
 </main>
 
@@ -660,7 +660,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.3.2';
+const APP_VERSION = 'v9.3.3';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -1197,10 +1197,19 @@ function sortRowsAlphabetically(rows) {
   return [...rows].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' }));
 }
 
+async function fetchWithTimeout(url, opts, ms) {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { ...opts, signal: controller.signal });
+  } finally {
+    clearTimeout(t);
+  }
+}
 async function fetchRemoteCatalog() {
   try {
     const url = `./${GITHUB_FILE}?t=${Date.now()}`;
-    const res = await fetch(url, { cache: 'no-store' });
+    const res = await fetchWithTimeout(url, { cache: 'no-store' }, 15000);
     if (!res.ok) return null;
     const data = await res.json();
     if (!data || !Array.isArray(data.products)) return null;
@@ -1212,12 +1221,14 @@ async function fetchRemoteCatalog() {
 }
 async function verifyToken(token) {
   try {
-    const res = await fetch(`${GITHUB_API}/user`, {
+    const res = await fetchWithTimeout(`${GITHUB_API}/user`, {
       headers: { 'Authorization': `token ${token}` }
-    });
-    return res.ok;
+    }, 15000);
+    if (res.ok) return 'ok';
+    if (res.status === 401) return 'invalid';
+    return 'network';
   } catch (e) {
-    return false;
+    return 'network';
   }
 }
 async function pushToGitHub(token, data) {
@@ -1226,13 +1237,13 @@ async function pushToGitHub(token, data) {
 
   let sha = null;
   try {
-    const getRes = await fetch(url, {
+    const getRes = await fetchWithTimeout(url, {
       headers: {
         'Authorization': `token ${token}`,
         'Accept': 'application/vnd.github.v3+json'
       },
       cache: 'no-store'
-    });
+    }, 30000);
     if (getRes.ok) {
       const info = await getRes.json();
       sha = info.sha || null;
@@ -1244,7 +1255,7 @@ async function pushToGitHub(token, data) {
       return { ok: false, code: getRes.status, message: 'Ошибка сервера' };
     }
   } catch (e) {
-    return { ok: false, code: 0, message: 'Нет подключения' };
+    return { ok: false, code: 0, message: 'Нет связи с сервером' };
   }
 
   const body = {
@@ -1254,7 +1265,7 @@ async function pushToGitHub(token, data) {
   };
 
   try {
-    const putRes = await fetch(url, {
+    const putRes = await fetchWithTimeout(url, {
       method: 'PUT',
       headers: {
         'Authorization': `token ${token}`,
@@ -1262,7 +1273,7 @@ async function pushToGitHub(token, data) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(body)
-    });
+    }, 30000);
     if (putRes.ok) return { ok: true };
     if (putRes.status === 401) return { ok: false, code: 401, message: 'Неверный токен' };
     if (putRes.status === 403) return { ok: false, code: 403, message: 'Нет прав / лимит' };
@@ -1270,7 +1281,7 @@ async function pushToGitHub(token, data) {
     if (putRes.status === 409) return { ok: false, code: 409, message: 'Конфликт версий — повторите' };
     return { ok: false, code: putRes.status, message: `Ошибка ${putRes.status}` };
   } catch (e) {
-    return { ok: false, code: 0, message: 'Нет подключения' };
+    return { ok: false, code: 0, message: 'Нет связи с сервером' };
   }
 }
 function buildSyncPayload() {
@@ -1341,7 +1352,7 @@ async function syncPushToServer() {
     else if (result.code === 403) msg = 'Нет прав или лимит';
     else if (result.code === 404) msg = 'Файл не найден — создайте sync.json';
     else if (result.code === 409) msg = 'Конфликт версий — попробуйте ещё раз';
-    else if (result.code === 0) msg = 'Нет подключения';
+    else if (result.code === 0) msg = 'Нет связи с сервером';
     if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = msg; }
     return { ok: false, message: msg };
   }
@@ -1444,10 +1455,14 @@ async function activateOwner() {
   }
   if (statusEl) { statusEl.className = 'status show info'; statusEl.textContent = 'Проверка токена…'; }
   if (btn) btn.classList.add('busy');
-  const ok = await verifyToken(token);
+  const status = await verifyToken(token);
   if (btn) btn.classList.remove('busy');
-  if (!ok) {
+  if (status === 'invalid') {
     if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Неверный токен'; }
+    return;
+  }
+  if (status === 'network') {
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Нет связи с сервером'; }
     return;
   }
   try { localStorage.setItem(ACCESS_KEY, token); } catch (e) {}
@@ -1465,13 +1480,16 @@ async function restoreOwnerMode() {
   try {
     const token = localStorage.getItem(ACCESS_KEY);
     if (!token) return;
-    const ok = await verifyToken(token);
-    if (ok) {
+    const status = await verifyToken(token);
+    if (status === 'ok') {
       setOwnerMode(true);
-    } else {
+    } else if (status === 'invalid') {
+      // Токен точно недействителен — удаляем
       try { localStorage.removeItem(ACCESS_KEY); } catch (e) {}
       setOwnerMode(false);
     }
+    // status === 'network' — токен не трогаем, интерфейс не меняем.
+    // Владелец сам увидит подсказку, когда нажмёт «Активировать».
   } catch (e) {}
 }
 
@@ -3591,7 +3609,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.3.2 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.3.3 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
