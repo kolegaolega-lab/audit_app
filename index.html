@@ -39,8 +39,9 @@
   }
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0;overflow-x:hidden}
-html{scrollbar-width:none;-ms-overflow-style:none}
+html,body{margin:0;padding:0}
+html{overflow-x:clip;scrollbar-width:none;-ms-overflow-style:none}
+body{overflow-x:clip}
 html::-webkit-scrollbar{width:0;height:0;display:none}
 body::-webkit-scrollbar{width:0;height:0;display:none}
 body{
@@ -49,7 +50,6 @@ body{
   -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
   letter-spacing:-.005em;
 }
-body.modal-open{overflow:hidden}
 .app-header{
   position:sticky;top:0;z-index:100;
   padding:11px var(--page-pad);
@@ -499,7 +499,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint version">French Bakery Аудит · v9.3.0</div>
+  <div class="hint version">French Bakery Аудит · v9.3.1</div>
 
 </main>
 
@@ -659,7 +659,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.3.0';
+const APP_VERSION = 'v9.3.1';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -695,13 +695,23 @@ let _catalogSelectMode = false;
 let _catalogSelected = new Set();
 let _ignoredSelectMode = false;
 let _ignoredSelected = new Set();
+let _scrollLockY = 0;
 
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
 
 function openModal(id) {
   const el = $(id);
   if (!el) return;
-  document.body.style.overflow = 'hidden';
+  const anyOpen = document.querySelector('.modal:not(.hidden)');
+  if (!anyOpen) {
+    _scrollLockY = window.scrollY || window.pageYOffset || 0;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${_scrollLockY}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+    document.body.style.overflow = 'hidden';
+  }
   document.body.classList.add('modal-open');
   el.classList.remove('hidden');
 }
@@ -711,7 +721,15 @@ function closeModal(id) {
   el.classList.add('hidden');
   const anyOpen = document.querySelector('.modal:not(.hidden)');
   if (!anyOpen) {
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.right = '';
+    document.body.style.width = '';
     document.body.style.overflow = '';
+    window.scrollTo(0, _scrollLockY);
+  }
+  if (!document.querySelector('.modal:not(.hidden)')) {
     document.body.classList.remove('modal-open');
   }
 }
@@ -3574,7 +3592,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.3.0 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.3.1 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length);
 }
 
 PRODUCTS = loadCatalog();
