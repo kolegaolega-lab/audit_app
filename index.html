@@ -124,7 +124,7 @@ details.settings summary::-webkit-details-marker{display:none}
 details.settings summary::before{content:'›';transition:transform .2s;display:inline-block;font-size:15px;color:var(--text-tertiary);line-height:1}
 details.settings[open] summary::before{transform:rotate(90deg)}
 details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap:10px}
-.banner{max-width:var(--page-max);margin:0 auto 10px;background:#af52de;color:#fff;padding:13px 15px;border-radius:14px;display:flex;align-items:center;gap:11px;box-shadow:0 6px 20px rgba(175,82,222,.28)}
+.banner{position:sticky;top:calc(var(--header-h) + 4px);z-index:90;max-width:var(--page-max);margin:0 auto 10px;background:#af52de;color:#fff;padding:13px 15px;border-radius:14px;display:flex;align-items:center;gap:11px;box-shadow:0 6px 20px rgba(175,82,222,.28)}
 .banner .txt{flex:1;min-width:0;line-height:1.35;font-weight:600;font-size:13.5px}
 .banner .txt small{display:block;opacity:.9;font-weight:500;font-size:11.5px;margin-top:2px}
 .banner button{background:rgba(255,255,255,.95);color:#af52de;padding:7px 13px;min-height:34px;font-size:13px;font-weight:700;border-radius:9px}
