@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-22T07:05:34.872Z",
-  "updatedBy": "v9.3.1",
+  "updatedAt": "2026-09-22T08:21:43.493Z",
+  "updatedBy": "v9.3.2",
   "products": [
     {
       "name": "Баушкин рецепт",
@@ -726,6 +726,10 @@
     {
       "name": "Киш с ветчиной и грибами",
       "shelfLife": 48
+    },
+    {
+      "name": "123",
+      "shelfLife": 0
     }
   ],
   "ignored": [
