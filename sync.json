@@ -1,1035 +1,1287 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-22T16:40:54.508Z",
-  "updatedBy": "v9.3.3",
+  "updatedAt": "2026-09-23T10:19:32.529Z",
+  "updatedBy": "v9.5.0",
   "products": [
     {
       "name": "Баушкин рецепт",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": null
     },
     {
       "name": "Хлеб Деревенский",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": null
     },
     {
       "name": "Хлеб ржаной 100%",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Хлеб зерновой",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Хлеб бородинский",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Батон деревенский",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": null
     },
     {
       "name": "Батон нарезной",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": null
     },
     {
       "name": "Багет французский",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": null
     },
     {
       "name": "Батон 8 злаков",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Зеленая гречка",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Чесночный",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Зерновой белый",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": null
     },
     {
       "name": "Багет на закваске",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": null
     },
     {
       "name": "Сосиска в тесте",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Сосиска с сыром в слойке",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Пирожок с луком и яйцом",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Пирожок с капустой",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Пирожок с картошкой",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Пирожок с курицей",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Пирожок с яблоком",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Грилата с картофелем и грибами",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Грилата с брынзой и зеленью",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Грилата с мясом",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Грилата с курицей",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Киш с курицей",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Киш с ветчиной и сыром",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Киш 4 сыра",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Торт Наполеон",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Торт МЕДОВИК",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Торт ГЕРМАН",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Торт мини ФИСТАШКОВАЯ МЕРЕНГА",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Торт ШОКОЛАДНО-КЛУБНИЧНЫЙ",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Торт Красный Бархат",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Торт Фирменный",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Пирог вишневый",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Морковное печенье",
-      "shelfLife": 120
+      "shelfLife": 120,
+      "category": null
     },
     {
       "name": "Макарун ваниль-клубника",
-      "shelfLife": 96
+      "shelfLife": 96,
+      "category": null
     },
     {
       "name": "Макарун Сникерс",
-      "shelfLife": 96
+      "shelfLife": 96,
+      "category": null
     },
     {
       "name": "Макарун Фисташка-Малина",
-      "shelfLife": 96
+      "shelfLife": 96,
+      "category": null
     },
     {
       "name": "Макарун Лайм-вишня",
-      "shelfLife": 96
+      "shelfLife": 96,
+      "category": null
     },
     {
       "name": "Шоколадное печенье с фундуком",
-      "shelfLife": 288
+      "shelfLife": 288,
+      "category": null
     },
     {
       "name": "Брауни с вишней",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Борщ с говядиной",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Окрошка",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": "lunches"
     },
     {
       "name": "Суп том ям",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Свекольник",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": "lunches"
     },
     {
       "name": "Фирменный",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Суп пюре грибной",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Крем суп тыквенный",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Суп сырный с куриным филе и брокколи",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Индейка с рисом в кисло сладком соусе",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Куриный шашлычок с печеным картофелем",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Соба с индейкой",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Картофельное пюре с минтаем",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Пенне с куриным филе и фасолью",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Бефстроганов из говядины с картофельным пюре",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Терияки с курицей",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Чахохбили с гречкой и курицей",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Филе минтая с рисом и овощами",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Пюре с минтаем и соусом тар тар",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Спагетти карбонара",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Лингуини с жареными креветками",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Сырники со сметаной",
-      "shelfLife": 24
-    },
-    {
-      "name": "Цезарь",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": "lunches"
     },
     {
       "name": "Киноа с креветками",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": "lunches"
     },
     {
       "name": "Салат с говядиной",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": "lunches"
     },
     {
       "name": "Салат с Халуми",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": "lunches"
     },
     {
       "name": "Салат с тунцом",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": "lunches"
     },
     {
       "name": "Салат с тыквой и куриной грудкой",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": "lunches"
     },
     {
       "name": "Салат с печеной тыквой",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": "lunches"
     },
     {
       "name": "Круассан с сыром",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": null
     },
     {
       "name": "Круассан классический",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": null
     },
     {
       "name": "Круассан с ванильным кремом",
-      "shelfLife": 12
+      "shelfLife": 12,
+      "category": null
     },
     {
       "name": "Круассан миндальный",
-      "shelfLife": 12
+      "shelfLife": 12,
+      "category": null
     },
     {
       "name": "Круассан шоколадный",
-      "shelfLife": 12
+      "shelfLife": 12,
+      "category": null
     },
     {
       "name": "Круассан с клубникой и шоколадом",
-      "shelfLife": 12
+      "shelfLife": 12,
+      "category": null
     },
     {
       "name": "Круассан с творогом",
-      "shelfLife": 12
+      "shelfLife": 12,
+      "category": null
     },
     {
       "name": "Круассан с абрикосом",
-      "shelfLife": 12
+      "shelfLife": 12,
+      "category": null
     },
     {
       "name": "Бриошь с черной смородиной",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Улитка с изюмом",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Улитка яблочная",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Улитка с корицей",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Булочка с маком",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Косичка с шоколадом",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Маффин шоколадный",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Маффин классический",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Ромовая баба",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Сочник",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Шатель",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Донатс с малиной",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Донатс шоколадный",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Пончик фисташковый",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Бриошь с шоколадом",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Булочка с фисташкой",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Штрудель яблочный",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Булочка с ванильным кремом и корицей",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Слойка со сливой",
-      "shelfLife": 18
+      "shelfLife": 18,
+      "category": null
     },
     {
       "name": "Чизкейк тыквенный",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Пана-котта Пряная",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Трубочка с белковым кремом",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Эклер фисташковый",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Эклер шоколадный",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Тарталетка с белковым кремом",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Пирожное картошка",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Пирожное ГЕРМАН",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Пирожное Медовик (банка)",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Пирожное Наполеон(банка)",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Пирожное Чизкейк",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Профитроли со сливками",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Кольцо с творогом",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": null
     },
     {
       "name": "Соленая карамель",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Тирамису в стакане",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Морковное пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Десерт Сердце малина(банка)",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Пудинг Чиа Манго",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Десерт Манго-мята(банка)",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Десерт Роше",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Десерт Фисташковый",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Десерт 3 шоколада",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Кофейное зерно пирожное",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Чизкейк черная смородина",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Десерт Монастырская изба",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Чизкейк Орео",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Паннакотта шоколад-тропик",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Паннакотта ваниль-смородина",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Паннакотта кокос-ананас",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Индейка с рисом в кисло-сладком соусе",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Крем-суп тыквенный на кококовом молоке",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Лапша удон с куриным филе под соусом терияки",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Лингвини с жареными креветками",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Паста пенне с курицей и фасолью",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Суп-пюре грибной",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Бабушкин рецепт маленький",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": null
     },
     {
       "name": "Грилата с куриным филе",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Пирожок с яйцом",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Ржаной хлеб",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Ром баба",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Чиабатта 310гр.",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": null
     },
     {
       "name": "Герман пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Десерт Манго-мята",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Десерт сердце малина в банке",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Десерт соленая карамель п/ф",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Десерт Три шоколада п/ф",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Картошка пирожное п/ф",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Кофейное зерно Десерт",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Малиновый донатс",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Медовик пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Наполеон пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Паннакота пряная",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Пончик фисташка",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Профитроли п/ф",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Пудинг Манго Чиа п/ф",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Роше пирожное",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Тирамису в стакане п/ф",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Торт морковный 1 кус.",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Фисташковый десерт п/ф",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Чизкейк орео (НОВАЯ)",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Чизкейк пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Чизкейк Чёрная смородина Пирожное (НОВАЯ)",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Шоколадный донатс",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Эклер ванильный",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Эклер Малина",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Эклер миндальный",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Эклер сникерс",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Десерт \"Три шоколада\"",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Десерт соленая карамель",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Круассан с миндалем",
-      "shelfLife": 12
+      "shelfLife": 12,
+      "category": null
     },
     {
       "name": "Круассан с шоколадом",
-      "shelfLife": 12
+      "shelfLife": 12,
+      "category": null
     },
     {
       "name": "Профитроли",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Пудинг Манго Чиа",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Торт \"Герман\"",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Торт \"Красный Бархат\"",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Торт \"Медовик\" 650гр.",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Торт \"Наполеон\"",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Торт мини \"Фисташковая меренга\"",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Фисташковый десерт",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Эклер \"Малина\"",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Киш курица",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Салат цезарь для франшизы",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": "lunches"
     },
     {
       "name": "Макарун вишня-лайм",
-      "shelfLife": 96
+      "shelfLife": 96,
+      "category": null
     },
     {
       "name": "Киш с ветчиной и грибами",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Десерт \"Три шоколада\" п/ф",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т \"Брауни\"с вишней",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т \"Картошка\" пирожное п/ф",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т \"Медовик\" пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Крем-суп тыквенный на кокосовом молоке",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Салат Цезарь",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": "lunches"
     },
     {
       "name": "Бефстроганов из говядины с картофельным пюре п/ф",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Борщ с говядиной п/ф",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Куриный шашлычок с печеным картофелем п/ф",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Паста пенне с курицей и фасолью п/ф",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Салат Цезарь п/ф",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": "lunches"
     },
     {
       "name": "Чахохбили с гречкой и курицей п/ф",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "\"Роше\" пирожное",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Улитка яблочная п/ф",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "\"Брауни\"с вишней",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "\"Герман\" пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "\"Картошка\" пирожное п/ф",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "\"Медовик\" пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "\"Наполеон\" пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "\"Тирамису\" в стакане п/ф",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "\"Чизкейк Чёрная смородина\" Пирожное (НОВАЯ)",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "\"Чизкейк\" пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Макарун вишня/лайм",
-      "shelfLife": 96
+      "shelfLife": 96,
+      "category": null
     },
     {
       "name": "Макарун фисташка/малина",
-      "shelfLife": 96
+      "shelfLife": 96,
+      "category": null
     },
     {
       "name": "Вишневый пирог",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т \"Герман\" пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т \"Наполеон\" пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т \"Роше\" пирожное",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т \"Тирамису\" в стакане п/ф",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т \"Чизкейк Чёрная смородина\" Пирожное (НОВАЯ)",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т \"Чизкейк\" пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т Десерт \"Три шоколада\" п/ф",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т Десерт Манго-мята",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т Десерт сердце малина в банке",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т Десерт соленая карамель п/ф",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т Кольцо с творогом",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": null
     },
     {
       "name": "Т Кофейное зерно Десерт",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т Макарун вишня/лайм",
-      "shelfLife": 96
+      "shelfLife": 96,
+      "category": null
     },
     {
       "name": "Т Макарун сникерс",
-      "shelfLife": 96
+      "shelfLife": 96,
+      "category": null
     },
     {
       "name": "Т Малиновый донатс",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т Маффин шоколадный",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т Паннакота прямая",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т Пончик фисташка",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т Профитроли п/ф",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т Пудинг Манго Чиа п/ф",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т Тарталетка с белковым кремом",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т Торт морковный 1 кус.",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т Трубочка с белковым кремом",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т Фисташковый десерт п/ф",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т Чизкейк орео (НОВАЯ)",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т Чизкейк Тыквенный",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т Шоколадный донатс",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т Эклер \"Малина\"",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т Эклер ванильный",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т Эклер миндальный",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т Эклер сникерс",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т Эклер фисташковый",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т Эклер шоколадный",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Бриошь с шоколадом п/ф",
-      "shelfLife": 36
+      "shelfLife": 36,
+      "category": null
     },
     {
       "name": "Т Бефстроганов из говядины с картофельным пюре п/ф",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Т Борщ с говядиной п/ф",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Т Крем-суп тыквенный на кокосовом молоке",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Т Куриный шашлычок с печеным картофелем п/ф",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Т Паста пенне с курицей и фасолью п/ф",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Т Салат С печеной тыквой",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": "lunches"
     },
     {
       "name": "Т Салат Цезарь п/ф",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": "lunches"
     },
     {
       "name": "Т Суп-пюре грибной",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Т Сырники со сметаной",
-      "shelfLife": 24
+      "shelfLife": 24,
+      "category": "lunches"
     },
     {
       "name": "Т Чахохбили с гречкой и курицей п/ф",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": "lunches"
     },
     {
       "name": "Десерт Три шоколада",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Картошка пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "\"Картошка\" пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "\"Тирамису\" в стакане пирожное",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Зерновой 450 гр",
-      "shelfLife": 48
+      "shelfLife": 48,
+      "category": null
     },
     {
       "name": "Т Маффин классический",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     },
     {
       "name": "Т Паннакота пряная",
-      "shelfLife": 72
+      "shelfLife": 72,
+      "category": null
     }
   ],
   "ignored": [
