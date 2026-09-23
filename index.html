@@ -283,7 +283,9 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 #promptModal .modal-content{max-height:calc(100dvh - 32px);padding:22px;overflow:auto;scrollbar-width:none;-ms-overflow-style:none}
 #promptModal .modal-content::-webkit-scrollbar{display:none}
 pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm);font-size:11.5px;line-height:1.55;overflow:auto;max-height:60vh;white-space:pre-wrap;word-break:break-word;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;border:1px solid #1e293b}
-.photo-queue{display:grid;gap:8px;margin-top:10px}
+.photo-queue{display:grid;gap:8px;margin-top:8px}
+.photo-queue > .hint{margin-top:0}
+.section-body > label:first-child{margin-top:-4px}
 .photo-item{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--separator);border-radius:var(--r-sm);background:var(--bg-input)}
 .photo-thumb{width:44px;height:44px;object-fit:cover;border-radius:9px;background:var(--bg-elev-2)}
 .photo-meta{min-width:0}
@@ -755,9 +757,10 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 </div>
 
 <div id="updateBanner" class="toast">Доступно обновление · нажмите, чтобы перезагрузить</div>
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
-'use strict';
+  'use strict';
 
 const MAX_ROWS = 2000;
 const MAX_DATES = 30;
@@ -833,7 +836,7 @@ let _ignoredSelectMode = false;
 let _ignoredSelected = new Set();
 let _aliasTargetFor = null;
 let _aliasTargetMode = null;
-let _activeCategory = 'desserts';
+let _activeCategory = null;
 let _reportView = null;
 
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
@@ -1860,7 +1863,7 @@ function applySession(data) {
   try {
     if ($('point') && typeof data.point === 'string') $('point').value = data.point.slice(0, 50);
     if ($('csvInput') && typeof data.csvText === 'string') $('csvInput').value = data.csvText.slice(0, 500000);
-    if (isValidCategory(data.activeCategory)) _activeCategory = data.activeCategory;
+    if (data.activeCategory === null || isValidCategory(data.activeCategory)) _activeCategory = data.activeCategory;
     if (Array.isArray(data.rows) && data.rows.length) {
       tableRows = data.rows.slice(0, MAX_ROWS).map(r => {
         let stock = null;
@@ -2617,7 +2620,7 @@ function addSelectedUnknown() {
   });
   if (!toAdd.length) { showToast('Ничего не выбрано'); return; }
   const addKeys = new Set(toAdd.map(x => normalizeName(x.name)));
-  toAdd.forEach(({ name, hours }) => { PRODUCTS.push({ name, shelfLife: hours, category: _activeCategory }); });
+  toAdd.forEach(({ name, hours }) => { PRODUCTS.push({ name, shelfLife: hours, category: isValidCategory(_activeCategory) ? _activeCategory : null }); });
   saveCatalog();
   const moved = [];
   for (let i = unknownRows.length - 1; i >= 0; i--) {
@@ -2625,7 +2628,7 @@ function addSelectedUnknown() {
     if (addKeys.has(normalizeName(row.name))) {
       const entry = toAdd.find(x => normalizeName(x.name) === normalizeName(row.name));
       row.shelfLife = entry ? entry.hours : row.shelfLife;
-      row.category = _activeCategory;
+      if (isValidCategory(_activeCategory)) row.category = _activeCategory;
       if (Array.isArray(row.incoming)) row.incoming.forEach(p => { p._originalQty = p.qty; });
       moved.push(row);
       unknownRows.splice(i, 1);
@@ -2810,7 +2813,6 @@ function renderCatalogList() {
     });
     row.appendChild(daysWrap);
 
-    // === v9.5.0: цикл-кнопка категории ===
     const catBtn = document.createElement('button');
     catBtn.type = 'button';
     catBtn.className = 'cat-cycle' + (p.category ? ' set' : '');
@@ -3193,7 +3195,8 @@ function closeAliasTargetModal() {
   _aliasTargetFor = null;
   _aliasTargetMode = null;
 }
-  async function applyCSV() {
+
+async function applyCSV() {
   if (applyBusy) return;
   applyBusy = true;
   const btn = $('applyCsvBtn');
@@ -3202,6 +3205,7 @@ function closeAliasTargetModal() {
   setTimeout(() => { applyBusy = false; if (btn) btn.classList.remove('busy'); }, BTN_LOCK_MS);
   const statusEl = $('csvStatus');
   try {
+    if (!isValidCategory(_activeCategory)) throw new Error('Сначала выберите категорию.');
     const csvInput = $('csvInput');
     if (!csvInput) throw new Error('Поле ввода не найдено.');
     const text = csvInput.value.trim();
@@ -3232,7 +3236,6 @@ function closeAliasTargetModal() {
     }
     if (myToken !== resetToken) return;
 
-    // Накопительная таблица: строки текущей категории заменяются
     const otherRows = tableRows.filter(r => r.category !== _activeCategory);
     tableRows = sortRowsAlphabetically(otherRows.concat(inCategory));
     unknownRows = sortRowsAlphabetically(notInCatalog);
@@ -3241,7 +3244,6 @@ function closeAliasTargetModal() {
     updateUnknownBanner();
     scheduleSessionSave();
 
-    // Тихая очистка: фото и текст CSV
     const csvEl = $('csvInput');
     if (csvEl) csvEl.value = '';
     autoResizeTextarea();
@@ -3250,7 +3252,6 @@ function closeAliasTargetModal() {
     await renderPhotoQueue();
 
     const salesOnlyMode = rows.every(r => r.salesOnly);
-    const hasMixed = rows.some(r => r.salesOnly) && !salesOnlyMode;
     const validDates = new Set();
     rows.forEach(r => r.incoming.forEach(p => validDates.add(p.date)));
     if (statusEl) {
@@ -3347,7 +3348,7 @@ function buildPrompt() {
   const checkDate = getTodayStr();
   const checkTime = getCurrentTimeStr();
   const catProducts = getCategoryProducts(_activeCategory);
-  const catLabel = CATEGORY_LABELS[_activeCategory];
+  const catLabel = _activeCategory ? CATEGORY_LABELS[_activeCategory] : '—';
 
   let searchBlock;
   let catalogList;
@@ -3361,10 +3362,15 @@ ${catProducts.map(p => `- ${p.name}`).join('\n')}
 ВАЖНО: если позиции НЕТ в этом списке — НЕ включай её в CSV.
 Строки из накладной, которых нет в этом перечне, ПРОПУСКАЙ (это чужие категории).
 `;
-  } else {
+  } else if (_activeCategory) {
     catalogList = PRODUCTS.map(p => `- ${p.name}: ${p.shelfLife}`).join('\n');
     searchBlock = `⚠️ ВНИМАНИЕ: для категории «${catLabel}» пока не назначено ни одной позиции.
 Сначала назначьте категории в разделе «Справочник», иначе фильтрация невозможна.
+`;
+  } else {
+    catalogList = PRODUCTS.map(p => `- ${p.name}: ${p.shelfLife}`).join('\n');
+    searchBlock = `⚠️ ВНИМАНИЕ: категория не выбрана.
+Выберите категорию в разделе «Материалы» перед отправкой в ИИ.
 `;
   }
 
@@ -3617,10 +3623,15 @@ async function shareToAI() {
     if (el) { el.className = 'status show info'; el.textContent = 'Сначала загрузите материалы.'; }
     return;
   }
+  if (!isValidCategory(_activeCategory)) {
+    const el = $('shareStatus');
+    if (el) { el.className = 'status show err'; el.textContent = 'Сначала выберите категорию.'; }
+    return;
+  }
   const catProducts = getCategoryProducts(_activeCategory);
   if (!catProducts.length) {
     const el = $('shareStatus');
-    if (el) { el.className = 'status show err'; el.textContent = `Сначала назначьте категории в справочнике (${CATEGORY_LABELS[_activeCategory]}).`; }
+    if (el) { el.className = 'status show err'; el.textContent = `В категории «${CATEGORY_LABELS[_activeCategory]}» пока нет позиций. Назначьте их в справочнике.`; }
     return;
   }
   shareBusy = true;
@@ -3668,9 +3679,8 @@ async function shareToAI() {
   }
 }
 
-/* === v9.5.0: КАТЕГОРИИ UI === */
 function setActiveCategory(cat) {
-  if (!isValidCategory(cat)) return;
+  if (cat !== null && !isValidCategory(cat)) return;
   _activeCategory = cat;
   const grid = $('catGrid');
   if (grid) {
@@ -3691,7 +3701,6 @@ function bindCategoryGrid() {
   });
 }
 
-/* === v9.5.0: ОТЧЁТ === */
 function pluralize(n, one, few, many) {
   const mod10 = n % 10;
   const mod100 = n % 100;
@@ -4098,7 +4107,7 @@ function bindUI() {
     if (!name) { alert('Введите название.'); return; }
     if (PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) { alert('Такая позиция уже есть.'); return; }
     if (PRODUCTS.length >= MAX_CATALOG) { alert('Справочник переполнен.'); return; }
-    PRODUCTS.push({ name, shelfLife: hours, category: _activeCategory });
+    PRODUCTS.push({ name, shelfLife: hours, category: isValidCategory(_activeCategory) ? _activeCategory : null });
     saveCatalog();
     if (nameEl) nameEl.value = '';
     if (hoursEl) hoursEl.value = '0';
