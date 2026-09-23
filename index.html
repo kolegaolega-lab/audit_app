@@ -319,7 +319,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .cat-btn:active{transform:scale(.98);opacity:.9}
 .cat-btn .cat-emoji{font-size:30px;line-height:1;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI Emoji","Apple Color Emoji",sans-serif}
 .cat-btn .cat-label{font-size:11px;font-weight:700;color:var(--text-secondary);letter-spacing:.03em}
-.cat-btn.active{border-color:var(--accent);background:var(--accent-soft)}
+.cat-btn.active{border-color:var(--accent);border-width:1.5px;background:var(--accent-soft)}
 .cat-btn.active .cat-label{color:var(--accent)}
 /* === v9.5.0: Категория — цикл-кнопка в справочнике === */
 .cat-cycle{width:38px;height:38px;min-height:38px;padding:0;background:var(--bg-input);border:1px solid var(--separator-opaque);border-radius:8px;font-size:18px;line-height:1;color:var(--text-secondary);display:inline-flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI Emoji","Apple Color Emoji",sans-serif;cursor:pointer}
@@ -349,7 +349,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .report-item-reason{font-size:12px;color:var(--text-secondary);margin-top:3px;line-height:1.35}
 .report-back{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;font-weight:500;color:var(--accent);background:transparent;border:0;padding:6px 8px;margin:-6px -8px;min-height:auto;cursor:pointer;font-family:inherit}
 .report-back:active{opacity:.6}
-/* === v9.5.0: landscape на телефоне — компактнее === */
 @media (orientation: landscape) and (max-height: 500px){
   .cat-btn{height:78px}
   .cat-btn .cat-emoji{font-size:24px}
@@ -844,6 +843,7 @@ let _ignoredSelected = new Set();
 let _aliasTargetFor = null;
 let _aliasTargetMode = null;
 let _activeCategory = null;
+let _lastImportedCategory = null;
 let _reportView = null;
 
 const $ = id => { try { return document.getElementById(id); } catch (e) { return null; } };
@@ -1403,6 +1403,7 @@ function parseCSV(text, referenceDate) {
     if (!vals.some(v => v !== '')) continue;
     const name = safeStr(vals[idxName], MAX_NAME);
     if (!name) continue;
+    if (name.startsWith('#')) continue;
     const salesVal = idxSales >= 0 ? parseNum(vals[idxSales]) : 0;
     const shelfRaw = idxShelf >= 0 ? parseShelfLife(vals[idxShelf]) : null;
     const incoming = [];
@@ -2624,8 +2625,9 @@ function addSelectedUnknown() {
     toAdd.push({ name, hours });
   });
   if (!toAdd.length) { showToast('Ничего не выбрано'); return; }
+  const newCat = isValidCategory(_activeCategory) ? _activeCategory : (isValidCategory(_lastImportedCategory) ? _lastImportedCategory : null);
   const addKeys = new Set(toAdd.map(x => normalizeName(x.name)));
-  toAdd.forEach(({ name, hours }) => { PRODUCTS.push({ name, shelfLife: hours, category: isValidCategory(_activeCategory) ? _activeCategory : null }); });
+  toAdd.forEach(({ name, hours }) => { PRODUCTS.push({ name, shelfLife: hours, category: newCat }); });
   saveCatalog();
   const moved = [];
   for (let i = unknownRows.length - 1; i >= 0; i--) {
@@ -2633,7 +2635,7 @@ function addSelectedUnknown() {
     if (addKeys.has(normalizeName(row.name))) {
       const entry = toAdd.find(x => normalizeName(x.name) === normalizeName(row.name));
       row.shelfLife = entry ? entry.hours : row.shelfLife;
-      if (isValidCategory(_activeCategory)) row.category = _activeCategory;
+      if (isValidCategory(newCat)) row.category = newCat;
       if (Array.isArray(row.incoming)) row.incoming.forEach(p => { p._originalQty = p.qty; });
       moved.push(row);
       unknownRows.splice(i, 1);
@@ -3211,6 +3213,8 @@ async function applyCSV() {
   const statusEl = $('csvStatus');
   try {
     if (!isValidCategory(_activeCategory)) throw new Error('Сначала выберите категорию.');
+    const importedCategoryLabel = CATEGORY_LABELS[_activeCategory];
+    _lastImportedCategory = _activeCategory;
     const csvInput = $('csvInput');
     if (!csvInput) throw new Error('Поле ввода не найдено.');
     const text = csvInput.value.trim();
@@ -3262,7 +3266,7 @@ async function applyCSV() {
     rows.forEach(r => r.incoming.forEach(p => validDates.add(p.date)));
     if (statusEl) {
       statusEl.className = 'status show ok';
-      let msg = `${CATEGORY_LABELS[_activeCategory]}: загружено ${inCategory.length} позиций.`;
+      let msg = `${importedCategoryLabel}: загружено ${inCategory.length} позиций.`;
       if (notInCategory.length) msg += ` Пропущено (другая категория): ${notInCategory.length}.`;
       if (truncated) msg += ` Первые ${MAX_ROWS} строк.`;
       if (!salesOnlyMode && validDates.size === 0) msg += ` Даты приходов не распознаны.`;
@@ -4113,7 +4117,8 @@ function bindUI() {
     if (!name) { alert('Введите название.'); return; }
     if (PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) { alert('Такая позиция уже есть.'); return; }
     if (PRODUCTS.length >= MAX_CATALOG) { alert('Справочник переполнен.'); return; }
-    PRODUCTS.push({ name, shelfLife: hours, category: isValidCategory(_activeCategory) ? _activeCategory : null });
+    const newCat = isValidCategory(_activeCategory) ? _activeCategory : (isValidCategory(_lastImportedCategory) ? _lastImportedCategory : null);
+    PRODUCTS.push({ name, shelfLife: hours, category: newCat });
     saveCatalog();
     if (nameEl) nameEl.value = '';
     if (hoursEl) hoursEl.value = '0';
