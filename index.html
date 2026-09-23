@@ -207,8 +207,8 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .card-cell .lbl{font-size:9px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;text-align:center;white-space:nowrap}
 .card-cell .num{width:100%;min-width:0;max-width:none;display:block;margin:0 auto}
 .card-cell .inp-wrap{position:relative}
-.card-cell .inp-wrap.edited .num{background:var(--orange-soft);border-color:var(--orange)}
-.card-cell .inp-wrap .reset-btn{position:absolute;top:1px;right:1px;width:14px;height:14px;min-height:0;padding:0;border-radius:50%;background:var(--orange);color:#fff;font-size:8px;font-weight:800;display:none;z-index:3;line-height:1;align-items:center;justify-content:center;cursor:pointer}
+.card-cell .inp-wrap.edited .num{background:var(--orange-soft);border-color:var(--orange);border-radius:0 0 10px 10px}
+.card-cell .inp-wrap .reset-btn{position:absolute;top:0;right:0;width:16px;height:16px;min-height:0;padding:0;border-radius:10px 0 0 10px;background:var(--orange);color:#fff;font-size:9px;font-weight:800;display:none;z-index:3;line-height:1;align-items:center;justify-content:center;cursor:pointer}
 .card-cell .inp-wrap.edited .reset-btn{display:inline-flex}
 .card-result{padding-top:10px;margin-top:10px;border-top:1px solid var(--separator);font-size:12px;color:var(--text-secondary);display:flex;flex-direction:column;gap:4px}
 .card-result .rv{font-weight:600}
@@ -232,7 +232,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .modal-body::-webkit-scrollbar{display:none;width:0;height:0}
 .modal-footer{flex:0 0 auto;padding:12px 12px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);background:var(--bg-card);position:relative;z-index:10}
 .modal-footer button{pointer-events:auto;cursor:pointer}
-#unknownModalContent,#catalogModalContent,#ignoredModalContent,#aliasesModalContent,#aliasTargetModalContent,#reportModalContent{display:flex;flex-direction:column;padding:0 !important;height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden}
+#unknownModalContent,#catalogModalContent,#ignoredModalContent,#aliasesModalContent,#aliasTargetModalContent,#reportModalContent,#noCategoryModalContent{display:flex;flex-direction:column;padding:0 !important;height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden}
 .unknown-toolbar-block{flex:0 0 auto;padding:0 12px 12px;background:var(--bg-card);border-bottom:1px solid var(--separator)}
 .unknown-toolbar-block .unknown-counter{margin:0 0 10px}
 .unknown-toolbar-block .unknown-toolbar{padding:0 0 10px}
@@ -349,6 +349,13 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .report-item-reason{font-size:12px;color:var(--text-secondary);margin-top:3px;line-height:1.35}
 .report-back{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;font-weight:500;color:var(--accent);background:transparent;border:0;padding:6px 8px;margin:-6px -8px;min-height:auto;cursor:pointer;font-family:inherit}
 .report-back:active{opacity:.6}
+/* === v9.5.0: Без категории === */
+.no-cat-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--separator)}
+.no-cat-row:last-child{border-bottom:none}
+.no-cat-name{flex:1;min-width:0;font-size:13.5px;font-weight:600;line-height:1.35;word-break:break-word}
+.no-cat-btns{display:flex;gap:4px;flex:0 0 auto}
+.no-cat-btns button{width:38px;height:38px;min-height:38px;padding:0;background:var(--bg-input);border:1px solid var(--separator-opaque);border-radius:8px;font-size:18px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI Emoji","Apple Color Emoji",sans-serif}
+.no-cat-btns button:active{background:var(--accent-soft);border-color:var(--accent)}
 @media (orientation: landscape) and (max-height: 500px){
   .cat-btn{height:78px}
   .cat-btn .cat-emoji{font-size:24px}
@@ -532,6 +539,10 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 
     <div id="unknownBanner" style="display:none;padding:12px 12px 0">
       <button id="openUnknownBtn" class="warn block">Не в справочнике (<span id="unknownCount">0</span>)</button>
+    </div>
+
+    <div id="noCategoryBanner" style="display:none;padding:12px 12px 0">
+      <button id="openNoCategoryBtn" class="warn block">Без категории (<span id="noCategoryCount">0</span>)</button>
     </div>
 
     <div class="table-wrap" id="tableWrap" style="display:none">
@@ -762,6 +773,19 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   </div>
 </div>
 
+<div id="noCategoryModal" class="modal hidden">
+  <div class="modal-content" id="noCategoryModalContent">
+    <div class="modal-header">
+      <h3>Без категории</h3>
+      <p class="hint">Эти позиции есть в справочнике, но без категории. Продажи и приходы по ним теряются при импорте. Тапните категорию, чтобы назначить.</p>
+    </div>
+    <div class="modal-body" id="noCategoryList"></div>
+    <div class="modal-footer">
+      <button id="closeNoCategoryBtn" class="secondary block">Закрыть</button>
+    </div>
+  </div>
+</div>
+
 <div id="updateBanner" class="toast">Доступно обновление · нажмите, чтобы перезагрузить</div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -814,6 +838,7 @@ let IGNORED = [];
 let ALIASES = [];
 let tableRows = [];
 let unknownRows = [];
+let noCategoryRows = [];
 let unknownSelected = new Set();
 let unknownVisible = UNKNOWN_PAGE_SIZE;
 let unknownQuery = '';
@@ -1842,7 +1867,8 @@ function saveSession() {
         category: r.category || null,
         incoming: (r.incoming || []).slice(0, MAX_DATES).map(p => ({ date: p.date, qty: p.qty })),
         salesOnly: !!r.salesOnly
-      }))
+      })),
+      noCategory: noCategoryRows.slice(0, MAX_ROWS).map(r => ({ name: r.name }))
     };
     localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
     showAutosaveBadge();
@@ -1905,6 +1931,9 @@ function applySession(data) {
         };
       }).filter(r => r.name);
     } else unknownRows = [];
+    if (Array.isArray(data.noCategory) && data.noCategory.length) {
+      noCategoryRows = data.noCategory.slice(0, MAX_ROWS).map(r => ({ name: safeStr(r.name, MAX_NAME) })).filter(r => r.name);
+    } else noCategoryRows = [];
     return true;
   } finally { isRestoring = false; }
 }
@@ -2670,6 +2699,70 @@ function ignoreSelectedUnknown() {
   showToast(`Игнорировано: ${count}`);
 }
 
+/* === v9.5.0: БЕЗ КАТЕГОРИИ === */
+function updateNoCategoryBanner() {
+  const banner = $('noCategoryBanner');
+  const countEl = $('noCategoryCount');
+  if (countEl) countEl.textContent = String(noCategoryRows.length);
+  if (banner) banner.style.display = noCategoryRows.length ? 'block' : 'none';
+}
+function renderNoCategoryModal() {
+  const list = $('noCategoryList');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!noCategoryRows.length) {
+    list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Список пуст.</div>';
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  noCategoryRows.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'no-cat-row';
+    const name = document.createElement('div');
+    name.className = 'no-cat-name';
+    name.textContent = r.name;
+    row.appendChild(name);
+    const btns = document.createElement('div');
+    btns.className = 'no-cat-btns';
+    CATEGORY_ORDER.forEach(cat => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = CATEGORY_EMOJI[cat];
+      b.title = CATEGORY_LABELS[cat];
+      b.addEventListener('click', () => assignNoCategory(r.name, cat));
+      btns.appendChild(b);
+    });
+    row.appendChild(btns);
+    frag.appendChild(row);
+  });
+  list.appendChild(frag);
+}
+function assignNoCategory(name, cat) {
+  if (!isValidCategory(cat)) return;
+  const key = normalizeName(name);
+  const p = PRODUCTS.find(x => normalizeName(x.name) === key);
+  if (p) {
+    p.category = cat;
+    saveCatalog();
+  }
+  noCategoryRows = noCategoryRows.filter(r => normalizeName(r.name) !== key);
+  updateNoCategoryBanner();
+  showToast(`«${name}» → ${CATEGORY_LABELS[cat]}`);
+  if (!noCategoryRows.length) {
+    closeModal('noCategoryModal');
+  } else {
+    renderNoCategoryModal();
+  }
+}
+function openNoCategoryModal() {
+  if (!noCategoryRows.length) return;
+  renderNoCategoryModal();
+  openModal('noCategoryModal');
+}
+function closeNoCategoryModal() {
+  closeModal('noCategoryModal');
+}
+
 function updateCatalogSelectUI() {
   const bar = $('catalogSelectBar');
   const addBlock = $('catalogAddBlock');
@@ -3255,7 +3348,7 @@ async function applyCSV() {
     if (!rows.length) throw new Error('Не удалось распознать строки.');
     if (myToken !== resetToken) return;
 
-    const inCategory = [], notInCategory = [], notInCatalog = [];
+    const inCategory = [], notInCategory = [], noCategory = [], notInCatalog = [];
     for (const r of rows) {
       const aliased = applyAliases(r.name);
       if (aliased !== r.name) r.name = aliased;
@@ -3267,6 +3360,7 @@ async function applyCSV() {
         r.incoming.forEach(p2 => { p2._originalQty = p2.qty; });
         r._originalSales = r.sales;
         if (p.category === _activeCategory) inCategory.push(r);
+        else if (p.category === null) noCategory.push(r);
         else notInCategory.push(r);
       } else {
         if (isIgnored(r.name)) continue;
@@ -3275,8 +3369,6 @@ async function applyCSV() {
     }
     if (myToken !== resetToken) return;
 
-    // Патч: добавляем все позиции категории, которых нет в CSV — с нулями.
-    // Такие позиции нужны, чтобы внести остаток вручную (напр. приход не оформили).
     const otherRows = tableRows.filter(r => r.category !== _activeCategory);
     const alreadyKeys = new Set(inCategory.map(r => normalizeName(r.name)));
     const catProducts = getCategoryProducts(_activeCategory);
@@ -3297,9 +3389,11 @@ async function applyCSV() {
     }
     tableRows = sortRowsAlphabetically(otherRows.concat(inCategory));
     unknownRows = sortRowsAlphabetically(notInCatalog);
+    noCategoryRows = noCategory.slice();
 
     renderTable();
     updateUnknownBanner();
+    updateNoCategoryBanner();
     scheduleSessionSave();
 
     const csvEl = $('csvInput');
@@ -3317,6 +3411,7 @@ async function applyCSV() {
       statusEl.className = 'status show ok';
       let msg = `${importedCategoryLabel}: загружено ${inCategory.length} позиций.`;
       if (notInCategory.length) msg += ` Пропущено (другая категория): ${notInCategory.length}.`;
+      if (noCategory.length) msg += ` Без категории: ${noCategory.length}.`;
       if (truncated) msg += ` Первые ${MAX_ROWS} строк.`;
       if (!salesOnlyMode && validDates.size === 0) msg += ` Даты приходов не распознаны.`;
       if (notInCatalog.length) msg += ` Не в справочнике: ${notInCatalog.length}.`;
@@ -3324,6 +3419,8 @@ async function applyCSV() {
     }
     if (notInCatalog.length) {
       setTimeout(() => { if (unknownRows.length && $('unknownModal').classList.contains('hidden')) openUnknownModal(); }, 300);
+    } else if (noCategory.length) {
+      setTimeout(() => { if (noCategoryRows.length && $('noCategoryModal').classList.contains('hidden')) openNoCategoryModal(); }, 300);
     }
   } catch (e) {
     if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = e.message || 'Ошибка'; }
@@ -4069,7 +4166,7 @@ function bindUI() {
     applySession(data);
     setActiveCategory(_activeCategory);
     autoResizeTextarea(); updateCsvCounter();
-    renderTable(); updateUnknownBanner();
+    renderTable(); updateUnknownBanner(); updateNoCategoryBanner();
     const st = $('csvStatus');
     if (st) { st.className = 'status show ok'; st.textContent = 'Сессия восстановлена.'; }
   };
@@ -4079,7 +4176,7 @@ function bindUI() {
     if (!confirm('Сбросить все данные?')) return;
     pendingSessionReset = true; resetToken++;
     try {
-      tableRows = []; unknownRows = []; unknownSelected = new Set(); _tableQuery = '';
+      tableRows = []; unknownRows = []; noCategoryRows = []; unknownSelected = new Set(); _tableQuery = '';
       const pt = $('point'); if (pt) pt.value = '';
       const ci = $('csvInput'); if (ci) { ci.value = ''; autoResizeTextarea(); updateCsvCounter(); }
       const ts = $('tableSearch'); if (ts) ts.value = '';
@@ -4088,7 +4185,7 @@ function bindUI() {
       const ss = $('shareStatus'); if (ss) { ss.className = 'status'; ss.textContent = ''; }
       try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
       try { await clearAllPhotos(); } catch (e) {}
-      renderTable(); updateUnknownBanner(); await renderPhotoQueue();
+      renderTable(); updateUnknownBanner(); updateNoCategoryBanner(); await renderPhotoQueue();
       const cs2 = $('csvStatus');
       if (cs2) { cs2.className = 'status show ok'; cs2.textContent = 'Данные очищены.'; }
     } finally { setTimeout(() => { pendingSessionReset = false; }, 500); }
@@ -4311,6 +4408,10 @@ function bindUI() {
 
   const openUnknownBtn = $('openUnknownBtn');
   if (openUnknownBtn) openUnknownBtn.onclick = () => openUnknownModal();
+  const openNoCategoryBtn = $('openNoCategoryBtn');
+  if (openNoCategoryBtn) openNoCategoryBtn.onclick = () => openNoCategoryModal();
+  const closeNoCategoryBtn = $('closeNoCategoryBtn');
+  if (closeNoCategoryBtn) closeNoCategoryBtn.onclick = (e) => { e.stopPropagation(); closeNoCategoryModal(); };
   const unknownSelectAllBtn = $('unknownSelectAllBtn');
   if (unknownSelectAllBtn) unknownSelectAllBtn.onclick = (e) => {
     e.stopPropagation();
@@ -4449,7 +4550,7 @@ function bindUI() {
 }
 
 function bindModalBackdrops() {
-  ['catalogModal', 'unknownModal', 'ignoredModal', 'aliasesModal', 'aliasTargetModal', 'reportModal'].forEach(id => {
+  ['catalogModal', 'unknownModal', 'ignoredModal', 'aliasesModal', 'aliasTargetModal', 'reportModal', 'noCategoryModal'].forEach(id => {
     const m = $(id);
     if (!m) return;
     m.addEventListener('click', e => {
@@ -4477,6 +4578,8 @@ function bindModalBackdrops() {
         closeAliasTargetModal();
       } else if (id === 'reportModal') {
         closeReport();
+      } else if (id === 'noCategoryModal') {
+        closeNoCategoryModal();
       }
     });
   });
@@ -4489,6 +4592,7 @@ function bindModalBackdrops() {
       else if (!$('unknownModal').classList.contains('hidden')) closeUnknownModal();
       else if (!$('ignoredModal').classList.contains('hidden')) closeModal('ignoredModal');
       else if (!$('catalogModal').classList.contains('hidden')) closeModal('catalogModal');
+      else if (!$('noCategoryModal').classList.contains('hidden')) closeNoCategoryModal();
       else if (!$('promptModal').classList.contains('hidden')) closeModal('promptModal');
     }
   });
@@ -4559,6 +4663,7 @@ function init() {
   setActiveCategory(_activeCategory);
   renderTable();
   updateUnknownBanner();
+  updateNoCategoryBanner();
   renderPhotoQueue();
   updateIgnoredCount();
   updateAliasesCount();
@@ -4568,7 +4673,7 @@ function init() {
   window.addEventListener('storage', e => {
     if (e.key === SESSION_KEY && !isRestoring) {
       const data = loadSession();
-      if (data) { applySession(data); setActiveCategory(_activeCategory); autoResizeTextarea(); updateCsvCounter(); renderTable(); updateUnknownBanner(); }
+      if (data) { applySession(data); setActiveCategory(_activeCategory); autoResizeTextarea(); updateCsvCounter(); renderTable(); updateUnknownBanner(); updateNoCategoryBanner(); }
     }
     if (e.key === IGNORED_KEY) {
       IGNORED = loadIgnored();
