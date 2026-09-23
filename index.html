@@ -841,6 +841,7 @@ let _catalogSelected = new Set();
 let _ignoredSelectMode = false;
 let _ignoredSelected = new Set();
 let _aliasTargetFor = null;
+let _aliasTargetForList = [];
 let _aliasTargetMode = null;
 let _activeCategory = null;
 let _lastImportedCategory = null;
@@ -2689,8 +2690,13 @@ function updateCatalogSelectUI() {
   if (toIgnoredBtn) toIgnoredBtn.textContent = `В игнор-лист (${_catalogSelected.size})`;
   const matchBtn = $('catalogMatchBtn');
   if (matchBtn) {
-    const canMatch = _isOwner && _catalogSelectMode && _catalogSelected.size === 1;
+    const canMatch = _isOwner && _catalogSelectMode && _catalogSelected.size >= 1;
     matchBtn.style.display = canMatch ? 'block' : 'none';
+    if (canMatch) {
+      matchBtn.textContent = _catalogSelected.size === 1
+        ? 'Сопоставить с другой позицией'
+        : `Сопоставить ${_catalogSelected.size} позиций`;
+    }
   }
   const hint = document.querySelector('#catalogModalContent .modal-header .hint');
   if (hint) hint.style.display = _catalogSelectMode ? 'none' : '';
@@ -3098,6 +3104,64 @@ function closeAliasesModal() {
   closeModal('aliasesModal');
 }
 
+function handleAliasTargetClick(baseName) {
+  const mode = _aliasTargetMode;
+  const srcList = (_aliasTargetForList || []).slice();
+  if (!srcList.length) { closeAliasTargetModal(); return; }
+  const baseKey = normalizeName(baseName);
+
+  if (mode === 'catalog') {
+    const toRemove = srcList.filter(n => normalizeName(n) !== baseKey);
+    if (!toRemove.length) { closeAliasTargetModal(); return; }
+    if (!confirm(`Сопоставить ${toRemove.length} поз. с «${baseName}»?\nВыбранные позиции станут алиасами и исчезнут из справочника.`)) return;
+    toRemove.forEach(aliasName => addOrUpdateAlias(aliasName, baseName));
+    const keysToRemove = new Set(toRemove.map(normalizeName));
+    const beforeLen = PRODUCTS.length;
+    PRODUCTS = PRODUCTS.filter(x => !keysToRemove.has(normalizeName(x.name)));
+    const removed = beforeLen - PRODUCTS.length;
+    tableRows = tableRows.filter(r => !keysToRemove.has(normalizeName(r.name)));
+    unknownRows = unknownRows.filter(r => !keysToRemove.has(normalizeName(r.name)));
+    saveCatalog();
+    _catalogSelected = new Set();
+    _catalogSelectMode = false;
+    updateCatalogSelectUI();
+    renderCatalogList();
+    renderTable();
+    updateUnknownBanner();
+    scheduleSessionSave();
+    showToast(`Сопоставлено ${removed} → ${baseName}`);
+    closeAliasTargetModal();
+    return;
+  }
+
+  const aliasName = srcList[0];
+  if (normalizeName(aliasName) === baseKey) { closeAliasTargetModal(); return; }
+  const ok = addOrUpdateAlias(aliasName, baseName);
+  if (!ok) { closeAliasTargetModal(); return; }
+  showToast(`Алиас создан: ${aliasName} → ${baseName}`);
+  closeAliasTargetModal();
+  const aliasKey = normalizeName(aliasName);
+  const idx = unknownRows.findIndex(r => normalizeName(r.name) === aliasKey);
+  if (idx >= 0) {
+    const row = unknownRows[idx];
+    const p2 = PRODUCTS.find(x => normalizeName(x.name) === normalizeName(baseName));
+    row.name = baseName;
+    row.shelfLife = p2 ? p2.shelfLife : row.shelfLife;
+    row.category = p2 ? p2.category : row.category;
+    if (Array.isArray(row.incoming)) row.incoming.forEach(x => { x._originalQty = x.qty; });
+    unknownRows.splice(idx, 1);
+    tableRows = sortRowsAlphabetically(tableRows.concat([row]));
+    tableRows.forEach(r => { if (r.name === baseName && p2) r.shelfLife = p2.shelfLife; });
+    renderTable();
+    updateUnknownBanner();
+    scheduleSessionSave();
+  }
+  unknownSelected = new Set();
+  if ($('unknownModal') && !$('unknownModal').classList.contains('hidden')) {
+    if (!unknownRows.filter(r => !isIgnored(r.name)).length) closeModal('unknownModal');
+    else renderUnknownModal();
+  }
+}
 function renderAliasTargetList() {
   const list = $('aliasTargetList');
   if (!list) return;
@@ -3106,9 +3170,13 @@ function renderAliasTargetList() {
   const q = (searchEl && searchEl.value || '').toLowerCase().trim().slice(0, 100);
   if (searchClear) searchClear.classList.toggle('show', !!q);
   list.innerHTML = '';
-  const srcKey = _aliasTargetFor ? normalizeName(_aliasTargetFor) : '';
-  const filtered = PRODUCTS
-    .filter(p => !srcKey || normalizeName(p.name) !== srcKey)
+  const mode = _aliasTargetMode;
+  const srcKeys = new Set((_aliasTargetForList || []).map(normalizeName));
+  let filtered = PRODUCTS.slice();
+  if (mode === 'unknown') {
+    filtered = filtered.filter(p => !srcKeys.has(normalizeName(p.name)));
+  }
+  filtered = filtered
     .filter(p => !q || p.name.toLowerCase().includes(q))
     .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
   if (!filtered.length) {
@@ -3132,66 +3200,27 @@ function renderAliasTargetList() {
     ch.textContent = `${p.shelfLife} ч`;
     row.appendChild(cn);
     row.appendChild(ch);
-    row.onclick = () => {
-      if (!_aliasTargetFor) return;
-      const aliasName = _aliasTargetFor;
-      const mode = _aliasTargetMode;
-      const ok = addOrUpdateAlias(aliasName, p.name);
-      if (!ok) { closeAliasTargetModal(); return; }
-      showToast(`Алиас создан: ${aliasName} → ${p.name}`);
-      closeAliasTargetModal();
-      const aliasKey = normalizeName(aliasName);
-
-      if (mode === 'catalog') {
-        const beforeLen = PRODUCTS.length;
-        PRODUCTS = PRODUCTS.filter(x => normalizeName(x.name) !== aliasKey);
-        if (beforeLen !== PRODUCTS.length) {
-          tableRows = tableRows.filter(r => normalizeName(r.name) !== aliasKey);
-          unknownRows = unknownRows.filter(r => normalizeName(r.name) !== aliasKey);
-          saveCatalog();
-          _catalogSelected = new Set();
-          _catalogSelectMode = false;
-          updateCatalogSelectUI();
-          renderCatalogList();
-          renderTable();
-          updateUnknownBanner();
-          scheduleSessionSave();
-        }
-      } else {
-        const idx = unknownRows.findIndex(r => normalizeName(r.name) === aliasKey);
-        if (idx >= 0) {
-          const row = unknownRows[idx];
-          const p2 = PRODUCTS.find(x => normalizeName(x.name) === normalizeName(p.name));
-          row.name = p.name;
-          row.shelfLife = p2 ? p2.shelfLife : row.shelfLife;
-          row.category = p2 ? p2.category : row.category;
-          if (Array.isArray(row.incoming)) row.incoming.forEach(x => { x._originalQty = x.qty; });
-          unknownRows.splice(idx, 1);
-          tableRows = sortRowsAlphabetically(tableRows.concat([row]));
-          tableRows.forEach(r => { if (r.name === p.name && p2) r.shelfLife = p2.shelfLife; });
-          renderTable();
-          updateUnknownBanner();
-          scheduleSessionSave();
-        }
-        unknownSelected = new Set();
-        if ($('unknownModal') && !$('unknownModal').classList.contains('hidden')) {
-          if (!unknownRows.filter(r => !isIgnored(r.name)).length) closeModal('unknownModal');
-          else renderUnknownModal();
-        }
-      }
-      _aliasTargetFor = null;
-      _aliasTargetMode = null;
-    };
+    row.onclick = () => handleAliasTargetClick(p.name);
     frag.appendChild(row);
   });
   list.appendChild(frag);
 }
 function openAliasTargetModal(aliasName, mode) {
+  openAliasTargetModalList([aliasName], mode);
+}
+function openAliasTargetModalList(list, mode) {
   if (!_isOwner) return;
-  _aliasTargetFor = aliasName;
+  _aliasTargetForList = Array.isArray(list) ? list.slice() : [];
+  _aliasTargetFor = _aliasTargetForList[0] || null;
   _aliasTargetMode = mode || 'unknown';
   const hint = $('aliasTargetHint');
-  if (hint) hint.innerHTML = `<b>${escapeHtml(aliasName)}</b> → выберите позицию справочника`;
+  if (hint) {
+    if (_aliasTargetForList.length === 1) {
+      hint.innerHTML = `<b>${escapeHtml(_aliasTargetForList[0])}</b> → выберите позицию справочника`;
+    } else {
+      hint.innerHTML = `Сопоставить <b>${_aliasTargetForList.length} позиций</b> с одной базовой. Тапните базу.`;
+    }
+  }
   const searchEl = $('aliasTargetSearch');
   if (searchEl) searchEl.value = '';
   renderAliasTargetList();
@@ -3200,6 +3229,7 @@ function openAliasTargetModal(aliasName, mode) {
 function closeAliasTargetModal() {
   closeModal('aliasTargetModal');
   _aliasTargetFor = null;
+  _aliasTargetForList = [];
   _aliasTargetMode = null;
 }
 
@@ -3245,9 +3275,9 @@ async function applyCSV() {
     }
     if (myToken !== resetToken) return;
 
-        const otherRows = tableRows.filter(r => r.category !== _activeCategory);
-    // Добавляем позиции категории, которых нет в CSV — с нулями.
+    // Патч: добавляем все позиции категории, которых нет в CSV — с нулями.
     // Такие позиции нужны, чтобы внести остаток вручную (напр. приход не оформили).
+    const otherRows = tableRows.filter(r => r.category !== _activeCategory);
     const alreadyKeys = new Set(inCategory.map(r => normalizeName(r.name)));
     const catProducts = getCategoryProducts(_activeCategory);
     for (const p of catProducts) {
@@ -4114,10 +4144,13 @@ function bindUI() {
   const catalogMatchBtn = $('catalogMatchBtn');
   if (catalogMatchBtn) catalogMatchBtn.onclick = (e) => {
     e.stopPropagation();
-    if (_catalogSelected.size !== 1) return;
-    const key = [..._catalogSelected][0];
-    const found = PRODUCTS.find(p => normalizeName(p.name) === key);
-    if (found) openAliasTargetModal(found.name, 'catalog');
+    if (_catalogSelected.size < 1) return;
+    const selectedNames = [];
+    _catalogSelected.forEach(key => {
+      const found = PRODUCTS.find(p => normalizeName(p.name) === key);
+      if (found) selectedNames.push(found.name);
+    });
+    if (selectedNames.length) openAliasTargetModalList(selectedNames, 'catalog');
   };
   const catalogToIgnoredBtn = $('catalogToIgnoredBtn');
   if (catalogToIgnoredBtn) catalogToIgnoredBtn.onclick = (e) => {
