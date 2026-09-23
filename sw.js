@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'fb-audit-v42';
+const CACHE_NAME = 'fb-audit-v43';
 const ASSETS = [
   './',
   './index.html',
