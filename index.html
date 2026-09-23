@@ -3245,7 +3245,26 @@ async function applyCSV() {
     }
     if (myToken !== resetToken) return;
 
-    const otherRows = tableRows.filter(r => r.category !== _activeCategory);
+        const otherRows = tableRows.filter(r => r.category !== _activeCategory);
+    // Добавляем позиции категории, которых нет в CSV — с нулями.
+    // Такие позиции нужны, чтобы внести остаток вручную (напр. приход не оформили).
+    const alreadyKeys = new Set(inCategory.map(r => normalizeName(r.name)));
+    const catProducts = getCategoryProducts(_activeCategory);
+    for (const p of catProducts) {
+      const key = normalizeName(p.name);
+      if (alreadyKeys.has(key)) continue;
+      if (otherRows.some(r => normalizeName(r.name) === key && r.category === _activeCategory)) continue;
+      inCategory.push({
+        name: p.name,
+        stock: null,
+        sales: 0,
+        _originalSales: 0,
+        shelfLife: p.shelfLife,
+        category: _activeCategory,
+        incoming: [],
+        salesOnly: false
+      });
+    }
     tableRows = sortRowsAlphabetically(otherRows.concat(inCategory));
     unknownRows = sortRowsAlphabetically(notInCatalog);
 
@@ -3518,6 +3537,18 @@ ${searchBlock}
 ═══════════════════════════════════════════
 Структура чека: [№] [Наименование] [К-во] [Цена] [Сумма] [Скидка]
 Бери колонку «К-во», НЕ «Сумма», НЕ «Цена», НЕ «Скидка».
+
+КОМПЛИМЕНТЫ (важно):
+Если позиция ЕСТЬ в справочнике и в чеке у неё цена 0 — это комплимент.
+Он прошёл через кассу, значит списался с остатков → включай в продажи.
+Бери реальное К-во из чека.
+
+Пример:
+  В чеке: "Чизкейк Орео" 2x0 0.00
+  → в CSV: Чизкейк Орео, Продано = 2
+
+Если позиция НЕ в справочнике и цена 0 — игнорируй
+(это модификатор подачи, опция или услуга, не товар).
 
 Склейка фото одного чека:
 - Длинный чек часто фотографируют кусками с перекрытием.
