@@ -3193,7 +3193,7 @@ function closeAliasTargetModal() {
   _aliasTargetFor = null;
   _aliasTargetMode = null;
 }
-  function applyCSV() {
+  async function applyCSV() {
   if (applyBusy) return;
   applyBusy = true;
   const btn = $('applyCsvBtn');
