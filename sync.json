@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-23T18:59:13.835Z",
+  "updatedAt": "2026-09-24T08:04:09.910Z",
   "updatedBy": "v9.5.0",
   "products": [
     {
@@ -652,6 +652,16 @@
       "name": "\"Картошка\" пирожное",
       "shelfLife": 72,
       "category": "desserts"
+    },
+    {
+      "name": "Десерт \"Орех\"",
+      "shelfLife": 48,
+      "category": "pastry"
+    },
+    {
+      "name": "Десерт \"Какао боб\"",
+      "shelfLife": 48,
+      "category": "pastry"
     }
   ],
   "ignored": [
