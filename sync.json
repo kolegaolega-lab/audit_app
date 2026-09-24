@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-24T10:14:21.882Z",
+  "updatedAt": "2026-09-24T11:03:32.697Z",
   "updatedBy": "v9.5.0",
   "products": [
     {
@@ -70,11 +70,6 @@
     },
     {
       "name": "Сосиска с сыром в слойке",
-      "shelfLife": 36,
-      "category": "pastry"
-    },
-    {
-      "name": "Пирожок с луком и яйцом",
       "shelfLife": 36,
       "category": "pastry"
     },
