@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-24T13:30:19.226Z",
+  "updatedAt": "2026-09-24T16:48:36.698Z",
   "updatedBy": "v9.5.0",
   "products": [
     {
@@ -129,22 +129,12 @@
       "category": "desserts"
     },
     {
-      "name": "Пирог вишневый",
-      "shelfLife": 48,
-      "category": "desserts"
-    },
-    {
       "name": "Макарун ваниль-клубника",
       "shelfLife": 96,
       "category": "desserts"
     },
     {
       "name": "Макарун Сникерс",
-      "shelfLife": 96,
-      "category": "desserts"
-    },
-    {
-      "name": "Макарун Лайм-вишня",
       "shelfLife": 96,
       "category": "desserts"
     },
@@ -1166,6 +1156,14 @@
     {
       "alias": "Торт МЕДОВИК",
       "target": "Торт \"Медовик\""
+    },
+    {
+      "alias": "Макарун Лайм-вишня",
+      "target": "Макарун вишня-лайм"
+    },
+    {
+      "alias": "Пирог вишневый",
+      "target": "Вишневый пирог"
     }
   ]
 }
