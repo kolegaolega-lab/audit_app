@@ -1761,17 +1761,29 @@ function openPhotoDB() {
     } catch (e) { reject(e); }
   });
 }
-  async function addPhotos(files, type) {
+async function addPhotos(files, type) {
   if (!files || !files.length) return;
   try {
     const existing = await getPhotos();
     if (existing.length + files.length > MAX_PHOTOS) { alert(`Максимум ${MAX_PHOTOS} файлов.`); return; }
     const db = await openPhotoDB();
-    await Promise.all([...files].map(file => new Promise((resolve, reject) => {
-      const tx = db.transaction(PHOTO_STORE, 'readwrite');
-      tx.objectStore(PHOTO_STORE).add({ name: safeStr(file.name, 200), type, kind: file.type || '', size: file.size, createdAt: Date.now(), blob: file });
-      tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
-    })));
+    const list = [...files];
+    for (let i = 0; i < list.length; i++) {
+      const file = list[i];
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(PHOTO_STORE, 'readwrite');
+        tx.objectStore(PHOTO_STORE).add({
+          name: safeStr(file.name, 200),
+          type,
+          kind: file.type || '',
+          size: file.size,
+          createdAt: Date.now(),
+          blob: file
+        });
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+    }
     await renderPhotoQueue();
   } catch (e) { console.warn('addPhotos:', e); }
 }
@@ -1817,7 +1829,7 @@ async function renderPhotoQueue() {
   count.className = 'hint';
   count.innerHTML = `Загружено: <b>${items.length}</b> ${items.length === 1 ? 'файл' : 'файлов'}`;
   box.appendChild(count);
-  items.sort((a, b) => b.createdAt - a.createdAt).forEach(item => {
+  items.sort((a, b) => a.id - b.id).forEach(item => {
     const row = document.createElement('div');
     row.className = 'photo-item';
     const img = document.createElement('img');
@@ -4095,7 +4107,7 @@ ${catalogList}
 
 async function shareToAI() {
   if (shareBusy) return;
-  const items = await getPhotos();
+  const items = (await getPhotos()).sort((a, b) => a.id - b.id);
   if (!items.length) {
     const el = $('shareStatus');
     if (el) { el.className = 'status show info'; el.textContent = 'Сначала загрузите материалы.'; }
