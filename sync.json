@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-24T08:04:09.910Z",
+  "updatedAt": "2026-09-24T08:33:59.198Z",
   "updatedBy": "v9.5.0",
   "products": [
     {
@@ -656,12 +656,12 @@
     {
       "name": "Десерт \"Орех\"",
       "shelfLife": 48,
-      "category": "pastry"
+      "category": "desserts"
     },
     {
       "name": "Десерт \"Какао боб\"",
       "shelfLife": 48,
-      "category": "pastry"
+      "category": "desserts"
     }
   ],
   "ignored": [
