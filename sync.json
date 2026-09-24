@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-24T11:03:32.697Z",
+  "updatedAt": "2026-09-24T13:30:19.226Z",
   "updatedBy": "v9.5.0",
   "products": [
     {
@@ -119,12 +119,12 @@
       "category": "pastry"
     },
     {
-      "name": "Торт шоколадно-клубничный",
+      "name": "Торт \"Шоколадно-клубничный\"",
       "shelfLife": 72,
       "category": "desserts"
     },
     {
-      "name": "Торт Фирменный",
+      "name": "Торт \"Фирменный\"",
       "shelfLife": 72,
       "category": "desserts"
     },
