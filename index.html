@@ -5164,17 +5164,18 @@ function cmpParseCSV(text) {
   const raw = String(text || '').replace(/^\uFEFF/, '');
   const lines = raw.split(/\r?\n/);
   const mainLines = []; const checkLines = [];
-  let inCheck = false; let checkTotal = null;
+  let inCheck = false; let checkTotal = null; let serviceMode = false;
   for (const line of lines) {
     const t = line.trim();
-    if (t === '#ЧЕК_ПОЛНЫЙ:') { inCheck = true; continue; }
+    if (t === '#ЧЕК_ПОЛНЫЙ:') { inCheck = true; serviceMode = false; continue; }
     if (t.startsWith('#ЧЕК_ИТОГО:')) {
       const v = String(t.replace('#ЧЕК_ИТОГО:', '')).replace(',', '.').replace(/[^\d.]/g, '');
       checkTotal = Number(v) || 0;
-      inCheck = false; continue;
+      inCheck = false; serviceMode = false; continue;
     }
-    if (t.startsWith('#')) { mainLines.push(line); continue; }
     if (inCheck) { checkLines.push(line); continue; }
+    if (t.startsWith('#')) { serviceMode = true; continue; }
+    if (serviceMode) continue;
     mainLines.push(line);
   }
     function cmpIsServiceLine(line) {
