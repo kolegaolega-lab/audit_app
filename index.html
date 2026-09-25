@@ -4856,11 +4856,11 @@ function bindUI() {
     requestAnimationFrame(() => { try { el.select(); } catch (_) {} });
   });
 }
-  /* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════
    BIND MODAL BACKDROPS
    ═══════════════════════════════════════════ */
 function bindModalBackdrops() {
-  ['catalogModal', 'unknownModal', 'ignoredModal', 'aliasesModal', 'aliasTargetModal', 'reportModal', 'noCategoryModal', 'pricesModal', 'priceEditModal'].forEach(id => {
+  ['catalogModal', 'unknownModal', 'ignoredModal', 'aliasesModal', 'aliasTargetModal', 'reportModal', 'noCategoryModal', 'pricesModal', 'priceEditModal', 'compareModal'].forEach(id => {
     const m = $(id);
     if (!m) return;
     m.addEventListener('click', e => {
@@ -4894,6 +4894,8 @@ function bindModalBackdrops() {
         closePricesModal();
       } else if (id === 'priceEditModal') {
         closePriceEdit();
+      } else if (id === 'compareModal') {
+        closeCompareModal();
       }
     });
   });
@@ -4909,6 +4911,7 @@ function bindModalBackdrops() {
       else if (!$('noCategoryModal').classList.contains('hidden')) closeNoCategoryModal();
       else if (!$('pricesModal').classList.contains('hidden')) closePricesModal();
       else if (!$('priceEditModal').classList.contains('hidden')) closePriceEdit();
+      else if (!$('compareModal').classList.contains('hidden')) closeCompareModal();
       else if (!$('promptModal').classList.contains('hidden')) closeModal('promptModal');
     }
   });
@@ -5018,6 +5021,405 @@ function init() {
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
   console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.5.0 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length, '· aliases:', ALIASES.length, '· prices:', Object.keys(PRICES).length);
+}
+  /* ═══════════════════════════════════════════
+   СВЕРКА ДВУХ CSV
+   ═══════════════════════════════════════════ */
+let _cmpData = null;
+let _cmpNakls = [];
+
+function cmpSplitLine(line, sep) {
+  const out = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQ) {
+      if (ch === '"') { if (line[i+1] === '"') { cur += '"'; i++; continue; } inQ = false; continue; }
+      cur += ch; continue;
+    }
+    if (ch === '"') { inQ = true; continue; }
+    if (ch === sep) { out.push(cur); cur = ''; continue; }
+    cur += ch;
+  }
+  out.push(cur); return out;
+}
+
+function cmpParseCSV(text) {
+  const raw = String(text || '').replace(/^\uFEFF/, '');
+  const lines = raw.split(/\r?\n/);
+  const mainLines = []; const checkLines = [];
+  let inCheck = false; let checkTotal = null;
+  for (const line of lines) {
+    const t = line.trim();
+    if (t === '#ЧЕК_ПОЛНЫЙ:') { inCheck = true; continue; }
+    if (t.startsWith('#ЧЕК_ИТОГО:')) {
+      const v = String(t.replace('#ЧЕК_ИТОГО:', '')).replace(',', '.').replace(/[^\d.]/g, '');
+      checkTotal = Number(v) || 0;
+      inCheck = false; continue;
+    }
+    if (t.startsWith('#')) { mainLines.push(line); continue; }
+    if (inCheck) { checkLines.push(line); continue; }
+    mainLines.push(line);
+  }
+  const dataLines = mainLines.filter(l => l.trim() && !l.trim().startsWith('#'));
+  if (dataLines.length < 2) return null;
+  const sep = dataLines[0].includes(';') ? ';' : ',';
+  const header = cmpSplitLine(dataLines[0], sep);
+  const idxName = header.findIndex(h => /наимен/i.test(h));
+  if (idxName < 0) return null;
+  const dateCols = [];
+  header.forEach((h, i) => {
+    if (/получено за/i.test(h)) {
+      const m = h.match(/(\d{1,2})[.\-\/](\d{1,2})/);
+      if (m) dateCols.push({ idx: i, key: `${m[1].padStart(2,'0')}.${m[2].padStart(2,'0')}`, label: `${m[1].padStart(2,'0')}.${m[2].padStart(2,'0')}` });
+    }
+  });
+  const idxSales = header.findIndex(h => /продано|продажи/i.test(h));
+  const rows = {}; const order = [];
+  for (let i = 1; i < dataLines.length; i++) {
+    const f = cmpSplitLine(dataLines[i], sep);
+    const name = (f[idxName] || '').trim().replace(/^"|"$/g, '');
+    if (!name) continue;
+    const key = normalizeName(name);
+    const rec = { name, incoming: {}, sales: 0 };
+    dateCols.forEach(dc => {
+      const v = String(f[dc.idx] || '').replace(/[^\d]/g, '');
+      rec.incoming[dc.key] = v === '' ? 0 : parseInt(v, 10);
+    });
+    if (idxSales >= 0) {
+      const s = String(f[idxSales] || '').replace(/[^\d]/g, '');
+      rec.sales = s === '' ? 0 : parseInt(s, 10);
+    }
+    rows[key] = rec;
+    order.push(key);
+  }
+  const checkRows = [];
+  for (const line of checkLines) {
+    const t = line.trim(); if (!t) continue;
+    const f = cmpSplitLine(t, ';');
+    if (f.length < 4) continue;
+    const name = f[0].trim();
+    const qty = parseInt(String(f[1] || '').replace(/[^\d]/g, ''), 10) || 0;
+    const price = Number(String(f[2] || '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+    const sum = Number(String(f[3] || '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+    if (name) checkRows.push({ name, qty, price, sum });
+  }
+  return { rows, dateCols, order, count: order.length, checkRows, checkTotal };
+}
+
+function cmpCalcSigmaForDate(csvData, dateKey) {
+  let total = 0; let count = 0; const missing = [];
+  for (const key of csvData.order) {
+    const row = csvData.rows[key];
+    const val = row.incoming[dateKey] || 0;
+    if (val === 0) continue;
+    count++;
+    const price = getPriceFor(row.name);
+    if (!price) { missing.push(row.name); continue; }
+    total += val * price;
+  }
+  return { total, count, missing };
+}
+
+function cmpFindRowByDiff(csvData, diff) {
+  const tol = 0.05;
+  for (const key of csvData.order) {
+    const row = csvData.rows[key];
+    const price = getPriceFor(row.name);
+    if (!price) continue;
+    for (const dk of Object.keys(row.incoming)) {
+      const cost = row.incoming[dk] * price;
+      if (Math.abs(cost - diff) < tol) {
+        return { name: row.name, dateKey: dk, qty: row.incoming[dk], price, sum: cost };
+      }
+    }
+  }
+  return null;
+}
+
+function cmpRenderNakls() {
+  const list = $('cmpNaklList');
+  if (!list) return;
+  list.innerHTML = '';
+  _cmpNakls.forEach((n, i) => {
+    const el = document.createElement('div');
+    el.className = 'cmp-nakl-item';
+    el.innerHTML = `
+      <div><label>Дата</label><input type="text" data-i="${i}" data-f="date" value="${escapeHtml(n.date)}" placeholder="20.09"></div>
+      <div><label>№</label><input type="text" data-i="${i}" data-f="num" value="${escapeHtml(n.num)}" placeholder="211224"></div>
+      <div><label>Посл. №</label><input type="text" data-i="${i}" data-f="lastNum" value="${escapeHtml(n.lastNum)}" placeholder="18"></div>
+      <div><label>Печатный итог</label><input type="text" data-i="${i}" data-f="total" value="${escapeHtml(n.total)}" placeholder="1657.36"></div>
+      <button class="del-btn" data-del="${i}">×</button>
+    `;
+    list.appendChild(el);
+  });
+  list.querySelectorAll('input').forEach(inp => {
+    inp.oninput = e => {
+      const i = parseInt(e.target.dataset.i, 10);
+      _cmpNakls[i][e.target.dataset.f] = e.target.value;
+    };
+  });
+  list.querySelectorAll('[data-del]').forEach(btn => {
+    btn.onclick = e => {
+      _cmpNakls.splice(parseInt(e.target.dataset.del, 10), 1);
+      cmpRenderNakls();
+    };
+  });
+}
+
+function openCompareModal() {
+  const st = $('cmpStats'); if (st) st.style.display = 'none';
+  const res = $('cmpResults'); if (res) res.innerHTML = '';
+  const chk = $('cmpCheckResults'); if (chk) chk.innerHTML = '';
+  const btn = $('cmpApplyBtn'); if (btn) btn.style.display = 'none';
+  _cmpData = null;
+  if (_cmpNakls.length === 0) _cmpNakls = [{ date: '', num: '', lastNum: '', total: '' }];
+  cmpRenderNakls();
+  openModal('compareModal');
+}
+function closeCompareModal() {
+  closeModal('compareModal');
+}
+
+function cmpRunCompare() {
+  const t1 = $('cmpCsv1') ? $('cmpCsv1').value : '';
+  const t2 = $('cmpCsv2') ? $('cmpCsv2').value : '';
+  if (!t1.trim() || !t2.trim()) { showToast('Заполни оба CSV'); return; }
+  const d1 = cmpParseCSV(t1);
+  const d2 = cmpParseCSV(t2);
+  if (!d1 || !d2) { showToast('Не удалось разобрать CSV'); return; }
+
+  const allKeys = new Set([...Object.keys(d1.rows), ...Object.keys(d2.rows)]);
+  const dateLabels = {};
+  d1.dateCols.forEach(dc => dateLabels[dc.key] = dc.label);
+  d2.dateCols.forEach(dc => dateLabels[dc.key] = dc.label);
+  const rows = [];
+  let okCount = 0, warnCount = 0, errCount = 0;
+  allKeys.forEach(k => {
+    const a = d1.rows[k]; const b = d2.rows[k];
+    const name = (a && a.name) || (b && b.name) || k;
+    const dates = new Set([...(a ? Object.keys(a.incoming) : []), ...(b ? Object.keys(b.incoming) : [])]);
+    let status = 'ok';
+    if (!a || !b) status = 'err';
+    else {
+      for (const dk of dates) {
+        if ((a.incoming[dk] || 0) !== (b.incoming[dk] || 0)) { status = 'warn'; break; }
+      }
+      if (status === 'ok' && a.sales !== b.sales) status = 'warn';
+    }
+    if (status === 'ok') okCount++; else if (status === 'warn') warnCount++; else errCount++;
+    rows.push({ key: k, name, a, b, dates: [...dates], status });
+  });
+  const order = { err: 0, warn: 1, ok: 2 };
+  rows.sort((x, y) => {
+    if (order[x.status] !== order[y.status]) return order[x.status] - order[y.status];
+    return x.name.localeCompare(y.name, 'ru');
+  });
+
+  const checks = [];
+  _cmpNakls.filter(n => n.date).forEach(n => {
+    const dateKey = n.date;
+    const printedTotal = Number(String(n.total).replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+    const lastNum = parseInt(String(n.lastNum).replace(/[^\d]/g, ''), 10) || 0;
+    const sig1 = cmpCalcSigmaForDate(d1, dateKey);
+    const sig2 = cmpCalcSigmaForDate(d2, dateKey);
+    const maxCount = Math.max(sig1.count, sig2.count);
+
+    let c1ok = true, c1detail = '';
+    if (lastNum > 0) {
+      if (maxCount === lastNum) { c1ok = true; c1detail = `В CSV ${maxCount} поз. — совпадает с последним № ${lastNum}.`; }
+      else if (maxCount < lastNum) { c1ok = false; c1detail = `В CSV ${maxCount} поз., в накладной ${lastNum}. Возможно, потеряна строка.`; }
+      else { c1ok = false; c1detail = `В CSV ${maxCount} поз., в накладной только ${lastNum}. Лишние строки.`; }
+    } else { c1detail = 'Последний № не задан — пропущено.'; }
+    checks.push({ ok: c1ok, title: `№${n.num} (${dateKey}) — количество позиций`, detail: c1detail });
+
+    if (printedTotal > 0) {
+      const diff1 = sig1.total - printedTotal;
+      const diff2 = sig2.total - printedTotal;
+      const tol = 0.5;
+      const bothOk = Math.abs(diff1) <= tol && Math.abs(diff2) <= tol;
+      let detail = `CSV №1: <b>${sig1.total.toFixed(2)}</b> (Δ${diff1.toFixed(2)}), CSV №2: <b>${sig2.total.toFixed(2)}</b> (Δ${diff2.toFixed(2)}), печатный: <b>${printedTotal.toFixed(2)}</b>.`;
+      if (!bothOk) {
+        const absDiff = Math.abs(diff1);
+        const found = cmpFindRowByDiff(d1, absDiff) || cmpFindRowByDiff(d2, absDiff);
+        if (found) {
+          detail += `<br>💡 Возможно, строка <b>«${escapeHtml(found.name)}»</b> (${found.qty} × ${found.price} = ${found.sum.toFixed(2)}) не вошла в печатный итог. Это ошибка документа, а не CSV.`;
+        } else {
+          detail += '<br>⚠️ Не удалось найти строку с такой стоимостью. Возможна ошибка чтения.';
+        }
+      }
+      if (sig1.missing.length || sig2.missing.length) {
+        const names = [...new Set([...sig1.missing, ...sig2.missing])].slice(0, 5);
+        detail += `<br>⚠️ Нет цены для: ${names.map(n => escapeHtml(n)).join(', ')}${names.length === 5 ? '...' : ''}`;
+      }
+      checks.push({ ok: bothOk, title: `№${n.num} (${dateKey}) — Σ по цене`, detail });
+    } else {
+      checks.push({ ok: true, title: `№${n.num} (${dateKey}) — Σ по цене`, detail: 'Печатный итог не задан — пропущено.' });
+    }
+  });
+
+  const catalogSet = new Set(PRODUCTS.map(p => normalizeName(p.name)));
+  const notFound = [];
+  for (const key of Object.keys(d1.rows)) {
+    const name = d1.rows[key].name;
+    const allValues = Object.values(d1.rows[key].incoming);
+    const totalQty = allValues.reduce((a, b) => a + b, 0);
+    if (totalQty === 0 && d1.rows[key].sales === 0) continue;
+    if (!catalogSet.has(normalizeName(name))) notFound.push(name);
+  }
+  checks.push({
+    ok: notFound.length === 0,
+    title: 'Целостность справочника',
+    detail: notFound.length === 0
+      ? 'Все позиции CSV есть в справочнике.'
+      : `Не найдены в справочнике: <b>${notFound.map(n => escapeHtml(n)).join('</b>, <b>')}</b>`
+  });
+
+  const checkPrinted = Number(String($('cmpCheckPrinted') ? $('cmpCheckPrinted').value : '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+  if (checkPrinted > 0 && d1.checkRows.length > 0) {
+    const sig = d1.checkRows.reduce((a, r) => a + r.sum, 0);
+    const declared = d1.checkTotal || 0;
+    const diff = sig - checkPrinted;
+    const tol = 0.05;
+    const ok = Math.abs(diff) <= tol;
+    let detail = `Σ строк отчёта: <b>${sig.toFixed(2)}</b>, печатный итог чека: <b>${checkPrinted.toFixed(2)}</b>.`;
+    if (declared > 0 && Math.abs(declared - checkPrinted) > tol) {
+      detail += `<br>⚠️ ИИ заявил #ЧЕК_ИТОГО: ${declared.toFixed(2)} — не совпадает с печатным.`;
+    }
+    if (!ok) detail += `<br>Разница: ${diff.toFixed(2)}. Проверь чек по фото.`;
+    checks.push({ ok, title: 'Сверка чека', detail });
+  } else if (checkPrinted > 0 && d1.checkRows.length === 0) {
+    checks.push({ ok: false, title: 'Сверка чека', detail: 'В CSV нет блока #ЧЕК_ПОЛНЫЙ — невозможно проверить.' });
+  } else {
+    checks.push({ ok: true, title: 'Сверка чека', detail: 'Печатный итог чека не задан — пропущено.' });
+  }
+
+  _cmpData = { rows, dateLabels, okCount, warnCount, errCount, csv1: d1, csv2: d2, checks };
+  cmpRenderChecks(checks);
+  cmpRenderResults();
+}
+
+function cmpRenderChecks(checks) {
+  const el = $('cmpCheckResults');
+  if (!el) return;
+  if (!checks.length) { el.innerHTML = '<div class="cmp-empty">Нет контролей.</div>'; return; }
+  el.innerHTML = checks.map(c => {
+    const cls = c.ok ? 'ok' : 'err';
+    const icon = c.ok ? '✓' : '✗';
+    return `<div class="cmp-check ${cls}">
+      <span class="cmp-check-icon">${icon}</span>
+      <div class="cmp-check-body">
+        <div class="cmp-check-title">${escapeHtml(c.title)}</div>
+        <div class="cmp-check-detail">${c.detail}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function cmpRenderResults() {
+  if (!_cmpData) return;
+  const { rows, dateLabels, okCount, warnCount, errCount } = _cmpData;
+  const stats = $('cmpStats');
+  const out = $('cmpResults');
+  if (stats) {
+    stats.style.display = 'grid';
+    stats.innerHTML = `
+      <span class="k">✓ Совпало</span><span class="v" style="color:var(--green)">${okCount}</span>
+      <span class="k">⚠ Расхождения</span><span class="v" style="color:var(--orange)">${warnCount}</span>
+      <span class="k">✗ Только в одном</span><span class="v" style="color:var(--red)">${errCount}</span>
+    `;
+  }
+  if (!out) return;
+  if (!rows.length) { out.innerHTML = '<div class="cmp-empty">Оба CSV пусты.</div>'; return; }
+  out.innerHTML = rows.map(r => {
+    const icon = r.status === 'ok' ? '✓' : r.status === 'warn' ? '⚠' : '✗';
+    const vals = [];
+    r.dates.forEach(dk => {
+      const va = r.a ? (r.a.incoming[dk] || 0) : '—';
+      const vb = r.b ? (r.b.incoming[dk] || 0) : '—';
+      const cls = va !== vb ? 'diff' : 'same';
+      vals.push(`<span class="cmp-val ${cls}">${dateLabels[dk] || dk}: ${va} / ${vb}</span>`);
+    });
+    if (r.a || r.b) {
+      const sa = r.a ? r.a.sales : '—';
+      const sb = r.b ? r.b.sales : '—';
+      const cls = sa !== sb ? 'diff' : 'same';
+      vals.push(`<span class="cmp-val ${cls}">Прод: ${sa} / ${sb}</span>`);
+    }
+    return `<div class="cmp-row ${r.status}">
+      <span class="cmp-icon">${icon}</span>
+      <span class="cmp-name">${escapeHtml(r.name)}</span>
+      <span class="cmp-vals">${vals.join('')}</span>
+    </div>`;
+  }).join('');
+  const applyBtn = $('cmpApplyBtn');
+  if (applyBtn) applyBtn.style.display = okCount ? 'block' : 'none';
+}
+
+function cmpApplyMatched() {
+  if (!_cmpData) return;
+  const okRows = _cmpData.rows.filter(r => r.status === 'ok' && r.a);
+  if (!okRows.length) { showToast('Нет совпавших строк'); return; }
+  const byKey = new Map();
+  okRows.forEach(r => byKey.set(normalizeName(r.name), r.a));
+
+  const year = new Date().getFullYear();
+  let applied = 0;
+
+  tableRows.forEach(row => {
+    const key = normalizeName(row.name);
+    const match = byKey.get(key);
+    if (!match) return;
+    Object.keys(match.incoming).forEach(dk => {
+      const m = dk.match(/^(\d{1,2})\.(\d{1,2})$/);
+      if (!m) return;
+      const iso = `${year}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+      let p = (row.incoming || []).find(x => x.date === iso);
+      if (!p) { p = { date: iso, qty: 0, _originalQty: 0 }; row.incoming.push(p); }
+      p.qty = match.incoming[dk];
+      p._originalQty = match.incoming[dk];
+    });
+    if (typeof match.sales === 'number') {
+      row.sales = match.sales;
+      row._originalSales = match.sales;
+    }
+    applied++;
+  });
+
+  renderTable();
+  scheduleSessionSave();
+  showToast(`Применено совпавших: ${applied}`);
+  closeCompareModal();
+}
+
+function cmpBindUI() {
+  const openBtn = $('openCompareBtn');
+  if (openBtn) openBtn.onclick = openCompareModal;
+  const runBtn = $('cmpRunBtn');
+  if (runBtn) runBtn.onclick = cmpRunCompare;
+  const clearBtn = $('cmpClearBtn');
+  if (clearBtn) clearBtn.onclick = () => {
+    const a = $('cmpCsv1'); const b = $('cmpCsv2');
+    if (a) a.value = '';
+    if (b) b.value = '';
+    const cp = $('cmpCheckPrinted'); if (cp) cp.value = '';
+    _cmpNakls = [{ date: '', num: '', lastNum: '', total: '' }];
+    cmpRenderNakls();
+    const st = $('cmpStats'); if (st) st.style.display = 'none';
+    const chk = $('cmpCheckResults'); if (chk) chk.innerHTML = '';
+    const res = $('cmpResults'); if (res) res.innerHTML = '';
+    const ap = $('cmpApplyBtn'); if (ap) ap.style.display = 'none';
+    _cmpData = null;
+  };
+  const addNaklBtn = $('cmpAddNaklBtn');
+  if (addNaklBtn) addNaklBtn.onclick = () => {
+    if (_cmpNakls.length >= 4) { showToast('Максимум 4 накладные'); return; }
+    _cmpNakls.push({ date: '', num: '', lastNum: '', total: '' });
+    cmpRenderNakls();
+  };
+  const closeBtn = $('cmpCloseBtn');
+  if (closeBtn) closeBtn.onclick = closeCompareModal;
+  const applyBtn = $('cmpApplyBtn');
+  if (applyBtn) applyBtn.onclick = cmpApplyMatched;
 }
 
 /* ═══════════════════════════════════════════
