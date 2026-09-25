@@ -1641,8 +1641,25 @@ function parseShelfLife(str) {
   if (n === 0) return 0;
   return clampNum(n, 1, 10000, null);
 }
+function stripServiceSections(rawText) {
+  const lines = String(rawText || '').split(/\r?\n/);
+  const out = [];
+  let serviceMode = false;
+  let inCheck = false;
+  for (const line of lines) {
+    const t = line.trim();
+    if (t === '#ЧЕК_ПОЛНЫЙ:') { inCheck = true; serviceMode = false; continue; }
+    if (t.startsWith('#ЧЕК_ИТОГО:')) { inCheck = false; serviceMode = false; continue; }
+    if (inCheck) continue;
+    if (t.startsWith('#')) { serviceMode = true; continue; }
+    if (serviceMode) continue;
+    out.push(line);
+  }
+  return out.join('\n');
+}
+
 function parseCSV(text, referenceDate) {
-  const raw = String(text || '').replace(/^\uFEFF/, '').slice(0, MAX_CSV_BYTES);
+  const raw = stripServiceSections(String(text || '').replace(/^\uFEFF/, '').slice(0, MAX_CSV_BYTES));
   if (!raw.trim()) throw new Error('CSV пустой.');
   const firstLine = raw.split(/\r?\n/).find(l => l.trim()) || '';
   if (!firstLine) throw new Error('CSV пустой.');
