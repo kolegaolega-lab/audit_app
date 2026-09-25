@@ -382,6 +382,38 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .price-row .pchev{flex:0 0 auto;color:var(--text-tertiary);font-size:14px;margin-left:2px}
 .price-row.empty .pval{color:var(--text-tertiary);font-weight:500}
 .price-empty{padding:30px 14px;text-align:center;color:var(--text-tertiary);font-size:13px}
+  /* === Сверка CSV === */
+#compareModalContent{display:flex;flex-direction:column;padding:0 !important;height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden}
+.cmp-nakl-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.cmp-nakl-item{background:var(--bg-elev-2);border-radius:var(--r-sm);padding:8px 10px;display:grid;grid-template-columns:1.2fr 0.8fr 0.8fr 1.2fr auto;gap:5px;align-items:end}
+.cmp-nakl-item label{font-size:9px;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-secondary);font-weight:600;display:block}
+.cmp-nakl-item input{font-size:12px;padding:7px 8px;min-height:34px;width:100%;border:1px solid var(--separator-opaque);border-radius:7px;background:var(--bg-input);color:var(--text);font-family:inherit;outline:none;box-sizing:border-box}
+.cmp-nakl-item .del-btn{width:30px;height:30px;min-height:30px;padding:0;margin:0;background:var(--red);color:#fff;font-size:15px;border-radius:7px;border:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.cmp-row{display:flex;align-items:flex-start;gap:8px;padding:9px 11px;border-radius:8px;margin-bottom:5px;font-size:12.5px;line-height:1.4}
+.cmp-row.ok{background:rgba(52,199,89,.12);border-left:3px solid var(--green)}
+.cmp-row.warn{background:rgba(255,149,0,.12);border-left:3px solid var(--orange)}
+.cmp-row.err{background:rgba(255,59,48,.12);border-left:3px solid var(--red)}
+.cmp-icon{flex:0 0 auto;font-size:13px;width:16px;text-align:center;font-weight:700}
+.cmp-row.ok .cmp-icon{color:var(--green)}
+.cmp-row.warn .cmp-icon{color:var(--orange)}
+.cmp-row.err .cmp-icon{color:var(--red)}
+.cmp-name{flex:1;min-width:0;font-weight:600;word-break:break-word}
+.cmp-vals{flex:0 0 auto;display:flex;gap:5px;font-variant-numeric:tabular-nums;flex-wrap:wrap;justify-content:flex-end;max-width:55%}
+.cmp-val{background:rgba(0,0,0,.05);padding:2px 7px;border-radius:6px;font-size:11px;white-space:nowrap;font-weight:600}
+@media (prefers-color-scheme:dark){.cmp-val{background:rgba(255,255,255,.08)}}
+.cmp-val.diff{background:var(--orange);color:#fff}
+.cmp-val.same{background:rgba(52,199,89,.2);color:var(--green)}
+.cmp-check{display:flex;align-items:flex-start;gap:9px;padding:10px 12px;border-radius:8px;margin-bottom:5px;font-size:12.5px;line-height:1.4}
+.cmp-check.ok{background:rgba(52,199,89,.12);border-left:3px solid var(--green)}
+.cmp-check.err{background:rgba(255,59,48,.12);border-left:3px solid var(--red)}
+.cmp-check-icon{flex:0 0 auto;font-size:15px;width:18px;text-align:center;font-weight:700}
+.cmp-check.ok .cmp-check-icon{color:var(--green)}
+.cmp-check.err .cmp-check-icon{color:var(--red)}
+.cmp-check-body{flex:1;min-width:0}
+.cmp-check-title{font-weight:600;margin-bottom:2px}
+.cmp-check-detail{font-size:11.5px;color:var(--text-secondary);word-break:break-word}
+.cmp-check-detail b{color:var(--text);font-weight:600}
+.cmp-empty{text-align:center;padding:20px;color:var(--text-tertiary);font-size:12.5px}
 @media (orientation: landscape) and (max-height: 500px){
   .cat-btn{height:78px}
   .cat-btn .cat-emoji{font-size:24px}
@@ -5063,7 +5095,7 @@ function init() {
   window.addEventListener('error', e => console.warn('Global error:', e.message));
   console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.5.0 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length, '· aliases:', ALIASES.length, '· prices:', Object.keys(PRICES).length);
 }
-  /* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════
    СВЕРКА ДВУХ CSV
    ═══════════════════════════════════════════ */
 let _cmpData = null;
