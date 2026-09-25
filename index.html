@@ -5189,8 +5189,25 @@ function cmpParseCSV(text) {
   const rows = {}; const order = [];
   for (let i = 1; i < dataLines.length; i++) {
     const f = cmpSplitLine(dataLines[i], sep);
-    const name = (f[idxName] || '').trim().replace(/^"|"$/g, '');
+    let name = (f[idxName] || '').trim().replace(/^"|"$/g, '');
     if (!name) continue;
+
+    // Отбрасываем служебные строки, попавшие в «Наименование»
+    if (/^[-–—•·*]/.test(name)) continue;
+    if (/^фото\s+\d/i.test(name)) continue;
+    if (/^накладная\s+№/i.test(name)) continue;
+    if (/^чек\s+(продаж|от)/i.test(name)) continue;
+    if (/\(не\s+в\s+справочнике/i.test(name)) continue;
+    if (/\(нет\s+в\s+справочнике/i.test(name)) continue;
+    if (/\(есть\s+в\s+чеке/i.test(name)) continue;
+    if (/\(есть\s+в\s+справочнике/i.test(name)) continue;
+    if (/^источник/i.test(name)) continue;
+    if (/^проверка[: ]/i.test(name)) continue;
+    if (/^сверка[: ]/i.test(name)) continue;
+
+    // Если в строке нет ни одной цифры нигде — это не позиция
+    const hasNumbers = f.some((cell, idx) => idx !== idxName && /\d/.test(String(cell || '')));
+    if (!hasNumbers) continue;
     const key = normalizeName(name);
     const rec = { name, incoming: {}, sales: 0 };
     dateCols.forEach(dc => {
