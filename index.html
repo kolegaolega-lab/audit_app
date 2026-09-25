@@ -1674,6 +1674,17 @@ function parseCSV(text, referenceDate) {
     const name = safeStr(vals[idxName], MAX_NAME);
     if (!name) continue;
     if (name.startsWith('#')) continue;
+    if (/^[-–—•·*]\s/.test(name)) continue;
+    if (/^фото\s+\d/i.test(name)) continue;
+    if (/^накладная\s+№/i.test(name)) continue;
+    if (/^чек\s+(продаж|от)/i.test(name)) continue;
+    if (/\(не\s+в\s+справочнике/i.test(name)) continue;
+    if (/\(нет\s+в\s+справочнике/i.test(name)) continue;
+    if (/\(есть\s+в\s+чеке/i.test(name)) continue;
+    if (/\(есть\s+в\s+справочнике/i.test(name)) continue;
+    if (/^источник/i.test(name)) continue;
+    if (/^проверка[: ]/i.test(name)) continue;
+    if (/^сверка[: ]/i.test(name)) continue;
     const salesVal = idxSales >= 0 ? parseNum(vals[idxSales]) : 0;
     const shelfRaw = idxShelf >= 0 ? parseShelfLife(vals[idxShelf]) : null;
     const incoming = [];
