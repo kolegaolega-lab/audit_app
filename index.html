@@ -79,7 +79,7 @@ main{max-width:var(--page-max);margin:0 auto;padding:14px var(--page-pad) calc(1
 .section-header .desc b{color:var(--text);font-weight:600}
 .section-body{padding:14px 12px 16px}
 .section-header + .section-body{padding-top:12px}
-label{display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em}
+  label{display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em}
 input[type=text],input[type=password]{width:100%;padding:11px 13px;border:1px solid var(--separator-opaque);border-radius:var(--r-sm);background:var(--bg-input);color:var(--text);font-size:15px;transition:border-color .18s,background .18s,box-shadow .18s;-webkit-appearance:none;appearance:none;min-height:44px;font-family:inherit;outline:none}
 input:focus{border-color:var(--accent);background:var(--bg-card);box-shadow:0 0 0 3.5px var(--accent-soft)}
 input::placeholder{color:var(--text-tertiary)}
@@ -156,7 +156,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .kv .v{color:var(--text);font-weight:500;text-align:right}
 .actions-row{display:flex;gap:6px;margin-top:12px}
 .actions-row button{flex:1}
-.sticky-search{position:sticky;top:var(--header-h);z-index:50;background:var(--bg-card);padding:12px 12px 10px;border-bottom:1px solid var(--separator);margin-top:12px}
+  .sticky-search{position:sticky;top:var(--header-h);z-index:50;background:var(--bg-card);padding:12px 12px 10px;border-bottom:1px solid var(--separator);margin-top:12px}
 .search-input-wrap{position:relative;flex:1;min-width:0}
 .search-input-wrap input{padding-left:36px;padding-right:40px;min-height:40px;font-size:14px}
 .search-input-wrap::before{content:'';position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;background:currentColor;opacity:.4;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") center/contain no-repeat;pointer-events:none}
@@ -219,9 +219,10 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .card-cell{flex:0 0 auto;display:flex;flex-direction:column;gap:4px;width:62px}
 .card-cell .lbl{font-size:9px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;text-align:center;white-space:nowrap}
 .card-cell .num{width:100%;min-width:0;max-width:none;display:block;margin:0 auto}
+/* === Правка ячейки в карточках: полное закругление + круглая кнопка сброса === */
 .card-cell .inp-wrap{position:relative}
-.card-cell .inp-wrap.edited .num{background:var(--orange-soft);border-color:var(--orange);border-radius:0 0 10px 10px}
-.card-cell .inp-wrap .reset-btn{position:absolute;top:0;right:0;width:18px;height:18px;min-height:0;padding:0;border-radius:9px 0 0 9px;background:var(--orange);color:#fff;display:none;z-index:3;line-height:1;align-items:center;justify-content:center;cursor:pointer;box-shadow:-1px 1px 3px rgba(255,149,0,.3);transition:transform .12s ease;-webkit-tap-highlight-color:transparent}
+.card-cell .inp-wrap.edited .num{background:var(--orange-soft);border-color:var(--orange)}
+.card-cell .inp-wrap .reset-btn{position:absolute;top:-7px;right:-7px;width:22px;height:22px;min-height:0;padding:0;border-radius:50%;background:var(--orange);color:#fff;font-size:11px;font-weight:800;display:none;z-index:3;line-height:1;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--bg-card);box-sizing:border-box;box-shadow:0 1px 3px rgba(255,149,0,.35);transition:transform .12s ease;-webkit-tap-highlight-color:transparent}
 .card-cell .inp-wrap .reset-btn:active{transform:scale(.85)}
 .card-cell .inp-wrap.edited .reset-btn{display:inline-flex}
 .card-result{padding-top:10px;margin-top:10px;border-top:1px solid var(--separator);font-size:12px;color:var(--text-secondary);display:flex;flex-direction:column;gap:4px}
@@ -368,13 +369,22 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .no-cat-btns{display:flex;gap:4px;flex:0 0 auto}
 .no-cat-btns button{width:38px;height:38px;min-height:38px;padding:0;background:var(--bg-input);border:1px solid var(--separator-opaque);border-radius:8px;font-size:18px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI Emoji","Apple Color Emoji",sans-serif}
 .no-cat-btns button:active{background:var(--accent-soft);border-color:var(--accent)}
+/* === Цены позиций === */
+#pricesModalContent{display:flex;flex-direction:column;padding:0 !important;height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden}
+.price-row{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--separator);cursor:pointer;transition:background .12s}
+.price-row:last-child{border-bottom:none}
+.price-row:active{background:var(--bg-elev-2)}
+.price-row .pname{flex:1;min-width:0;font-size:14.5px;word-break:break-word;line-height:1.35}
+.price-row .pval{flex:0 0 auto;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.price-row .pchev{flex:0 0 auto;color:var(--text-tertiary);font-size:14px;margin-left:2px}
+.price-row.empty .pval{color:var(--text-tertiary);font-weight:500}
+.price-empty{padding:30px 14px;text-align:center;color:var(--text-tertiary);font-size:13px}
 @media (orientation: landscape) and (max-height: 500px){
   .cat-btn{height:78px}
   .cat-btn .cat-emoji{font-size:24px}
   main{padding-top:8px;max-width:640px}
   .section{margin-bottom:8px}
 }
-/* === Плавные переходы для iOS === */
 .section,.card,.modal-content,.cat-btn,button,input,textarea{transition-timing-function:cubic-bezier(.32,.72,0,1)}
 </style>
 </head>
@@ -518,6 +528,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
         <button id="ignoredBtn" class="secondary">Игнор-лист (<span id="ignoredCount">0</span>)</button>
       </div>
       <button id="aliasesBtn" class="secondary block" style="display:none;margin-top:8px">Алиасы (<span id="aliasesCount">0</span>)</button>
+      <button id="pricesBtn" class="secondary block" style="display:none;margin-top:8px">Цены позиций</button>
       <details class="settings">
         <summary>Настройки синхронизации</summary>
         <div class="content">
@@ -611,7 +622,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   <div class="hint version">French Bakery Аудит · v9.5.0</div>
 
 </main>
-
 <!-- ═══════════════ Модалка: Справочник ═══════════════ -->
 <div id="catalogModal" class="modal hidden">
   <div class="modal-content" id="catalogModalContent">
@@ -817,9 +827,58 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   </div>
 </div>
 
+<!-- ═══════════════ Модалка: Цены позиций ═══════════════ -->
+<div id="pricesModal" class="modal hidden">
+  <div class="modal-content" id="pricesModalContent">
+    <div class="modal-header">
+      <h3>Цены позиций</h3>
+      <p class="hint">Справочник цен для контроля сумм в документах. Синхронизируется с сервером.</p>
+      <div style="margin:12px 0 0;display:flex;gap:8px;align-items:center">
+        <div class="search-input-wrap" style="flex:1">
+          <input id="pricesSearch" type="text" placeholder="Поиск по названию..." autocomplete="off" maxlength="100">
+          <button type="button" class="search-clear" id="pricesSearchClear" aria-label="Очистить">
+            <span class="x-icon"></span>
+          </button>
+        </div>
+        <button type="button" id="pricesAddBtn" class="primary" style="flex:0 0 auto;min-height:44px;padding:8px 14px;font-size:14px;font-weight:600">+ Добавить</button>
+      </div>
+    </div>
+    <div class="modal-body" id="pricesList"></div>
+    <div class="modal-footer">
+      <div class="row" style="margin-bottom:8px">
+        <button id="pricesExportBtn" class="secondary">Экспорт</button>
+        <button id="pricesImportBtn" class="secondary">Импорт</button>
+      </div>
+      <input id="pricesImportFile" type="file" accept=".json,application/json" hidden>
+      <div id="pricesStatus" class="status"></div>
+      <button id="closePricesBtn" class="secondary block" style="margin-top:10px">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ Модалка: Изменить цену ═══════════════ -->
+<div id="priceEditModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="priceEditTitle">Изменить цену</h3>
+      <p class="hint" id="priceEditSubtitle"></p>
+    </div>
+    <div class="modal-body">
+      <label>Название позиции</label>
+      <input id="priceEditName" type="text" maxlength="100" autocomplete="off" style="margin-bottom:14px">
+      <label>Цена, ₽</label>
+      <input id="priceEditValue" type="text" inputmode="decimal" placeholder="0,00" autocomplete="off">
+    </div>
+    <div class="modal-footer">
+      <button id="priceEditSaveBtn" class="success block" style="margin-bottom:8px">Сохранить</button>
+      <button id="priceEditDeleteBtn" class="secondary block" style="margin-bottom:8px;display:none;color:var(--red)">Удалить позицию</button>
+      <button id="priceEditCancelBtn" class="secondary block">Отмена</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════ Тост обновления PWA ═══════════════ -->
 <div id="updateBanner" class="toast">Доступно обновление · нажмите, чтобы перезагрузить</div>
-
 <!-- ═══════════════ Библиотека Excel ═══════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
@@ -850,6 +909,7 @@ const LEGACY_SESSION_KEY = 'fbAuditSessionV5';
 const CATALOG_KEY = 'fbAuditProducts';
 const IGNORED_KEY = 'fbAuditIgnored';
 const ALIASES_KEY = 'fbAuditAliases';
+const PRICES_KEY = 'fbAuditPrices';
 const CATALOG_BACKUP_KEY = 'fbAuditCatalogBackup';
 const SYNC_LOCAL_UPDATED_AT = 'fbAuditSyncLocalUpdatedAt';
 const SYNC_LAST_CHECK = 'fbAuditSyncLastCheck';
@@ -875,6 +935,7 @@ const CATEGORY_CYCLE = [null, 'desserts', 'lunches', 'pastry'];
 let PRODUCTS = [];
 let IGNORED = [];
 let ALIASES = [];
+let PRICES = {};
 let tableRows = [];
 let unknownRows = [];
 let noCategoryRows = [];
@@ -910,6 +971,7 @@ let _aliasTargetMode = null;
 let _activeCategory = null;
 let _lastImportedCategory = null;
 let _reportView = null;
+let _priceEditOriginal = null;
 
 /* ═══════════════════════════════════════════
    БАЗОВЫЕ УТИЛИТЫ
@@ -933,7 +995,6 @@ function closeModal(id) {
     document.body.classList.remove('modal-open');
   }
 }
-
 function clampNum(v, min, max, fallback) {
   if (v == null) return fallback;
   const n = Number(v);
@@ -1120,8 +1181,7 @@ function setTableQuery(q) {
   if (_tableSearchTimer) clearTimeout(_tableSearchTimer);
   _tableSearchTimer = setTimeout(() => { _tableSearchTimer = null; applyTableFilter(); }, SEARCH_DEBOUNCE_MS);
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    ФАБРИЧНЫЙ СПРАВОЧНИК
    ═══════════════════════════════════════════ */
 const FACTORY_CATALOG = [
@@ -1174,8 +1234,7 @@ const FACTORY_CATALOG = [
   ["Десерт Монастырская изба",48],["Чизкейк Орео",72],["Паннакотта шоколад-тропик",72],
   ["Паннакотта ваниль-смородина",72],["Паннакотта кокос -ананас",72]
 ];
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    СПРАВОЧНИК: загрузка/сохранение
    ═══════════════════════════════════════════ */
 function sanitizeProducts(arr) {
@@ -1312,6 +1371,53 @@ function removeAlias(aliasName) {
 }
 
 /* ═══════════════════════════════════════════
+   ЦЕНЫ ПОЗИЦИЙ
+   ═══════════════════════════════════════════ */
+function loadPrices() {
+  try {
+    const raw = localStorage.getItem(PRICES_KEY);
+    if (!raw) return {};
+    const obj = JSON.parse(raw);
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return {};
+    const out = {};
+    for (const name of Object.keys(obj).slice(0, MAX_CATALOG)) {
+      const n = safeStr(name, MAX_NAME);
+      const v = Number(obj[name]);
+      if (!n) continue;
+      if (!isFinite(v) || v < 0) continue;
+      out[n] = Math.round(v * 100) / 100;
+    }
+    return out;
+  } catch (e) { return {}; }
+}
+function savePrices() {
+  try { localStorage.setItem(PRICES_KEY, JSON.stringify(PRICES)); }
+  catch (e) { console.warn('savePrices:', e); }
+}
+function getPriceFor(name) {
+  if (!name) return 0;
+  if (PRICES[name] != null) return PRICES[name];
+  const key = normalizeName(name);
+  for (const n of Object.keys(PRICES)) {
+    if (normalizeName(n) === key) return PRICES[n];
+  }
+  return 0;
+}
+function setPrice(name, value) {
+  const n = safeStr(name, MAX_NAME).trim();
+  if (!n) return false;
+  const v = Number(value);
+  if (!isFinite(v) || v < 0) return false;
+  PRICES[n] = Math.round(v * 100) / 100;
+  savePrices();
+  return true;
+}
+function deletePrice(name) {
+  if (PRICES[name] == null) return;
+  delete PRICES[name];
+  savePrices();
+}
+  /* ═══════════════════════════════════════════
    FIFO / СРОКИ ГОДНОСТИ
    ═══════════════════════════════════════════ */
 function getCheckMoment() { return new Date(); }
@@ -1397,8 +1503,7 @@ function getCardStatus(calc, row) {
   if (calc.expiredOnShelf > 0) return 'warn';
   return 'fresh';
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    CSV: парсер
    ═══════════════════════════════════════════ */
 function detectDelimiter(firstLine) {
@@ -1509,8 +1614,7 @@ function parseCSV(text, referenceDate) {
 function sortRowsAlphabetically(rows) {
   return [...rows].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' }));
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    СИНХРОНИЗАЦИЯ С GITHUB
    ═══════════════════════════════════════════ */
 async function fetchWithTimeout(url, opts, ms) {
@@ -1607,7 +1711,8 @@ function buildSyncPayload() {
     updatedBy: APP_VERSION,
     products: PRODUCTS,
     ignored: IGNORED,
-    aliases: ALIASES
+    aliases: ALIASES,
+    prices: PRICES
   };
 }
 function syncPullFromServer(opts) {
@@ -1640,6 +1745,18 @@ function syncPullFromServer(opts) {
       .slice(0, MAX_CATALOG);
     saveAliases();
   }
+  if (remote.prices && typeof remote.prices === 'object' && !Array.isArray(remote.prices)) {
+    const out = {};
+    for (const name of Object.keys(remote.prices).slice(0, MAX_CATALOG)) {
+      const n = safeStr(name, MAX_NAME);
+      const v = Number(remote.prices[name]);
+      if (!n) continue;
+      if (!isFinite(v) || v < 0) continue;
+      out[n] = Math.round(v * 100) / 100;
+    }
+    PRICES = out;
+    savePrices();
+  }
   try { localStorage.setItem(SYNC_LOCAL_UPDATED_AT, String(remote.updatedAt || '')); } catch (e) {}
   _pendingRemote = null;
   updateCatalogMeta();
@@ -1664,7 +1781,7 @@ async function syncPushToServer() {
   if (result.ok) {
     try { localStorage.setItem(SYNC_LOCAL_UPDATED_AT, payload.updatedAt); } catch (e) {}
     try {
-      const backup = { version: 1, savedAt: Date.now(), products: PRODUCTS, ignored: IGNORED, aliases: ALIASES };
+      const backup = { version: 1, savedAt: Date.now(), products: PRODUCTS, ignored: IGNORED, aliases: ALIASES, prices: PRICES };
       localStorage.setItem(CATALOG_BACKUP_KEY, JSON.stringify(backup));
     } catch (e) {}
     updateCatalogMeta();
@@ -1739,8 +1856,7 @@ function applyPendingRemote() {
   hideCatalogUpdateBanner();
   if (ok) showToast(`Справочник обновлён: ${PRODUCTS.length} позиций`);
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    РЕЖИМ ВЛАДЕЛЬЦА
    ═══════════════════════════════════════════ */
 function updateHeaderBadge() {
@@ -1768,6 +1884,8 @@ function setOwnerMode(on) {
   if (deactivateBtn) deactivateBtn.style.display = _isOwner ? 'inline-flex' : 'none';
   if (editCatalogBtn) editCatalogBtn.style.display = _isOwner ? 'inline-flex' : 'none';
   if (aliasesBtn) aliasesBtn.style.display = _isOwner ? 'inline-flex' : 'none';
+  const pricesBtn = $('pricesBtn');
+  if (pricesBtn) pricesBtn.style.display = _isOwner ? 'inline-flex' : 'none';
   if (statusEl) { statusEl.className = 'status'; statusEl.textContent = ''; }
   if (badge && badge._t) { clearTimeout(badge._t); badge._t = null; }
   updateHeaderBadge();
@@ -1818,8 +1936,7 @@ async function restoreOwnerMode() {
     }
   } catch (e) {}
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    ФОТО (IndexedDB)
    ═══════════════════════════════════════════ */
 function openPhotoDB() {
@@ -1927,8 +2044,7 @@ async function renderPhotoQueue() {
     box.appendChild(row);
   });
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    СЕССИЯ
    ═══════════════════════════════════════════ */
 function scheduleSessionSave() {
@@ -2025,8 +2141,7 @@ function applySession(data) {
     return true;
   } finally { isRestoring = false; }
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    РЕЗУЛЬТАТ: мета, навигация по таблице
    ═══════════════════════════════════════════ */
 function updateResultMeta() {
@@ -2038,7 +2153,6 @@ function updateResultMeta() {
   const pt = $('point');
   const p = $('metaPoint'); if (p) p.textContent = (pt && pt.value.trim()) ? pt.value.trim() : '—';
 }
-
 function scrollIntoContainer(el) {
   const scroller = el.closest('.table-scroll');
   if (!scroller) return;
@@ -2138,21 +2252,17 @@ function bindTableInput(inp) {
   inp.addEventListener('focus', e => { e.stopPropagation(); requestAnimationFrame(() => scrollIntoContainer(inp)); });
   inp.addEventListener('keydown', tableKey);
 }
-
-/* === iOS: SVG-иконка сброса (SF Symbol arrow.counterclockwise) === */
 function createResetIcon() {
   const icon = document.createElement('span');
   icon.className = 'reset-icon';
   icon.setAttribute('aria-hidden', 'true');
   return icon;
 }
-
 function updateFinishCheckBtn() {
   const wrap = $('finishCheckWrap');
   if (!wrap) return;
   wrap.style.display = (Array.isArray(tableRows) && tableRows.length) ? 'block' : 'none';
 }
-
 function renderTable() {
   if (isRendering) return;
   isRendering = true;
@@ -2434,8 +2544,7 @@ function updateTotals() {
   `;
   if (_tableQuery) applyTableFilter();
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    РЕНДЕР КАРТОЧЕК
    ═══════════════════════════════════════════ */
 function buildCardInput(row, opts) {
@@ -2617,8 +2726,7 @@ function refreshCardRow(row, card) {
   scheduleTotalsUpdate();
   scheduleTableSync();
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    МОДАЛКА «НЕ В СПРАВОЧНИКЕ»
    ═══════════════════════════════════════════ */
 function renderUnknownModal() {
@@ -2892,8 +3000,7 @@ function openNoCategoryModal() {
 function closeNoCategoryModal() {
   closeModal('noCategoryModal');
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    МОДАЛКА «СПРАВОЧНИК»
    ═══════════════════════════════════════════ */
 function updateCatalogSelectUI() {
@@ -3147,8 +3254,7 @@ function catalogToIgnored() {
   scheduleSessionSave();
   showToast(`Перенесено в игнор: ${added}`);
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    МОДАЛКА «ИГНОР-ЛИСТ»
    ═══════════════════════════════════════════ */
 function updateIgnoredSelectUI() {
@@ -3256,8 +3362,7 @@ function ignoredToCatalog() {
   scheduleSessionSave();
   showToast(`Возвращено в справочник: ${returned.length}`);
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    МОДАЛКА «АЛИАСЫ»
    ═══════════════════════════════════════════ */
 function renderAliasesList() {
@@ -3335,7 +3440,6 @@ function openAliasesModal() {
 function closeAliasesModal() {
   closeModal('aliasesModal');
 }
-
 function handleAliasTargetClick(baseName) {
   const mode = _aliasTargetMode;
   const srcList = (_aliasTargetForList || []).slice();
@@ -3464,8 +3568,94 @@ function closeAliasTargetModal() {
   _aliasTargetForList = [];
   _aliasTargetMode = null;
 }
+  /* ═══════════════════════════════════════════
+   МОДАЛ «ЦЕНЫ»
+   ═══════════════════════════════════════════ */
+function openPricesModal() {
+  const s = $('pricesSearch'); if (s) s.value = '';
+  const st = $('pricesStatus'); if (st) { st.className = 'status'; st.textContent = ''; }
+  renderPricesList();
+  openModal('pricesModal');
+}
+function closePricesModal() { closeModal('pricesModal'); }
 
-/* ═══════════════════════════════════════════
+function renderPricesList() {
+  const list = $('pricesList');
+  if (!list) return;
+  const searchEl = $('pricesSearch');
+  const searchClear = $('pricesSearchClear');
+  const q = (searchEl && searchEl.value || '').toLowerCase().trim().slice(0, 100);
+  if (searchClear) searchClear.classList.toggle('show', !!q);
+  list.innerHTML = '';
+  const allNames = new Set();
+  PRODUCTS.forEach(p => allNames.add(p.name));
+  Object.keys(PRICES).forEach(n => allNames.add(n));
+  let arr = [...allNames].map(n => ({ name: n, price: getPriceFor(n) }));
+  if (q) arr = arr.filter(x => x.name.toLowerCase().includes(q));
+  arr.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+  if (!arr.length) { list.innerHTML = '<div class="price-empty">Ничего не найдено.</div>'; return; }
+  const frag = document.createDocumentFragment();
+  arr.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'price-row' + (item.price > 0 ? '' : ' empty');
+    const nameEl = document.createElement('span');
+    nameEl.className = 'pname';
+    nameEl.textContent = item.name;
+    const valEl = document.createElement('span');
+    valEl.className = 'pval';
+    valEl.textContent = item.price > 0 ? `${item.price.toFixed(2).replace('.', ',')} ₽` : '—';
+    const chev = document.createElement('span');
+    chev.className = 'pchev';
+    chev.textContent = '›';
+    row.appendChild(nameEl);
+    row.appendChild(valEl);
+    row.appendChild(chev);
+    row.onclick = () => openPriceEdit(item.name, item.price);
+    frag.appendChild(row);
+  });
+  list.appendChild(frag);
+}
+
+function openPriceEdit(name, currentPrice) {
+  _priceEditOriginal = name;
+  const title = $('priceEditTitle');
+  const subtitle = $('priceEditSubtitle');
+  const nameInput = $('priceEditName');
+  const valueInput = $('priceEditValue');
+  const deleteBtn = $('priceEditDeleteBtn');
+  if (title) title.textContent = name ? 'Изменить цену' : 'Новая позиция';
+  if (subtitle) subtitle.textContent = name ? name : 'Введите название и цену';
+  if (nameInput) { nameInput.value = name || ''; nameInput.readOnly = !!name; }
+  if (valueInput) valueInput.value = currentPrice > 0 ? String(currentPrice).replace('.', ',') : '';
+  if (deleteBtn) deleteBtn.style.display = (name && PRICES[name] != null) ? 'block' : 'none';
+  openModal('priceEditModal');
+  setTimeout(() => { if (!name && nameInput) nameInput.focus(); else if (valueInput) valueInput.focus(); }, 200);
+}
+function closePriceEdit() { closeModal('priceEditModal'); _priceEditOriginal = null; }
+function savePriceEdit() {
+  const nameInput = $('priceEditName');
+  const valueInput = $('priceEditValue');
+  if (!nameInput || !valueInput) return;
+  const name = safeStr(nameInput.value, MAX_NAME).trim();
+  if (!name) { showToast('Введите название'); return; }
+  const raw = String(valueInput.value).replace(',', '.').replace(/[^\d.]/g, '');
+  const v = parseFloat(raw);
+  if (!isFinite(v) || v < 0) { showToast('Введите корректную цену'); return; }
+  setPrice(name, v);
+  showToast('Цена сохранена');
+  closePriceEdit();
+  renderPricesList();
+}
+function deletePriceEdit() {
+  const name = _priceEditOriginal;
+  if (!name) return;
+  if (!confirm(`Удалить цену для «${name}»?`)) return;
+  deletePrice(name);
+  showToast('Цена удалена');
+  closePriceEdit();
+  renderPricesList();
+}
+  /* ═══════════════════════════════════════════
    ПРИМЕНЕНИЕ CSV
    ═══════════════════════════════════════════ */
 async function applyCSV() {
@@ -3568,8 +3758,7 @@ async function applyCSV() {
     if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = e.message || 'Ошибка'; }
   }
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    ЭКСПОРТ В EXCEL
    ═══════════════════════════════════════════ */
 function exportExcel() {
@@ -3619,8 +3808,7 @@ function exportExcel() {
   } catch (e) { alert('Ошибка экспорта: ' + (e.message || e)); }
   finally { setTimeout(() => { exportBusy = false; if (btn) btn.classList.remove('busy'); }, 500); }
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    TOAST
    ═══════════════════════════════════════════ */
 function getToastBottom() {
@@ -3647,8 +3835,7 @@ function showToast(text) {
     setTimeout(() => { el.remove(); if (_currentToast === el) _currentToast = null; }, 300);
   }, 3000);
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    ПРОМПТ ДЛЯ ИИ
    ═══════════════════════════════════════════ */
 function buildPrompt() {
@@ -3830,8 +4017,7 @@ ${catalogList}
 
 Выдай CSV.`;
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    SHARE TO AI
    ═══════════════════════════════════════════ */
 async function shareToAI() {
@@ -3922,8 +4108,7 @@ function bindCategoryGrid() {
     });
   });
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    ОТЧЁТ
    ═══════════════════════════════════════════ */
 function pluralize(n, one, few, many) {
@@ -4101,8 +4286,7 @@ function renderReport() {
     }
   }
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    UI-ХЕЛПЕРЫ
    ═══════════════════════════════════════════ */
 function scrollFieldIntoView(el) {
@@ -4124,8 +4308,7 @@ function measureHeader() {
   const height = h.getBoundingClientRect().height;
   document.documentElement.style.setProperty('--header-h', height + 'px');
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    BIND UI
    ═══════════════════════════════════════════ */
 function bindUI() {
@@ -4372,7 +4555,7 @@ function bindUI() {
   const expCat = $('exportCatalogBtn');
   if (expCat) expCat.onclick = () => {
     try {
-      const data = JSON.stringify({ version: 1, products: PRODUCTS, ignored: IGNORED, aliases: ALIASES }, null, 2);
+      const data = JSON.stringify({ version: 1, products: PRODUCTS, ignored: IGNORED, aliases: ALIASES, prices: PRICES }, null, 2);
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -4511,6 +4694,66 @@ function bindUI() {
 
   const aliasesBtn = $('aliasesBtn');
   if (aliasesBtn) aliasesBtn.onclick = () => openAliasesModal();
+
+  const pricesBtn = $('pricesBtn');
+  if (pricesBtn) pricesBtn.onclick = () => openPricesModal();
+  const closePricesBtn = $('closePricesBtn');
+  if (closePricesBtn) closePricesBtn.onclick = (e) => { e.stopPropagation(); closePricesModal(); };
+  const pricesSearch = $('pricesSearch');
+  if (pricesSearch) pricesSearch.oninput = renderPricesList;
+  const pricesSearchClear = $('pricesSearchClear');
+  if (pricesSearchClear) pricesSearchClear.onclick = () => {
+    const s = $('pricesSearch'); if (s) s.value = '';
+    renderPricesList();
+  };
+  const pricesAddBtn = $('pricesAddBtn');
+  if (pricesAddBtn) pricesAddBtn.onclick = (e) => { e.stopPropagation(); openPriceEdit('', 0); };
+  const priceEditSaveBtn = $('priceEditSaveBtn');
+  if (priceEditSaveBtn) priceEditSaveBtn.onclick = savePriceEdit;
+  const priceEditDeleteBtn = $('priceEditDeleteBtn');
+  if (priceEditDeleteBtn) priceEditDeleteBtn.onclick = deletePriceEdit;
+  const priceEditCancelBtn = $('priceEditCancelBtn');
+  if (priceEditCancelBtn) priceEditCancelBtn.onclick = closePriceEdit;
+  const pricesExportBtn = $('pricesExportBtn');
+  if (pricesExportBtn) pricesExportBtn.onclick = () => {
+    try {
+      const data = JSON.stringify({ version: 1, prices: PRICES }, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `fb_audit_prices_${getTodayStr()}.json`; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) { alert('Ошибка: ' + e.message); }
+  };
+  const pricesImportBtn = $('pricesImportBtn');
+  if (pricesImportBtn) pricesImportBtn.onclick = () => { const i = $('pricesImportFile'); if (i) i.click(); };
+  const pricesImportFile = $('pricesImportFile');
+  if (pricesImportFile) pricesImportFile.onchange = async e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) { e.target.value = ''; return; }
+    try {
+      const text = await f.text();
+      const parsed = JSON.parse(text);
+      const obj = parsed && typeof parsed === 'object' && parsed.prices && typeof parsed.prices === 'object' ? parsed.prices : parsed;
+      if (!obj || typeof obj !== 'object' || Array.isArray(obj)) throw new Error('Неверный формат');
+      let count = 0;
+      for (const name of Object.keys(obj).slice(0, MAX_CATALOG)) {
+        const n = safeStr(name, MAX_NAME).trim();
+        const v = Number(obj[name]);
+        if (!n || !isFinite(v) || v < 0) continue;
+        PRICES[n] = Math.round(v * 100) / 100;
+        count++;
+      }
+      savePrices();
+      renderPricesList();
+      const st = $('pricesStatus');
+      if (st) { st.className = 'status show ok'; st.textContent = `Импортировано: ${count}`; }
+    } catch (err) {
+      const st = $('pricesStatus');
+      if (st) { st.className = 'status show err'; st.textContent = err.message || 'Ошибка импорта'; }
+    } finally { e.target.value = ''; }
+  };
+
   const closeAliases = $('closeAliasesBtn');
   if (closeAliases) closeAliases.onclick = (e) => { e.stopPropagation(); closeAliasesModal(); };
   const aliasesSearch = $('aliasesSearch');
@@ -4610,12 +4853,11 @@ function bindUI() {
     requestAnimationFrame(() => { try { el.select(); } catch (_) {} });
   });
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    BIND MODAL BACKDROPS
    ═══════════════════════════════════════════ */
 function bindModalBackdrops() {
-  ['catalogModal', 'unknownModal', 'ignoredModal', 'aliasesModal', 'aliasTargetModal', 'reportModal', 'noCategoryModal'].forEach(id => {
+  ['catalogModal', 'unknownModal', 'ignoredModal', 'aliasesModal', 'aliasTargetModal', 'reportModal', 'noCategoryModal', 'pricesModal', 'priceEditModal'].forEach(id => {
     const m = $(id);
     if (!m) return;
     m.addEventListener('click', e => {
@@ -4645,6 +4887,10 @@ function bindModalBackdrops() {
         closeReport();
       } else if (id === 'noCategoryModal') {
         closeNoCategoryModal();
+      } else if (id === 'pricesModal') {
+        closePricesModal();
+      } else if (id === 'priceEditModal') {
+        closePriceEdit();
       }
     });
   });
@@ -4658,12 +4904,13 @@ function bindModalBackdrops() {
       else if (!$('ignoredModal').classList.contains('hidden')) closeModal('ignoredModal');
       else if (!$('catalogModal').classList.contains('hidden')) closeModal('catalogModal');
       else if (!$('noCategoryModal').classList.contains('hidden')) closeNoCategoryModal();
+      else if (!$('pricesModal').classList.contains('hidden')) closePricesModal();
+      else if (!$('priceEditModal').classList.contains('hidden')) closePriceEdit();
       else if (!$('promptModal').classList.contains('hidden')) closeModal('promptModal');
     }
   });
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    LOGO / SERVICE WORKER / INIT
    ═══════════════════════════════════════════ */
 function initLogoFallback() {
@@ -4752,6 +4999,9 @@ function init() {
       ALIASES = loadAliases();
       updateAliasesCount();
     }
+    if (e.key === PRICES_KEY) {
+      PRICES = loadPrices();
+    }
   });
   window.addEventListener('beforeunload', () => {
     if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
@@ -4764,7 +5014,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.5.0 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length, '· aliases:', ALIASES.length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.5.0 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length, '· aliases:', ALIASES.length, '· prices:', Object.keys(PRICES).length);
 }
 
 /* ═══════════════════════════════════════════
@@ -4773,6 +5023,7 @@ function init() {
 PRODUCTS = loadCatalog();
 IGNORED = loadIgnored();
 ALIASES = loadAliases();
+PRICES = loadPrices();
 bindUI();
 bindModalBackdrops();
 init();
