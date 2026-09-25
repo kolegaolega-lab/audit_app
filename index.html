@@ -604,12 +604,16 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <button id="finishCheckBtn" class="primary block">Завершить проверку</button>
     </div>
 
-    <div id="tableSearchWrap" class="sticky-search" style="display:none">
+     <div id="tableSearchWrap" class="sticky-search" style="display:none">
       <div class="search-input-wrap">
         <input id="tableSearch" type="text" placeholder="Поиск по таблице..." autocomplete="off" maxlength="100">
         <button type="button" class="search-clear" id="tableSearchClear" aria-label="Очистить">
           <span class="x-icon"></span>
         </button>
+      </div>
+      <div class="segmented" id="problemSegmented">
+        <button type="button" data-filter="all" class="active">Все <span class="cnt" id="segCountAll">0</span></button>
+        <button type="button" data-filter="problems">Проблемные <span class="cnt cnt-warn" id="segCountProblems">0</span></button>
       </div>
     </div>
 
