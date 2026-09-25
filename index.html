@@ -5149,7 +5149,30 @@ function cmpParseCSV(text) {
     if (inCheck) { checkLines.push(line); continue; }
     mainLines.push(line);
   }
-  const dataLines = mainLines.filter(l => l.trim() && !l.trim().startsWith('#'));
+    function cmpIsServiceLine(line) {
+    const t = line.trim();
+    if (!t) return true;
+    if (t.startsWith('#')) return true;
+    if (t.startsWith('•')) return true;
+    if (t.startsWith('·')) return true;
+    if (t.startsWith('*')) return true;
+    if (/^[-–—]\s*фото\b/i.test(t)) return true;
+    if (/^[-–—]\s*накладная\b/i.test(t)) return true;
+    if (/^[-–—]\s*чек\b/i.test(t)) return true;
+    if (/^накладная\s+№/i.test(t)) return true;
+    if (/^чек\s+(продаж|от)\s/i.test(t)) return true;
+    if (/^фото\s+\d/i.test(t)) return true;
+    if (/^источник/i.test(t)) return true;
+    if (/^проверка[: ]/i.test(t)) return true;
+    if (/^сверка[: ]/i.test(t)) return true;
+    if (/^нечитаемо[: ]/i.test(t)) return true;
+    if (/^всего\s+в\s+csv/i.test(t)) return true;
+    if (/^в\s+накладной\s+№/i.test(t)) return true;
+    if (/^в\s+чеке[: ]/i.test(t)) return true;
+    return false;
+  }
+
+  const dataLines = mainLines.filter(l => l.trim() && !cmpIsServiceLine(l));
   if (dataLines.length < 2) return null;
   const sep = dataLines[0].includes(';') ? ';' : ',';
   const header = cmpSplitLine(dataLines[0], sep);
