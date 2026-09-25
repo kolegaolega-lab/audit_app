@@ -189,7 +189,6 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .num-disabled{display:inline-flex;align-items:center;justify-content:center;width:60px;min-width:60px;height:38px;color:var(--text-tertiary);font-weight:600;font-size:14px;user-select:none;vertical-align:middle}
 .income-cell,.edited-num-cell{position:relative;padding:8px 4px !important;text-align:center}
 .income-cell.edited .num,.edited-num-cell.edited .num{background:var(--orange-soft);border-color:var(--orange);color:var(--text);box-shadow:inset 0 0 0 1px rgba(255,149,0,.18)}
-/* === iOS: иконка сброса отредактированной ячейки (SF Symbol arrow.counterclockwise) === */
 .reset-icon{
   display:inline-block;width:11px;height:11px;background:currentColor;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 3-6.7L3 8'/%3E%3Cpath d='M3 3v5h5'/%3E%3C/svg%3E") center/contain no-repeat;
@@ -219,7 +218,6 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .card-cell{flex:0 0 auto;display:flex;flex-direction:column;gap:4px;width:62px}
 .card-cell .lbl{font-size:9px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;text-align:center;white-space:nowrap}
 .card-cell .num{width:100%;min-width:0;max-width:none;display:block;margin:0 auto}
-/* === Правка ячейки в карточках: полное закругление + круглая кнопка сброса === */
 .card-cell .inp-wrap{position:relative}
 .card-cell .inp-wrap.edited .num{background:var(--orange-soft);border-color:var(--orange)}
 .card-cell .inp-wrap .reset-btn{position:absolute;top:-7px;right:-7px;width:22px;height:22px;min-height:0;padding:0;border-radius:50%;background:var(--orange);color:#fff;font-size:11px;font-weight:800;display:none;z-index:3;line-height:1;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--bg-card);box-sizing:border-box;box-shadow:0 1px 3px rgba(255,149,0,.35);transition:transform .12s ease;-webkit-tap-highlight-color:transparent}
@@ -372,7 +370,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .no-cat-btns{display:flex;gap:4px;flex:0 0 auto}
 .no-cat-btns button{width:38px;height:38px;min-height:38px;padding:0;background:var(--bg-input);border:1px solid var(--separator-opaque);border-radius:8px;font-size:18px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI Emoji","Apple Color Emoji",sans-serif}
 .no-cat-btns button:active{background:var(--accent-soft);border-color:var(--accent)}
-/* === Цены позиций === */
 #pricesModalContent{display:flex;flex-direction:column;padding:0 !important;height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden}
 .price-row{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--separator);cursor:pointer;transition:background .12s}
 .price-row:last-child{border-bottom:none}
@@ -382,8 +379,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .price-row .pchev{flex:0 0 auto;color:var(--text-tertiary);font-size:14px;margin-left:2px}
 .price-row.empty .pval{color:var(--text-tertiary);font-weight:500}
 .price-empty{padding:30px 14px;text-align:center;color:var(--text-tertiary);font-size:13px}
-  /* === Фильтр «Проблемные» + значок сверки === */
-.segmented{display:flex;background:var(--bg-input);border-radius:10px;padding:3px;gap:2px;margin-top:10px}
+  .segmented{display:flex;background:var(--bg-input);border-radius:10px;padding:3px;gap:2px;margin-top:10px}
 .segmented button{flex:1;padding:8px 10px;border:0;background:transparent;border-radius:8px;font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;min-height:auto;line-height:1.2;transition:background .15s,color .15s}
 .segmented button.active{background:var(--bg-card);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .segmented .cnt{font-size:11px;font-weight:700;padding:1px 6px;border-radius:99px;background:var(--bg-elev-2);color:var(--text-tertiary);min-width:20px;text-align:center}
@@ -394,7 +390,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .card-name .check-warn-icon{font-size:13px;margin-left:4px}
 .problem-empty{display:none;text-align:center;padding:30px 20px;color:var(--text-secondary);font-size:13.5px;line-height:1.5}
 .problem-empty b{color:var(--text);font-weight:600;display:block;margin-bottom:4px}
-  /* === Сверка CSV === */
 #compareModalContent{display:flex;flex-direction:column;padding:0 !important;height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden}
 .cmp-nakl-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
 .cmp-nakl-item{background:var(--bg-elev-2);border-radius:var(--r-sm);padding:8px 10px;display:grid;grid-template-columns:1.2fr 0.8fr 0.8fr 1.2fr auto;gap:5px;align-items:end}
@@ -630,6 +625,12 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <button id="openNoCategoryBtn" class="warn block">Без категории (<span id="noCategoryCount">0</span>)</button>
     </div>
 
+    <!-- ПАТЧ 2: блок «Проблемных позиций нет» перед таблицей -->
+    <div id="problemEmpty" class="problem-empty">
+      <b>Проблемных позиций нет.</b>
+      Всё свежее.
+    </div>
+
     <div class="table-wrap" id="tableWrap" style="display:none">
       <div class="table-scroll" id="tableScroll">
         <table id="resultTable" class="table-body">
@@ -674,6 +675,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   <div class="hint version">French Bakery Аудит · v9.5.0</div>
 
 </main>
+
 <!-- ═══════════════ Модалка: Справочник ═══════════════ -->
 <div id="catalogModal" class="modal hidden">
   <div class="modal-content" id="catalogModalContent">
@@ -929,7 +931,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   </div>
 </div>
 
-  <!-- ═══════════════ Модалка: Сверка двух CSV ═══════════════ -->
+<!-- ═══════════════ Модалка: Сверка двух CSV ═══════════════ -->
 <div id="compareModal" class="modal hidden">
   <div class="modal-content" id="compareModalContent">
     <div class="modal-header">
@@ -969,6 +971,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 
 <!-- ═══════════════ Тост обновления PWA ═══════════════ -->
 <div id="updateBanner" class="toast">Доступно обновление · нажмите, чтобы перезагрузить</div>
+
 <!-- ═══════════════ Библиотека Excel ═══════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
@@ -1062,6 +1065,9 @@ let _activeCategory = null;
 let _lastImportedCategory = null;
 let _reportView = null;
 let _priceEditOriginal = null;
+/* ПАТЧ 3: состояние фильтра «Проблемные» и списка расхождений сверки */
+let _problemFilter = false;
+let _needsCheckNames = new Set();
 
 /* ═══════════════════════════════════════════
    БАЗОВЫЕ УТИЛИТЫ
@@ -1230,40 +1236,53 @@ function updateCsvCounter() {
   counter.innerHTML = `<b>${dataLines}</b> строк · ${kb} КБ${suffix}`;
 }
 
-/* === Фильтр таблицы === */
+/* ═══════════════════════════════════════════
+   ПАТЧ 5: Фильтр таблицы (поиск + «Проблемные»)
+   ═══════════════════════════════════════════ */
 function applyTableFilter() {
   const tbody = document.querySelector('#resultTable tbody');
   const cardsBox = $('cardsView');
   const q = normalizeForSearch(_tableQuery);
+
+  const isVisible = (row) => {
+    if (!row) return false;
+    if (q && !normalizeForSearch(row.name).includes(q)) return false;
+    if (_problemFilter && !isProblemRow(row)) return false;
+    return true;
+  };
+
   if (tbody) {
-    const rows = tbody.children;
-    for (let i = 0; i < rows.length; i++) {
-      const tr = rows[i];
-      const nameEl = tr.querySelector('.name-text');
-      const name = nameEl ? normalizeForSearch(nameEl.textContent) : '';
-      if (!q || name.includes(q)) tr.classList.remove('hidden-row');
-      else tr.classList.add('hidden-row');
+    const trs = tbody.children;
+    for (let i = 0; i < trs.length; i++) {
+      const row = tableRows[i];
+      trs[i].classList.toggle('hidden-row', !isVisible(row));
     }
   }
   if (cardsBox) {
     const cards = cardsBox.querySelectorAll('.card');
-    cards.forEach(card => {
-      const nameEl = card.querySelector('.card-name');
-      const name = nameEl ? normalizeForSearch(nameEl.textContent) : '';
-      const ok = !q || name.includes(q);
-      card.classList.toggle('hidden-card', !ok);
+    cards.forEach((card, i) => {
+      const row = tableRows[i];
+      card.classList.toggle('hidden-card', !isVisible(row));
     });
   }
+
+  updateSegmentedCounters();
+
   const summary = $('summary');
   if (summary) {
     const base = summary.dataset.baseSummary || '';
-    if (q && Array.isArray(tableRows)) {
-      let visible = 0;
-      tableRows.forEach(r => { if (normalizeForSearch(r.name).includes(q)) visible++; });
+    if (_tableQuery || _problemFilter) {
+      const visible = tableRows.filter(isVisible).length;
       summary.textContent = `${base} Показано: ${visible}`;
     } else {
       summary.textContent = base;
     }
+  }
+
+  const emptyEl = $('problemEmpty');
+  if (emptyEl) {
+    const problemsTotal = tableRows.filter(isProblemRow).length;
+    emptyEl.style.display = (_problemFilter && problemsTotal === 0 && tableRows.length > 0) ? 'block' : 'none';
   }
 }
 function setTableQuery(q) {
@@ -1271,7 +1290,37 @@ function setTableQuery(q) {
   if (_tableSearchTimer) clearTimeout(_tableSearchTimer);
   _tableSearchTimer = setTimeout(() => { _tableSearchTimer = null; applyTableFilter(); }, SEARCH_DEBOUNCE_MS);
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
+   ПАТЧ 4: Проверка проблемности + счётчики + переключатель
+   ═══════════════════════════════════════════ */
+function isProblemRow(row) {
+  if (!row) return false;
+  const calc = computeFIFO(row);
+  if (calc && ((calc.expiredOnShelf != null && calc.expiredOnShelf > 0) ||
+               (calc.soldExpired != null && calc.soldExpired > 0))) return true;
+  if (_needsCheckNames.has(normalizeName(row.name))) return true;
+  return false;
+}
+function updateSegmentedCounters() {
+  const total = Array.isArray(tableRows) ? tableRows.length : 0;
+  let problems = 0;
+  if (total) problems = tableRows.filter(isProblemRow).length;
+  const elAll = $('segCountAll'); if (elAll) elAll.textContent = String(total);
+  const elPr = $('segCountProblems'); if (elPr) elPr.textContent = String(problems);
+}
+function setProblemFilter(on) {
+  _problemFilter = !!on;
+  const seg = $('problemSegmented');
+  if (seg) {
+    seg.querySelectorAll('button').forEach(b => {
+      b.classList.toggle('active', (b.dataset.filter === 'problems') === _problemFilter);
+    });
+  }
+  applyTableFilter();
+}
+
+/* ═══════════════════════════════════════════
    ФАБРИЧНЫЙ СПРАВОЧНИК
    ═══════════════════════════════════════════ */
 const FACTORY_CATALOG = [
@@ -1324,7 +1373,8 @@ const FACTORY_CATALOG = [
   ["Десерт Монастырская изба",48],["Чизкейк Орео",72],["Паннакотта шоколад-тропик",72],
   ["Паннакотта ваниль-смородина",72],["Паннакотта кокос -ананас",72]
 ];
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    СПРАВОЧНИК: загрузка/сохранение
    ═══════════════════════════════════════════ */
 function sanitizeProducts(arr) {
@@ -1507,7 +1557,8 @@ function deletePrice(name) {
   delete PRICES[name];
   savePrices();
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    FIFO / СРОКИ ГОДНОСТИ
    ═══════════════════════════════════════════ */
 function getCheckMoment() { return new Date(); }
@@ -1593,7 +1644,8 @@ function getCardStatus(calc, row) {
   if (calc.expiredOnShelf > 0) return 'warn';
   return 'fresh';
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    CSV: парсер
    ═══════════════════════════════════════════ */
 function detectDelimiter(firstLine) {
@@ -1673,7 +1725,6 @@ function stripServiceSections(rawText) {
   }
   return out.join('\n');
 }
-
 function parseCSV(text, referenceDate) {
   const raw = stripServiceSections(String(text || '').replace(/^\uFEFF/, '').slice(0, MAX_CSV_BYTES));
   if (!raw.trim()) throw new Error('CSV пустой.');
@@ -1974,7 +2025,8 @@ function applyPendingRemote() {
   hideCatalogUpdateBanner();
   if (ok) showToast(`Справочник обновлён: ${PRODUCTS.length} позиций`);
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    РЕЖИМ ВЛАДЕЛЬЦА
    ═══════════════════════════════════════════ */
 function updateHeaderBadge() {
@@ -2054,7 +2106,8 @@ async function restoreOwnerMode() {
     }
   } catch (e) {}
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    ФОТО (IndexedDB)
    ═══════════════════════════════════════════ */
 function openPhotoDB() {
@@ -2162,7 +2215,8 @@ async function renderPhotoQueue() {
     box.appendChild(row);
   });
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    СЕССИЯ
    ═══════════════════════════════════════════ */
 function scheduleSessionSave() {
@@ -2259,7 +2313,8 @@ function applySession(data) {
     return true;
   } finally { isRestoring = false; }
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    РЕЗУЛЬТАТ: мета, навигация по таблице
    ═══════════════════════════════════════════ */
 function updateResultMeta() {
@@ -2427,6 +2482,14 @@ function renderTable() {
       nameText.className = 'name-text';
       nameText.textContent = row.name;
       tdName.appendChild(nameText);
+      /* ПАТЧ 6: значок ⚠ для позиций с расхождением сверки */
+      if (_needsCheckNames.has(normalizeName(row.name))) {
+        const warnIcon = document.createElement('span');
+        warnIcon.className = 'check-warn-icon';
+        warnIcon.textContent = '⚠';
+        warnIcon.title = 'Расхождение в сверке — проверь по фото';
+        tdName.appendChild(warnIcon);
+      }
       tr.appendChild(tdName);
 
       /* Остаток */
@@ -2567,7 +2630,9 @@ function renderTable() {
     scheduleTotalsUpdate();
     updateResultMeta();
     updateFinishCheckBtn();
-    if (_tableQuery) applyTableFilter();
+    /* ПАТЧ 6: счётчики и фильтр */
+    updateSegmentedCounters();
+    if (_tableQuery || _problemFilter) applyTableFilter();
     if (!document.activeElement || !document.activeElement.closest('#cardsView')) {
       renderCards();
     }
@@ -2660,9 +2725,10 @@ function updateTotals() {
     Продано просроченным: <b style="color:var(--red)">${totalSoldExpired}</b> шт · Просрочено на витрине: <b style="color:var(--red)">${totalExpiredOnShelf}</b> шт
     ${cntInfo > 0 ? `<br>Без накладных: <b style="color:var(--text)">${cntInfo}</b> поз.` : ''}
   `;
-  if (_tableQuery) applyTableFilter();
+  if (_tableQuery || _problemFilter) applyTableFilter();
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    РЕНДЕР КАРТОЧЕК
    ═══════════════════════════════════════════ */
 function buildCardInput(row, opts) {
@@ -2737,6 +2803,14 @@ function renderCards() {
     const nameEl = document.createElement('div');
     nameEl.className = 'card-name';
     nameEl.textContent = row.name;
+    /* ПАТЧ 7: значок ⚠ для позиций с расхождением сверки */
+    if (_needsCheckNames.has(normalizeName(row.name))) {
+      const warnIcon = document.createElement('span');
+      warnIcon.className = 'check-warn-icon';
+      warnIcon.textContent = '⚠';
+      warnIcon.title = 'Расхождение в сверке — проверь по фото';
+      nameEl.appendChild(warnIcon);
+    }
     const shelfEl = document.createElement('div');
     shelfEl.className = 'card-shelf';
     shelfEl.textContent = `${row.shelfLife} ч`;
@@ -2803,7 +2877,8 @@ function renderCards() {
 
   requestAnimationFrame(() => {
     updateCardResults();
-    if (_tableQuery) applyTableFilter();
+    /* ПАТЧ 7: перерисовка при активном фильтре */
+    if (_tableQuery || _problemFilter) applyTableFilter();
   });
 }
 function updateCardResults() {
@@ -2844,7 +2919,8 @@ function refreshCardRow(row, card) {
   scheduleTotalsUpdate();
   scheduleTableSync();
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    МОДАЛКА «НЕ В СПРАВОЧНИКЕ»
    ═══════════════════════════════════════════ */
 function renderUnknownModal() {
@@ -3053,7 +3129,8 @@ function ignoreSelectedUnknown() {
   else renderUnknownModal();
   showToast(`Игнорировано: ${count}`);
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    БЕЗ КАТЕГОРИИ
    ═══════════════════════════════════════════ */
 function updateNoCategoryBanner() {
@@ -3118,7 +3195,8 @@ function openNoCategoryModal() {
 function closeNoCategoryModal() {
   closeModal('noCategoryModal');
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    МОДАЛКА «СПРАВОЧНИК»
    ═══════════════════════════════════════════ */
 function updateCatalogSelectUI() {
@@ -3372,7 +3450,8 @@ function catalogToIgnored() {
   scheduleSessionSave();
   showToast(`Перенесено в игнор: ${added}`);
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    МОДАЛКА «ИГНОР-ЛИСТ»
    ═══════════════════════════════════════════ */
 function updateIgnoredSelectUI() {
@@ -3480,7 +3559,8 @@ function ignoredToCatalog() {
   scheduleSessionSave();
   showToast(`Возвращено в справочник: ${returned.length}`);
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    МОДАЛКА «АЛИАСЫ»
    ═══════════════════════════════════════════ */
 function renderAliasesList() {
@@ -3686,7 +3766,8 @@ function closeAliasTargetModal() {
   _aliasTargetForList = [];
   _aliasTargetMode = null;
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    МОДАЛ «ЦЕНЫ»
    ═══════════════════════════════════════════ */
 function openPricesModal() {
@@ -3788,6 +3869,9 @@ async function applyCSV() {
     if (!isValidCategory(_activeCategory)) throw new Error('Сначала выберите категорию.');
     const importedCategoryLabel = CATEGORY_LABELS[_activeCategory];
     _lastImportedCategory = _activeCategory;
+    /* ПАТЧ 10: сброс расхождений и фильтра при импорте */
+    _needsCheckNames = new Set();
+    setProblemFilter(false);
     const csvInput = $('csvInput');
     if (!csvInput) throw new Error('Поле ввода не найдено.');
     const text = csvInput.value.trim();
@@ -3876,7 +3960,8 @@ async function applyCSV() {
     if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = e.message || 'Ошибка'; }
   }
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    ЭКСПОРТ В EXCEL
    ═══════════════════════════════════════════ */
 function exportExcel() {
@@ -3926,7 +4011,8 @@ function exportExcel() {
   } catch (e) { alert('Ошибка экспорта: ' + (e.message || e)); }
   finally { setTimeout(() => { exportBusy = false; if (btn) btn.classList.remove('busy'); }, 500); }
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    TOAST
    ═══════════════════════════════════════════ */
 function getToastBottom() {
@@ -3953,7 +4039,8 @@ function showToast(text) {
     setTimeout(() => { el.remove(); if (_currentToast === el) _currentToast = null; }, 300);
   }, 3000);
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    ПРОМПТ ДЛЯ ИИ
    ═══════════════════════════════════════════ */
 function buildPrompt() {
@@ -4151,7 +4238,8 @@ ${catalogList}
 
 Выдай CSV.`;
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    SHARE TO AI
    ═══════════════════════════════════════════ */
 async function shareToAI() {
@@ -4242,7 +4330,8 @@ function bindCategoryGrid() {
     });
   });
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    ОТЧЁТ
    ═══════════════════════════════════════════ */
 function pluralize(n, one, few, many) {
@@ -4420,7 +4509,8 @@ function renderReport() {
     }
   }
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    UI-ХЕЛПЕРЫ
    ═══════════════════════════════════════════ */
 function scrollFieldIntoView(el) {
@@ -4442,7 +4532,8 @@ function measureHeader() {
   const height = h.getBoundingClientRect().height;
   document.documentElement.style.setProperty('--header-h', height + 'px');
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    BIND UI
    ═══════════════════════════════════════════ */
 function bindUI() {
@@ -4526,6 +4617,16 @@ function bindUI() {
     };
   }
 
+  /* ПАТЧ 8: обработчик сегментированного контрола «Все / Проблемные» */
+  const problemSeg = $('problemSegmented');
+  if (problemSeg) {
+    problemSeg.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        setProblemFilter(btn.dataset.filter === 'problems');
+      });
+    });
+  }
+
   bindCategoryGrid();
 
   const applyBtn = $('applyCsvBtn'); if (applyBtn) applyBtn.onclick = applyCSV;
@@ -4556,6 +4657,9 @@ function bindUI() {
     pendingSessionReset = true; resetToken++;
     try {
       tableRows = []; unknownRows = []; noCategoryRows = []; unknownSelected = new Set(); _tableQuery = '';
+      /* ПАТЧ 10: сброс расхождений и фильтра при полной очистке */
+      _needsCheckNames = new Set();
+      _problemFilter = false;
       const pt = $('point'); if (pt) pt.value = '';
       const ci = $('csvInput'); if (ci) { ci.value = ''; autoResizeTextarea(); updateCsvCounter(); }
       const ts = $('tableSearch'); if (ts) ts.value = '';
@@ -4564,7 +4668,10 @@ function bindUI() {
       const ss = $('shareStatus'); if (ss) { ss.className = 'status'; ss.textContent = ''; }
       try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
       try { await clearAllPhotos(); } catch (e) {}
-      renderTable(); updateUnknownBanner(); updateNoCategoryBanner(); await renderPhotoQueue();
+      renderTable(); updateUnknownBanner(); updateNoCategoryBanner();
+      updateSegmentedCounters();
+      setProblemFilter(false);
+      await renderPhotoQueue();
       const cs2 = $('csvStatus');
       if (cs2) { cs2.className = 'status show ok'; cs2.textContent = 'Данные очищены.'; }
     } finally { setTimeout(() => { pendingSessionReset = false; }, 500); }
@@ -4987,6 +5094,7 @@ function bindUI() {
     requestAnimationFrame(() => { try { el.select(); } catch (_) {} });
   });
 }
+
 /* ═══════════════════════════════════════════
    BIND MODAL BACKDROPS
    ═══════════════════════════════════════════ */
@@ -5047,7 +5155,8 @@ function bindModalBackdrops() {
     }
   });
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    LOGO / SERVICE WORKER / INIT
    ═══════════════════════════════════════════ */
 function initLogoFallback() {
@@ -5116,6 +5225,9 @@ function init() {
   renderTable();
   updateUnknownBanner();
   updateNoCategoryBanner();
+  /* ПАТЧ 11: первичный счётчик и сброс фильтра */
+  updateSegmentedCounters();
+  setProblemFilter(false);
   renderPhotoQueue();
   cmpBindUI();
   cmpRenderNakls();
@@ -5155,6 +5267,7 @@ function init() {
   window.addEventListener('error', e => console.warn('Global error:', e.message));
   console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.5.0 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length, '· aliases:', ALIASES.length, '· prices:', Object.keys(PRICES).length);
 }
+
 /* ═══════════════════════════════════════════
    СВЕРКА ДВУХ CSV
    ═══════════════════════════════════════════ */
@@ -5237,7 +5350,6 @@ function cmpParseCSV(text) {
     let name = (f[idxName] || '').trim().replace(/^"|"$/g, '');
     if (!name) continue;
 
-    // Отбрасываем служебные строки, попавшие в «Наименование»
     if (/^[-–—•·*]/.test(name)) continue;
     if (/^фото\s+\d/i.test(name)) continue;
     if (/^накладная\s+№/i.test(name)) continue;
@@ -5250,7 +5362,6 @@ function cmpParseCSV(text) {
     if (/^проверка[: ]/i.test(name)) continue;
     if (/^сверка[: ]/i.test(name)) continue;
 
-    // Если в строке нет ни одной цифры нигде — это не позиция
     const hasNumbers = f.some((cell, idx) => idx !== idxName && /\d/.test(String(cell || '')));
     if (!hasNumbers) continue;
     const key = normalizeName(name);
@@ -5529,10 +5640,12 @@ function cmpRenderResults() {
   if (applyBtn) applyBtn.style.display = okCount ? 'block' : 'none';
 }
 
+/* ПАТЧ 9: применяем совпавшие + собираем расхождения в _needsCheckNames */
 function cmpApplyMatched() {
   if (!_cmpData) return;
   const okRows = _cmpData.rows.filter(r => r.status === 'ok' && r.a);
-  if (!okRows.length) { showToast('Нет совпавших строк'); return; }
+  const diffRows = _cmpData.rows.filter(r => r.status !== 'ok');
+  if (!okRows.length && !diffRows.length) { showToast('Нет данных'); return; }
   const byKey = new Map();
   okRows.forEach(r => byKey.set(normalizeName(r.name), r.a));
 
@@ -5559,9 +5672,18 @@ function cmpApplyMatched() {
     applied++;
   });
 
+  /* ПАТЧ 9: собираем имена расхождений → покажем ⚠ и включим в «Проблемные» */
+  _needsCheckNames = new Set();
+  diffRows.forEach(r => { if (r.name) _needsCheckNames.add(normalizeName(r.name)); });
+
   renderTable();
+  updateSegmentedCounters();
   scheduleSessionSave();
-  showToast(`Применено совпавших: ${applied}`);
+  if (_needsCheckNames.size) {
+    showToast(`Применено: ${applied}. Проверить вручную: ${_needsCheckNames.size}`);
+  } else {
+    showToast(`Применено совпавших: ${applied}`);
+  }
   closeCompareModal();
 }
 
