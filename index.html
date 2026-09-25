@@ -881,6 +881,44 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   </div>
 </div>
 
+  <!-- ═══════════════ Модалка: Сверка двух CSV ═══════════════ -->
+<div id="compareModal" class="modal hidden">
+  <div class="modal-content" id="compareModalContent">
+    <div class="modal-header">
+      <h3>Сверка двух CSV</h3>
+      <p class="hint">Вставьте два ответа от ИИ из разных чатов. Совпавшие — доверяем, расхождения — проверяем.</p>
+    </div>
+    <div class="modal-body">
+      <label>CSV №1 (первый прогон)</label>
+      <textarea id="cmpCsv1" style="min-height:80px;margin-bottom:12px"></textarea>
+
+      <label>CSV №2 (второй прогон)</label>
+      <textarea id="cmpCsv2" style="min-height:80px;margin-bottom:16px"></textarea>
+
+      <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px">Накладные (до 4 за раз)</div>
+      <p class="hint" style="margin:0 0 8px">Для каждой: дата (дд.мм), №, последний № позиции, печатный итог (кол. 12).</p>
+      <div id="cmpNaklList" class="cmp-nakl-list"></div>
+      <button id="cmpAddNaklBtn" class="secondary block" style="margin-bottom:16px">+ Добавить накладную</button>
+
+      <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px">Печатный итог чека</div>
+      <p class="hint" style="margin:0 0 8px">Число из строки «Итого для продажи». Если чека нет — оставь пустым.</p>
+      <input id="cmpCheckPrinted" type="text" inputmode="decimal" placeholder="32771.50" style="margin-bottom:16px">
+
+      <button id="cmpRunBtn" class="primary block">Проверить всё</button>
+      <button id="cmpClearBtn" class="secondary block" style="margin-top:8px">Очистить</button>
+
+      <div id="cmpStats" class="kv" style="display:none;margin-top:16px;padding:12px;background:var(--bg-input);border-radius:var(--r-sm)"></div>
+
+      <div id="cmpCheckResults" style="margin-top:16px"></div>
+      <div id="cmpResults" style="margin-top:16px"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="cmpApplyBtn" class="success block" style="display:none;margin-bottom:8px">Применить совпавшие в таблицу</button>
+      <button id="cmpCloseBtn" class="secondary block">Закрыть</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══════════════ Тост обновления PWA ═══════════════ -->
 <div id="updateBanner" class="toast">Доступно обновление · нажмите, чтобы перезагрузить</div>
 <!-- ═══════════════ Библиотека Excel ═══════════════ -->
