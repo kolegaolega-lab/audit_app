@@ -410,6 +410,9 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 @media (prefers-color-scheme:dark){.cmp-val{background:rgba(255,255,255,.08)}}
 .cmp-val.diff{background:var(--orange);color:#fff}
 .cmp-val.same{background:rgba(52,199,89,.2);color:var(--green)}
+.cmp-val.edited{background:var(--accent);color:#fff}
+.cmp-val.editing{padding:0;background:transparent}
+.cmp-edit-input{width:72px;height:26px;padding:2px 6px;border:1px solid var(--accent);border-radius:6px;background:var(--bg-card);color:var(--text);font-size:12px;font-weight:600;text-align:center;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none}
 .cmp-check{display:flex;align-items:flex-start;gap:9px;padding:10px 12px;border-radius:8px;margin-bottom:5px;font-size:12.5px;line-height:1.4}
 .cmp-check.ok{background:rgba(52,199,89,.12);border-left:3px solid var(--green)}
 .cmp-check.err{background:rgba(255,59,48,.12);border-left:3px solid var(--red)}
@@ -672,7 +675,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint version">French Bakery Аудит · v9.5.0</div>
+  <div class="hint version">French Bakery Аудит · v9.5.1</div>
 
 </main>
 
@@ -963,7 +966,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <div id="cmpResults" style="margin-top:16px"></div>
     </div>
     <div class="modal-footer">
-      <button id="cmpApplyBtn" class="success block" style="display:none;margin-bottom:8px">Применить совпавшие в таблицу</button>
+      <button id="cmpApplyBtn" class="success block" style="display:none;margin-bottom:8px">Применить в таблицу</button>
       <button id="cmpCloseBtn" class="secondary block">Закрыть</button>
     </div>
   </div>
@@ -975,7 +978,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 <!-- ═══════════════ Библиотека Excel ═══════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
-  'use strict';
+    'use strict';
 
 /* ═══════════════════════════════════════════
    КОНСТАНТЫ
@@ -1010,7 +1013,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.5.0';
+const APP_VERSION = 'v9.5.1';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -2122,13 +2125,16 @@ function openPhotoDB() {
     } catch (e) { reject(e); }
   });
 }
+/* ПАТЧ 1: сортируем файлы по имени перед сохранением */
 async function addPhotos(files, type) {
   if (!files || !files.length) return;
   try {
     const existing = await getPhotos();
     if (existing.length + files.length > MAX_PHOTOS) { alert(`Максимум ${MAX_PHOTOS} файлов.`); return; }
     const db = await openPhotoDB();
-    const list = [...files];
+    const list = [...files].sort((a, b) =>
+      String(a.name || '').localeCompare(String(b.name || ''), undefined, { numeric: true, sensitivity: 'base' })
+    );
     for (let i = 0; i < list.length; i++) {
       const file = list[i];
       await new Promise((resolve, reject) => {
@@ -2380,8 +2386,7 @@ function tableKey(e) {
   e.preventDefault();
   tableNav(e.target, k);
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    РЕНДЕР ТАБЛИЦЫ
    ═══════════════════════════════════════════ */
 function buildColgroupHTML(dates) {
@@ -4322,7 +4327,10 @@ ${catalogList}
    ═══════════════════════════════════════════ */
 async function shareToAI() {
   if (shareBusy) return;
-  const items = (await getPhotos()).sort((a, b) => a.id - b.id);
+  /* ПАТЧ 2: сортируем по имени при отправке (страховка) */
+  const items = (await getPhotos()).sort((a, b) =>
+    String(a.name || '').localeCompare(String(b.name || ''), undefined, { numeric: true, sensitivity: 'base' })
+  );
   if (!items.length) {
     const el = $('shareStatus');
     if (el) { el.className = 'status show info'; el.textContent = 'Сначала загрузите материалы.'; }
@@ -4383,8 +4391,7 @@ async function shareToAI() {
     if (btn) btn.classList.remove('busy');
   }
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    КАТЕГОРИИ
    ═══════════════════════════════════════════ */
 function setActiveCategory(cat) {
@@ -5343,7 +5350,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.5.0 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length, '· aliases:', ALIASES.length, '· prices:', Object.keys(PRICES).length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.5.1 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length, '· aliases:', ALIASES.length, '· prices:', Object.keys(PRICES).length);
 }
 
 /* ═══════════════════════════════════════════
@@ -5570,7 +5577,8 @@ function cmpRunCompare() {
       if (status === 'ok' && a.sales !== b.sales) status = 'warn';
     }
     if (status === 'ok') okCount++; else if (status === 'warn') warnCount++; else errCount++;
-    rows.push({ key: k, name, a, b, dates: [...dates], status });
+    /* ПАТЧ 5: добавляем хранилище правок в каждую строку */
+    rows.push({ key: k, name, a, b, dates: [...dates], status, edits: { incoming: {}, sales: null } });
   });
   const order = { err: 0, warn: 1, ok: 2 };
   rows.sort((x, y) => {
@@ -5678,6 +5686,62 @@ function cmpRenderChecks(checks) {
   }).join('');
 }
 
+/* ПАТЧ 7: новая функция — тап по плитке расхождения → поле ввода */
+function cmpStartEdit(pill) {
+  if (pill.querySelector('input')) return;
+  const key = pill.dataset.key;
+  const dk = pill.dataset.dk;
+  const kind = pill.dataset.kind;
+  const row = _cmpData && _cmpData.rows.find(r => r.key === key);
+  if (!row) return;
+
+  let current;
+  if (kind === 'sales') {
+    current = (row.edits && row.edits.sales != null) ? row.edits.sales : (row.a ? row.a.sales : 0);
+  } else {
+    current = (row.edits && row.edits.incoming && row.edits.incoming[dk] != null)
+      ? row.edits.incoming[dk]
+      : (row.a ? (row.a.incoming[dk] || 0) : 0);
+  }
+
+  pill.innerHTML = '';
+  pill.classList.add('editing');
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.inputMode = 'numeric';
+  inp.pattern = '[0-9]*';
+  inp.autocomplete = 'off';
+  inp.className = 'cmp-edit-input';
+  inp.value = String(current);
+  pill.appendChild(inp);
+  setTimeout(() => { try { inp.focus(); inp.select(); } catch (e) {} }, 30);
+
+  inp.addEventListener('input', () => {
+    const cleaned = inp.value.replace(/[^\d]/g, '');
+    if (cleaned !== inp.value) inp.value = cleaned;
+  });
+  inp.addEventListener('click', e => e.stopPropagation());
+
+  let done = false;
+  const finish = (save) => {
+    if (done) return;
+    done = true;
+    if (save) {
+      const val = parseInt(inp.value.replace(/[^\d]/g, ''), 10) || 0;
+      if (!row.edits) row.edits = { incoming: {}, sales: null };
+      if (kind === 'sales') row.edits.sales = val;
+      else row.edits.incoming[dk] = val;
+    }
+    cmpRenderResults();
+  };
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+    else if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+  });
+  inp.addEventListener('blur', () => finish(true));
+}
+
+/* ПАТЧ 6: переписано — плитки расхождений кликабельны, синие с ✓ после правки */
 function cmpRenderResults() {
   if (!_cmpData) return;
   const { rows, dateLabels, okCount, warnCount, errCount } = _cmpData;
@@ -5699,33 +5763,55 @@ function cmpRenderResults() {
     r.dates.forEach(dk => {
       const va = r.a ? (r.a.incoming[dk] || 0) : '—';
       const vb = r.b ? (r.b.incoming[dk] || 0) : '—';
-      const cls = va !== vb ? 'diff' : 'same';
-      vals.push(`<span class="cmp-val ${cls}">${dateLabels[dk] || dk}: ${va} / ${vb}</span>`);
+      const edited = r.edits && r.edits.incoming && r.edits.incoming[dk] != null;
+      const cls = edited ? 'edited' : (va !== vb ? 'diff' : 'same');
+      const shown = edited ? r.edits.incoming[dk] : `${va} / ${vb}`;
+      vals.push(`<span class="cmp-val ${cls}" data-key="${escapeHtml(r.key)}" data-dk="${dk}" data-kind="incoming">${dateLabels[dk] || dk}: ${shown}</span>`);
     });
     if (r.a || r.b) {
       const sa = r.a ? r.a.sales : '—';
       const sb = r.b ? r.b.sales : '—';
-      const cls = sa !== sb ? 'diff' : 'same';
-      vals.push(`<span class="cmp-val ${cls}">Прод: ${sa} / ${sb}</span>`);
+      const edited = r.edits && r.edits.sales != null;
+      const cls = edited ? 'edited' : (sa !== sb ? 'diff' : 'same');
+      const shown = edited ? r.edits.sales : `${sa} / ${sb}`;
+      vals.push(`<span class="cmp-val ${cls}" data-key="${escapeHtml(r.key)}" data-dk="sales" data-kind="sales">Прод: ${shown}</span>`);
     }
-    return `<div class="cmp-row ${r.status}">
+    return `<div class="cmp-row ${r.status}" data-key="${escapeHtml(r.key)}">
       <span class="cmp-icon">${icon}</span>
       <span class="cmp-name">${escapeHtml(r.name)}</span>
       <span class="cmp-vals">${vals.join('')}</span>
     </div>`;
   }).join('');
+  out.querySelectorAll('.cmp-val.diff, .cmp-val.edited').forEach(pill => {
+    pill.addEventListener('click', () => cmpStartEdit(pill));
+  });
   const applyBtn = $('cmpApplyBtn');
-  if (applyBtn) applyBtn.style.display = okCount ? 'block' : 'none';
+  const hasEdits = rows.some(r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null));
+  if (applyBtn) applyBtn.style.display = (okCount || hasEdits) ? 'block' : 'none';
 }
 
-/* ПАТЧ 9: применяем совпавшие + собираем расхождения в _needsCheckNames */
+/* ПАТЧ 8: применяем совпавшие И исправленные, расхождения без правок — в ⚠ */
 function cmpApplyMatched() {
   if (!_cmpData) return;
+
+  const hasEdits = r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null);
   const okRows = _cmpData.rows.filter(r => r.status === 'ok' && r.a);
+  const editedRows = _cmpData.rows.filter(r => r.status !== 'ok' && hasEdits(r));
   const diffRows = _cmpData.rows.filter(r => r.status !== 'ok');
-  if (!okRows.length && !diffRows.length) { showToast('Нет данных'); return; }
+
+  const applyRows = [...okRows];
+  const okKeys = new Set(okRows.map(r => r.key));
+  editedRows.forEach(r => { if (!okKeys.has(r.key)) applyRows.push(r); });
+
+  if (!applyRows.length && !diffRows.length) { showToast('Нет данных'); return; }
+
   const byKey = new Map();
-  okRows.forEach(r => byKey.set(normalizeName(r.name), r.a));
+  applyRows.forEach(r => {
+    const incoming = { ...(r.a ? r.a.incoming : {}) };
+    if (r.edits && r.edits.incoming) Object.assign(incoming, r.edits.incoming);
+    const sales = (r.edits && r.edits.sales != null) ? r.edits.sales : (r.a ? r.a.sales : 0);
+    byKey.set(normalizeName(r.name), { incoming, sales });
+  });
 
   const year = new Date().getFullYear();
   let applied = 0;
@@ -5750,9 +5836,11 @@ function cmpApplyMatched() {
     applied++;
   });
 
-  /* ПАТЧ 9: собираем имена расхождений → покажем ⚠ и включим в «Проблемные» */
   _needsCheckNames = new Set();
-  diffRows.forEach(r => { if (r.name) _needsCheckNames.add(normalizeName(r.name)); });
+  diffRows.forEach(r => {
+    if (hasEdits(r)) return;
+    if (r.name) _needsCheckNames.add(normalizeName(r.name));
+  });
 
   renderTable();
   updateSegmentedCounters();
@@ -5760,7 +5848,7 @@ function cmpApplyMatched() {
   if (_needsCheckNames.size) {
     showToast(`Применено: ${applied}. Проверить вручную: ${_needsCheckNames.size}`);
   } else {
-    showToast(`Применено совпавших: ${applied}`);
+    showToast(`Применено: ${applied}`);
   }
   closeCompareModal();
 }
