@@ -79,10 +79,12 @@ main{max-width:var(--page-max);margin:0 auto;padding:14px var(--page-pad) calc(1
 .section-header .desc b{color:var(--text);font-weight:600}
 .section-body{padding:14px 12px 16px}
 .section-header + .section-body{padding-top:12px}
-  label{display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em}
+label{display:block;font-size:11px;font-weight:600;color:var(--text-secondary);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em}
 input[type=text],input[type=password]{width:100%;padding:11px 13px;border:1px solid var(--separator-opaque);border-radius:var(--r-sm);background:var(--bg-input);color:var(--text);font-size:15px;transition:border-color .18s,background .18s,box-shadow .18s;-webkit-appearance:none;appearance:none;min-height:44px;font-family:inherit;outline:none}
 input:focus{border-color:var(--accent);background:var(--bg-card);box-shadow:0 0 0 3.5px var(--accent-soft)}
 input::placeholder{color:var(--text-tertiary)}
+select{width:100%;padding:11px 36px 11px 13px;border:1px solid var(--separator-opaque);border-radius:var(--r-sm);background:var(--bg-input);color:var(--text);font-size:15px;font-family:inherit;min-height:44px;-webkit-appearance:none;appearance:none;outline:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:16px;transition:border-color .18s,box-shadow .18s,background-color .18s}
+select:focus{border-color:var(--accent);background-color:var(--bg-card);box-shadow:0 0 0 3.5px var(--accent-soft)}
 input:read-only{cursor:default}
 #autoDate,#autoTime{pointer-events:none;color:var(--text-secondary);background:var(--bg-card);border-color:var(--separator);cursor:default;-webkit-user-select:none;user-select:none}
 #autoDate:focus,#autoTime:focus{border-color:var(--separator);background:var(--bg-card);box-shadow:none;outline:none}
@@ -156,7 +158,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .kv .v{color:var(--text);font-weight:500;text-align:right}
 .actions-row{display:flex;gap:6px;margin-top:12px}
 .actions-row button{flex:1}
-  .sticky-search{position:sticky;top:var(--header-h);z-index:50;background:var(--bg-card);padding:12px 12px 10px;border-bottom:1px solid var(--separator);margin-top:12px}
+.sticky-search{position:sticky;top:var(--header-h);z-index:50;background:var(--bg-card);padding:12px 12px 10px;border-bottom:1px solid var(--separator);margin-top:12px}
 .search-input-wrap{position:relative;flex:1;min-width:0}
 .search-input-wrap input{padding-left:36px;padding-right:40px;min-height:40px;font-size:14px}
 .search-input-wrap::before{content:'';position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;background:currentColor;opacity:.4;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") center/contain no-repeat;pointer-events:none}
@@ -189,11 +191,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .num-disabled{display:inline-flex;align-items:center;justify-content:center;width:60px;min-width:60px;height:38px;color:var(--text-tertiary);font-weight:600;font-size:14px;user-select:none;vertical-align:middle}
 .income-cell,.edited-num-cell{position:relative;padding:8px 4px !important;text-align:center}
 .income-cell.edited .num,.edited-num-cell.edited .num{background:var(--orange-soft);border-color:var(--orange);color:var(--text);box-shadow:inset 0 0 0 1px rgba(255,149,0,.18)}
-.reset-icon{
-  display:inline-block;width:11px;height:11px;background:currentColor;
-  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 3-6.7L3 8'/%3E%3Cpath d='M3 3v5h5'/%3E%3C/svg%3E") center/contain no-repeat;
-  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 3-6.7L3 8'/%3E%3Cpath d='M3 3v5h5'/%3E%3C/svg%3E") center/contain no-repeat;
-}
+.reset-icon{display:inline-block;width:11px;height:11px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 3-6.7L3 8'/%3E%3Cpath d='M3 3v5h5'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12a9 9 0 1 0 3-6.7L3 8'/%3E%3Cpath d='M3 3v5h5'/%3E%3C/svg%3E") center/contain no-repeat}
 .income-cell .reset-btn,.edited-num-cell .reset-btn{position:absolute;top:3px;right:8px;width:18px;height:18px;padding:0;border-radius:50%;background:var(--orange);color:#fff;display:none;z-index:3;min-height:auto;border:2px solid var(--bg-card);line-height:1;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(255,149,0,.35);transition:transform .12s ease,box-shadow .15s ease;-webkit-tap-highlight-color:transparent}
 .income-cell .reset-btn:active,.edited-num-cell .reset-btn:active{transform:scale(.85);box-shadow:0 0 0 6px var(--orange-soft)}
 .income-cell.edited .reset-btn,.edited-num-cell.edited .reset-btn{display:inline-flex}
@@ -249,7 +247,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .modal-body::-webkit-scrollbar{display:none;width:0;height:0}
 .modal-footer{flex:0 0 auto;padding:12px 12px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--separator);background:var(--bg-card);position:relative;z-index:10}
 .modal-footer button{pointer-events:auto;cursor:pointer}
-#unknownModalContent,#catalogModalContent,#ignoredModalContent,#aliasesModalContent,#aliasTargetModalContent,#reportModalContent,#noCategoryModalContent{display:flex;flex-direction:column;padding:0 !important;height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden}
+#unknownModalContent,#catalogModalContent,#ignoredModalContent,#aliasesModalContent,#aliasTargetModalContent,#reportModalContent,#noCategoryModalContent,#pricesModalContent,#compareModalContent{display:flex;flex-direction:column;padding:0 !important;height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden}
 .unknown-toolbar-block{flex:0 0 auto;padding:0 12px 12px;background:var(--bg-card);border-bottom:1px solid var(--separator)}
 .unknown-toolbar-block .unknown-counter{margin:0 0 10px}
 .unknown-toolbar-block .unknown-toolbar{padding:0 0 10px}
@@ -370,7 +368,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .no-cat-btns{display:flex;gap:4px;flex:0 0 auto}
 .no-cat-btns button{width:38px;height:38px;min-height:38px;padding:0;background:var(--bg-input);border:1px solid var(--separator-opaque);border-radius:8px;font-size:18px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI Emoji","Apple Color Emoji",sans-serif}
 .no-cat-btns button:active{background:var(--accent-soft);border-color:var(--accent)}
-#pricesModalContent{display:flex;flex-direction:column;padding:0 !important;height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden}
 .price-row{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--separator);cursor:pointer;transition:background .12s}
 .price-row:last-child{border-bottom:none}
 .price-row:active{background:var(--bg-elev-2)}
@@ -379,7 +376,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .price-row .pchev{flex:0 0 auto;color:var(--text-tertiary);font-size:14px;margin-left:2px}
 .price-row.empty .pval{color:var(--text-tertiary);font-weight:500}
 .price-empty{padding:30px 14px;text-align:center;color:var(--text-tertiary);font-size:13px}
-  .segmented{display:flex;background:var(--bg-input);border-radius:10px;padding:3px;gap:2px;margin-top:10px}
+.segmented{display:flex;background:var(--bg-input);border-radius:10px;padding:3px;gap:2px;margin-top:10px}
 .segmented button{flex:1;padding:8px 10px;border:0;background:transparent;border-radius:8px;font-size:13px;font-weight:600;color:var(--text-secondary);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;min-height:auto;line-height:1.2;transition:background .15s,color .15s}
 .segmented button.active{background:var(--bg-card);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .segmented .cnt{font-size:11px;font-weight:700;padding:1px 6px;border-radius:99px;background:var(--bg-elev-2);color:var(--text-tertiary);min-width:20px;text-align:center}
@@ -390,7 +387,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .card-name .check-warn-icon{font-size:13px;margin-left:4px}
 .problem-empty{display:none;text-align:center;padding:30px 20px;color:var(--text-secondary);font-size:13.5px;line-height:1.5}
 .problem-empty b{color:var(--text);font-weight:600;display:block;margin-bottom:4px}
-#compareModalContent{display:flex;flex-direction:column;padding:0 !important;height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));overflow:hidden}
 .cmp-nakl-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
 .cmp-nakl-item{background:var(--bg-elev-2);border-radius:var(--r-sm);padding:8px 10px;display:grid;grid-template-columns:1.2fr 0.8fr 0.8fr 1.2fr auto;gap:5px;align-items:end}
 .cmp-nakl-item label{font-size:9px;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-secondary);font-weight:600;display:block}
@@ -515,14 +511,60 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
   <div class="section">
     <div class="section-header">
       <h2>Распознавание</h2>
-      <p class="desc">Отправьте материалы в ИИ — он вернёт CSV с приходами и продажами.</p>
+      <p class="desc">Отправьте материалы — приложение вернёт CSV с приходами и продажами.</p>
     </div>
     <div class="section-body">
-      <div class="row">
+      <button id="recognizeGeminiBtn" class="success block" style="display:none">Распознать</button>
+      <div class="row" style="margin-top:8px">
         <button id="shareToAIBtn" class="primary">Отправить</button>
         <button id="copyPromptBtn" class="secondary">Промпт</button>
       </div>
+      <p class="hint" style="margin-top:10px">Для распознавания накладных используйте раздел <b>«Загрузка по датам»</b> ниже — там обработка идёт по одной дате.</p>
+      <details class="settings" style="margin-top:12px">
+        <summary>Настройки распознавания</summary>
+        <div class="content">
+          <div>
+            <label>API-ключ</label>
+            <input id="geminiKeyInput" type="password" placeholder="AIza..." autocomplete="off" maxlength="200">
+          </div>
+          <div>
+            <label>Модель</label>
+            <div style="display:flex;gap:6px;align-items:stretch">
+              <select id="geminiModelSelect" style="flex:1"><option value="">Загрузка…</option></select>
+              <button type="button" id="refreshModelsBtn" class="secondary" style="flex:0 0 auto;min-height:44px;padding:0 14px;font-size:16px" title="Обновить список моделей">↻</button>
+            </div>
+          </div>
+          <p class="hint" style="margin:0">Ключ хранится только в вашем браузере.
+            Получить: <b>aistudio.google.com</b> → Get API key.</p>
+        </div>
+      </details>
       <div id="shareStatus" class="status"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ Загрузка по датам ═══════════════ -->
+  <div class="section" id="dailySection">
+    <div class="section-header">
+      <h2>Загрузка по датам</h2>
+      <p class="desc">Распознайте накладные по одной дате. Затем соберите итоговый CSV.</p>
+    </div>
+    <div class="section-body">
+      <div class="row">
+        <div>
+          <label>Дата накладной</label>
+          <input id="dailyDate" type="text" placeholder="23.09" maxlength="10" autocomplete="off">
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button id="dailyRecognizeBtn" class="primary block">Распознать дату</button>
+        </div>
+      </div>
+      <div id="dailyStatus" class="status" style="margin-top:10px"></div>
+      <div id="dailyList" style="margin-top:12px"></div>
+      <div id="dailyActions" style="margin-top:12px;display:none">
+        <button id="dailyBuildBtn" class="success block">Применить</button>
+        <button id="dailyClearBtn" class="secondary block" style="margin-top:8px">Очистить</button>
+      </div>
     </div>
   </div>
 
@@ -541,7 +583,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <textarea id="csvInput" maxlength="2000000" placeholder="Наименование;Получено за 17.09;Получено за 18.09;Продано сегодня;Срок годности" style="margin-top:10px"></textarea>
       <div id="csvCounter" class="counter"></div>
       <button id="applyCsvBtn" class="success block" style="margin-top:10px">Применить</button>
-      <button id="openCompareBtn" class="secondary block" style="margin-top:8px">Сверка двух CSV</button>
+      <button id="openCompareBtn" class="secondary block" style="margin-top:8px">Сверка</button>
       <div id="csvStatus" class="status"></div>
     </div>
   </div>
@@ -628,7 +670,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
       <button id="openNoCategoryBtn" class="warn block">Без категории (<span id="noCategoryCount">0</span>)</button>
     </div>
 
-    <!-- ПАТЧ 2: блок «Проблемных позиций нет» перед таблицей -->
     <div id="problemEmpty" class="problem-empty">
       <b>Проблемных позиций нет.</b>
       Всё свежее.
@@ -675,7 +716,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint version">French Bakery Аудит · v9.5.1</div>
+  <div class="hint version">French Bakery Аудит · v9.8.1 · +Gemini · загрузка по датам</div>
 
 </main>
 
@@ -975,8 +1016,6 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 <!-- ═══════════════ Тост обновления PWA ═══════════════ -->
 <div id="updateBanner" class="toast">Доступно обновление · нажмите, чтобы перезагрузить</div>
 
-<!-- ═══════════════ Библиотека Excel ═══════════════ -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
     'use strict';
 
@@ -1013,11 +1052,26 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.5.1';
+const APP_VERSION = 'v9.8.1';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
 const UNKNOWN_SEARCH_THRESHOLD = 20;
+
+/* === GEMINI === */
+const GEMINI_KEY = 'fbAuditGeminiKey';
+const GEMINI_MODEL_KEY = 'fbAuditGeminiModel';
+const GEMINI_MODEL_DEFAULT = 'gemini-3.1-flash-lite';
+const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta/models';
+const GEMINI_IMG_MAX_SIDE = 1600;
+const GEMINI_IMG_QUALITY = 0.85;
+const GEMINI_MAX_B64_BYTES = 15 * 1024 * 1024;
+const GEMINI_MODELS_CACHE_KEY = 'fbAuditModelsCache';
+const GEMINI_MODELS_CACHE_TTL = 24 * 60 * 60 * 1000;
+const GEMINI_MAX_OUTPUT_TOKENS = 16384;
+
+/* === Загрузка по датам === */
+const DAILY_KEY = 'fbAuditDailyAccumulator';
 
 /* === КАТЕГОРИИ === */
 const CATEGORY_LABELS = { desserts: 'Десерты', lunches: 'Обеды', pastry: 'Выпечка' };
@@ -1068,9 +1122,16 @@ let _activeCategory = null;
 let _lastImportedCategory = null;
 let _reportView = null;
 let _priceEditOriginal = null;
-/* ПАТЧ 3: состояние фильтра «Проблемные» и списка расхождений сверки */
 let _problemFilter = false;
 let _needsCheckNames = new Set();
+let _lastGeminiCsvs = { first: '', second: '' };
+let _cmpData = null;
+let _cmpNakls = [];
+let _xlsxPromise = null;
+let _dailyAccum = [];
+let _dailyEditing = null;
+let _modelsRefreshScheduled = false;
+let _geminiTestImageCache = null;
 
 /* ═══════════════════════════════════════════
    БАЗОВЫЕ УТИЛИТЫ
@@ -1187,43 +1248,37 @@ function normalizeName(s) {
 function normalizeForSearch(s) {
   return String(s || '').toLowerCase().trim().replace(/\s+/g, ' ').replace(/ё/g, 'е');
 }
-
-/* === Категории: хелперы === */
-function isValidCategory(c) {
-  return c === 'desserts' || c === 'lunches' || c === 'pastry';
+function naturalCompare(a, b) {
+  return String(a || '').localeCompare(String(b || ''), 'ru', { numeric: true, sensitivity: 'base' });
 }
+
+/* === Категории === */
+function isValidCategory(c) { return c === 'desserts' || c === 'lunches' || c === 'pastry'; }
 function getCategoryProducts(cat) {
   if (!isValidCategory(cat)) return [];
   return PRODUCTS.filter(p => p.category === cat);
 }
-function getCategoryEmoji(cat) {
-  return CATEGORY_EMOJI[cat] || '—';
-}
-function getCategoryLabel(cat) {
-  return CATEGORY_LABELS[cat] || 'Без категории';
-}
+function getCategoryEmoji(cat) { return CATEGORY_EMOJI[cat] || '—'; }
+function getCategoryLabel(cat) { return CATEGORY_LABELS[cat] || 'Без категории'; }
 
 /* === Дата/время в шапке === */
 function updateAutoDate() { const el = $('autoDate'); if (el) el.value = formatDateRu(getTodayStr()); }
 function updateAutoTime() { const el = $('autoTime'); if (el) el.value = getCurrentTimeStr(); }
 function startAutoDateTime() {
-  updateAutoDate();
-  updateAutoTime();
+  updateAutoDate(); updateAutoTime();
   if (_timeUpdater) clearInterval(_timeUpdater);
   _timeUpdater = setInterval(() => { updateAutoDate(); updateAutoTime(); }, TIME_UPDATE_MS);
 }
 
 /* === CSV: счётчик и ресайз textarea === */
 function autoResizeTextarea() {
-  const ta = $('csvInput');
-  if (!ta) return;
+  const ta = $('csvInput'); if (!ta) return;
   ta.style.height = 'auto';
   const next = Math.min(ta.scrollHeight, 400);
   ta.style.height = next + 'px';
 }
 function updateCsvCounter() {
-  const ta = $('csvInput');
-  const counter = $('csvCounter');
+  const ta = $('csvInput'); const counter = $('csvCounter');
   if (!ta || !counter) return;
   const text = ta.value;
   if (!text.trim()) { counter.textContent = ''; counter.className = 'counter'; return; }
@@ -1231,57 +1286,40 @@ function updateCsvCounter() {
   const dataLines = Math.max(0, lines.length - 1);
   const bytes = new Blob([text]).size;
   const kb = Math.round(bytes / 1024);
-  let cls = 'counter';
-  let suffix = '';
+  let cls = 'counter'; let suffix = '';
   if (bytes > MAX_CSV_BYTES) { cls += ' err'; suffix = ' · превышает 2 МБ'; }
   else if (bytes > MAX_CSV_BYTES * 0.8) { cls += ' warn'; }
   counter.className = cls;
   counter.innerHTML = `<b>${dataLines}</b> строк · ${kb} КБ${suffix}`;
 }
 
-/* ═══════════════════════════════════════════
-   ПАТЧ 5: Фильтр таблицы (поиск + «Проблемные»)
-   ═══════════════════════════════════════════ */
+/* === Фильтр таблицы === */
 function applyTableFilter() {
   const tbody = document.querySelector('#resultTable tbody');
   const cardsBox = $('cardsView');
   const q = normalizeForSearch(_tableQuery);
-
   const isVisible = (row) => {
     if (!row) return false;
     if (q && !normalizeForSearch(row.name).includes(q)) return false;
     if (_problemFilter && !isProblemRow(row)) return false;
     return true;
   };
-
   if (tbody) {
     const trs = tbody.children;
-    for (let i = 0; i < trs.length; i++) {
-      const row = tableRows[i];
-      trs[i].classList.toggle('hidden-row', !isVisible(row));
-    }
+    for (let i = 0; i < trs.length; i++) trs[i].classList.toggle('hidden-row', !isVisible(tableRows[i]));
   }
   if (cardsBox) {
-    const cards = cardsBox.querySelectorAll('.card');
-    cards.forEach((card, i) => {
-      const row = tableRows[i];
-      card.classList.toggle('hidden-card', !isVisible(row));
-    });
+    cardsBox.querySelectorAll('.card').forEach((card, i) => card.classList.toggle('hidden-card', !isVisible(tableRows[i])));
   }
-
   updateSegmentedCounters();
-
   const summary = $('summary');
   if (summary) {
     const base = summary.dataset.baseSummary || '';
     if (_tableQuery || _problemFilter) {
       const visible = tableRows.filter(isVisible).length;
       summary.textContent = `${base} Показано: ${visible}`;
-    } else {
-      summary.textContent = base;
-    }
+    } else summary.textContent = base;
   }
-
   const emptyEl = $('problemEmpty');
   if (emptyEl) {
     const problemsTotal = tableRows.filter(isProblemRow).length;
@@ -1293,10 +1331,6 @@ function setTableQuery(q) {
   if (_tableSearchTimer) clearTimeout(_tableSearchTimer);
   _tableSearchTimer = setTimeout(() => { _tableSearchTimer = null; applyTableFilter(); }, SEARCH_DEBOUNCE_MS);
 }
-
-/* ═══════════════════════════════════════════
-   ПАТЧ 4: Проверка проблемности + счётчики + переключатель
-   ═══════════════════════════════════════════ */
 function isProblemRow(row) {
   if (!row) return false;
   const calc = computeFIFO(row);
@@ -1316,9 +1350,7 @@ function setProblemFilter(on) {
   _problemFilter = !!on;
   const seg = $('problemSegmented');
   if (seg) {
-    seg.querySelectorAll('button').forEach(b => {
-      b.classList.toggle('active', (b.dataset.filter === 'problems') === _problemFilter);
-    });
+    seg.querySelectorAll('button').forEach(b => b.classList.toggle('active', (b.dataset.filter === 'problems') === _problemFilter));
   }
   applyTableFilter();
 }
@@ -1378,7 +1410,7 @@ const FACTORY_CATALOG = [
 ];
 
 /* ═══════════════════════════════════════════
-   СПРАВОЧНИК: загрузка/сохранение
+   СПРАВОЧНИК: load/save
    ═══════════════════════════════════════════ */
 function sanitizeProducts(arr) {
   if (!Array.isArray(arr)) return [];
@@ -1418,7 +1450,7 @@ function saveCatalog() {
 }
 
 /* ═══════════════════════════════════════════
-   ИГНОР-ЛИСТ
+   IGNORED
    ═══════════════════════════════════════════ */
 function loadIgnored() {
   try {
@@ -1450,12 +1482,11 @@ function isIgnored(name) {
   return IGNORED.some(i => normalizeName(i) === key);
 }
 function updateIgnoredCount() {
-  const el = $('ignoredCount');
-  if (el) el.textContent = String(IGNORED.length);
+  const el = $('ignoredCount'); if (el) el.textContent = String(IGNORED.length);
 }
 
 /* ═══════════════════════════════════════════
-   АЛИАСЫ
+   ALIASES
    ═══════════════════════════════════════════ */
 function loadAliases() {
   try {
@@ -1485,8 +1516,7 @@ function saveAliases() {
   updateAliasesCount();
 }
 function updateAliasesCount() {
-  const el = $('aliasesCount');
-  if (el) el.textContent = String(ALIASES.length);
+  const el = $('aliasesCount'); if (el) el.textContent = String(ALIASES.length);
 }
 function findAlias(name) {
   const key = normalizeName(name);
@@ -1514,7 +1544,7 @@ function removeAlias(aliasName) {
 }
 
 /* ═══════════════════════════════════════════
-   ЦЕНЫ ПОЗИЦИЙ
+   PRICES
    ═══════════════════════════════════════════ */
 function loadPrices() {
   try {
@@ -1562,7 +1592,7 @@ function deletePrice(name) {
 }
 
 /* ═══════════════════════════════════════════
-   FIFO / СРОКИ ГОДНОСТИ
+   FIFO / СРОКИ
    ═══════════════════════════════════════════ */
 function getCheckMoment() { return new Date(); }
 function getWriteOffMoment(partyDate, shelfLife) {
@@ -1649,7 +1679,7 @@ function getCardStatus(calc, row) {
 }
 
 /* ═══════════════════════════════════════════
-   CSV: парсер
+   CSV PARSER
    ═══════════════════════════════════════════ */
 function detectDelimiter(firstLine) {
   let semi = 0, comma = 0, inQ = false;
@@ -1758,7 +1788,11 @@ function parseCSV(text, referenceDate) {
   for (let i = 1; i < maxRow; i++) {
     const vals = matrix[i].slice(0, maxCols).map(v => String(v ?? '').trim());
     if (!vals.some(v => v !== '')) continue;
-    const name = safeStr(vals[idxName], MAX_NAME);
+    let name = safeStr(vals[idxName], MAX_NAME);
+    if (!name) continue;
+    name = name.replace(/^Т\s+/, '');
+    name = name.replace(/\s+п\/ф\s*$/i, '').replace(/\s+полуфабрикат\s*$/i, '');
+    name = name.trim();
     if (!name) continue;
     if (name.startsWith('#')) continue;
     if (/^[-–—•·*]\s/.test(name)) continue;
@@ -1786,17 +1820,15 @@ function parseCSV(text, referenceDate) {
 function sortRowsAlphabetically(rows) {
   return [...rows].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' }));
 }
-  /* ═══════════════════════════════════════════
-   СИНХРОНИЗАЦИЯ С GITHUB
+
+/* ═══════════════════════════════════════════
+   GitHub sync
    ═══════════════════════════════════════════ */
 async function fetchWithTimeout(url, opts, ms) {
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), ms);
-  try {
-    return await fetch(url, { ...opts, signal: controller.signal });
-  } finally {
-    clearTimeout(t);
-  }
+  try { return await fetch(url, { ...opts, signal: controller.signal }); }
+  finally { clearTimeout(t); }
 }
 async function fetchRemoteCatalog() {
   try {
@@ -1806,64 +1838,41 @@ async function fetchRemoteCatalog() {
     const data = await res.json();
     if (!data || !Array.isArray(data.products)) return null;
     return data;
-  } catch (e) {
-    console.warn('fetchRemoteCatalog:', e);
-    return null;
-  }
+  } catch (e) { console.warn('fetchRemoteCatalog:', e); return null; }
 }
 async function verifyToken(token) {
   try {
-    const res = await fetchWithTimeout(`${GITHUB_API}/user`, {
-      headers: { 'Authorization': `token ${token}` }
-    }, 15000);
+    const res = await fetchWithTimeout(`${GITHUB_API}/user`, { headers: { 'Authorization': `token ${token}` } }, 15000);
     if (res.ok) return 'ok';
     if (res.status === 401) return 'invalid';
     return 'network';
-  } catch (e) {
-    return 'network';
-  }
+  } catch (e) { return 'network'; }
 }
 async function pushToGitHub(token, data) {
   const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
   const url = `${GITHUB_API}/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
-
   let sha = null;
   try {
     const getRes = await fetchWithTimeout(url, {
-      headers: {
-        'Authorization': `token ${token}`,
-        'Accept': 'application/vnd.github.v3+json'
-      },
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' },
       cache: 'no-store'
     }, 30000);
     if (getRes.ok) {
       const info = await getRes.json();
       sha = info.sha || null;
-    } else if (getRes.status === 401) {
-      return { ok: false, code: 401, message: 'Неверный токен' };
-    } else if (getRes.status === 403) {
-      return { ok: false, code: 403, message: 'Нет прав / лимит' };
-    } else if (getRes.status !== 404) {
-      return { ok: false, code: getRes.status, message: 'Ошибка сервера' };
-    }
-  } catch (e) {
-    return { ok: false, code: 0, message: 'Нет связи с сервером' };
-  }
-
+    } else if (getRes.status === 401) return { ok: false, code: 401, message: 'Неверный токен' };
+    else if (getRes.status === 403) return { ok: false, code: 403, message: 'Нет прав / лимит' };
+    else if (getRes.status !== 404) return { ok: false, code: getRes.status, message: 'Ошибка сервера' };
+  } catch (e) { return { ok: false, code: 0, message: 'Нет связи с сервером' }; }
   const body = {
     message: `sync: обновление справочника от ${data.updatedAt}`,
     content,
     ...(sha ? { sha } : {})
   };
-
   try {
     const putRes = await fetchWithTimeout(url, {
       method: 'PUT',
-      headers: {
-        'Authorization': `token ${token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     }, 30000);
     if (putRes.ok) return { ok: true };
@@ -1872,19 +1881,14 @@ async function pushToGitHub(token, data) {
     if (putRes.status === 404) return { ok: false, code: 404, message: 'Файл не найден' };
     if (putRes.status === 409) return { ok: false, code: 409, message: 'Конфликт версий — повторите' };
     return { ok: false, code: putRes.status, message: `Ошибка ${putRes.status}` };
-  } catch (e) {
-    return { ok: false, code: 0, message: 'Нет связи с сервером' };
-  }
+  } catch (e) { return { ok: false, code: 0, message: 'Нет связи с сервером' }; }
 }
 function buildSyncPayload() {
   return {
     version: 1,
     updatedAt: new Date().toISOString(),
     updatedBy: APP_VERSION,
-    products: PRODUCTS,
-    ignored: IGNORED,
-    aliases: ALIASES,
-    prices: PRICES
+    products: PRODUCTS, ignored: IGNORED, aliases: ALIASES, prices: PRICES
   };
 }
 function syncPullFromServer(opts) {
@@ -1903,8 +1907,7 @@ function syncPullFromServer(opts) {
     if (!silent && statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Файл на сервере пустой или повреждён.'; }
     return false;
   }
-  PRODUCTS = cleaned;
-  saveCatalog();
+  PRODUCTS = cleaned; saveCatalog();
   if (Array.isArray(remote.ignored)) {
     IGNORED = remote.ignored.filter(x => typeof x === 'string').map(x => x.trim()).filter(Boolean).slice(0, MAX_CATALOG);
     saveIgnored();
@@ -1926,14 +1929,11 @@ function syncPullFromServer(opts) {
       if (!isFinite(v) || v < 0) continue;
       out[n] = Math.round(v * 100) / 100;
     }
-    PRICES = out;
-    savePrices();
+    PRICES = out; savePrices();
   }
   try { localStorage.setItem(SYNC_LOCAL_UPDATED_AT, String(remote.updatedAt || '')); } catch (e) {}
   _pendingRemote = null;
-  updateCatalogMeta();
-  renderTable();
-  updateUnknownBanner();
+  updateCatalogMeta(); renderTable(); updateUnknownBanner();
   if (!silent && statusEl) {
     statusEl.className = 'status show ok';
     statusEl.textContent = `Загружено с сервера: ${PRODUCTS.length} позиций.`;
@@ -1984,13 +1984,11 @@ function updateCatalogMeta() {
     const localUpdatedAt = localStorage.getItem(SYNC_LOCAL_UPDATED_AT) || '';
     const lastCheck = localStorage.getItem(SYNC_LAST_CHECK) || '';
     if (localUpdatedAt) {
-      metaLocal.style.display = 'none';
-      metaRemote.style.display = 'flex';
+      metaLocal.style.display = 'none'; metaRemote.style.display = 'flex';
       const s = $('syncTime'); if (s) s.textContent = formatDateTimeRu(localUpdatedAt);
       const lc2 = $('lastCheckTime2'); if (lc2 && lastCheck) lc2.textContent = formatDateTimeRu(lastCheck);
     } else {
-      metaLocal.style.display = 'flex';
-      metaRemote.style.display = 'none';
+      metaLocal.style.display = 'flex'; metaRemote.style.display = 'none';
       const lc1 = $('lastCheckTime'); if (lc1 && lastCheck) lc1.textContent = formatDateTimeRu(lastCheck);
     }
   } catch (e) {}
@@ -2017,8 +2015,7 @@ function showCatalogUpdateBanner(remote) {
   banner.classList.remove('hidden');
 }
 function hideCatalogUpdateBanner() {
-  const banner = $('banner');
-  if (banner) banner.classList.add('hidden');
+  const banner = $('banner'); if (banner) banner.classList.add('hidden');
 }
 function applyPendingRemote() {
   if (!_pendingRemote) return;
@@ -2030,18 +2027,13 @@ function applyPendingRemote() {
 }
 
 /* ═══════════════════════════════════════════
-   РЕЖИМ ВЛАДЕЛЬЦА
+   OWNER MODE
    ═══════════════════════════════════════════ */
 function updateHeaderBadge() {
   const el = $('headerBadge');
   if (!el) return;
-  if (_isOwner) {
-    el.className = 'header-badge show owner';
-    el.textContent = 'Владелец';
-  } else {
-    el.className = 'header-badge';
-    el.textContent = '';
-  }
+  if (_isOwner) { el.className = 'header-badge show owner'; el.textContent = 'Владелец'; }
+  else { el.className = 'header-badge'; el.textContent = ''; }
 }
 function setOwnerMode(on) {
   _isOwner = !!on;
@@ -2077,14 +2069,8 @@ async function activateOwner() {
   if (btn) btn.classList.add('busy');
   const status = await verifyToken(token);
   if (btn) btn.classList.remove('busy');
-  if (status === 'invalid') {
-    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Неверный токен'; }
-    return;
-  }
-  if (status === 'network') {
-    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Нет связи с сервером'; }
-    return;
-  }
+  if (status === 'invalid') { if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Неверный токен'; } return; }
+  if (status === 'network') { if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Нет связи с сервером'; } return; }
   try { localStorage.setItem(ACCESS_KEY, token); } catch (e) {}
   setOwnerMode(true);
   if (input) input.value = '';
@@ -2092,8 +2078,7 @@ async function activateOwner() {
 function deactivateOwner() {
   try { localStorage.removeItem(ACCESS_KEY); } catch (e) {}
   setOwnerMode(false);
-  const input = $('tokenInput');
-  if (input) input.value = '';
+  const input = $('tokenInput'); if (input) input.value = '';
   showToast('Режим владельца выключен');
 }
 async function restoreOwnerMode() {
@@ -2101,17 +2086,13 @@ async function restoreOwnerMode() {
     const token = localStorage.getItem(ACCESS_KEY);
     if (!token) return;
     const status = await verifyToken(token);
-    if (status === 'ok') {
-      setOwnerMode(true);
-    } else if (status === 'invalid') {
-      try { localStorage.removeItem(ACCESS_KEY); } catch (e) {}
-      setOwnerMode(false);
-    }
+    if (status === 'ok') setOwnerMode(true);
+    else if (status === 'invalid') { try { localStorage.removeItem(ACCESS_KEY); } catch (e) {} setOwnerMode(false); }
   } catch (e) {}
 }
 
 /* ═══════════════════════════════════════════
-   ФОТО (IndexedDB)
+   PHOTO DB
    ═══════════════════════════════════════════ */
 function openPhotoDB() {
   return new Promise((resolve, reject) => {
@@ -2125,27 +2106,20 @@ function openPhotoDB() {
     } catch (e) { reject(e); }
   });
 }
-/* ПАТЧ 1: сортируем файлы по имени перед сохранением */
 async function addPhotos(files, type) {
   if (!files || !files.length) return;
   try {
     const existing = await getPhotos();
     if (existing.length + files.length > MAX_PHOTOS) { alert(`Максимум ${MAX_PHOTOS} файлов.`); return; }
     const db = await openPhotoDB();
-    const list = [...files].sort((a, b) =>
-      String(a.name || '').localeCompare(String(b.name || ''), undefined, { numeric: true, sensitivity: 'base' })
-    );
+    const list = [...files].sort((a, b) => naturalCompare(a.name, b.name));
     for (let i = 0; i < list.length; i++) {
       const file = list[i];
       await new Promise((resolve, reject) => {
         const tx = db.transaction(PHOTO_STORE, 'readwrite');
         tx.objectStore(PHOTO_STORE).add({
-          name: safeStr(file.name, 200),
-          type,
-          kind: file.type || '',
-          size: file.size,
-          createdAt: Date.now(),
-          blob: file
+          name: safeStr(file.name, 200), type, kind: file.type || '', size: file.size,
+          createdAt: Date.now(), blob: file
         });
         tx.oncomplete = resolve;
         tx.onerror = () => reject(tx.error);
@@ -2182,7 +2156,8 @@ async function clearAllPhotos() {
     return new Promise((resolve, reject) => {
       const tx = db.transaction(PHOTO_STORE, 'readwrite');
       tx.objectStore(PHOTO_STORE).clear();
-      tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
     });
   } catch (e) { console.warn('clearAllPhotos:', e); }
 }
@@ -2196,7 +2171,10 @@ async function renderPhotoQueue() {
   count.className = 'hint';
   count.innerHTML = `Загружено: <b>${items.length}</b> ${items.length === 1 ? 'файл' : 'файлов'}`;
   box.appendChild(count);
-  items.sort((a, b) => a.id - b.id).forEach(item => {
+  items.sort((a, b) => {
+    const cmp = naturalCompare(a.name, b.name);
+    return cmp !== 0 ? cmp : a.id - b.id;
+  }).forEach((item, idx) => {
     const row = document.createElement('div');
     row.className = 'photo-item';
     const img = document.createElement('img');
@@ -2210,7 +2188,7 @@ async function renderPhotoQueue() {
     const meta = document.createElement('div');
     meta.className = 'photo-meta';
     const isPdf = item.kind === 'application/pdf';
-    meta.innerHTML = `<div class="photo-name">${escapeHtml(item.name)}</div><div class="photo-type">${item.type === 'invoice' ? 'Накладная' : 'Чек продаж'} · ${isPdf ? 'PDF' : 'Фото'} · ${Math.round(item.size / 1024)} КБ</div>`;
+    meta.innerHTML = `<div class="photo-name">${idx + 1}. ${escapeHtml(item.name)}</div><div class="photo-type">${item.type === 'invoice' ? 'Накладная' : 'Чек продаж'} · ${isPdf ? 'PDF' : 'Фото'} · ${Math.round(item.size / 1024)} КБ</div>`;
     const acts = document.createElement('div');
     acts.className = 'photo-actions';
     const del = document.createElement('button');
@@ -2223,7 +2201,7 @@ async function renderPhotoQueue() {
 }
 
 /* ═══════════════════════════════════════════
-   СЕССИЯ
+   SESSION
    ═══════════════════════════════════════════ */
 function scheduleSessionSave() {
   if (isRestoring || pendingSessionReset) return;
@@ -2257,8 +2235,7 @@ function saveSession() {
   } catch (e) { console.warn('saveSession:', e); }
 }
 function showAutosaveBadge() {
-  const el = $('headerBadge');
-  if (!el) return;
+  const el = $('headerBadge'); if (!el) return;
   el.className = 'header-badge show saved';
   el.textContent = 'Сохранено';
   if (el._t) clearTimeout(el._t);
@@ -2321,11 +2298,10 @@ function applySession(data) {
 }
 
 /* ═══════════════════════════════════════════
-   РЕЗУЛЬТАТ: мета, навигация по таблице
+   RESULT META + NAV
    ═══════════════════════════════════════════ */
 function updateResultMeta() {
-  const box = $('resultMeta');
-  if (!box) return;
+  const box = $('resultMeta'); if (!box) return;
   if (!Array.isArray(tableRows) || !tableRows.length) { box.style.display = 'none'; return; }
   box.style.display = 'grid';
   const d = $('metaDate'); if (d) d.textContent = formatDateRu(getTodayStr());
@@ -2387,7 +2363,7 @@ function tableKey(e) {
   tableNav(e.target, k);
 }
   /* ═══════════════════════════════════════════
-   РЕНДЕР ТАБЛИЦЫ
+   RENDER TABLE
    ═══════════════════════════════════════════ */
 function buildColgroupHTML(dates) {
   return [
@@ -2415,9 +2391,7 @@ function makeNumInput(opts) {
   inp.className = opts.className || 'num';
   if (opts.value != null) inp.value = String(opts.value);
   if (opts.placeholder) inp.placeholder = opts.placeholder;
-  inp.addEventListener('focus', () => {
-    requestAnimationFrame(() => { try { inp.select(); } catch (e) {} });
-  });
+  inp.addEventListener('focus', () => { requestAnimationFrame(() => { try { inp.select(); } catch (e) {} }); });
   inp.addEventListener('input', () => {
     const cleaned = onlyDigits(inp.value);
     if (cleaned !== inp.value) inp.value = cleaned;
@@ -2437,8 +2411,7 @@ function createResetIcon() {
   return icon;
 }
 function updateFinishCheckBtn() {
-  const wrap = $('finishCheckWrap');
-  if (!wrap) return;
+  const wrap = $('finishCheckWrap'); if (!wrap) return;
   wrap.style.display = (Array.isArray(tableRows) && tableRows.length) ? 'block' : 'none';
 }
 function renderTable() {
@@ -2487,7 +2460,6 @@ function renderTable() {
       nameText.className = 'name-text';
       nameText.textContent = row.name;
       tdName.appendChild(nameText);
-      /* ПАТЧ 6: значок ⚠ для позиций с расхождением сверки */
       if (_needsCheckNames.has(normalizeName(row.name))) {
         const warnIcon = document.createElement('span');
         warnIcon.className = 'check-warn-icon';
@@ -2497,7 +2469,6 @@ function renderTable() {
       }
       tr.appendChild(tdName);
 
-      /* Остаток */
       const tdStock = document.createElement('td');
       tdStock.className = 'num-cell';
       if (row.salesOnly) {
@@ -2513,7 +2484,6 @@ function renderTable() {
       }
       tr.appendChild(tdStock);
 
-      /* Продано */
       const tdSales = document.createElement('td');
       tdSales.className = 'edited-num-cell num-cell';
       const inputSales = makeNumInput({
@@ -2550,7 +2520,6 @@ function renderTable() {
       tdSales.appendChild(salesReset);
       tr.appendChild(tdSales);
 
-      /* Приходы по датам */
       dates.forEach(d => {
         const td = document.createElement('td');
         td.className = 'income-cell num-cell';
@@ -2595,12 +2564,10 @@ function renderTable() {
         tr.appendChild(td);
       });
 
-      /* Срок */
       const tdShelf = document.createElement('td');
       tdShelf.textContent = `${row.shelfLife} ч`;
       tr.appendChild(tdShelf);
 
-      /* Расчётные */
       const tdFresh = document.createElement('td');
       tdFresh.className = 'calc-cell' + (calc.freshOnShelf === null ? ' zero' : '');
       tdFresh.textContent = calc.freshOnShelf === null ? '—' : calc.freshOnShelf;
@@ -2635,12 +2602,9 @@ function renderTable() {
     scheduleTotalsUpdate();
     updateResultMeta();
     updateFinishCheckBtn();
-    /* ПАТЧ 6: счётчики и фильтр */
     updateSegmentedCounters();
     if (_tableQuery || _problemFilter) applyTableFilter();
-    if (!document.activeElement || !document.activeElement.closest('#cardsView')) {
-      renderCards();
-    }
+    if (!document.activeElement || !document.activeElement.closest('#cardsView')) renderCards();
   } finally { isRendering = false; }
 }
 function markEdited(td, party, newQty) {
@@ -2691,8 +2655,7 @@ function scheduleCardsSync() {
   }, SYNC_DEBOUNCE_MS);
 }
 function updateTotals() {
-  const summary = $('summary');
-  if (!summary) return;
+  const summary = $('summary'); if (!summary) return;
   const box = $('totals');
   let totalFreshOnShelf = 0, totalFreshSold = 0;
   let totalExpiredOnShelf = 0, totalSoldExpired = 0, totalSales = 0;
@@ -2734,23 +2697,18 @@ function updateTotals() {
 }
 
 /* ═══════════════════════════════════════════
-   РЕНДЕР КАРТОЧЕК
+   RENDER CARDS
    ═══════════════════════════════════════════ */
 function buildCardInput(row, opts) {
   const inpWrap = document.createElement('div');
   inpWrap.className = 'inp-wrap';
   const edited = opts.isEdited ? opts.isEdited() : false;
   if (edited) inpWrap.classList.add('edited');
-
   const inp = document.createElement('input');
-  inp.type = 'text';
-  inp.inputMode = 'numeric';
-  inp.className = 'num';
+  inp.type = 'text'; inp.inputMode = 'numeric'; inp.className = 'num';
   inp.value = opts.value;
   if (opts.placeholder) inp.placeholder = opts.placeholder;
-  inp.addEventListener('focus', () => {
-    requestAnimationFrame(() => { try { inp.select(); } catch (e) {} });
-  });
+  inp.addEventListener('focus', () => { requestAnimationFrame(() => { try { inp.select(); } catch (e) {} }); });
   inp.addEventListener('input', () => {
     const cleaned = onlyDigits(inp.value);
     if (cleaned !== inp.value) inp.value = cleaned;
@@ -2758,13 +2716,10 @@ function buildCardInput(row, opts) {
     if (opts.isEdited) inpWrap.classList.toggle('edited', opts.isEdited());
   });
   inpWrap.appendChild(inp);
-
   if (opts.onReset) {
     const reset = document.createElement('button');
-    reset.type = 'button';
-    reset.className = 'reset-btn';
-    reset.setAttribute('aria-label', 'Сбросить');
-    reset.title = 'Сбросить';
+    reset.type = 'button'; reset.className = 'reset-btn';
+    reset.setAttribute('aria-label', 'Сбросить'); reset.title = 'Сбросить';
     reset.appendChild(createResetIcon());
     reset.addEventListener('click', e => {
       e.stopPropagation();
@@ -2780,23 +2735,19 @@ function buildCardCell(label, inputEl) {
   const cell = document.createElement('div');
   cell.className = 'card-cell';
   const lbl = document.createElement('div');
-  lbl.className = 'lbl';
-  lbl.textContent = label;
+  lbl.className = 'lbl'; lbl.textContent = label;
   cell.appendChild(lbl);
   cell.appendChild(inputEl);
   return cell;
 }
 function renderCards() {
-  const box = $('cardsView');
-  if (!box) return;
+  const box = $('cardsView'); if (!box) return;
   box.innerHTML = '';
   if (!Array.isArray(tableRows) || !tableRows.length) return;
-
   const allDates = new Set();
   tableRows.forEach(r => (r.incoming || []).forEach(p => { if (p.date) allDates.add(p.date); }));
   let dates = [...allDates].sort((a, b) => b.localeCompare(a));
   if (dates.length > MAX_DATES) dates = dates.slice(0, MAX_DATES);
-
   tableRows.forEach(row => {
     const calc = computeFIFO(row);
     const cardStatus = getCardStatus(calc, row);
@@ -2808,7 +2759,6 @@ function renderCards() {
     const nameEl = document.createElement('div');
     nameEl.className = 'card-name';
     nameEl.textContent = row.name;
-    /* ПАТЧ 7: значок ⚠ для позиций с расхождением сверки */
     if (_needsCheckNames.has(normalizeName(row.name))) {
       const warnIcon = document.createElement('span');
       warnIcon.className = 'check-warn-icon';
@@ -2840,8 +2790,7 @@ function renderCards() {
         placeholder: '—',
         isEdited: () => false,
         onChange: v => { row.stock = v === '' ? null : clampNum(v, 0, MAX_NUM, null); refreshCardRow(row, card); scheduleSessionSave(); updateFinishCheckBtn(); },
-        onReset: null,
-        original: null
+        onReset: null, original: null
       })));
       scroll.appendChild(buildCardCell('Прод.', buildCardInput(row, {
         value: String(row.sales || 0),
@@ -2879,16 +2828,13 @@ function renderCards() {
 
     box.appendChild(card);
   });
-
   requestAnimationFrame(() => {
     updateCardResults();
-    /* ПАТЧ 7: перерисовка при активном фильтре */
     if (_tableQuery || _problemFilter) applyTableFilter();
   });
 }
 function updateCardResults() {
-  const box = $('cardsView');
-  if (!box) return;
+  const box = $('cardsView'); if (!box) return;
   const cards = box.querySelectorAll('.card');
   cards.forEach((card, idx) => {
     const row = tableRows[idx];
@@ -2926,7 +2872,7 @@ function refreshCardRow(row, card) {
 }
 
 /* ═══════════════════════════════════════════
-   МОДАЛКА «НЕ В СПРАВОЧНИКЕ»
+   UNKNOWN MODAL
    ═══════════════════════════════════════════ */
 function renderUnknownModal() {
   const body = $('unknownRows');
@@ -2963,10 +2909,8 @@ function renderUnknownModal() {
     const main = document.createElement('div');
     main.className = 'unk-main';
     const nameField = document.createElement('input');
-    nameField.type = 'text';
-    nameField.className = 'unk-name-field';
-    nameField.value = r.name;
-    nameField.readOnly = true;
+    nameField.type = 'text'; nameField.className = 'unk-name-field';
+    nameField.value = r.name; nameField.readOnly = true;
     nameField.addEventListener('click', e => e.stopPropagation());
     main.appendChild(nameField);
 
@@ -2995,9 +2939,7 @@ function renderUnknownModal() {
     const daysWrap = document.createElement('div');
     daysWrap.className = 'unk-hours';
     const dInp = document.createElement('input');
-    dInp.type = 'text';
-    dInp.inputMode = 'decimal';
-    dInp.className = 'pill center';
+    dInp.type = 'text'; dInp.inputMode = 'decimal'; dInp.className = 'pill center';
     dInp.dataset.role = 'shelfDays';
     dInp.placeholder = '—';
     dInp.value = formatDays(r.shelfLife);
@@ -3025,15 +2967,8 @@ function renderUnknownModal() {
     row.addEventListener('click', e => {
       if (e.target.closest('input')) return;
       const key = normalizeName(r.name);
-      if (unknownSelected.has(key)) {
-        unknownSelected.delete(key);
-        row.classList.remove('selected');
-        cb.classList.remove('checked');
-      } else {
-        unknownSelected.add(key);
-        row.classList.add('selected');
-        cb.classList.add('checked');
-      }
+      if (unknownSelected.has(key)) { unknownSelected.delete(key); row.classList.remove('selected'); cb.classList.remove('checked'); }
+      else { unknownSelected.add(key); row.classList.add('selected'); cb.classList.add('checked'); }
       if (selectedEl) selectedEl.textContent = String(unknownSelected.size);
       updateUnknownMatchBtn();
     });
@@ -3056,8 +2991,7 @@ function openUnknownModal() {
   unknownVisible = UNKNOWN_PAGE_SIZE;
   unknownQuery = '';
   unknownSelected = new Set();
-  const searchEl = $('unknownSearch');
-  if (searchEl) searchEl.value = '';
+  const searchEl = $('unknownSearch'); if (searchEl) searchEl.value = '';
   renderUnknownModal();
   openModal('unknownModal');
 }
@@ -3074,8 +3008,7 @@ function updateUnknownBanner() {
   if (banner) banner.style.display = filter.length ? 'block' : 'none';
 }
 function updateUnknownMatchBtn() {
-  const btn = $('unknownMatchBtn');
-  if (!btn) return;
+  const btn = $('unknownMatchBtn'); if (!btn) return;
   const canMatch = _isOwner && unknownSelected.size === 1;
   btn.style.display = canMatch ? 'inline-flex' : 'none';
 }
@@ -3122,9 +3055,7 @@ function ignoreSelectedUnknown() {
   const keys = new Set(unknownSelected);
   const count = keys.size;
   if (!confirm(`Добавить ${count} позиций в игнор-лист?`)) return;
-  unknownRows.forEach(r => {
-    if (keys.has(normalizeName(r.name)) && !isIgnored(r.name)) IGNORED.push(r.name);
-  });
+  unknownRows.forEach(r => { if (keys.has(normalizeName(r.name)) && !isIgnored(r.name)) IGNORED.push(r.name); });
   saveIgnored();
   unknownRows = unknownRows.filter(r => !keys.has(normalizeName(r.name)));
   unknownSelected = new Set();
@@ -3136,7 +3067,7 @@ function ignoreSelectedUnknown() {
 }
 
 /* ═══════════════════════════════════════════
-   БЕЗ КАТЕГОРИИ
+   NO CATEGORY
    ═══════════════════════════════════════════ */
 function updateNoCategoryBanner() {
   const banner = $('noCategoryBanner');
@@ -3145,8 +3076,7 @@ function updateNoCategoryBanner() {
   if (banner) banner.style.display = noCategoryRows.length ? 'block' : 'none';
 }
 function renderNoCategoryModal() {
-  const list = $('noCategoryList');
-  if (!list) return;
+  const list = $('noCategoryList'); if (!list) return;
   list.innerHTML = '';
   if (!noCategoryRows.length) {
     list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Список пуст.</div>';
@@ -3157,16 +3087,13 @@ function renderNoCategoryModal() {
     const row = document.createElement('div');
     row.className = 'no-cat-row';
     const name = document.createElement('div');
-    name.className = 'no-cat-name';
-    name.textContent = r.name;
+    name.className = 'no-cat-name'; name.textContent = r.name;
     row.appendChild(name);
     const btns = document.createElement('div');
     btns.className = 'no-cat-btns';
     CATEGORY_ORDER.forEach(cat => {
       const b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = CATEGORY_EMOJI[cat];
-      b.title = CATEGORY_LABELS[cat];
+      b.type = 'button'; b.textContent = CATEGORY_EMOJI[cat]; b.title = CATEGORY_LABELS[cat];
       b.addEventListener('click', () => assignNoCategory(r.name, cat));
       btns.appendChild(b);
     });
@@ -3179,30 +3106,22 @@ function assignNoCategory(name, cat) {
   if (!isValidCategory(cat)) return;
   const key = normalizeName(name);
   const p = PRODUCTS.find(x => normalizeName(x.name) === key);
-  if (p) {
-    p.category = cat;
-    saveCatalog();
-  }
+  if (p) { p.category = cat; saveCatalog(); }
   noCategoryRows = noCategoryRows.filter(r => normalizeName(r.name) !== key);
   updateNoCategoryBanner();
   showToast(`«${name}» → ${CATEGORY_LABELS[cat]}`);
-  if (!noCategoryRows.length) {
-    closeModal('noCategoryModal');
-  } else {
-    renderNoCategoryModal();
-  }
+  if (!noCategoryRows.length) closeModal('noCategoryModal');
+  else renderNoCategoryModal();
 }
 function openNoCategoryModal() {
   if (!noCategoryRows.length) return;
   renderNoCategoryModal();
   openModal('noCategoryModal');
 }
-function closeNoCategoryModal() {
-  closeModal('noCategoryModal');
-}
+function closeNoCategoryModal() { closeModal('noCategoryModal'); }
 
 /* ═══════════════════════════════════════════
-   МОДАЛКА «СПРАВОЧНИК»
+   CATALOG MODAL
    ═══════════════════════════════════════════ */
 function updateCatalogSelectUI() {
   const bar = $('catalogSelectBar');
@@ -3236,8 +3155,7 @@ function updateCatalogSelectUI() {
   if (hint) hint.style.display = _catalogSelectMode ? 'none' : '';
 }
 function renderCatalogList() {
-  const list = $('catalogList');
-  if (!list) return;
+  const list = $('catalogList'); if (!list) return;
   const searchEl = $('catalogSearch');
   const searchClear = $('catalogSearchClear');
   const query = (searchEl && searchEl.value || '').toLowerCase().trim().slice(0, 100);
@@ -3261,10 +3179,8 @@ function renderCatalogList() {
     }
 
     const nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.className = 'pill text';
-    nameInput.value = p.name;
-    nameInput.maxLength = 100;
+    nameInput.type = 'text'; nameInput.className = 'pill text';
+    nameInput.value = p.name; nameInput.maxLength = 100;
     nameInput.placeholder = 'Название';
     nameInput.readOnly = _catalogSelectMode;
     nameInput.onchange = () => {
@@ -3279,9 +3195,7 @@ function renderCatalogList() {
       unknownRows.forEach(r => { if (r.name === oldName) r.name = newName; });
       const oldKey = normalizeName(oldName);
       let aliasesChanged = false;
-      ALIASES.forEach(a => {
-        if (normalizeName(a.target) === oldKey) { a.target = newName; aliasesChanged = true; }
-      });
+      ALIASES.forEach(a => { if (normalizeName(a.target) === oldKey) { a.target = newName; aliasesChanged = true; } });
       if (aliasesChanged) saveAliases();
       saveCatalog(); scheduleSessionSave();
     };
@@ -3291,13 +3205,9 @@ function renderCatalogList() {
     const hoursWrap = document.createElement('div');
     hoursWrap.className = 'pill-wrap';
     const hoursInput = document.createElement('input');
-    hoursInput.type = 'text';
-    hoursInput.className = 'pill center';
-    hoursInput.inputMode = 'numeric';
-    hoursInput.pattern = '[0-9]*';
-    hoursInput.value = String(p.shelfLife);
-    hoursInput.placeholder = '0';
-    hoursInput.maxLength = 3;
+    hoursInput.type = 'text'; hoursInput.className = 'pill center';
+    hoursInput.inputMode = 'numeric'; hoursInput.pattern = '[0-9]*';
+    hoursInput.value = String(p.shelfLife); hoursInput.placeholder = '0'; hoursInput.maxLength = 3;
     hoursInput.readOnly = _catalogSelectMode;
     hoursWrap.appendChild(hoursInput);
     const hoursUnit = document.createElement('span'); hoursUnit.className = 'unit'; hoursUnit.textContent = 'ч';
@@ -3325,12 +3235,9 @@ function renderCatalogList() {
     const daysWrap = document.createElement('div');
     daysWrap.className = 'pill-wrap';
     const daysInput = document.createElement('input');
-    daysInput.type = 'text';
-    daysInput.className = 'pill center';
+    daysInput.type = 'text'; daysInput.className = 'pill center';
     daysInput.inputMode = 'decimal';
-    daysInput.value = formatDays(p.shelfLife);
-    daysInput.placeholder = '—';
-    daysInput.maxLength = 4;
+    daysInput.value = formatDays(p.shelfLife); daysInput.placeholder = '—'; daysInput.maxLength = 4;
     daysInput.readOnly = _catalogSelectMode;
     daysWrap.appendChild(daysInput);
     const daysUnit = document.createElement('span'); daysUnit.className = 'unit'; daysUnit.textContent = 'сут';
@@ -3440,24 +3347,19 @@ function catalogToIgnored() {
   tableRows = tableRows.filter(r => !keys.has(normalizeName(r.name)));
   unknownRows = unknownRows.filter(r => !keys.has(normalizeName(r.name)));
   let added = 0;
-  toIgnore.forEach(name => {
-    if (!isIgnored(name)) { IGNORED.push(name); added++; }
-  });
-  saveCatalog();
-  saveIgnored();
+  toIgnore.forEach(name => { if (!isIgnored(name)) { IGNORED.push(name); added++; } });
+  saveCatalog(); saveIgnored();
   _catalogSelected = new Set();
   _catalogSelectMode = false;
   updateCatalogSelectUI();
-  renderCatalogList();
-  renderTable();
-  updateUnknownBanner();
+  renderCatalogList(); renderTable(); updateUnknownBanner();
   if ($('ignoredModal') && !$('ignoredModal').classList.contains('hidden')) renderIgnoredList();
   scheduleSessionSave();
   showToast(`Перенесено в игнор: ${added}`);
 }
 
 /* ═══════════════════════════════════════════
-   МОДАЛКА «ИГНОР-ЛИСТ»
+   IGNORED MODAL
    ═══════════════════════════════════════════ */
 function updateIgnoredSelectUI() {
   const bar = $('ignoredSelectBar');
@@ -3479,8 +3381,7 @@ function updateIgnoredSelectUI() {
   if (hint) hint.style.display = _ignoredSelectMode ? 'none' : '';
 }
 function renderIgnoredList() {
-  const list = $('ignoredList');
-  if (!list) return;
+  const list = $('ignoredList'); if (!list) return;
   list.innerHTML = '';
   if (!IGNORED.length) { list.innerHTML = '<div class="hint" style="text-align:center;padding:20px">Игнор-лист пуст.</div>'; return; }
   const frag = document.createDocumentFragment();
@@ -3499,20 +3400,16 @@ function renderIgnoredList() {
     }
 
     const nameInput = document.createElement('input');
-    nameInput.type = 'text';
-    nameInput.className = 'pill text';
-    nameInput.value = name;
-    nameInput.readOnly = true;
+    nameInput.type = 'text'; nameInput.className = 'pill text';
+    nameInput.value = name; nameInput.readOnly = true;
     nameInput.addEventListener('click', e => e.stopPropagation());
     row.appendChild(nameInput);
 
     if (!_ignoredSelectMode) {
       const delBtn = document.createElement('button');
-      delBtn.className = 'del-btn';
-      delBtn.type = 'button';
+      delBtn.className = 'del-btn'; delBtn.type = 'button';
       delBtn.setAttribute('aria-label', 'Удалить');
-      const xIcon = document.createElement('span');
-      xIcon.className = 'x-icon';
+      const xIcon = document.createElement('span'); xIcon.className = 'x-icon';
       delBtn.appendChild(xIcon);
       delBtn.onclick = (e) => {
         e.stopPropagation();
@@ -3554,8 +3451,7 @@ function ignoredToCatalog() {
       PRODUCTS.push({ name, shelfLife: 0, category: null });
     }
   });
-  saveIgnored();
-  saveCatalog();
+  saveIgnored(); saveCatalog();
   _ignoredSelected = new Set();
   _ignoredSelectMode = false;
   updateIgnoredSelectUI();
@@ -3566,11 +3462,10 @@ function ignoredToCatalog() {
 }
 
 /* ═══════════════════════════════════════════
-   МОДАЛКА «АЛИАСЫ»
+   ALIASES MODAL
    ═══════════════════════════════════════════ */
 function renderAliasesList() {
-  const list = $('aliasesList');
-  if (!list) return;
+  const list = $('aliasesList'); if (!list) return;
   const searchEl = $('aliasesSearch');
   const searchClear = $('aliasesSearchClear');
   const q = (searchEl && searchEl.value || '').toLowerCase().trim().slice(0, 100);
@@ -3604,8 +3499,7 @@ function renderAliasesList() {
     const card = document.createElement('div');
     card.className = 'ali-card';
     const del = document.createElement('button');
-    del.className = 'del';
-    del.type = 'button';
+    del.className = 'del'; del.type = 'button';
     del.setAttribute('aria-label', 'Удалить');
     del.textContent = '✕';
     del.onclick = (e) => {
@@ -3615,34 +3509,26 @@ function renderAliasesList() {
       renderAliasesList();
     };
     const src = document.createElement('div');
-    src.className = 'src';
-    src.textContent = a.alias;
+    src.className = 'src'; src.textContent = a.alias;
     const dst = document.createElement('div');
     dst.className = 'dst';
     const ar = document.createElement('span');
-    ar.className = 'ar';
-    ar.textContent = '→';
+    ar.className = 'ar'; ar.textContent = '→';
     const dstText = document.createElement('span');
     dstText.textContent = a.target;
-    dst.appendChild(ar);
-    dst.appendChild(dstText);
-    card.appendChild(del);
-    card.appendChild(src);
-    card.appendChild(dst);
+    dst.appendChild(ar); dst.appendChild(dstText);
+    card.appendChild(del); card.appendChild(src); card.appendChild(dst);
     frag.appendChild(card);
   });
   list.appendChild(frag);
 }
 function openAliasesModal() {
   if (!_isOwner) return;
-  const searchEl = $('aliasesSearch');
-  if (searchEl) searchEl.value = '';
+  const searchEl = $('aliasesSearch'); if (searchEl) searchEl.value = '';
   renderAliasesList();
   openModal('aliasesModal');
 }
-function closeAliasesModal() {
-  closeModal('aliasesModal');
-}
+function closeAliasesModal() { closeModal('aliasesModal'); }
 function handleAliasTargetClick(baseName) {
   const mode = _aliasTargetMode;
   const srcList = (_aliasTargetForList || []).slice();
@@ -3664,9 +3550,7 @@ function handleAliasTargetClick(baseName) {
     _catalogSelected = new Set();
     _catalogSelectMode = false;
     updateCatalogSelectUI();
-    renderCatalogList();
-    renderTable();
-    updateUnknownBanner();
+    renderCatalogList(); renderTable(); updateUnknownBanner();
     scheduleSessionSave();
     showToast(`Сопоставлено ${removed} → ${baseName}`);
     closeAliasTargetModal();
@@ -3691,9 +3575,7 @@ function handleAliasTargetClick(baseName) {
     unknownRows.splice(idx, 1);
     tableRows = sortRowsAlphabetically(tableRows.concat([row]));
     tableRows.forEach(r => { if (r.name === baseName && p2) r.shelfLife = p2.shelfLife; });
-    renderTable();
-    updateUnknownBanner();
-    scheduleSessionSave();
+    renderTable(); updateUnknownBanner(); scheduleSessionSave();
   }
   unknownSelected = new Set();
   if ($('unknownModal') && !$('unknownModal').classList.contains('hidden')) {
@@ -3702,8 +3584,7 @@ function handleAliasTargetClick(baseName) {
   }
 }
 function renderAliasTargetList() {
-  const list = $('aliasTargetList');
-  if (!list) return;
+  const list = $('aliasTargetList'); if (!list) return;
   const searchEl = $('aliasTargetSearch');
   const searchClear = $('aliasTargetSearchClear');
   const q = (searchEl && searchEl.value || '').toLowerCase().trim().slice(0, 100);
@@ -3712,12 +3593,8 @@ function renderAliasTargetList() {
   const mode = _aliasTargetMode;
   const srcKeys = new Set((_aliasTargetForList || []).map(normalizeName));
   let filtered = PRODUCTS.slice();
-  if (mode === 'unknown') {
-    filtered = filtered.filter(p => !srcKeys.has(normalizeName(p.name)));
-  }
-  filtered = filtered
-    .filter(p => !q || p.name.toLowerCase().includes(q))
-    .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+  if (mode === 'unknown') filtered = filtered.filter(p => !srcKeys.has(normalizeName(p.name)));
+  filtered = filtered.filter(p => !q || p.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name, 'ru'));
   if (!filtered.length) {
     const empty = document.createElement('div');
     empty.className = 'hint';
@@ -3729,16 +3606,12 @@ function renderAliasTargetList() {
   const frag = document.createDocumentFragment();
   filtered.forEach(p => {
     const row = document.createElement('button');
-    row.type = 'button';
-    row.className = 'alias-target-row';
+    row.type = 'button'; row.className = 'alias-target-row';
     const cn = document.createElement('span');
-    cn.className = 'cn';
-    cn.textContent = p.name;
+    cn.className = 'cn'; cn.textContent = p.name;
     const ch = document.createElement('span');
-    ch.className = 'ch';
-    ch.textContent = `${p.shelfLife} ч`;
-    row.appendChild(cn);
-    row.appendChild(ch);
+    ch.className = 'ch'; ch.textContent = `${p.shelfLife} ч`;
+    row.appendChild(cn); row.appendChild(ch);
     row.onclick = () => handleAliasTargetClick(p.name);
     frag.appendChild(row);
   });
@@ -3754,14 +3627,10 @@ function openAliasTargetModalList(list, mode) {
   _aliasTargetMode = mode || 'unknown';
   const hint = $('aliasTargetHint');
   if (hint) {
-    if (_aliasTargetForList.length === 1) {
-      hint.innerHTML = `<b>${escapeHtml(_aliasTargetForList[0])}</b> → выберите позицию справочника`;
-    } else {
-      hint.innerHTML = `Сопоставить <b>${_aliasTargetForList.length} позиций</b> с одной базовой. Тапните базу.`;
-    }
+    if (_aliasTargetForList.length === 1) hint.innerHTML = `<b>${escapeHtml(_aliasTargetForList[0])}</b> → выберите позицию справочника`;
+    else hint.innerHTML = `Сопоставить <b>${_aliasTargetForList.length} позиций</b> с одной базовой. Тапните базу.`;
   }
-  const searchEl = $('aliasTargetSearch');
-  if (searchEl) searchEl.value = '';
+  const searchEl = $('aliasTargetSearch'); if (searchEl) searchEl.value = '';
   renderAliasTargetList();
   openModal('aliasTargetModal');
 }
@@ -3773,7 +3642,7 @@ function closeAliasTargetModal() {
 }
 
 /* ═══════════════════════════════════════════
-   МОДАЛ «ЦЕНЫ»
+   PRICES MODAL
    ═══════════════════════════════════════════ */
 function openPricesModal() {
   const s = $('pricesSearch'); if (s) s.value = '';
@@ -3782,10 +3651,8 @@ function openPricesModal() {
   openModal('pricesModal');
 }
 function closePricesModal() { closeModal('pricesModal'); }
-
 function renderPricesList() {
-  const list = $('pricesList');
-  if (!list) return;
+  const list = $('pricesList'); if (!list) return;
   const searchEl = $('pricesSearch');
   const searchClear = $('pricesSearchClear');
   const q = (searchEl && searchEl.value || '').toLowerCase().trim().slice(0, 100);
@@ -3803,23 +3670,18 @@ function renderPricesList() {
     const row = document.createElement('div');
     row.className = 'price-row' + (item.price > 0 ? '' : ' empty');
     const nameEl = document.createElement('span');
-    nameEl.className = 'pname';
-    nameEl.textContent = item.name;
+    nameEl.className = 'pname'; nameEl.textContent = item.name;
     const valEl = document.createElement('span');
     valEl.className = 'pval';
     valEl.textContent = item.price > 0 ? `${item.price.toFixed(2).replace('.', ',')} ₽` : '—';
     const chev = document.createElement('span');
-    chev.className = 'pchev';
-    chev.textContent = '›';
-    row.appendChild(nameEl);
-    row.appendChild(valEl);
-    row.appendChild(chev);
+    chev.className = 'pchev'; chev.textContent = '›';
+    row.appendChild(nameEl); row.appendChild(valEl); row.appendChild(chev);
     row.onclick = () => openPriceEdit(item.name, item.price);
     frag.appendChild(row);
   });
   list.appendChild(frag);
 }
-
 function openPriceEdit(name, currentPrice) {
   _priceEditOriginal = name;
   const title = $('priceEditTitle');
@@ -3859,8 +3721,9 @@ function deletePriceEdit() {
   closePriceEdit();
   renderPricesList();
 }
-  /* ═══════════════════════════════════════════
-   ПРИМЕНЕНИЕ CSV
+
+/* ═══════════════════════════════════════════
+   APPLY CSV
    ═══════════════════════════════════════════ */
 async function applyCSV() {
   if (applyBusy) return;
@@ -3874,7 +3737,6 @@ async function applyCSV() {
     if (!isValidCategory(_activeCategory)) throw new Error('Сначала выберите категорию.');
     const importedCategoryLabel = CATEGORY_LABELS[_activeCategory];
     _lastImportedCategory = _activeCategory;
-    /* ПАТЧ 10: сброс расхождений и фильтра при импорте */
     _needsCheckNames = new Set();
     setProblemFilter(false);
     const csvInput = $('csvInput');
@@ -3916,14 +3778,8 @@ async function applyCSV() {
       if (alreadyKeys.has(key)) continue;
       if (otherRows.some(r => normalizeName(r.name) === key && r.category === _activeCategory)) continue;
       inCategory.push({
-        name: p.name,
-        stock: null,
-        sales: 0,
-        _originalSales: 0,
-        shelfLife: p.shelfLife,
-        category: _activeCategory,
-        incoming: [],
-        salesOnly: false
+        name: p.name, stock: null, sales: 0, _originalSales: 0,
+        shelfLife: p.shelfLife, category: _activeCategory, incoming: [], salesOnly: false
       });
     }
     tableRows = sortRowsAlphabetically(otherRows.concat(inCategory));
@@ -3967,17 +3823,37 @@ async function applyCSV() {
 }
 
 /* ═══════════════════════════════════════════
-   ЭКСПОРТ В EXCEL
+   EXPORT EXCEL
    ═══════════════════════════════════════════ */
-function exportExcel() {
+async function loadXLSX() {
+  if (typeof XLSX !== 'undefined') return XLSX;
+  if (_xlsxPromise) return _xlsxPromise;
+  _xlsxPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    s.async = true;
+    s.onload = () => {
+      if (typeof XLSX !== 'undefined') resolve(XLSX);
+      else reject(new Error('Библиотека XLSX не инициализировалась'));
+    };
+    s.onerror = () => {
+      _xlsxPromise = null;
+      reject(new Error('Не удалось загрузить библиотеку Excel. Проверьте интернет.'));
+    };
+    document.head.appendChild(s);
+  });
+  return _xlsxPromise;
+}
+async function exportExcel() {
   if (exportBusy) return;
-  if (typeof XLSX === 'undefined') { alert('Библиотека Excel не загружена.'); return; }
   if (!Array.isArray(tableRows) || !tableRows.length) { alert('Нет данных.'); return; }
   exportBusy = true;
   const btn = $('exportBtn');
   if (btn) btn.classList.add('busy');
   if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
   try {
+    await loadXLSX();
+    if (typeof XLSX === 'undefined') throw new Error('Библиотека Excel не загружена.');
     const allDates = new Set();
     tableRows.forEach(r => (r.incoming || []).forEach(p => { if (p.date) allDates.add(p.date); }));
     unknownRows.forEach(r => (r.incoming || []).forEach(p => { if (p.date) allDates.add(p.date); }));
@@ -4046,43 +3922,47 @@ function showToast(text) {
 }
 
 /* ═══════════════════════════════════════════
-   ПРОМПТ ДЛЯ ИИ
+   ПРОМПТЫ
    ═══════════════════════════════════════════ */
-function buildPrompt() {
-  const checkDate = getTodayStr();
-  const checkTime = getCurrentTimeStr();
+function buildCatalogListForPrompt() {
   const catProducts = getCategoryProducts(_activeCategory);
-  const catLabel = _activeCategory ? CATEGORY_LABELS[_activeCategory] : '—';
-
-  let searchBlock;
-  let catalogList;
   if (catProducts.length) {
-    catalogList = catProducts.map(p => `- ${p.name}: ${p.shelfLife}`).join('\n');
-    searchBlock = `═══════════════════════════════════════════
-🎯 ИЩИ ТОЛЬКО ЭТИ ПОЗИЦИИ (категория «${catLabel}»)
+    return {
+      list: catProducts.map(p => `- ${p.name}: ${p.shelfLife}`).join('\n'),
+      block: `═══════════════════════════════════════════
+🎯 ИЩИ ТОЛЬКО ЭТИ ПОЗИЦИИ (категория «${CATEGORY_LABELS[_activeCategory]}»)
 ═══════════════════════════════════════════
 ${catProducts.map(p => `- ${p.name}`).join('\n')}
 
 ВАЖНО: если позиции НЕТ в этом списке — НЕ включай её в CSV.
-Строки из накладной, которых нет в этом перечне, ПРОПУСКАЙ (это чужие категории).
-`;
-  } else if (_activeCategory) {
-    catalogList = PRODUCTS.map(p => `- ${p.name}: ${p.shelfLife}`).join('\n');
-    searchBlock = `⚠️ ВНИМАНИЕ: для категории «${catLabel}» пока не назначено ни одной позиции.
-Сначала назначьте категории в разделе «Справочник», иначе фильтрация невозможна.
-`;
-  } else {
-    catalogList = PRODUCTS.map(p => `- ${p.name}: ${p.shelfLife}`).join('\n');
-    searchBlock = `⚠️ ВНИМАНИЕ: категория не выбрана.
-Выберите категорию в разделе «Материалы» перед отправкой в ИИ.
-`;
+Строки из накладной, которых нет в этом перечне, ПРОПУСКАЙ (это чужие категории).`
+    };
   }
+  if (_activeCategory) {
+    return {
+      list: PRODUCTS.map(p => `- ${p.name}: ${p.shelfLife}`).join('\n'),
+      block: `⚠️ ВНИМАНИЕ: для категории «${CATEGORY_LABELS[_activeCategory]}» пока не назначено ни одной позиции.
+Сначала назначьте категории в разделе «Справочник», иначе фильтрация невозможна.`
+    };
+  }
+  return {
+    list: PRODUCTS.map(p => `- ${p.name}: ${p.shelfLife}`).join('\n'),
+    block: `⚠️ ВНИМАНИЕ: категория не выбрана.
+Выберите категорию в разделе «Материалы» перед отправкой в ИИ.`
+  };
+}
+
+function buildPrompt() {
+  const checkDate = getTodayStr();
+  const checkTime = getCurrentTimeStr();
+  const { list: catalogList, block: searchBlock } = buildCatalogListForPrompt();
 
   return `Ты — OCR-ассистент для аудита сроков годности в кондитерской French Bakery.
 
 ЗАДАЧА: прочитать накладные (ТОРГ-12) и чек продаж, вернуть CSV.
 
 ${searchBlock}
+
 ═══════════════════════════════════════════
 ИСТОЧНИКИ
 ═══════════════════════════════════════════
@@ -4308,6 +4188,13 @@ ${searchBlock}
    отдельно. Если в ней числа визуально «перепутаны» или
    повторяются без причины — перечитай ряд ещё раз.
 
+🔴 ПРОВЕРКА ПОЛНОТЫ (обязательно):
+#ПРОВЕРКА_ПОЛНОТЫ: перечисли ВСЕ изображения по номерам (изображение 1, 2, ...).
+Для каждого укажи: к какой накладной относится, какие номера строк содержит.
+Проверь сквозную нумерацию: если на фото №1 последняя строка 8, а на фото №2
+первая 10 — строка 9 потеряна, найди её.
+В конце выведи: «получено изображений: N, обработано: M».
+
 #ИСТОЧНИКИ: какие файлы, какие накладные, какие листы заказа.
 #ПРОВЕРКА: сколько позиций в накладных и листах, сколько в CSV.
 #НЕЧИТАЕМО: что не удалось прочитать, включая пометки «+N» / «-N».
@@ -4322,15 +4209,1061 @@ ${catalogList}
 Выдай CSV.`;
 }
 
+function buildDailyPrompt(dateLabel) {
+  const checkDate = getTodayStr();
+  const checkTime = getCurrentTimeStr();
+  const { list: catalogList, block: searchBlock } = buildCatalogListForPrompt();
+
+  return `ЗАДАЧА: прочитать ОДНУ накладную за ${dateLabel} и ОДИН чек продаж (если загружен).
+
+🔴 ВСЕ приложенные фото относятся к ОДНОЙ дате — ${dateLabel}.
+Не путай с другими датами.
+
+${searchBlock}
+
+═══════════════════════════════════════════
+ИСТОЧНИКИ
+═══════════════════════════════════════════
+- НАКЛАДНАЯ за ${dateLabel} → приход товара.
+- ЧЕК продаж → продажи за день.
+Не суммировать их между собой.
+
+═══════════════════════════════════════════
+ГРУППИРОВКА ФАЙЛОВ
+═══════════════════════════════════════════
+Одна накладная = несколько фото. Признак — сквозная нумерация строк
+(1–8, 9–32, 33–36 = одна накладная). Шапка только на первом фото.
+Последняя страница содержит «Всего по накладной».
+
+🔴 ФОТО БЕЗ ШАПКИ — НЕ ОТДЕЛЬНЫЙ ДОКУМЕНТ.
+   Даже если на фото нет № и даты — читай его позиции и присоединяй
+   к предыдущей накладной по сквозной нумерации.
+
+🔴 ПРОВЕРКА ПОСЛЕ ГРУППИРОВКИ:
+   Посчитай позиции со всех фото накладной. Если последняя позиция —
+   №41, значит всего 41 позиция. Если получилось меньше — ты потерял
+   страницу.
+
+═══════════════════════════════════════════
+ЧТЕНИЕ НАКЛАДНЫХ
+═══════════════════════════════════════════
+Количество — только колонка 8 «Количество (масса), места, штук».
+Не брать: колонку 7 (в одном месте), колонку 10 (нетто),
+цену (11), суммы (12, 15).
+
+Каждую строку читай глазами. Источник К-во — только колонка 8.
+Не вычисляй К-во делением Суммы на Цену.
+
+Проверка строки: К-во × Цена = Сумма. Если не сходится —
+перечитай колонку 8 глазами. Не подгоняй.
+
+Если цифра нечитаема — не выдумывай. Пиши #НЕЧИТАЕМО.
+
+🔴 РУКОПИСНЫЕ ПОМЕТКИ В НАКЛАДНОЙ — ИГНОРИРУЙ ПОЛНОСТЬЮ.
+   Любые рукописные записи (√, +N, -N, зачёркнутое, цифры сбоку
+   от колонки) НЕ читай и НЕ применяй. Берёшь ТОЛЬКО печатное
+   число из колонки 8.
+
+═══════════════════════════════════════════
+ЧТЕНИЕ ЛИСТА ЗАКАЗА
+═══════════════════════════════════════════
+Если бланк называется «ЛИСТ ЗАКАЗА» — это другой тип документа.
+Дата документа = дата прихода (${dateLabel}).
+
+Таблица — 6 колонок:
+  3 — ПРОДУКТ              ← НАЗВАНИЕ позиции
+  5 — Количество в ед. изм. ← ЭТО К-ВО
+Остальные колонки — не нужны.
+
+Цены и суммы в листе заказа НЕТ → арифметикой не проверить.
+Читай колонку 5 ГЛАЗАМИ, внимательно каждую строку.
+
+🔴 РУКОПИСНЫЕ ПОМЕТКИ В ЛИСТЕ ЗАКАЗА:
+  √ (галочка)               → игнорируй, бери печатное число.
+  зачёркнуто + новое число  → бери НОВОЕ (это исправление).
+  +N или -N рядом           → НЕ применяй. Пиши в #НЕЧИТАЕМО.
+
+Названия:
+  - снимай префикс «Т » (пробел после Т);
+  - снимай суффикс «п/ф».
+
+═══════════════════════════════════════════
+ЧТЕНИЕ ЧЕКА
+═══════════════════════════════════════════
+Формат А: К-во и Сумма в отдельных колонках.
+Формат Б: «2x171» — К-во и Цена в одной ячейке. Бери ПЕРВОЕ число.
+Комплименты (цена 0) — включай в продажи.
+Дубли при склейке фото не суммировать.
+
+═══════════════════════════════════════════
+РЯДЫ ПОХОЖИХ НАЗВАНИЙ — ОСОБЫЙ РЕЖИМ ЧТЕНИЯ
+═══════════════════════════════════════════
+Эклер…, Маффин…, Булочка…, Грилата…, Пирожок…, Круассан…,
+Макарун…, Сосиска…, Киш…, Улитка…, Бриошь…, Хлеб… —
+если идут подряд 2 или больше строк с одинаковым первым словом,
+это РЯД. К нему применяй особый режим.
+
+🔴 ПРАВИЛА ДЛЯ РЯДА:
+
+1. Читай по одной строке СВЕРХУ ВНИЗ.
+
+2. ЗАПРЕЩЕНО переносить, усреднять, обменивать и «выравнивать»
+   числа между строками ряда.
+
+3. Для КАЖДОЙ строки ряда сделай контроль: К-во × Цена = Сумма.
+
+4. Пример правильного чтения ряда Грилат:
+   №21 Грилата с мясом       К-во=15  Цена=61,82  Сумма=927,27 ✓
+   №22 Грилата с брынзой     К-во=9   Цена=58,18  Сумма=523,64 ✓
+   №23 Грилата с картоф.     К-во=15  Цена=65,45  Сумма=981,82 ✓
+   №24 Грилата с кур.филе    К-во=10  Цена=47,27  Сумма=472,73 ✓
+
+═══════════════════════════════════════════
+ФИЛЬТР
+═══════════════════════════════════════════
+В CSV включай только позиции выбранной категории, найденные
+в справочнике. Чужие категории пропускай.
+
+🔴 В CSV — ТОЛЬКО ТЕ ПОЗИЦИИ, КОТОРЫЕ ФИЗИЧЕСКИ ЕСТЬ
+   В НАКЛАДНОЙ ЗА ${dateLabel} ИЛИ В ЧЕКЕ.
+   
+   Позиция попадает в CSV, если она встречается:
+     - в накладной за ${dateLabel}, или
+     - в чеке (Продано сегодня > 0).
+
+   Единственное исключение — позиция ЕСТЬ в накладной, но Продано = 0.
+
+═══════════════════════════════════════════
+ФОРМАТ CSV
+═══════════════════════════════════════════
+Разделитель: ;
+Кодировка: UTF-8 с BOM
+
+🔴 РОВНО ЧЕТЫРЕ КОЛОНКИ — одна дата прихода:
+Наименование;Получено за ${dateLabel};Продано сегодня;Срок годности
+
+Кавычки в названиях: " → "", всё название в кавычках.
+Пример: Эклер "Малина" → "Эклер ""Малина"""
+
+Числа — целые. Если позиции нет в колонке — ставь 0, не пусто.
+
+🔴 НЕ добавляй колонки других дат. Только ${dateLabel}.
+
+═══════════════════════════════════════════
+ЗАПРЕТЫ
+═══════════════════════════════════════════
+🚫 Не выдумывать цифры.
+🚫 Не вычислять К-во делением.
+🚫 Не добавлять колонку «Остаток» / «Факт».
+🚫 Не писать «совпало» в #СВЕРКА без реального пересчёта Σ.
+🚫 Не применять рукописные пометки в накладной.
+🚫 Не «выравнивать» числа в рядах похожих названий.
+
+═══════════════════════════════════════════
+В КОНЦЕ CSV
+═══════════════════════════════════════════
+#СВЕРКА:
+
+🔴 ЭТОТ БЛОК ЗАПОЛНЯЙ ТОЛЬКО ПОСЛЕ РЕАЛЬНОГО ПЕРЕСЧЁТА.
+   НЕ пиши «совпало», пока физически не сложил колонку 12 по
+   всем строкам накладной.
+
+Порядок:
+1. Выпиши в столбик К-во × Цена для КАЖДОЙ строки накладной.
+2. Сложи. Получил свою Σ.
+3. Сравни с печатным «Всего по накладной».
+4. Если разница = 0 — пиши «совпало».
+5. Если разница ≠ 0 — пиши «РАСХОЖДЕНИЕ: Σ=<твоя>, итог=<печатный>, разница=<X>».
+
+ФОРМАТ:
+  Накладная №X от ${dateLabel}:
+    Σ пересчитано вручную: <число>
+    Печатный итог: <число>
+    Разница: <число>
+    Статус: совпало / РАСХОЖДЕНИЕ
+
+🔴 ОТДЕЛЬНО — ТАБЛИЦА РЯДОВ:
+
+#РЯДЫ_ПОД_ПРОВЕРКОЙ:
+  <первое слово>: <№1 название, К-во> | <№2 название, К-во> | ...
+  Пример: Грилата: №21 мясо=15, №22 брынза=9, №23 картоф=15, №24 кур.филе=10
+
+🔴 ПРОВЕРКА ПОЛНОТЫ (обязательно):
+#ПРОВЕРКА_ПОЛНОТЫ: перечисли ВСЕ изображения по номерам (изображение 1, 2, ...).
+Для каждого укажи, к какой накладной относится, какие номера строк содержит.
+В конце выведи: «получено изображений: N, обработано: M».
+
+#ИСТОЧНИКИ: какие файлы, какая накладная за ${dateLabel}, какой чек.
+#ПРОВЕРКА: сколько позиций в накладной, сколько в CSV.
+#НЕЧИТАЕМО: что не удалось прочитать.
+
+═══════════════════════════════════════════
+СПРАВОЧНИК (часы)
+═══════════════════════════════════════════
+${catalogList}
+
+Момент проверки: ${checkDate} ${checkTime}.
+
+Выдай CSV.`;
+}
+
+function buildSystemInstructionForGemini() {
+  return 'Ты OCR-ассистент French Bakery. Читаешь фото накладных и чеков, выдаёшь CSV строго по правилам из сообщения пользователя.';
+}
+  /* ═══════════════════════════════════════════
+   GEMINI — настройки
+   ═══════════════════════════════════════════ */
+function getGeminiKey() {
+  try { return localStorage.getItem(GEMINI_KEY) || ''; } catch (e) { return ''; }
+}
+function setGeminiKey(v) {
+  try { localStorage.setItem(GEMINI_KEY, String(v || '').trim()); } catch (e) {}
+}
+function getGeminiModel() {
+  try {
+    const v = localStorage.getItem(GEMINI_MODEL_KEY);
+    if (v) return v;
+  } catch (e) {}
+  return GEMINI_MODEL_DEFAULT;
+}
+function setGeminiModel(v) {
+  if (!v || typeof v !== 'string') return;
+  try { localStorage.setItem(GEMINI_MODEL_KEY, v); } catch (e) {}
+}
+
 /* ═══════════════════════════════════════════
-   SHARE TO AI
+   GEMINI — динамический список моделей
+   ═══════════════════════════════════════════ */
+function getGeminiTestImage() {
+  if (_geminiTestImageCache) return _geminiTestImageCache;
+  const canvas = document.createElement('canvas');
+  canvas.width = 64; canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 64, 64);
+  ctx.fillStyle = '#000000';
+  ctx.font = 'bold 32px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('T', 32, 32);
+  const dataUrl = canvas.toDataURL('image/png');
+  _geminiTestImageCache = dataUrl.split(',')[1];
+  return _geminiTestImageCache;
+}
+
+function loadModelsCache() {
+  try {
+    const raw = localStorage.getItem(GEMINI_MODELS_CACHE_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    if (!d || !Array.isArray(d.models) || !d.ts) return null;
+    if (Date.now() - d.ts > GEMINI_MODELS_CACHE_TTL) return null;
+    return d.models;
+  } catch (e) { return null; }
+}
+function saveModelsCache(models) {
+  try { localStorage.setItem(GEMINI_MODELS_CACHE_KEY, JSON.stringify({ ts: Date.now(), models })); } catch (e) {}
+}
+function clearModelsCache() {
+  try { localStorage.removeItem(GEMINI_MODELS_CACHE_KEY); } catch (e) {}
+}
+function getCachedModelsAge() {
+  try {
+    const raw = localStorage.getItem(GEMINI_MODELS_CACHE_KEY);
+    if (!raw) return Infinity;
+    const d = JSON.parse(raw);
+    if (!d || !d.ts) return Infinity;
+    return Date.now() - d.ts;
+  } catch (e) { return Infinity; }
+}
+
+function prettyModelName(id) {
+  const hasPro = /pro/.test(id);
+  const hasLite = /lite/.test(id);
+  const hasFlash = /flash/.test(id);
+  const preview = /preview/.test(id);
+  let base = 'Модель';
+  if (hasFlash && hasLite) base = 'Flash Lite';
+  else if (hasFlash) base = 'Flash';
+  else if (hasPro) base = 'Pro';
+  let suffix = preview ? ' (preview)' : '';
+  return base + suffix + ' — ' + id;
+}
+async function testGeminiModel(apiKey, id) {
+  const url = `${GEMINI_API}/${id}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const body = {
+    contents: [{ parts: [
+      { text: 'ok' },
+      { inline_data: { mime_type: 'image/png', data: getGeminiTestImage() } }
+    ]}],
+    generationConfig: { maxOutputTokens: 3, temperature: 0 }
+  };
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return !!(data && data.candidates && data.candidates.length);
+    }
+    let msg = '';
+    try {
+      const errJson = await res.json();
+      if (errJson && errJson.error && errJson.error.message) msg = errJson.error.message;
+    } catch (e) {}
+    if (res.status === 404) return false;
+    if (res.status === 429 || res.status === 503 || res.status === 500) return true;
+    if (res.status === 400) {
+      if (/api key|permission|quota|billing/i.test(msg)) return false;
+      if (/not found|not supported|does not support/i.test(msg)) return false;
+      return true;
+    }
+    if (res.status === 401 || res.status === 403) return false;
+    return false;
+  } catch (e) {
+    return true;
+  }
+}
+
+async function discoverGeminiModels(apiKey, onProgress) {
+  const listRes = await fetch(`${GEMINI_API}?key=${encodeURIComponent(apiKey)}`);
+  if (!listRes.ok) throw new Error('Не удалось получить список моделей');
+  const listData = await listRes.json();
+  const all = (listData.models || [])
+    .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.indexOf('generateContent') >= 0)
+    .map(m => ({ id: String(m.name || '').replace('models/', ''), displayName: m.displayName || '' }))
+    .filter(m => /^gemini-/.test(m.id))
+    .filter(m => !/tts|image|nano|robotics|computer-use|research|lyria|antigravity|omni|transcribe|clip|embedding|aqa|vision|translate/i.test(m.id));
+
+  const groups = { flashLite: [], flash: [], pro: [] };
+  all.forEach(m => {
+    if (/flash-lite/.test(m.id)) groups.flashLite.push(m);
+    else if (/pro/.test(m.id)) groups.pro.push(m);
+    else if (/flash/.test(m.id)) groups.flash.push(m);
+  });
+  Object.keys(groups).forEach(k => groups[k].sort((a, b) => b.id.localeCompare(a.id)));
+
+  const toTest = [];
+  ['flashLite', 'flash', 'pro'].forEach(k => {
+    const stable = groups[k].filter(m => !/preview/.test(m.id));
+    const preview = groups[k].filter(m => /preview/.test(m.id));
+    if (stable.length) toTest.push(stable[0]);
+    else if (preview.length) toTest.push(preview[0]);
+  });
+
+  const working = [];
+  for (let i = 0; i < toTest.length; i++) {
+    const m = toTest[i];
+    if (onProgress) onProgress(i + 1, toTest.length, m.id);
+    const ok = await testGeminiModel(apiKey, m.id);
+    if (ok) working.push(m);
+    if (i < toTest.length - 1) await new Promise(r => setTimeout(r, 800));
+  }
+  if (!working.length) throw new Error('Ни одна модель не ответила');
+  return working;
+}
+
+function fillModelSelect(models) {
+  const sel = $('geminiModelSelect');
+  if (!sel) return;
+  const current = sel.value || getGeminiModel();
+  sel.innerHTML = '';
+  models.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = prettyModelName(m.id);
+    sel.appendChild(opt);
+  });
+  const hasCurrent = models.some(m => m.id === current);
+  sel.value = hasCurrent ? current : models[0].id;
+  setGeminiModel(sel.value);
+}
+
+async function refreshModelSelect(force) {
+  const sel = $('geminiModelSelect');
+  const statusEl = $('shareStatus');
+  const setStatus = (cls, text) => { if (statusEl) { statusEl.className = 'status show ' + cls; statusEl.textContent = text; } };
+  const apiKey = getGeminiKey();
+  if (!apiKey) {
+    fillModelSelect([{ id: GEMINI_MODEL_DEFAULT, displayName: '' }]);
+    return;
+  }
+  if (!force) {
+    const cached = loadModelsCache();
+    if (cached && cached.length) { fillModelSelect(cached); return; }
+  } else {
+    clearModelsCache();
+  }
+  if (sel) sel.innerHTML = '<option value="">Обновление списка моделей…</option>';
+  try {
+    const working = await discoverGeminiModels(apiKey, (i, n, id) => {
+      if (sel) sel.innerHTML = `<option value="">Проверка моделей (${i}/${n}): ${id}…</option>`;
+    });
+    saveModelsCache(working);
+    fillModelSelect(working);
+    setStatus('ok', `Найдено рабочих моделей: ${working.length}`);
+  } catch (e) {
+    fillModelSelect([{ id: GEMINI_MODEL_DEFAULT, displayName: '' }]);
+    setStatus('warn', 'Не удалось обновить список моделей. Использую ' + GEMINI_MODEL_DEFAULT);
+  }
+}
+
+function scheduleModelsRefreshOncePerDay() {
+  if (_modelsRefreshScheduled) return;
+  _modelsRefreshScheduled = true;
+  const age = getCachedModelsAge();
+  if (age < GEMINI_MODELS_CACHE_TTL) return;
+  setTimeout(() => {
+    if (document.visibilityState === 'hidden') return;
+    _silentRefreshModels();
+  }, 60 * 1000);
+}
+
+async function _silentRefreshModels() {
+  const apiKey = getGeminiKey();
+  if (!apiKey) return;
+  try {
+    const working = await discoverGeminiModels(apiKey, null);
+    saveModelsCache(working);
+    const sel = $('geminiModelSelect');
+    const current = (sel && sel.value) || getGeminiModel();
+    fillModelSelect(working);
+    if (sel && working.some(m => m.id === current)) {
+      sel.value = current;
+      setGeminiModel(current);
+    }
+  } catch (e) {
+    console.warn('Silent model refresh failed:', e && e.message);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   GEMINI — утилиты
+   ═══════════════════════════════════════════ */
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const s = String(r.result || '');
+      const idx = s.indexOf(',');
+      resolve(idx >= 0 ? s.slice(idx + 1) : '');
+    };
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(blob);
+  });
+}
+async function compressImageForGemini(blob, maxSide, quality) {
+  if (!blob.type || !blob.type.startsWith('image/')) return null;
+  try {
+    const canvas = document.createElement('canvas');
+    let w = 0, h = 0;
+    if (typeof createImageBitmap === 'function') {
+      const bitmap = await createImageBitmap(blob);
+      const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+      w = Math.max(1, Math.round(bitmap.width * scale));
+      h = Math.max(1, Math.round(bitmap.height * scale));
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(bitmap, 0, 0, w, h);
+      if (bitmap.close) bitmap.close();
+    } else {
+      await new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(blob);
+        const el = new Image();
+        el.onload = () => {
+          const scale = Math.min(1, maxSide / Math.max(el.width, el.height));
+          w = Math.max(1, Math.round(el.width * scale));
+          h = Math.max(1, Math.round(el.height * scale));
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(el, 0, 0, w, h);
+          URL.revokeObjectURL(url);
+          resolve();
+        };
+        el.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load failed')); };
+        el.src = url;
+      });
+    }
+    const dataUrl = canvas.toDataURL('image/jpeg', quality);
+    const idx = dataUrl.indexOf(',');
+    return idx >= 0 ? dataUrl.slice(idx + 1) : null;
+  } catch (e) {
+    console.warn('compressImageForGemini:', e);
+    return null;
+  }
+}
+async function buildGeminiFileParts() {
+  const items = (await getPhotos()).sort((a, b) => {
+    const cmp = naturalCompare(a.name, b.name);
+    return cmp !== 0 ? cmp : a.id - b.id;
+  });
+  const parts = [];
+  let totalB64 = 0;
+  let imgIndex = 0;
+
+  for (const item of items) {
+    const kind = (item.kind || (item.blob && item.blob.type) || '').toLowerCase();
+    if (kind.startsWith('image/')) {
+      imgIndex++;
+      let b64 = await compressImageForGemini(item.blob, GEMINI_IMG_MAX_SIDE, GEMINI_IMG_QUALITY);
+      let mime = 'image/jpeg';
+      if (!b64) {
+        b64 = await blobToBase64(item.blob);
+        mime = kind;
+      }
+      if (b64) {
+        totalB64 += b64.length;
+        if (totalB64 > GEMINI_MAX_B64_BYTES) {
+          throw new Error(`Суммарный размер файлов превышает лимит. Уменьшите количество фото.`);
+        }
+        parts.push({ text: `--- Изображение ${imgIndex} ---` });
+        parts.push({ inline_data: { mime_type: mime, data: b64 } });
+      }
+    } else if (kind === 'application/pdf') {
+      imgIndex++;
+      const raw = await blobToBase64(item.blob);
+      if (raw) {
+        totalB64 += raw.length;
+        if (totalB64 > GEMINI_MAX_B64_BYTES) {
+          throw new Error(`Суммарный размер файлов превышает лимит.`);
+        }
+        parts.push({ text: `--- Документ ${imgIndex} ---` });
+        parts.push({ inline_data: { mime_type: 'application/pdf', data: raw } });
+      }
+    }
+  }
+  return parts;
+}
+function extractCsvFromGeminiText(text) {
+  let csv = String(text || '').trim();
+  csv = csv.replace(/^```[a-zA-Z]*\s*\n?/, '').replace(/\n?```\s*$/, '').trim();
+  const lines = csv.split(/\r?\n/);
+  const headerIdx = lines.findIndex(l => /наимен/i.test(l) && l.includes(';'));
+  if (headerIdx > 0) csv = lines.slice(headerIdx).join('\n');
+  return csv.trim();
+}
+
+/* ═══════════════════════════════════════════
+   GEMINI — общий распознаватель (скрыт)
+   ═══════════════════════════════════════════ */
+async function recognizeWithGemini() {
+  if (shareBusy) return;
+  const statusEl = $('shareStatus');
+  const setStatus = (cls, text) => {
+    if (statusEl) { statusEl.className = 'status show ' + cls; statusEl.textContent = text; }
+  };
+
+  const apiKey = getGeminiKey();
+  if (!apiKey) { setStatus('err', 'Введите API-ключ в настройках.'); return; }
+  if (!isValidCategory(_activeCategory)) { setStatus('err', 'Сначала выберите категорию.'); return; }
+  const items = await getPhotos();
+  if (!items.length) { setStatus('info', 'Сначала загрузите материалы.'); return; }
+
+  shareBusy = true;
+  const btn = $('recognizeGeminiBtn');
+  if (btn) btn.classList.add('busy');
+  try {
+    setStatus('info', 'Подготовка файлов…');
+    const fileParts = await buildGeminiFileParts();
+    if (!fileParts.length) throw new Error('Не удалось подготовить файлы.');
+
+    const systemPrompt = buildSystemInstructionForGemini();
+    const userPrompt = buildPrompt();
+    const model = getGeminiModel();
+    const url = `${GEMINI_API}/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+    const body = {
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ parts: [...fileParts, { text: userPrompt }] }],
+      generationConfig: { temperature: 0.1, maxOutputTokens: GEMINI_MAX_OUTPUT_TOKENS }
+    };
+
+    setStatus('info', 'Отправка 2 запросов…');
+
+    const sendOne = async (label) => {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`;
+        try {
+          const errJson = await res.json();
+          if (errJson && errJson.error && errJson.error.message) msg = errJson.error.message;
+        } catch (e) {}
+        if (res.status === 400 && /API key/i.test(msg)) msg = 'Неверный API-ключ.';
+        if (res.status === 400 && /model/i.test(msg)) msg = 'Модель недоступна: ' + model;
+        if (res.status === 429) msg = 'Превышен лимит запросов.';
+        if (res.status === 413) msg = 'Файлы слишком большие.';
+        if (res.status === 503 || /high demand|overload/i.test(msg)) msg = 'Сервер перегружен.';
+        throw new Error(label + ': ' + msg);
+      }
+      const data = await res.json();
+      const cand = data && data.candidates && data.candidates[0];
+      if (!cand) throw new Error(label + ': нет кандидатов.');
+      if (cand.finishReason === 'SAFETY') throw new Error(label + ': ответ заблокирован фильтрами.');
+      const parts = (cand.content && cand.content.parts) || [];
+      const text = parts.map(p => p.text || '').join('');
+      if (!text) throw new Error(label + ': пустой ответ.');
+      const csv = extractCsvFromGeminiText(text);
+      if (!csv || !/;/.test(csv)) throw new Error(label + ': ответ не похож на CSV.');
+      return csv;
+    };
+
+    const results = await Promise.allSettled([sendOne('Прогон 1'), sendOne('Прогон 2')]);
+    const csv1 = results[0].status === 'fulfilled' ? results[0].value : null;
+    const csv2 = results[1].status === 'fulfilled' ? results[1].value : null;
+    const err1 = results[0].status === 'rejected' ? (results[0].reason && results[0].reason.message) : '';
+    const err2 = results[1].status === 'rejected' ? (results[1].reason && results[1].reason.message) : '';
+
+    if (!csv1 && !csv2) throw new Error(err1 || err2 || 'Оба запроса не удались.');
+
+    const primaryCsv = csv1 || csv2;
+    const csvField = $('csvInput');
+    if (csvField) {
+      csvField.value = primaryCsv;
+      autoResizeTextarea();
+      updateCsvCounter();
+      scheduleSessionSave();
+    }
+
+    _lastGeminiCsvs = { first: csv1 || '', second: csv2 || '' };
+
+    if (csv1 && csv2) {
+      const lines = primaryCsv.split(/\r?\n/).length;
+      setStatus('info', `Получено 2 ответа (${lines} строк). Применяю первый…`);
+      showToast('Применяю CSV первого прогона');
+      await new Promise(r => setTimeout(r, 250));
+      try { await applyCSV(); } catch (e) { console.warn('Auto-apply failed:', e); }
+      await new Promise(r => setTimeout(r, 500));
+      try { closeUnknownModal(); } catch (e) {}
+      try { closeNoCategoryModal(); } catch (e) {}
+      setStatus('ok', `CSV первого прогона применён (${lines} строк). Открываю сверку…`);
+      showToast('Открываю сверку двух CSV');
+      setTimeout(() => openCompareModal({ first: csv1, second: csv2 }), 300);
+    } else if (csv1) {
+      setStatus('info', 'Второй прогон не удался. Применяю первый CSV…');
+      showToast('Применяю CSV первого прогона');
+      await new Promise(r => setTimeout(r, 250));
+      try { await applyCSV(); } catch (e) { console.warn('Auto-apply failed:', e); }
+      setStatus('warn', `Применён только CSV первого прогона. ${err2 ? 'Причина сбоя второго: ' + err2 : ''}`);
+    } else {
+      setStatus('info', 'Первый прогон не удался. Применяю второй CSV…');
+      showToast('Применяю CSV второго прогона');
+      await new Promise(r => setTimeout(r, 250));
+      try { await applyCSV(); } catch (e) { console.warn('Auto-apply failed:', e); }
+      setStatus('warn', `Применён только CSV второго прогона. ${err1 ? 'Причина сбоя первого: ' + err1 : ''}`);
+    }
+  } catch (e) {
+    setStatus('err', 'Ошибка: ' + (e.message || e));
+  } finally {
+    shareBusy = false;
+    if (btn) btn.classList.remove('busy');
+  }
+}
+
+/* ═══════════════════════════════════════════
+   ЗАГРУЗКА ПО ДАТАМ
+   ═══════════════════════════════════════════ */
+function loadDailyAccum() {
+  try {
+    const raw = localStorage.getItem(DAILY_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr.filter(x => x && typeof x.label === 'string' && typeof x.iso === 'string' && typeof x.csv === 'string');
+  } catch (e) { return []; }
+}
+function saveDailyAccum() {
+  try { localStorage.setItem(DAILY_KEY, JSON.stringify(_dailyAccum)); } catch (e) {}
+}
+
+function dailyParseDateInput(str) {
+  const s = String(str || '').trim();
+  if (!s) return null;
+  let m = s.match(/^(\d{1,2})[.\-\/](\d{1,2})(?:[.\-\/](\d{2,4}))?$/);
+  if (!m) return null;
+  const day = parseInt(m[1], 10);
+  const month = parseInt(m[2], 10);
+  if (day < 1 || day > 31 || month < 1 || month > 12) return null;
+  let year = m[3] ? parseInt(m[3], 10) : new Date().getFullYear();
+  if (year < 100) year += 2000;
+  const d = new Date(year, month - 1, day);
+  if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
+  const iso = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const label = `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}`;
+  return { iso, label };
+}
+
+function dailyRender() {
+  const list = $('dailyList');
+  const status = $('dailyStatus');
+  const actions = $('dailyActions');
+  if (!list) return;
+
+  if (!_dailyAccum.length) {
+    list.innerHTML = '<div class="hint">Пока ничего не накоплено.</div>';
+    if (actions) actions.style.display = 'none';
+    if (status) { status.className = 'status'; status.textContent = ''; }
+    return;
+  }
+
+  _dailyAccum.sort((a, b) => b.iso.localeCompare(a.iso));
+  list.innerHTML = '';
+  _dailyAccum.forEach(d => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:6px;padding:10px;border:1px solid var(--separator);border-radius:9px;background:var(--bg-input);margin-bottom:6px';
+
+    const info = document.createElement('div');
+    info.style.cssText = 'flex:1;min-width:0';
+    let posCount = 0;
+    try { posCount = (d.csv.split(/\r?\n/).filter(l => l.trim()).length - 1); } catch (e) {}
+    const warnMark = d.needsCheck ? ' <span style="color:var(--orange);font-size:15px">⚠</span>' : '';
+    const warnText = d.needsCheck ? ' · проверьте сверку' : '';
+    info.innerHTML = `<div style="font-weight:600;font-size:14px">Получено за ${escapeHtml(d.label)}${warnMark}</div><div style="font-size:11.5px;color:var(--text-secondary);margin-top:2px">${posCount} строк${warnText}</div>`;
+
+    const refresh = document.createElement('button');
+    refresh.className = 'secondary';
+    refresh.textContent = '↻';
+    refresh.title = 'Обновить из таблицы';
+    refresh.style.cssText = 'flex:0 0 auto;min-height:34px;padding:6px 10px;font-size:14px';
+    refresh.onclick = () => {
+      const ok = rebuildDailyCsvFromTable(d.iso);
+      if (ok) { dailyRender(); showToast(`Дата ${d.label} обновлена из таблицы`); }
+      else showToast('Не удалось обновить');
+    };
+
+    const del = document.createElement('button');
+    del.className = 'secondary';
+    del.textContent = 'Удалить';
+    del.style.cssText = 'flex:0 0 auto;min-height:34px;padding:6px 12px;font-size:12.5px';
+    del.onclick = () => {
+      _dailyAccum = _dailyAccum.filter(x => x.iso !== d.iso);
+      saveDailyAccum();
+      dailyRender();
+    };
+
+    row.appendChild(info);
+    row.appendChild(refresh);
+    row.appendChild(del);
+    list.appendChild(row);
+  });
+  if (actions) actions.style.display = 'block';
+  if (status) {
+    status.className = 'status show info';
+    status.textContent = `В пакете дат: ${_dailyAccum.length}. Даты: ${_dailyAccum.map(d => d.label).join(', ')}.`;
+  }
+}
+
+async function recognizeDaily() {
+  if (shareBusy) return;
+  const dateInput = $('dailyDate');
+  const statusEl = $('dailyStatus');
+  const setStatus = (cls, text) => { if (statusEl) { statusEl.className = 'status show ' + cls; statusEl.textContent = text; } };
+
+  const parsed = dailyParseDateInput(dateInput ? dateInput.value : '');
+  if (!parsed) { setStatus('err', 'Введите дату в формате ДД.ММ.'); return; }
+  if (!isValidCategory(_activeCategory)) { setStatus('err', 'Сначала выберите категорию.'); return; }
+  const apiKey = getGeminiKey();
+  if (!apiKey) { setStatus('err', 'Введите API-ключ в настройках.'); return; }
+
+  const items = await getPhotos();
+  if (!items.length) { setStatus('info', 'Сначала загрузите фото накладной и чека за эту дату.'); return; }
+
+  shareBusy = true;
+  const btn = $('dailyRecognizeBtn');
+  if (btn) btn.classList.add('busy');
+  try {
+    setStatus('info', 'Подготовка файлов…');
+    const fileParts = await buildGeminiFileParts();
+    if (!fileParts.length) throw new Error('Не удалось подготовить файлы.');
+
+    const systemPrompt = buildSystemInstructionForGemini();
+    const userPrompt = buildDailyPrompt(parsed.label);
+    const model = getGeminiModel();
+    const url = `${GEMINI_API}/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+    const body = {
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ parts: [...fileParts, { text: userPrompt }] }],
+      generationConfig: { temperature: 0.1, maxOutputTokens: GEMINI_MAX_OUTPUT_TOKENS }
+    };
+
+    setStatus('info', 'Отправка 2 запросов…');
+
+    const sendOne = async (label) => {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        let msg = `HTTP ${res.status}`;
+        try {
+          const errJson = await res.json();
+          if (errJson && errJson.error && errJson.error.message) msg = errJson.error.message;
+        } catch (e) {}
+        if (res.status === 429) msg = 'Превышен лимит запросов.';
+        if (res.status === 503 || /high demand|overload/i.test(msg)) msg = 'Сервер перегружен.';
+        throw new Error(label + ': ' + msg);
+      }
+      const data = await res.json();
+      const cand = data && data.candidates && data.candidates[0];
+      if (!cand) throw new Error(label + ': нет кандидатов.');
+      const parts = (cand.content && cand.content.parts) || [];
+      const text = parts.map(p => p.text || '').join('');
+      const csv = extractCsvFromGeminiText(text);
+      if (!csv || !/;/.test(csv)) throw new Error(label + ': ответ не похож на CSV.');
+      return csv;
+    };
+
+    const results = await Promise.allSettled([sendOne('Прогон 1'), sendOne('Прогон 2')]);
+    const csv1 = results[0].status === 'fulfilled' ? results[0].value : null;
+    const csv2 = results[1].status === 'fulfilled' ? results[1].value : null;
+    const err1 = results[0].status === 'rejected' ? results[0].reason.message : '';
+    const err2 = results[1].status === 'rejected' ? results[1].reason.message : '';
+
+    if (!csv1 && !csv2) throw new Error(err1 || err2 || 'Оба запроса не удались.');
+
+    let bothMatch = false;
+    if (csv1 && csv2) {
+      try {
+        const d1 = cmpParseCSV(csv1);
+        const d2 = cmpParseCSV(csv2);
+        if (d1 && d2) {
+          const keys1 = Object.keys(d1.rows);
+          const keys2 = Object.keys(d2.rows);
+          if (keys1.length === keys2.length && keys1.length > 0) {
+            bothMatch = keys1.every(k => {
+              const a = d1.rows[k];
+              const b = d2.rows[k];
+              if (!b) return false;
+              if ((a.sales || 0) !== (b.sales || 0)) return false;
+              const aKeys = Object.keys(a.incoming);
+              const bKeys = Object.keys(b.incoming);
+              const aVal = aKeys.length ? (a.incoming[aKeys[0]] || 0) : 0;
+              const bVal = bKeys.length ? (b.incoming[bKeys[0]] || 0) : 0;
+              return aVal === bVal;
+            });
+          }
+        }
+      } catch (e) { bothMatch = false; }
+    }
+
+    const chosen = csv1 || csv2;
+    const needsCheck = !!(csv1 && csv2 && !bothMatch);
+    const idx = _dailyAccum.findIndex(x => x.iso === parsed.iso);
+    const entry = { iso: parsed.iso, label: parsed.label, csv: chosen, ts: Date.now(), needsCheck: needsCheck, category: _activeCategory };
+    if (idx >= 0) _dailyAccum[idx] = entry;
+    else _dailyAccum.push(entry);
+    saveDailyAccum();
+    dailyRender();
+
+    if (csv1 && csv2 && bothMatch) {
+      setStatus('ok', `Дата ${parsed.label}: оба прогона совпали. Накоплено. Фото очищены.`);
+      try { await clearAllPhotos(); } catch (e) {}
+      await renderPhotoQueue();
+    } else if (csv1 && csv2) {
+      setStatus('warn', `Дата ${parsed.label}: расхождения между прогонами. Разберитесь в сверке — после закрытия данные этой даты перезапишутся из таблицы.`);
+      _lastGeminiCsvs = { first: csv1, second: csv2 };
+      _dailyEditing = parsed.iso;
+      setTimeout(() => openCompareModal({ first: csv1, second: csv2 }), 400);
+    } else {
+      setStatus('warn', `Дата ${parsed.label} накоплена (только один прогон удался). ${err1 || err2}`);
+      try { await clearAllPhotos(); } catch (e) {}
+      await renderPhotoQueue();
+    }
+
+    if (dateInput) dateInput.value = '';
+  } catch (e) {
+    setStatus('err', 'Ошибка: ' + (e.message || e));
+  } finally {
+    shareBusy = false;
+    if (btn) btn.classList.remove('busy');
+  }
+}
+
+function rebuildDailyCsvFromTable(iso) {
+  const idx = _dailyAccum.findIndex(x => x.iso === iso);
+  if (idx < 0) return false;
+  const entry = _dailyAccum[idx];
+  const category = entry.category || null;
+  const rows = [];
+
+  for (const row of tableRows) {
+    if (!row) continue;
+    if (category && row.category !== category) continue;
+    const party = (row.incoming || []).find(p => p.date === iso);
+    const qty = party ? (party.qty || 0) : 0;
+    const sales = row.sales || 0;
+    if (qty === 0 && sales === 0) continue;
+    rows.push({ name: row.name, qty, sales, shelfLife: row.shelfLife });
+  }
+
+  if (!rows.length) return false;
+
+  const header = ['Наименование', `Получено за ${entry.label}`, 'Продано сегодня', 'Срок годности'];
+  const lines = [header.join(';')];
+  for (const r of rows) {
+    const name = String(r.name || '');
+    const safeName = (name.includes(';') || name.includes('"') || name.includes('\n'))
+      ? '"' + name.replace(/"/g, '""') + '"'
+      : name;
+    lines.push(`${safeName};${r.qty};${r.sales};${r.shelfLife != null ? r.shelfLife : ''}`);
+  }
+  entry.csv = lines.join('\n');
+  entry.needsCheck = false;
+  entry.ts = Date.now();
+  saveDailyAccum();
+  return true;
+}
+
+function finalizeDailyEditing() {
+  if (!_dailyEditing) return;
+  const iso = _dailyEditing;
+  _dailyEditing = null;
+  const ok = rebuildDailyCsvFromTable(iso);
+  if (ok) {
+    const entry = _dailyAccum.find(x => x.iso === iso);
+    dailyRender();
+    if (entry) showToast(`Дата ${entry.label} обновлена из таблицы`);
+  }
+}
+
+async function buildDailyCsv() {
+  const statusEl = $('dailyStatus');
+  if (!_dailyAccum.length) {
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Накопитель пуст.'; }
+    return;
+  }
+  if (!isValidCategory(_activeCategory)) {
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Сначала выберите категорию.'; }
+    return;
+  }
+  function cleanName(raw) {
+    let s = String(raw || '');
+    s = s.replace(/^["'«»]+|["'«»]+$/g, '');
+    s = s.replace(/["'«»]/g, '');
+    s = s.replace(/^Т\s+/, '');
+    s = s.replace(/\s+п\/ф\s*$/i, '').replace(/\s+полуфабрикат\s*$/i, '');
+    s = s.replace(/\s+/g, ' ').trim();
+    return s;
+  }
+
+  _dailyAccum.sort((a, b) => a.iso.localeCompare(b.iso));
+
+  const allNames = new Set();
+  const byDate = {};
+  const salesByDate = {};
+  const shelfByName = {};
+  for (const d of _dailyAccum) {
+    byDate[d.iso] = {};
+    salesByDate[d.iso] = {};
+    let parsed;
+    try {
+      parsed = parseCSV(d.csv, new Date());
+    } catch (e) {
+      if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = `Ошибка разбора CSV для ${d.label}: ${e.message}`; }
+      return;
+    }
+    for (const r of parsed.rows) {
+      const clean = cleanName(r.name);
+      if (!clean) continue;
+      if (clean.length > 80) continue;
+      if (/;\d/.test(clean)) continue;
+      if (/^\d+$/.test(clean)) continue;
+      if (/^(итого|всего|без категории|вода)/i.test(clean)) continue;
+
+      const name = clean;
+      allNames.add(name);
+      if (!shelfByName[name] && r.shelfLife != null) shelfByName[name] = r.shelfLife;
+      const qty = r.incoming && r.incoming.length ? (r.incoming[0].qty || 0) : 0;
+      byDate[d.iso][name] = (byDate[d.iso][name] || 0) + qty;
+      salesByDate[d.iso][name] = (salesByDate[d.iso][name] || 0) + (r.sales || 0);
+    }
+  }
+
+  const sortedDatesAsc = _dailyAccum.map(d => ({ iso: d.iso, label: d.label })).sort((a, b) => a.iso.localeCompare(b.iso));
+  const lastDate = sortedDatesAsc[sortedDatesAsc.length - 1];
+  const sortedDates = [...sortedDatesAsc].reverse();
+
+  const header = ['Наименование', ...sortedDates.map(d => `Получено за ${d.label}`), 'Продано сегодня', 'Срок годности'];
+  const namesSorted = [...allNames].sort((a, b) => String(a).localeCompare(String(b), 'ru'));
+
+  const rows = [header];
+  for (const name of namesSorted) {
+    const cols = [name];
+    for (const d of sortedDates) {
+      cols.push(byDate[d.iso][name] || 0);
+    }
+    cols.push(salesByDate[lastDate.iso][name] || 0);
+    cols.push(shelfByName[name] != null ? shelfByName[name] : '');
+    rows.push(cols);
+  }
+
+  const csvLines = rows.map(r => r.map(v => {
+    const s = String(v);
+    if (s.includes(';') || s.includes('"') || s.includes('\n')) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  }).join(';'));
+
+  const finalCsv = csvLines.join('\n');
+  const csvField = $('csvInput');
+  if (csvField) {
+    csvField.value = finalCsv;
+    autoResizeTextarea();
+    updateCsvCounter();
+  }
+
+  if (statusEl) {
+    statusEl.className = 'status show info';
+    statusEl.textContent = `Итоговый CSV собран: ${namesSorted.length} позиций. Применяю…`;
+  }
+
+  await new Promise(r => setTimeout(r, 250));
+  try {
+    await applyCSV();
+  } catch (e) {
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Ошибка применения: ' + (e.message || e); }
+    return;
+  }
+
+  _dailyAccum = [];
+  saveDailyAccum();
+  dailyRender();
+
+  const summaryEl = $('summary');
+  if (summaryEl) {
+    try { summaryEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+  }
+
+  showToast(`Применено: ${namesSorted.length} позиций`);
+}
+
+function dailyClear() {
+  if (!_dailyAccum.length) return;
+  if (!confirm(`Очистить пакет из ${_dailyAccum.length} дат?`)) return;
+  _dailyAccum = [];
+  saveDailyAccum();
+  dailyRender();
+  const statusEl = $('dailyStatus');
+  if (statusEl) { statusEl.className = 'status'; statusEl.textContent = ''; }
+}
+
+/* ═══════════════════════════════════════════
+   SHARE TO AI (fallback)
    ═══════════════════════════════════════════ */
 async function shareToAI() {
   if (shareBusy) return;
-  /* ПАТЧ 2: сортируем по имени при отправке (страховка) */
-  const items = (await getPhotos()).sort((a, b) =>
-    String(a.name || '').localeCompare(String(b.name || ''), undefined, { numeric: true, sensitivity: 'base' })
-  );
+  const items = (await getPhotos()).sort((a, b) => {
+    const cmp = naturalCompare(a.name, b.name);
+    return cmp !== 0 ? cmp : a.id - b.id;
+  });
   if (!items.length) {
     const el = $('shareStatus');
     if (el) { el.className = 'status show info'; el.textContent = 'Сначала загрузите материалы.'; }
@@ -4391,8 +5324,9 @@ async function shareToAI() {
     if (btn) btn.classList.remove('busy');
   }
 }
-  /* ═══════════════════════════════════════════
-   КАТЕГОРИИ
+
+/* ═══════════════════════════════════════════
+   CATEGORIES
    ═══════════════════════════════════════════ */
 function setActiveCategory(cat) {
   if (cat !== null && !isValidCategory(cat)) return;
@@ -4417,7 +5351,7 @@ function bindCategoryGrid() {
 }
 
 /* ═══════════════════════════════════════════
-   ОТЧЁТ
+   REPORT
    ═══════════════════════════════════════════ */
 function pluralize(n, one, few, many) {
   const mod10 = n % 10;
@@ -4474,19 +5408,14 @@ function renderReport() {
         const posWord = pluralize(rows.length, 'позиция', 'позиции', 'позиций');
         const prWord = pluralize(problems, 'проблема', 'проблемы', 'проблем');
         m.textContent = `${rows.length} ${posWord} · ${problems} ${prWord}`;
-      } else {
-        m.textContent = 'Ожидает загрузки';
-      }
-      info.appendChild(t);
-      info.appendChild(m);
+      } else m.textContent = 'Ожидает загрузки';
+      info.appendChild(t); info.appendChild(m);
 
       const status = document.createElement('span');
       status.className = 'report-cat-status ' + (rows.length ? 'done' : 'wait');
       status.textContent = rows.length ? '✓ готово' : 'не начата';
 
-      btn.appendChild(icon);
-      btn.appendChild(info);
-      btn.appendChild(status);
+      btn.appendChild(icon); btn.appendChild(info); btn.appendChild(status);
       btn.addEventListener('click', () => {
         if (!rows.length) return;
         _reportView = cat;
@@ -4563,18 +5492,12 @@ function renderReport() {
         name.textContent = row.name;
         const reason = document.createElement('div');
         reason.className = 'report-item-reason';
-        if (critical && calc.expiredOnShelf > 0) {
-          reason.textContent = `Продано просрочкой: ${calc.soldExpired} · Просрочено на витрине: ${calc.expiredOnShelf}`;
-        } else if (critical) {
-          reason.textContent = `Продано просрочкой: ${calc.soldExpired}`;
-        } else {
-          reason.textContent = `Просрочено на витрине: ${calc.expiredOnShelf}`;
-        }
-        info.appendChild(name);
-        info.appendChild(reason);
+        if (critical && calc.expiredOnShelf > 0) reason.textContent = `Продано просрочкой: ${calc.soldExpired} · Просрочено на витрине: ${calc.expiredOnShelf}`;
+        else if (critical) reason.textContent = `Продано просрочкой: ${calc.soldExpired}`;
+        else reason.textContent = `Просрочено на витрине: ${calc.expiredOnShelf}`;
+        info.appendChild(name); info.appendChild(reason);
 
-        item.appendChild(dot);
-        item.appendChild(info);
+        item.appendChild(dot); item.appendChild(info);
         item.addEventListener('click', () => {
           closeReport();
           setTimeout(() => {
@@ -4596,7 +5519,7 @@ function renderReport() {
 }
 
 /* ═══════════════════════════════════════════
-   UI-ХЕЛПЕРЫ
+   UI HELPERS
    ═══════════════════════════════════════════ */
 function scrollFieldIntoView(el) {
   if (!el) return;
@@ -4612,23 +5535,598 @@ function scrollFieldIntoView(el) {
   }, 350);
 }
 function measureHeader() {
-  const h = $('appHeader');
-  if (!h) return;
+  const h = $('appHeader'); if (!h) return;
   const height = h.getBoundingClientRect().height;
   document.documentElement.style.setProperty('--header-h', height + 'px');
+}
+  /* ═══════════════════════════════════════════
+   СВЕРКА ДВУХ CSV
+   ═══════════════════════════════════════════ */
+function cmpSplitLine(line, sep) {
+  const out = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQ) {
+      if (ch === '"') { if (line[i+1] === '"') { cur += '"'; i++; continue; } inQ = false; continue; }
+      cur += ch; continue;
+    }
+    if (ch === '"') { inQ = true; continue; }
+    if (ch === sep) { out.push(cur); cur = ''; continue; }
+    cur += ch;
+  }
+  out.push(cur); return out;
+}
+
+function cmpParseCSV(text) {
+  const raw = String(text || '').replace(/^\uFEFF/, '');
+  const lines = raw.split(/\r?\n/);
+  const mainLines = []; const checkLines = [];
+  let inCheck = false; let checkTotal = null; let serviceMode = false;
+  for (const line of lines) {
+    const t = line.trim();
+    if (t === '#ЧЕК_ПОЛНЫЙ:') { inCheck = true; serviceMode = false; continue; }
+    if (t.startsWith('#ЧЕК_ИТОГО:')) {
+      const v = String(t.replace('#ЧЕК_ИТОГО:', '')).replace(',', '.').replace(/[^\d.]/g, '');
+      checkTotal = Number(v) || 0;
+      inCheck = false; serviceMode = false; continue;
+    }
+    if (inCheck) { checkLines.push(line); continue; }
+    if (t.startsWith('#')) { serviceMode = true; continue; }
+    if (serviceMode) continue;
+    mainLines.push(line);
+  }
+
+  function cmpIsServiceLine(line) {
+    const t = line.trim();
+    if (!t) return true;
+    if (t.startsWith('#')) return true;
+    if (t.startsWith('•')) return true;
+    if (t.startsWith('·')) return true;
+    if (t.startsWith('*')) return true;
+    if (/^[-–—]\s*фото\b/i.test(t)) return true;
+    if (/^[-–—]\s*накладная\b/i.test(t)) return true;
+    if (/^[-–—]\s*чек\b/i.test(t)) return true;
+    if (/^накладная\s+№/i.test(t)) return true;
+    if (/^чек\s+(продаж|от)\s/i.test(t)) return true;
+    if (/^фото\s+\d/i.test(t)) return true;
+    if (/^источник/i.test(t)) return true;
+    if (/^проверка[: ]/i.test(t)) return true;
+    if (/^сверка[: ]/i.test(t)) return true;
+    if (/^нечитаемо[: ]/i.test(t)) return true;
+    if (/^всего\s+в\s+csv/i.test(t)) return true;
+    if (/^в\s+накладной\s+№/i.test(t)) return true;
+    if (/^в\s+чеке[: ]/i.test(t)) return true;
+    return false;
+  }
+
+  const dataLines = mainLines.filter(l => l.trim() && !cmpIsServiceLine(l));
+  if (dataLines.length < 2) return null;
+  const sep = dataLines[0].includes(';') ? ';' : ',';
+  const header = cmpSplitLine(dataLines[0], sep);
+  const idxName = header.findIndex(h => /наимен/i.test(h));
+  if (idxName < 0) return null;
+  const dateCols = [];
+  header.forEach((h, i) => {
+    if (/получено за/i.test(h)) {
+      const m = h.match(/(\d{1,2})[.\-\/](\d{1,2})/);
+      if (m) dateCols.push({ idx: i, key: `${m[1].padStart(2,'0')}.${m[2].padStart(2,'0')}`, label: `${m[1].padStart(2,'0')}.${m[2].padStart(2,'0')}` });
+    }
+  });
+  const idxSales = header.findIndex(h => /продано|продажи/i.test(h));
+  const rows = {}; const order = [];
+  for (let i = 1; i < dataLines.length; i++) {
+    const f = cmpSplitLine(dataLines[i], sep);
+    let name = (f[idxName] || '').trim().replace(/^"|"$/g, '');
+    if (!name) continue;
+    if (/^[-–—•·*]/.test(name)) continue;
+    if (/^фото\s+\d/i.test(name)) continue;
+    if (/^накладная\s+№/i.test(name)) continue;
+    if (/^чек\s+(продаж|от)/i.test(name)) continue;
+    if (/\(не\s+в\s+справочнике/i.test(name)) continue;
+    if (/\(нет\s+в\s+справочнике/i.test(name)) continue;
+    if (/\(есть\s+в\s+чеке/i.test(name)) continue;
+    if (/\(есть\s+в\s+справочнике/i.test(name)) continue;
+    if (/^источник/i.test(name)) continue;
+    if (/^проверка[: ]/i.test(name)) continue;
+    if (/^сверка[: ]/i.test(name)) continue;
+    const hasNumbers = f.some((cell, idx) => idx !== idxName && /\d/.test(String(cell || '')));
+    if (!hasNumbers) continue;
+    const key = normalizeName(name);
+    const rec = { name, incoming: {}, sales: 0 };
+    dateCols.forEach(dc => {
+      const v = String(f[dc.idx] || '').replace(/[^\d]/g, '');
+      rec.incoming[dc.key] = v === '' ? 0 : parseInt(v, 10);
+    });
+    if (idxSales >= 0) {
+      const s = String(f[idxSales] || '').replace(/[^\d]/g, '');
+      rec.sales = s === '' ? 0 : parseInt(s, 10);
+    }
+    rows[key] = rec;
+    order.push(key);
+  }
+  const checkRows = [];
+  for (const line of checkLines) {
+    const t = line.trim(); if (!t) continue;
+    const f = cmpSplitLine(t, ';');
+    if (f.length < 4) continue;
+    const name = f[0].trim();
+    const qty = parseInt(String(f[1] || '').replace(/[^\d]/g, ''), 10) || 0;
+    const price = Number(String(f[2] || '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+    const sum = Number(String(f[3] || '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+    if (name) checkRows.push({ name, qty, price, sum });
+  }
+  return { rows, dateCols, order, count: order.length, checkRows, checkTotal };
+}
+
+function cmpCalcSigmaForDate(csvData, dateKey) {
+  let total = 0; let count = 0; const missing = [];
+  for (const key of csvData.order) {
+    const row = csvData.rows[key];
+    const val = row.incoming[dateKey] || 0;
+    if (val === 0) continue;
+    count++;
+    const price = getPriceFor(row.name);
+    if (!price) { missing.push(row.name); continue; }
+    total += val * price;
+  }
+  return { total, count, missing };
+}
+
+function cmpFindRowByDiff(csvData, diff) {
+  const tol = 0.05;
+  for (const key of csvData.order) {
+    const row = csvData.rows[key];
+    const price = getPriceFor(row.name);
+    if (!price) continue;
+    for (const dk of Object.keys(row.incoming)) {
+      const cost = row.incoming[dk] * price;
+      if (Math.abs(cost - diff) < tol) {
+        return { name: row.name, dateKey: dk, qty: row.incoming[dk], price, sum: cost };
+      }
+    }
+  }
+  return null;
+}
+
+function cmpRenderNakls() {
+  const list = $('cmpNaklList'); if (!list) return;
+  list.innerHTML = '';
+  _cmpNakls.forEach((n, i) => {
+    const el = document.createElement('div');
+    el.className = 'cmp-nakl-item';
+    el.innerHTML = `
+      <div><label>Дата</label><input type="text" data-i="${i}" data-f="date" value="${escapeHtml(n.date)}" placeholder="20.09"></div>
+      <div><label>№</label><input type="text" data-i="${i}" data-f="num" value="${escapeHtml(n.num)}" placeholder="211224"></div>
+      <div><label>Посл. №</label><input type="text" data-i="${i}" data-f="lastNum" value="${escapeHtml(n.lastNum)}" placeholder="18"></div>
+      <div><label>Печатный итог</label><input type="text" data-i="${i}" data-f="total" value="${escapeHtml(n.total)}" placeholder="1657.36"></div>
+      <button class="del-btn" data-del="${i}">×</button>
+    `;
+    list.appendChild(el);
+  });
+  list.querySelectorAll('input').forEach(inp => {
+    inp.oninput = e => {
+      const i = parseInt(e.target.dataset.i, 10);
+      _cmpNakls[i][e.target.dataset.f] = e.target.value;
+    };
+  });
+  list.querySelectorAll('[data-del]').forEach(btn => {
+    btn.onclick = e => {
+      _cmpNakls.splice(parseInt(e.target.dataset.del, 10), 1);
+      cmpRenderNakls();
+    };
+  });
+}
+
+function openCompareModal(prefill) {
+  const st = $('cmpStats'); if (st) st.style.display = 'none';
+  const res = $('cmpResults'); if (res) res.innerHTML = '';
+  const chk = $('cmpCheckResults'); if (chk) chk.innerHTML = '';
+  const btn = $('cmpApplyBtn'); if (btn) btn.style.display = 'none';
+  _cmpData = null;
+  if (_cmpNakls.length === 0) _cmpNakls = [{ date: '', num: '', lastNum: '', total: '' }];
+  cmpRenderNakls();
+
+  const t1 = $('cmpCsv1');
+  const t2 = $('cmpCsv2');
+
+  if (t1) {
+    if (prefill && prefill.first != null) t1.value = prefill.first;
+    else if (!t1.value.trim() && _lastGeminiCsvs.first) t1.value = _lastGeminiCsvs.first;
+  }
+  if (t2) {
+    if (prefill && prefill.second != null) t2.value = prefill.second;
+    else if (!t2.value.trim() && _lastGeminiCsvs.second) t2.value = _lastGeminiCsvs.second;
+  }
+
+  openModal('compareModal');
+}
+function closeCompareModal() {
+  closeModal('compareModal');
+  finalizeDailyEditing();
+}
+
+function cmpRunCompare() {
+  const t1 = $('cmpCsv1') ? $('cmpCsv1').value : '';
+  const t2 = $('cmpCsv2') ? $('cmpCsv2').value : '';
+  if (!t1.trim() || !t2.trim()) { showToast('Заполни оба CSV'); return; }
+  const d1 = cmpParseCSV(t1);
+  const d2 = cmpParseCSV(t2);
+  if (!d1 || !d2) { showToast('Не удалось разобрать CSV'); return; }
+
+  const allKeys = new Set([...Object.keys(d1.rows), ...Object.keys(d2.rows)]);
+  const dateLabels = {};
+  d1.dateCols.forEach(dc => dateLabels[dc.key] = dc.label);
+  d2.dateCols.forEach(dc => dateLabels[dc.key] = dc.label);
+  const rows = [];
+  let okCount = 0, warnCount = 0, errCount = 0;
+  allKeys.forEach(k => {
+    const a = d1.rows[k]; const b = d2.rows[k];
+    const name = (a && a.name) || (b && b.name) || k;
+    const dates = new Set([...(a ? Object.keys(a.incoming) : []), ...(b ? Object.keys(b.incoming) : [])]);
+    let status = 'ok';
+    if (!a || !b) status = 'err';
+    else {
+      for (const dk of dates) {
+        if ((a.incoming[dk] || 0) !== (b.incoming[dk] || 0)) { status = 'warn'; break; }
+      }
+      if (status === 'ok' && a.sales !== b.sales) status = 'warn';
+    }
+    if (status === 'ok') okCount++; else if (status === 'warn') warnCount++; else errCount++;
+    rows.push({ key: k, name, a, b, dates: [...dates], status, edits: { incoming: {}, sales: null } });
+  });
+  const order = { err: 0, warn: 1, ok: 2 };
+  rows.sort((x, y) => {
+    if (order[x.status] !== order[y.status]) return order[x.status] - order[y.status];
+    return x.name.localeCompare(y.name, 'ru');
+  });
+
+  const checks = [];
+  _cmpNakls.filter(n => n.date).forEach(n => {
+    const dateKey = n.date;
+    const printedTotal = Number(String(n.total).replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+    const lastNum = parseInt(String(n.lastNum).replace(/[^\d]/g, ''), 10) || 0;
+    const sig1 = cmpCalcSigmaForDate(d1, dateKey);
+    const sig2 = cmpCalcSigmaForDate(d2, dateKey);
+    const maxCount = Math.max(sig1.count, sig2.count);
+
+    let c1ok = true, c1detail = '';
+    if (lastNum > 0) {
+      if (maxCount === lastNum) { c1ok = true; c1detail = `В CSV ${maxCount} поз. — совпадает с последним № ${lastNum}.`; }
+      else if (maxCount < lastNum) { c1ok = false; c1detail = `В CSV ${maxCount} поз., в накладной ${lastNum}. Возможно, потеряна строка.`; }
+      else { c1ok = false; c1detail = `В CSV ${maxCount} поз., в накладной только ${lastNum}. Лишние строки.`; }
+    } else { c1detail = 'Последний № не задан — пропущено.'; }
+    checks.push({ ok: c1ok, title: `№${n.num} (${dateKey}) — количество позиций`, detail: c1detail });
+
+    if (printedTotal > 0) {
+      const diff1 = sig1.total - printedTotal;
+      const diff2 = sig2.total - printedTotal;
+      const tol = 0.5;
+      const bothOk = Math.abs(diff1) <= tol && Math.abs(diff2) <= tol;
+      let detail = `CSV №1: <b>${sig1.total.toFixed(2)}</b> (Δ${diff1.toFixed(2)}), CSV №2: <b>${sig2.total.toFixed(2)}</b> (Δ${diff2.toFixed(2)}), печатный: <b>${printedTotal.toFixed(2)}</b>.`;
+      if (!bothOk) {
+        const absDiff = Math.abs(diff1);
+        const found = cmpFindRowByDiff(d1, absDiff) || cmpFindRowByDiff(d2, absDiff);
+        if (found) {
+          detail += `<br>💡 Возможно, строка <b>«${escapeHtml(found.name)}»</b> (${found.qty} × ${found.price} = ${found.sum.toFixed(2)}) не вошла в печатный итог. Это ошибка документа, а не CSV.`;
+        } else {
+          detail += '<br>⚠️ Не удалось найти строку с такой стоимостью. Возможна ошибка чтения.';
+        }
+      }
+      if (sig1.missing.length || sig2.missing.length) {
+        const names = [...new Set([...sig1.missing, ...sig2.missing])].slice(0, 5);
+        detail += `<br>⚠️ Нет цены для: ${names.map(n => escapeHtml(n)).join(', ')}${names.length === 5 ? '...' : ''}`;
+      }
+      checks.push({ ok: bothOk, title: `№${n.num} (${dateKey}) — Σ по цене`, detail });
+    } else {
+      checks.push({ ok: true, title: `№${n.num} (${dateKey}) — Σ по цене`, detail: 'Печатный итог не задан — пропущено.' });
+    }
+  });
+
+  const catalogSet = new Set(PRODUCTS.map(p => normalizeName(p.name)));
+  const notFound = [];
+  for (const key of Object.keys(d1.rows)) {
+    const name = d1.rows[key].name;
+    const allValues = Object.values(d1.rows[key].incoming);
+    const totalQty = allValues.reduce((a, b) => a + b, 0);
+    if (totalQty === 0 && d1.rows[key].sales === 0) continue;
+    if (!catalogSet.has(normalizeName(name))) notFound.push(name);
+  }
+  checks.push({
+    ok: notFound.length === 0,
+    title: 'Целостность справочника',
+    detail: notFound.length === 0
+      ? 'Все позиции CSV есть в справочнике.'
+      : `Не найдены в справочнике: <b>${notFound.map(n => escapeHtml(n)).join('</b>, <b>')}</b>`
+  });
+
+  const checkPrinted = Number(String($('cmpCheckPrinted') ? $('cmpCheckPrinted').value : '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
+  if (checkPrinted > 0 && d1.checkRows.length > 0) {
+    const sig = d1.checkRows.reduce((a, r) => a + r.sum, 0);
+    const declared = d1.checkTotal || 0;
+    const diff = sig - checkPrinted;
+    const tol = 0.05;
+    const ok = Math.abs(diff) <= tol;
+    let detail = `Σ строк отчёта: <b>${sig.toFixed(2)}</b>, печатный итог чека: <b>${checkPrinted.toFixed(2)}</b>.`;
+    if (declared > 0 && Math.abs(declared - checkPrinted) > tol) {
+      detail += `<br>⚠️ ИИ заявил #ЧЕК_ИТОГО: ${declared.toFixed(2)} — не совпадает с печатным.`;
+    }
+    if (!ok) detail += `<br>Разница: ${diff.toFixed(2)}. Проверь чек по фото.`;
+    checks.push({ ok, title: 'Сверка чека', detail });
+  } else if (checkPrinted > 0 && d1.checkRows.length === 0) {
+    checks.push({ ok: false, title: 'Сверка чека', detail: 'В CSV нет блока #ЧЕК_ПОЛНЫЙ — невозможно проверить.' });
+  } else {
+    checks.push({ ok: true, title: 'Сверка чека', detail: 'Печатный итог чека не задан — пропущено.' });
+  }
+
+  _cmpData = { rows, dateLabels, okCount, warnCount, errCount, csv1: d1, csv2: d2, checks };
+  cmpRenderChecks(checks);
+  cmpRenderResults();
+}
+
+function cmpRenderChecks(checks) {
+  const el = $('cmpCheckResults'); if (!el) return;
+  if (!checks.length) { el.innerHTML = '<div class="cmp-empty">Нет контролей.</div>'; return; }
+  el.innerHTML = checks.map(c => {
+    const cls = c.ok ? 'ok' : 'err';
+    const icon = c.ok ? '✓' : '✗';
+    return `<div class="cmp-check ${cls}">
+      <span class="cmp-check-icon">${icon}</span>
+      <div class="cmp-check-body">
+        <div class="cmp-check-title">${escapeHtml(c.title)}</div>
+        <div class="cmp-check-detail">${c.detail}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function cmpStartEdit(pill) {
+  if (pill.querySelector('input')) return;
+  const key = pill.dataset.key;
+  const dk = pill.dataset.dk;
+  const kind = pill.dataset.kind;
+  const row = _cmpData && _cmpData.rows.find(r => r.key === key);
+  if (!row) return;
+
+  let current;
+  if (kind === 'sales') {
+    current = (row.edits && row.edits.sales != null) ? row.edits.sales : (row.a ? row.a.sales : 0);
+  } else {
+    current = (row.edits && row.edits.incoming && row.edits.incoming[dk] != null)
+      ? row.edits.incoming[dk]
+      : (row.a ? (row.a.incoming[dk] || 0) : 0);
+  }
+
+  pill.innerHTML = '';
+  pill.classList.add('editing');
+  const inp = document.createElement('input');
+  inp.type = 'text';
+  inp.inputMode = 'numeric';
+  inp.pattern = '[0-9]*';
+  inp.autocomplete = 'off';
+  inp.className = 'cmp-edit-input';
+  inp.value = String(current);
+  pill.appendChild(inp);
+  setTimeout(() => { try { inp.focus(); inp.select(); } catch (e) {} }, 30);
+
+  inp.addEventListener('input', () => {
+    const cleaned = inp.value.replace(/[^\d]/g, '');
+    if (cleaned !== inp.value) inp.value = cleaned;
+  });
+  inp.addEventListener('click', e => e.stopPropagation());
+
+  let done = false;
+  const finish = (save) => {
+    if (done) return;
+    done = true;
+    if (save) {
+      const val = parseInt(inp.value.replace(/[^\d]/g, ''), 10) || 0;
+      if (!row.edits) row.edits = { incoming: {}, sales: null };
+      if (kind === 'sales') row.edits.sales = val;
+      else row.edits.incoming[dk] = val;
+    }
+    cmpRenderResults();
+  };
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+    else if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+  });
+  inp.addEventListener('blur', () => finish(true));
+}
+
+function cmpRenderResults() {
+  if (!_cmpData) return;
+  const { rows, dateLabels, okCount, warnCount, errCount } = _cmpData;
+  const stats = $('cmpStats');
+  const out = $('cmpResults');
+  if (stats) {
+    stats.style.display = 'grid';
+    stats.innerHTML = `
+      <span class="k">✓ Совпало</span><span class="v" style="color:var(--green)">${okCount}</span>
+      <span class="k">⚠ Расхождения</span><span class="v" style="color:var(--orange)">${warnCount}</span>
+      <span class="k">✗ Только в одном</span><span class="v" style="color:var(--red)">${errCount}</span>
+    `;
+  }
+  if (!out) return;
+  if (!rows.length) { out.innerHTML = '<div class="cmp-empty">Оба CSV пусты.</div>'; return; }
+  out.innerHTML = rows.map(r => {
+    const icon = r.status === 'ok' ? '✓' : r.status === 'warn' ? '⚠' : '✗';
+    const vals = [];
+    r.dates.forEach(dk => {
+      const va = r.a ? (r.a.incoming[dk] || 0) : '—';
+      const vb = r.b ? (r.b.incoming[dk] || 0) : '—';
+      const edited = r.edits && r.edits.incoming && r.edits.incoming[dk] != null;
+      const cls = edited ? 'edited' : (va !== vb ? 'diff' : 'same');
+      const shown = edited ? r.edits.incoming[dk] : `${va} / ${vb}`;
+      vals.push(`<span class="cmp-val ${cls}" data-key="${escapeHtml(r.key)}" data-dk="${dk}" data-kind="incoming">${dateLabels[dk] || dk}: ${shown}</span>`);
+    });
+    if (r.a || r.b) {
+      const sa = r.a ? r.a.sales : '—';
+      const sb = r.b ? r.b.sales : '—';
+      const edited = r.edits && r.edits.sales != null;
+      const cls = edited ? 'edited' : (sa !== sb ? 'diff' : 'same');
+      const shown = edited ? r.edits.sales : `${sa} / ${sb}`;
+      vals.push(`<span class="cmp-val ${cls}" data-key="${escapeHtml(r.key)}" data-dk="sales" data-kind="sales">Прод: ${shown}</span>`);
+    }
+    return `<div class="cmp-row ${r.status}" data-key="${escapeHtml(r.key)}">
+      <span class="cmp-icon">${icon}</span>
+      <span class="cmp-name">${escapeHtml(r.name)}</span>
+      <span class="cmp-vals">${vals.join('')}</span>
+    </div>`;
+  }).join('');
+  out.querySelectorAll('.cmp-val.diff, .cmp-val.edited').forEach(pill => {
+    pill.addEventListener('click', () => cmpStartEdit(pill));
+  });
+  const applyBtn = $('cmpApplyBtn');
+  const hasEdits = rows.some(r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null));
+  if (applyBtn) applyBtn.style.display = (okCount || hasEdits) ? 'block' : 'none';
+}
+
+function cmpApplyMatched() {
+  if (!_cmpData) return;
+
+  const hasEdits = r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null);
+  const okRows = _cmpData.rows.filter(r => r.status === 'ok' && r.a);
+  const editedRows = _cmpData.rows.filter(r => r.status !== 'ok' && hasEdits(r));
+  const diffRows = _cmpData.rows.filter(r => r.status !== 'ok');
+
+  const applyRows = [...okRows];
+  const okKeys = new Set(okRows.map(r => r.key));
+  editedRows.forEach(r => { if (!okKeys.has(r.key)) applyRows.push(r); });
+
+  if (!applyRows.length && !diffRows.length) { showToast('Нет данных'); return; }
+
+  const byKey = new Map();
+  applyRows.forEach(r => {
+    const incoming = { ...(r.a ? r.a.incoming : {}) };
+    if (r.edits && r.edits.incoming) Object.assign(incoming, r.edits.incoming);
+    const sales = (r.edits && r.edits.sales != null) ? r.edits.sales : (r.a ? r.a.sales : 0);
+    byKey.set(normalizeName(r.name), { incoming, sales });
+  });
+
+  const year = new Date().getFullYear();
+  let applied = 0;
+
+  tableRows.forEach(row => {
+    const key = normalizeName(row.name);
+    const match = byKey.get(key);
+    if (!match) return;
+    Object.keys(match.incoming).forEach(dk => {
+      const m = dk.match(/^(\d{1,2})\.(\d{1,2})$/);
+      if (!m) return;
+      const iso = `${year}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+      let p = (row.incoming || []).find(x => x.date === iso);
+      if (!p) { p = { date: iso, qty: 0, _originalQty: 0 }; row.incoming.push(p); }
+      p.qty = match.incoming[dk];
+      p._originalQty = match.incoming[dk];
+    });
+    if (typeof match.sales === 'number') {
+      row.sales = match.sales;
+      row._originalSales = match.sales;
+    }
+    applied++;
+  });
+
+  _needsCheckNames = new Set();
+  diffRows.forEach(r => {
+    if (hasEdits(r)) return;
+    if (r.name) _needsCheckNames.add(normalizeName(r.name));
+  });
+
+  renderTable();
+  updateSegmentedCounters();
+  scheduleSessionSave();
+  if (_needsCheckNames.size) {
+    showToast(`Применено: ${applied}. Проверить вручную: ${_needsCheckNames.size}`);
+  } else {
+    showToast(`Применено: ${applied}`);
+  }
+  closeCompareModal();
+}
+
+function cmpBindUI() {
+  const openBtn = $('openCompareBtn'); if (openBtn) openBtn.onclick = () => openCompareModal();
+  const runBtn = $('cmpRunBtn'); if (runBtn) runBtn.onclick = cmpRunCompare;
+  const clearBtn = $('cmpClearBtn');
+  if (clearBtn) clearBtn.onclick = () => {
+    const a = $('cmpCsv1'); const b = $('cmpCsv2');
+    if (a) a.value = '';
+    if (b) b.value = '';
+    const cp = $('cmpCheckPrinted'); if (cp) cp.value = '';
+    _cmpNakls = [{ date: '', num: '', lastNum: '', total: '' }];
+    cmpRenderNakls();
+    const st = $('cmpStats'); if (st) st.style.display = 'none';
+    const chk = $('cmpCheckResults'); if (chk) chk.innerHTML = '';
+    const res = $('cmpResults'); if (res) res.innerHTML = '';
+    const ap = $('cmpApplyBtn'); if (ap) ap.style.display = 'none';
+    _cmpData = null;
+    _lastGeminiCsvs = { first: '', second: '' };
+    _dailyEditing = null;
+  };
+  const addNaklBtn = $('cmpAddNaklBtn');
+  if (addNaklBtn) addNaklBtn.onclick = () => {
+    if (_cmpNakls.length >= 4) { showToast('Максимум 4 накладные'); return; }
+    _cmpNakls.push({ date: '', num: '', lastNum: '', total: '' });
+    cmpRenderNakls();
+  };
+  const closeBtn = $('cmpCloseBtn'); if (closeBtn) closeBtn.onclick = closeCompareModal;
+  const applyBtn = $('cmpApplyBtn'); if (applyBtn) applyBtn.onclick = cmpApplyMatched;
 }
 
 /* ═══════════════════════════════════════════
    BIND UI
    ═══════════════════════════════════════════ */
 function bindUI() {
+  /* === Загрузка по датам === */
+  const dailyRec = $('dailyRecognizeBtn'); if (dailyRec) dailyRec.onclick = recognizeDaily;
+  const dailyBuild = $('dailyBuildBtn'); if (dailyBuild) dailyBuild.onclick = buildDailyCsv;
+  const dailyClearBtn = $('dailyClearBtn'); if (dailyClearBtn) dailyClearBtn.onclick = dailyClear;
+  const dailyDateInput = $('dailyDate');
+  if (dailyDateInput) {
+    dailyDateInput.addEventListener('focus', () => scrollFieldIntoView(dailyDateInput));
+    dailyDateInput.addEventListener('input', () => {
+      const cleaned = dailyDateInput.value.replace(/[^\d.]/g, '').slice(0, 10);
+      if (cleaned !== dailyDateInput.value) dailyDateInput.value = cleaned;
+    });
+  }
+
+  /* === Загрузка фото === */
   const invBtn = $('uploadInvoicePhotosBtn'); if (invBtn) invBtn.onclick = () => { const i = $('invoicePhotoInput'); if (i) i.click(); };
   const salBtn = $('uploadSalesPhotosBtn'); if (salBtn) salBtn.onclick = () => { const i = $('salesPhotoInput'); if (i) i.click(); };
   const invInput = $('invoicePhotoInput');
   if (invInput) invInput.onchange = async e => { try { if (e.target.files && e.target.files.length) await addPhotos(e.target.files, 'invoice'); } finally { e.target.value = ''; } };
   const salInput = $('salesPhotoInput');
   if (salInput) salInput.onchange = async e => { try { if (e.target.files && e.target.files.length) await addPhotos(e.target.files, 'sales'); } finally { e.target.value = ''; } };
+
+  /* === Gemini === */
+  const geminiBtn = $('recognizeGeminiBtn');
+  if (geminiBtn) geminiBtn.onclick = recognizeWithGemini;
+
+  const geminiKeyInput = $('geminiKeyInput');
+  if (geminiKeyInput) {
+    geminiKeyInput.value = getGeminiKey();
+    let _modelRefreshTimer = null;
+    geminiKeyInput.addEventListener('input', () => {
+      setGeminiKey(geminiKeyInput.value);
+      if (_modelRefreshTimer) clearTimeout(_modelRefreshTimer);
+      _modelRefreshTimer = setTimeout(() => {
+        _modelRefreshTimer = null;
+        clearModelsCache();
+        refreshModelSelect(false);
+      }, 1500);
+    });
+    geminiKeyInput.addEventListener('focus', () => scrollFieldIntoView(geminiKeyInput));
+  }
+  const refreshModelsBtn = $('refreshModelsBtn');
+  if (refreshModelsBtn) refreshModelsBtn.onclick = () => refreshModelSelect(true);
+  const geminiModelSelect = $('geminiModelSelect');
+  if (geminiModelSelect) {
+    geminiModelSelect.value = getGeminiModel();
+    geminiModelSelect.addEventListener('change', () => setGeminiModel(geminiModelSelect.value));
+  }
+
+  /* === Share fallback === */
   const shareBtn = $('shareToAIBtn'); if (shareBtn) shareBtn.onclick = shareToAI;
+
   const copyPromptBtn = $('copyPromptBtn');
   if (copyPromptBtn) copyPromptBtn.onclick = async () => {
     const prompt = buildPrompt();
@@ -4640,6 +6138,7 @@ function bindUI() {
       } else throw new Error();
     } catch (e) { const pc = $('promptContent'); if (pc) pc.textContent = prompt; openModal('promptModal'); }
   };
+
   const pasteCsvBtn = $('pasteCsvBtn');
   if (pasteCsvBtn) pasteCsvBtn.onclick = async () => {
     try {
@@ -4653,6 +6152,7 @@ function bindUI() {
       } else throw new Error();
     } catch (e) { const st = $('csvStatus'); if (st) { st.className = 'status show'; st.textContent = 'Вставьте CSV вручную.'; } }
   };
+
   const loadCsvBtn = $('loadCsvFileBtn');
   if (loadCsvBtn) loadCsvBtn.onclick = () => {
     if (_fileBusy) return;
@@ -4660,6 +6160,7 @@ function bindUI() {
     setTimeout(() => _fileBusy = false, 500);
     const i = $('csvFileInput'); if (i) i.click();
   };
+
   const csvFileInput = $('csvFileInput');
   if (csvFileInput) csvFileInput.onchange = async e => {
     const f = e.target.files && e.target.files[0];
@@ -4675,6 +6176,7 @@ function bindUI() {
     } catch (err) { const st = $('csvStatus'); if (st) { st.className = 'status show err'; st.textContent = 'Ошибка чтения.'; } }
     finally { e.target.value = ''; }
   };
+
   const csvInput = $('csvInput');
   if (csvInput) {
     csvInput.addEventListener('input', () => { autoResizeTextarea(); updateCsvCounter(); });
@@ -4682,9 +6184,7 @@ function bindUI() {
     csvInput.addEventListener('focus', () => scrollFieldIntoView(csvInput));
   }
   const pointInput = $('point');
-  if (pointInput) {
-    pointInput.addEventListener('focus', () => scrollFieldIntoView(pointInput));
-  }
+  if (pointInput) pointInput.addEventListener('focus', () => scrollFieldIntoView(pointInput));
 
   const tableSearch = $('tableSearch');
   const tableSearchClear = $('tableSearchClear');
@@ -4702,13 +6202,10 @@ function bindUI() {
     };
   }
 
-  /* ПАТЧ 8: обработчик сегментированного контрола «Все / Проблемные» */
   const problemSeg = $('problemSegmented');
   if (problemSeg) {
     problemSeg.querySelectorAll('button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        setProblemFilter(btn.dataset.filter === 'problems');
-      });
+      btn.addEventListener('click', () => { setProblemFilter(btn.dataset.filter === 'problems'); });
     });
   }
 
@@ -4735,6 +6232,7 @@ function bindUI() {
     const st = $('csvStatus');
     if (st) { st.className = 'status show ok'; st.textContent = 'Сессия восстановлена.'; }
   };
+
   const clearBtn = $('clearBtn');
   if (clearBtn) clearBtn.onclick = async () => {
     if (pendingSessionReset) return;
@@ -4742,7 +6240,6 @@ function bindUI() {
     pendingSessionReset = true; resetToken++;
     try {
       tableRows = []; unknownRows = []; noCategoryRows = []; unknownSelected = new Set(); _tableQuery = '';
-      /* ПАТЧ 10: сброс расхождений и фильтра при полной очистке */
       _needsCheckNames = new Set();
       _problemFilter = false;
       const pt = $('point'); if (pt) pt.value = '';
@@ -4821,10 +6318,7 @@ function bindUI() {
     if (selectedNames.length) openAliasTargetModalList(selectedNames, 'catalog');
   };
   const catalogToIgnoredBtn = $('catalogToIgnoredBtn');
-  if (catalogToIgnoredBtn) catalogToIgnoredBtn.onclick = (e) => {
-    e.stopPropagation();
-    catalogToIgnored();
-  };
+  if (catalogToIgnoredBtn) catalogToIgnoredBtn.onclick = (e) => { e.stopPropagation(); catalogToIgnored(); };
   const catSearch = $('catalogSearch');
   if (catSearch) catSearch.oninput = renderCatalogList;
   const catSearchClear = $('catalogSearchClear');
@@ -4966,10 +6460,7 @@ function bindUI() {
     renderIgnoredList();
   };
   const ignoredToCatalogBtn = $('ignoredToCatalogBtn');
-  if (ignoredToCatalogBtn) ignoredToCatalogBtn.onclick = (e) => {
-    e.stopPropagation();
-    ignoredToCatalog();
-  };
+  if (ignoredToCatalogBtn) ignoredToCatalogBtn.onclick = (e) => { e.stopPropagation(); ignoredToCatalog(); };
   const clearIgnoredBtn = $('clearIgnoredBtn');
   if (clearIgnoredBtn) clearIgnoredBtn.onclick = () => {
     if (!IGNORED.length) { alert('Игнор-лист уже пуст.'); return; }
@@ -5018,15 +6509,11 @@ function bindUI() {
     renderUnknownModal();
   };
 
-  const aliasesBtn = $('aliasesBtn');
-  if (aliasesBtn) aliasesBtn.onclick = () => openAliasesModal();
-
-  const pricesBtn = $('pricesBtn');
-  if (pricesBtn) pricesBtn.onclick = () => openPricesModal();
+  const aliasesBtn = $('aliasesBtn'); if (aliasesBtn) aliasesBtn.onclick = () => openAliasesModal();
+  const pricesBtn = $('pricesBtn'); if (pricesBtn) pricesBtn.onclick = () => openPricesModal();
   const closePricesBtn = $('closePricesBtn');
   if (closePricesBtn) closePricesBtn.onclick = (e) => { e.stopPropagation(); closePricesModal(); };
-  const pricesSearch = $('pricesSearch');
-  if (pricesSearch) pricesSearch.oninput = renderPricesList;
+  const pricesSearch = $('pricesSearch'); if (pricesSearch) pricesSearch.oninput = renderPricesList;
   const pricesSearchClear = $('pricesSearchClear');
   if (pricesSearchClear) pricesSearchClear.onclick = () => {
     const s = $('pricesSearch'); if (s) s.value = '';
@@ -5034,12 +6521,9 @@ function bindUI() {
   };
   const pricesAddBtn = $('pricesAddBtn');
   if (pricesAddBtn) pricesAddBtn.onclick = (e) => { e.stopPropagation(); openPriceEdit('', 0); };
-  const priceEditSaveBtn = $('priceEditSaveBtn');
-  if (priceEditSaveBtn) priceEditSaveBtn.onclick = savePriceEdit;
-  const priceEditDeleteBtn = $('priceEditDeleteBtn');
-  if (priceEditDeleteBtn) priceEditDeleteBtn.onclick = deletePriceEdit;
-  const priceEditCancelBtn = $('priceEditCancelBtn');
-  if (priceEditCancelBtn) priceEditCancelBtn.onclick = closePriceEdit;
+  const priceEditSaveBtn = $('priceEditSaveBtn'); if (priceEditSaveBtn) priceEditSaveBtn.onclick = savePriceEdit;
+  const priceEditDeleteBtn = $('priceEditDeleteBtn'); if (priceEditDeleteBtn) priceEditDeleteBtn.onclick = deletePriceEdit;
+  const priceEditCancelBtn = $('priceEditCancelBtn'); if (priceEditCancelBtn) priceEditCancelBtn.onclick = closePriceEdit;
   const pricesExportBtn = $('pricesExportBtn');
   if (pricesExportBtn) pricesExportBtn.onclick = () => {
     try {
@@ -5070,8 +6554,7 @@ function bindUI() {
         PRICES[n] = Math.round(v * 100) / 100;
         count++;
       }
-      savePrices();
-      renderPricesList();
+      savePrices(); renderPricesList();
       const st = $('pricesStatus');
       if (st) { st.className = 'status show ok'; st.textContent = `Импортировано: ${count}`; }
     } catch (err) {
@@ -5082,15 +6565,13 @@ function bindUI() {
 
   const closeAliases = $('closeAliasesBtn');
   if (closeAliases) closeAliases.onclick = (e) => { e.stopPropagation(); closeAliasesModal(); };
-  const aliasesSearch = $('aliasesSearch');
-  if (aliasesSearch) aliasesSearch.oninput = renderAliasesList;
+  const aliasesSearch = $('aliasesSearch'); if (aliasesSearch) aliasesSearch.oninput = renderAliasesList;
   const aliasesSearchClear = $('aliasesSearchClear');
   if (aliasesSearchClear) aliasesSearchClear.onclick = () => {
     const s = $('aliasesSearch'); if (s) s.value = '';
     renderAliasesList();
   };
-  const aliasTargetSearch = $('aliasTargetSearch');
-  if (aliasTargetSearch) aliasTargetSearch.oninput = renderAliasTargetList;
+  const aliasTargetSearch = $('aliasTargetSearch'); if (aliasTargetSearch) aliasTargetSearch.oninput = renderAliasTargetList;
   const aliasTargetSearchClear = $('aliasTargetSearchClear');
   if (aliasTargetSearchClear) aliasTargetSearchClear.onclick = () => {
     const s = $('aliasTargetSearch'); if (s) s.value = '';
@@ -5128,10 +6609,7 @@ function bindUI() {
     const remote = await fetchRemoteCatalog();
     if (metaSyncing) metaSyncing.style.display = 'none';
     updateCatalogMeta();
-    if (!remote) {
-      if (syncStatus) { syncStatus.className = 'status show'; syncStatus.textContent = 'Обновлений нет.'; }
-      return;
-    }
+    if (!remote) { if (syncStatus) { syncStatus.className = 'status show'; syncStatus.textContent = 'Обновлений нет.'; } return; }
     const localUpdatedAt = localStorage.getItem(SYNC_LOCAL_UPDATED_AT) || '';
     if (remote.updatedAt && (!localUpdatedAt || remote.updatedAt > localUpdatedAt)) {
       _pendingRemote = remote;
@@ -5149,8 +6627,7 @@ function bindUI() {
     if (result && result.ok) showToast('Опубликовано');
     else if (result && result.message) showToast(result.message);
   };
-  const bannerApply = $('bannerApply');
-  if (bannerApply) bannerApply.onclick = () => applyPendingRemote();
+  const bannerApply = $('bannerApply'); if (bannerApply) bannerApply.onclick = () => applyPendingRemote();
   const bannerLater = $('bannerLater');
   if (bannerLater) bannerLater.onclick = () => { _pendingRemote = null; hideCatalogUpdateBanner(); };
 
@@ -5185,8 +6662,7 @@ function bindUI() {
    ═══════════════════════════════════════════ */
 function bindModalBackdrops() {
   ['catalogModal', 'unknownModal', 'ignoredModal', 'aliasesModal', 'aliasTargetModal', 'reportModal', 'noCategoryModal', 'pricesModal', 'priceEditModal', 'compareModal'].forEach(id => {
-    const m = $(id);
-    if (!m) return;
+    const m = $(id); if (!m) return;
     m.addEventListener('click', e => {
       if (e.target !== m) return;
       if (id === 'catalogModal') {
@@ -5199,28 +6675,20 @@ function bindModalBackdrops() {
           renderTable();
         }
         updateCatalogMeta();
-      } else if (id === 'unknownModal') {
-        closeUnknownModal();
-      } else if (id === 'ignoredModal') {
+      } else if (id === 'unknownModal') closeUnknownModal();
+      else if (id === 'ignoredModal') {
         _ignoredSelectMode = false;
         _ignoredSelected = new Set();
         updateIgnoredSelectUI();
         closeModal('ignoredModal'); updateUnknownBanner();
-      } else if (id === 'aliasesModal') {
-        closeAliasesModal();
-      } else if (id === 'aliasTargetModal') {
-        closeAliasTargetModal();
-      } else if (id === 'reportModal') {
-        closeReport();
-      } else if (id === 'noCategoryModal') {
-        closeNoCategoryModal();
-      } else if (id === 'pricesModal') {
-        closePricesModal();
-      } else if (id === 'priceEditModal') {
-        closePriceEdit();
-      } else if (id === 'compareModal') {
-        closeCompareModal();
       }
+      else if (id === 'aliasesModal') closeAliasesModal();
+      else if (id === 'aliasTargetModal') closeAliasTargetModal();
+      else if (id === 'reportModal') closeReport();
+      else if (id === 'noCategoryModal') closeNoCategoryModal();
+      else if (id === 'pricesModal') closePricesModal();
+      else if (id === 'priceEditModal') closePriceEdit();
+      else if (id === 'compareModal') closeCompareModal();
     });
   });
 
@@ -5242,24 +6710,20 @@ function bindModalBackdrops() {
 }
 
 /* ═══════════════════════════════════════════
-   LOGO / SERVICE WORKER / INIT
+   LOGO / SW / INIT
    ═══════════════════════════════════════════ */
 function initLogoFallback() {
-  const logo = $('appLogo');
-  if (!logo) return;
+  const logo = $('appLogo'); if (!logo) return;
   logo.onerror = () => {
     logo.onerror = null;
-    const parent = logo.parentNode;
-    if (!parent) return;
+    const parent = logo.parentNode; if (!parent) return;
     const fallback = document.createElement('div');
-    fallback.className = 'logo';
-    fallback.textContent = 'FB';
+    fallback.className = 'logo'; fallback.textContent = 'FB';
     fallback.style.cssText = 'display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;background:#0a84ff;font-size:14px';
     parent.replaceChild(fallback, logo);
   };
   const img = document.createElement('img');
-  img.src = 'logo.png';
-  img.alt = 'FB';
+  img.src = 'logo.png'; img.alt = 'FB';
   img.onload = () => { logo.onerror = null; logo.innerHTML = ''; logo.appendChild(img); };
   img.onerror = () => {};
 }
@@ -5269,16 +6733,27 @@ function initSW() {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {
       reg.addEventListener('updatefound', () => {
-        const nw = reg.installing;
-        if (!nw) return;
+        const nw = reg.installing; if (!nw) return;
         nw.addEventListener('statechange', () => {
           if (nw.state === 'installed' && navigator.serviceWorker.controller) {
             const b = $('updateBanner');
-            if (b) b.classList.add('show');
+            if (b) {
+              b.classList.add('show');
+              b.onclick = () => {
+                if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+              };
+            }
           }
         });
       });
     }).catch(err => console.warn('SW registration failed:', err));
+
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
   });
 }
 
@@ -5296,6 +6771,17 @@ function init() {
   }
   window.addEventListener('load', () => { measureHeader(); setTimeout(measureHeader, 100); setTimeout(measureHeader, 500); });
 
+  const geminiKeyInput = $('geminiKeyInput');
+  if (geminiKeyInput && !geminiKeyInput.value) geminiKeyInput.value = getGeminiKey();
+
+  const _cachedModels = loadModelsCache();
+  if (_cachedModels && _cachedModels.length) {
+    fillModelSelect(_cachedModels);
+  } else {
+    fillModelSelect([{ id: GEMINI_MODEL_DEFAULT, displayName: '' }]);
+  }
+  scheduleModelsRefreshOncePerDay();
+
   const pt = $('point');
   if (pt) pt.addEventListener('input', () => { scheduleSessionSave(); updateResultMeta(); });
   const session = loadSession();
@@ -5310,10 +6796,11 @@ function init() {
   renderTable();
   updateUnknownBanner();
   updateNoCategoryBanner();
-  /* ПАТЧ 11: первичный счётчик и сброс фильтра */
   updateSegmentedCounters();
   setProblemFilter(false);
   renderPhotoQueue();
+  _dailyAccum = loadDailyAccum();
+  dailyRender();
   cmpBindUI();
   cmpRenderNakls();
   updateIgnoredCount();
@@ -5326,18 +6813,9 @@ function init() {
       const data = loadSession();
       if (data) { applySession(data); setActiveCategory(_activeCategory); autoResizeTextarea(); updateCsvCounter(); renderTable(); updateUnknownBanner(); updateNoCategoryBanner(); }
     }
-    if (e.key === IGNORED_KEY) {
-      IGNORED = loadIgnored();
-      updateIgnoredCount();
-      updateUnknownBanner();
-    }
-    if (e.key === ALIASES_KEY) {
-      ALIASES = loadAliases();
-      updateAliasesCount();
-    }
-    if (e.key === PRICES_KEY) {
-      PRICES = loadPrices();
-    }
+    if (e.key === IGNORED_KEY) { IGNORED = loadIgnored(); updateIgnoredCount(); updateUnknownBanner(); }
+    if (e.key === ALIASES_KEY) { ALIASES = loadAliases(); updateAliasesCount(); }
+    if (e.key === PRICES_KEY) { PRICES = loadPrices(); }
   });
   window.addEventListener('beforeunload', () => {
     if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
@@ -5350,538 +6828,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.5.1 · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length, '· aliases:', ALIASES.length, '· prices:', Object.keys(PRICES).length);
-}
-
-/* ═══════════════════════════════════════════
-   СВЕРКА ДВУХ CSV
-   ═══════════════════════════════════════════ */
-let _cmpData = null;
-let _cmpNakls = [];
-
-function cmpSplitLine(line, sep) {
-  const out = []; let cur = ''; let inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (inQ) {
-      if (ch === '"') { if (line[i+1] === '"') { cur += '"'; i++; continue; } inQ = false; continue; }
-      cur += ch; continue;
-    }
-    if (ch === '"') { inQ = true; continue; }
-    if (ch === sep) { out.push(cur); cur = ''; continue; }
-    cur += ch;
-  }
-  out.push(cur); return out;
-}
-
-function cmpParseCSV(text) {
-  const raw = String(text || '').replace(/^\uFEFF/, '');
-  const lines = raw.split(/\r?\n/);
-  const mainLines = []; const checkLines = [];
-  let inCheck = false; let checkTotal = null; let serviceMode = false;
-  for (const line of lines) {
-    const t = line.trim();
-    if (t === '#ЧЕК_ПОЛНЫЙ:') { inCheck = true; serviceMode = false; continue; }
-    if (t.startsWith('#ЧЕК_ИТОГО:')) {
-      const v = String(t.replace('#ЧЕК_ИТОГО:', '')).replace(',', '.').replace(/[^\d.]/g, '');
-      checkTotal = Number(v) || 0;
-      inCheck = false; serviceMode = false; continue;
-    }
-    if (inCheck) { checkLines.push(line); continue; }
-    if (t.startsWith('#')) { serviceMode = true; continue; }
-    if (serviceMode) continue;
-    mainLines.push(line);
-  }
-    function cmpIsServiceLine(line) {
-    const t = line.trim();
-    if (!t) return true;
-    if (t.startsWith('#')) return true;
-    if (t.startsWith('•')) return true;
-    if (t.startsWith('·')) return true;
-    if (t.startsWith('*')) return true;
-    if (/^[-–—]\s*фото\b/i.test(t)) return true;
-    if (/^[-–—]\s*накладная\b/i.test(t)) return true;
-    if (/^[-–—]\s*чек\b/i.test(t)) return true;
-    if (/^накладная\s+№/i.test(t)) return true;
-    if (/^чек\s+(продаж|от)\s/i.test(t)) return true;
-    if (/^фото\s+\d/i.test(t)) return true;
-    if (/^источник/i.test(t)) return true;
-    if (/^проверка[: ]/i.test(t)) return true;
-    if (/^сверка[: ]/i.test(t)) return true;
-    if (/^нечитаемо[: ]/i.test(t)) return true;
-    if (/^всего\s+в\s+csv/i.test(t)) return true;
-    if (/^в\s+накладной\s+№/i.test(t)) return true;
-    if (/^в\s+чеке[: ]/i.test(t)) return true;
-    return false;
-  }
-
-  const dataLines = mainLines.filter(l => l.trim() && !cmpIsServiceLine(l));
-  if (dataLines.length < 2) return null;
-  const sep = dataLines[0].includes(';') ? ';' : ',';
-  const header = cmpSplitLine(dataLines[0], sep);
-  const idxName = header.findIndex(h => /наимен/i.test(h));
-  if (idxName < 0) return null;
-  const dateCols = [];
-  header.forEach((h, i) => {
-    if (/получено за/i.test(h)) {
-      const m = h.match(/(\d{1,2})[.\-\/](\d{1,2})/);
-      if (m) dateCols.push({ idx: i, key: `${m[1].padStart(2,'0')}.${m[2].padStart(2,'0')}`, label: `${m[1].padStart(2,'0')}.${m[2].padStart(2,'0')}` });
-    }
-  });
-  const idxSales = header.findIndex(h => /продано|продажи/i.test(h));
-  const rows = {}; const order = [];
-  for (let i = 1; i < dataLines.length; i++) {
-    const f = cmpSplitLine(dataLines[i], sep);
-    let name = (f[idxName] || '').trim().replace(/^"|"$/g, '');
-    if (!name) continue;
-
-    if (/^[-–—•·*]/.test(name)) continue;
-    if (/^фото\s+\d/i.test(name)) continue;
-    if (/^накладная\s+№/i.test(name)) continue;
-    if (/^чек\s+(продаж|от)/i.test(name)) continue;
-    if (/\(не\s+в\s+справочнике/i.test(name)) continue;
-    if (/\(нет\s+в\s+справочнике/i.test(name)) continue;
-    if (/\(есть\s+в\s+чеке/i.test(name)) continue;
-    if (/\(есть\s+в\s+справочнике/i.test(name)) continue;
-    if (/^источник/i.test(name)) continue;
-    if (/^проверка[: ]/i.test(name)) continue;
-    if (/^сверка[: ]/i.test(name)) continue;
-
-    const hasNumbers = f.some((cell, idx) => idx !== idxName && /\d/.test(String(cell || '')));
-    if (!hasNumbers) continue;
-    const key = normalizeName(name);
-    const rec = { name, incoming: {}, sales: 0 };
-    dateCols.forEach(dc => {
-      const v = String(f[dc.idx] || '').replace(/[^\d]/g, '');
-      rec.incoming[dc.key] = v === '' ? 0 : parseInt(v, 10);
-    });
-    if (idxSales >= 0) {
-      const s = String(f[idxSales] || '').replace(/[^\d]/g, '');
-      rec.sales = s === '' ? 0 : parseInt(s, 10);
-    }
-    rows[key] = rec;
-    order.push(key);
-  }
-  const checkRows = [];
-  for (const line of checkLines) {
-    const t = line.trim(); if (!t) continue;
-    const f = cmpSplitLine(t, ';');
-    if (f.length < 4) continue;
-    const name = f[0].trim();
-    const qty = parseInt(String(f[1] || '').replace(/[^\d]/g, ''), 10) || 0;
-    const price = Number(String(f[2] || '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
-    const sum = Number(String(f[3] || '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
-    if (name) checkRows.push({ name, qty, price, sum });
-  }
-  return { rows, dateCols, order, count: order.length, checkRows, checkTotal };
-}
-
-function cmpCalcSigmaForDate(csvData, dateKey) {
-  let total = 0; let count = 0; const missing = [];
-  for (const key of csvData.order) {
-    const row = csvData.rows[key];
-    const val = row.incoming[dateKey] || 0;
-    if (val === 0) continue;
-    count++;
-    const price = getPriceFor(row.name);
-    if (!price) { missing.push(row.name); continue; }
-    total += val * price;
-  }
-  return { total, count, missing };
-}
-
-function cmpFindRowByDiff(csvData, diff) {
-  const tol = 0.05;
-  for (const key of csvData.order) {
-    const row = csvData.rows[key];
-    const price = getPriceFor(row.name);
-    if (!price) continue;
-    for (const dk of Object.keys(row.incoming)) {
-      const cost = row.incoming[dk] * price;
-      if (Math.abs(cost - diff) < tol) {
-        return { name: row.name, dateKey: dk, qty: row.incoming[dk], price, sum: cost };
-      }
-    }
-  }
-  return null;
-}
-
-function cmpRenderNakls() {
-  const list = $('cmpNaklList');
-  if (!list) return;
-  list.innerHTML = '';
-  _cmpNakls.forEach((n, i) => {
-    const el = document.createElement('div');
-    el.className = 'cmp-nakl-item';
-    el.innerHTML = `
-      <div><label>Дата</label><input type="text" data-i="${i}" data-f="date" value="${escapeHtml(n.date)}" placeholder="20.09"></div>
-      <div><label>№</label><input type="text" data-i="${i}" data-f="num" value="${escapeHtml(n.num)}" placeholder="211224"></div>
-      <div><label>Посл. №</label><input type="text" data-i="${i}" data-f="lastNum" value="${escapeHtml(n.lastNum)}" placeholder="18"></div>
-      <div><label>Печатный итог</label><input type="text" data-i="${i}" data-f="total" value="${escapeHtml(n.total)}" placeholder="1657.36"></div>
-      <button class="del-btn" data-del="${i}">×</button>
-    `;
-    list.appendChild(el);
-  });
-  list.querySelectorAll('input').forEach(inp => {
-    inp.oninput = e => {
-      const i = parseInt(e.target.dataset.i, 10);
-      _cmpNakls[i][e.target.dataset.f] = e.target.value;
-    };
-  });
-  list.querySelectorAll('[data-del]').forEach(btn => {
-    btn.onclick = e => {
-      _cmpNakls.splice(parseInt(e.target.dataset.del, 10), 1);
-      cmpRenderNakls();
-    };
-  });
-}
-
-function openCompareModal() {
-  const st = $('cmpStats'); if (st) st.style.display = 'none';
-  const res = $('cmpResults'); if (res) res.innerHTML = '';
-  const chk = $('cmpCheckResults'); if (chk) chk.innerHTML = '';
-  const btn = $('cmpApplyBtn'); if (btn) btn.style.display = 'none';
-  _cmpData = null;
-  if (_cmpNakls.length === 0) _cmpNakls = [{ date: '', num: '', lastNum: '', total: '' }];
-  cmpRenderNakls();
-  openModal('compareModal');
-}
-function closeCompareModal() {
-  closeModal('compareModal');
-}
-
-function cmpRunCompare() {
-  const t1 = $('cmpCsv1') ? $('cmpCsv1').value : '';
-  const t2 = $('cmpCsv2') ? $('cmpCsv2').value : '';
-  if (!t1.trim() || !t2.trim()) { showToast('Заполни оба CSV'); return; }
-  const d1 = cmpParseCSV(t1);
-  const d2 = cmpParseCSV(t2);
-  if (!d1 || !d2) { showToast('Не удалось разобрать CSV'); return; }
-
-  const allKeys = new Set([...Object.keys(d1.rows), ...Object.keys(d2.rows)]);
-  const dateLabels = {};
-  d1.dateCols.forEach(dc => dateLabels[dc.key] = dc.label);
-  d2.dateCols.forEach(dc => dateLabels[dc.key] = dc.label);
-  const rows = [];
-  let okCount = 0, warnCount = 0, errCount = 0;
-  allKeys.forEach(k => {
-    const a = d1.rows[k]; const b = d2.rows[k];
-    const name = (a && a.name) || (b && b.name) || k;
-    const dates = new Set([...(a ? Object.keys(a.incoming) : []), ...(b ? Object.keys(b.incoming) : [])]);
-    let status = 'ok';
-    if (!a || !b) status = 'err';
-    else {
-      for (const dk of dates) {
-        if ((a.incoming[dk] || 0) !== (b.incoming[dk] || 0)) { status = 'warn'; break; }
-      }
-      if (status === 'ok' && a.sales !== b.sales) status = 'warn';
-    }
-    if (status === 'ok') okCount++; else if (status === 'warn') warnCount++; else errCount++;
-    /* ПАТЧ 5: добавляем хранилище правок в каждую строку */
-    rows.push({ key: k, name, a, b, dates: [...dates], status, edits: { incoming: {}, sales: null } });
-  });
-  const order = { err: 0, warn: 1, ok: 2 };
-  rows.sort((x, y) => {
-    if (order[x.status] !== order[y.status]) return order[x.status] - order[y.status];
-    return x.name.localeCompare(y.name, 'ru');
-  });
-
-  const checks = [];
-  _cmpNakls.filter(n => n.date).forEach(n => {
-    const dateKey = n.date;
-    const printedTotal = Number(String(n.total).replace(',', '.').replace(/[^\d.]/g, '')) || 0;
-    const lastNum = parseInt(String(n.lastNum).replace(/[^\d]/g, ''), 10) || 0;
-    const sig1 = cmpCalcSigmaForDate(d1, dateKey);
-    const sig2 = cmpCalcSigmaForDate(d2, dateKey);
-    const maxCount = Math.max(sig1.count, sig2.count);
-
-    let c1ok = true, c1detail = '';
-    if (lastNum > 0) {
-      if (maxCount === lastNum) { c1ok = true; c1detail = `В CSV ${maxCount} поз. — совпадает с последним № ${lastNum}.`; }
-      else if (maxCount < lastNum) { c1ok = false; c1detail = `В CSV ${maxCount} поз., в накладной ${lastNum}. Возможно, потеряна строка.`; }
-      else { c1ok = false; c1detail = `В CSV ${maxCount} поз., в накладной только ${lastNum}. Лишние строки.`; }
-    } else { c1detail = 'Последний № не задан — пропущено.'; }
-    checks.push({ ok: c1ok, title: `№${n.num} (${dateKey}) — количество позиций`, detail: c1detail });
-
-    if (printedTotal > 0) {
-      const diff1 = sig1.total - printedTotal;
-      const diff2 = sig2.total - printedTotal;
-      const tol = 0.5;
-      const bothOk = Math.abs(diff1) <= tol && Math.abs(diff2) <= tol;
-      let detail = `CSV №1: <b>${sig1.total.toFixed(2)}</b> (Δ${diff1.toFixed(2)}), CSV №2: <b>${sig2.total.toFixed(2)}</b> (Δ${diff2.toFixed(2)}), печатный: <b>${printedTotal.toFixed(2)}</b>.`;
-      if (!bothOk) {
-        const absDiff = Math.abs(diff1);
-        const found = cmpFindRowByDiff(d1, absDiff) || cmpFindRowByDiff(d2, absDiff);
-        if (found) {
-          detail += `<br>💡 Возможно, строка <b>«${escapeHtml(found.name)}»</b> (${found.qty} × ${found.price} = ${found.sum.toFixed(2)}) не вошла в печатный итог. Это ошибка документа, а не CSV.`;
-        } else {
-          detail += '<br>⚠️ Не удалось найти строку с такой стоимостью. Возможна ошибка чтения.';
-        }
-      }
-      if (sig1.missing.length || sig2.missing.length) {
-        const names = [...new Set([...sig1.missing, ...sig2.missing])].slice(0, 5);
-        detail += `<br>⚠️ Нет цены для: ${names.map(n => escapeHtml(n)).join(', ')}${names.length === 5 ? '...' : ''}`;
-      }
-      checks.push({ ok: bothOk, title: `№${n.num} (${dateKey}) — Σ по цене`, detail });
-    } else {
-      checks.push({ ok: true, title: `№${n.num} (${dateKey}) — Σ по цене`, detail: 'Печатный итог не задан — пропущено.' });
-    }
-  });
-
-  const catalogSet = new Set(PRODUCTS.map(p => normalizeName(p.name)));
-  const notFound = [];
-  for (const key of Object.keys(d1.rows)) {
-    const name = d1.rows[key].name;
-    const allValues = Object.values(d1.rows[key].incoming);
-    const totalQty = allValues.reduce((a, b) => a + b, 0);
-    if (totalQty === 0 && d1.rows[key].sales === 0) continue;
-    if (!catalogSet.has(normalizeName(name))) notFound.push(name);
-  }
-  checks.push({
-    ok: notFound.length === 0,
-    title: 'Целостность справочника',
-    detail: notFound.length === 0
-      ? 'Все позиции CSV есть в справочнике.'
-      : `Не найдены в справочнике: <b>${notFound.map(n => escapeHtml(n)).join('</b>, <b>')}</b>`
-  });
-
-  const checkPrinted = Number(String($('cmpCheckPrinted') ? $('cmpCheckPrinted').value : '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
-  if (checkPrinted > 0 && d1.checkRows.length > 0) {
-    const sig = d1.checkRows.reduce((a, r) => a + r.sum, 0);
-    const declared = d1.checkTotal || 0;
-    const diff = sig - checkPrinted;
-    const tol = 0.05;
-    const ok = Math.abs(diff) <= tol;
-    let detail = `Σ строк отчёта: <b>${sig.toFixed(2)}</b>, печатный итог чека: <b>${checkPrinted.toFixed(2)}</b>.`;
-    if (declared > 0 && Math.abs(declared - checkPrinted) > tol) {
-      detail += `<br>⚠️ ИИ заявил #ЧЕК_ИТОГО: ${declared.toFixed(2)} — не совпадает с печатным.`;
-    }
-    if (!ok) detail += `<br>Разница: ${diff.toFixed(2)}. Проверь чек по фото.`;
-    checks.push({ ok, title: 'Сверка чека', detail });
-  } else if (checkPrinted > 0 && d1.checkRows.length === 0) {
-    checks.push({ ok: false, title: 'Сверка чека', detail: 'В CSV нет блока #ЧЕК_ПОЛНЫЙ — невозможно проверить.' });
-  } else {
-    checks.push({ ok: true, title: 'Сверка чека', detail: 'Печатный итог чека не задан — пропущено.' });
-  }
-
-  _cmpData = { rows, dateLabels, okCount, warnCount, errCount, csv1: d1, csv2: d2, checks };
-  cmpRenderChecks(checks);
-  cmpRenderResults();
-}
-
-function cmpRenderChecks(checks) {
-  const el = $('cmpCheckResults');
-  if (!el) return;
-  if (!checks.length) { el.innerHTML = '<div class="cmp-empty">Нет контролей.</div>'; return; }
-  el.innerHTML = checks.map(c => {
-    const cls = c.ok ? 'ok' : 'err';
-    const icon = c.ok ? '✓' : '✗';
-    return `<div class="cmp-check ${cls}">
-      <span class="cmp-check-icon">${icon}</span>
-      <div class="cmp-check-body">
-        <div class="cmp-check-title">${escapeHtml(c.title)}</div>
-        <div class="cmp-check-detail">${c.detail}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-/* ПАТЧ 7: новая функция — тап по плитке расхождения → поле ввода */
-function cmpStartEdit(pill) {
-  if (pill.querySelector('input')) return;
-  const key = pill.dataset.key;
-  const dk = pill.dataset.dk;
-  const kind = pill.dataset.kind;
-  const row = _cmpData && _cmpData.rows.find(r => r.key === key);
-  if (!row) return;
-
-  let current;
-  if (kind === 'sales') {
-    current = (row.edits && row.edits.sales != null) ? row.edits.sales : (row.a ? row.a.sales : 0);
-  } else {
-    current = (row.edits && row.edits.incoming && row.edits.incoming[dk] != null)
-      ? row.edits.incoming[dk]
-      : (row.a ? (row.a.incoming[dk] || 0) : 0);
-  }
-
-  pill.innerHTML = '';
-  pill.classList.add('editing');
-  const inp = document.createElement('input');
-  inp.type = 'text';
-  inp.inputMode = 'numeric';
-  inp.pattern = '[0-9]*';
-  inp.autocomplete = 'off';
-  inp.className = 'cmp-edit-input';
-  inp.value = String(current);
-  pill.appendChild(inp);
-  setTimeout(() => { try { inp.focus(); inp.select(); } catch (e) {} }, 30);
-
-  inp.addEventListener('input', () => {
-    const cleaned = inp.value.replace(/[^\d]/g, '');
-    if (cleaned !== inp.value) inp.value = cleaned;
-  });
-  inp.addEventListener('click', e => e.stopPropagation());
-
-  let done = false;
-  const finish = (save) => {
-    if (done) return;
-    done = true;
-    if (save) {
-      const val = parseInt(inp.value.replace(/[^\d]/g, ''), 10) || 0;
-      if (!row.edits) row.edits = { incoming: {}, sales: null };
-      if (kind === 'sales') row.edits.sales = val;
-      else row.edits.incoming[dk] = val;
-    }
-    cmpRenderResults();
-  };
-  inp.addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); finish(true); }
-    else if (e.key === 'Escape') { e.preventDefault(); finish(false); }
-  });
-  inp.addEventListener('blur', () => finish(true));
-}
-
-/* ПАТЧ 6: переписано — плитки расхождений кликабельны, синие с ✓ после правки */
-function cmpRenderResults() {
-  if (!_cmpData) return;
-  const { rows, dateLabels, okCount, warnCount, errCount } = _cmpData;
-  const stats = $('cmpStats');
-  const out = $('cmpResults');
-  if (stats) {
-    stats.style.display = 'grid';
-    stats.innerHTML = `
-      <span class="k">✓ Совпало</span><span class="v" style="color:var(--green)">${okCount}</span>
-      <span class="k">⚠ Расхождения</span><span class="v" style="color:var(--orange)">${warnCount}</span>
-      <span class="k">✗ Только в одном</span><span class="v" style="color:var(--red)">${errCount}</span>
-    `;
-  }
-  if (!out) return;
-  if (!rows.length) { out.innerHTML = '<div class="cmp-empty">Оба CSV пусты.</div>'; return; }
-  out.innerHTML = rows.map(r => {
-    const icon = r.status === 'ok' ? '✓' : r.status === 'warn' ? '⚠' : '✗';
-    const vals = [];
-    r.dates.forEach(dk => {
-      const va = r.a ? (r.a.incoming[dk] || 0) : '—';
-      const vb = r.b ? (r.b.incoming[dk] || 0) : '—';
-      const edited = r.edits && r.edits.incoming && r.edits.incoming[dk] != null;
-      const cls = edited ? 'edited' : (va !== vb ? 'diff' : 'same');
-      const shown = edited ? r.edits.incoming[dk] : `${va} / ${vb}`;
-      vals.push(`<span class="cmp-val ${cls}" data-key="${escapeHtml(r.key)}" data-dk="${dk}" data-kind="incoming">${dateLabels[dk] || dk}: ${shown}</span>`);
-    });
-    if (r.a || r.b) {
-      const sa = r.a ? r.a.sales : '—';
-      const sb = r.b ? r.b.sales : '—';
-      const edited = r.edits && r.edits.sales != null;
-      const cls = edited ? 'edited' : (sa !== sb ? 'diff' : 'same');
-      const shown = edited ? r.edits.sales : `${sa} / ${sb}`;
-      vals.push(`<span class="cmp-val ${cls}" data-key="${escapeHtml(r.key)}" data-dk="sales" data-kind="sales">Прод: ${shown}</span>`);
-    }
-    return `<div class="cmp-row ${r.status}" data-key="${escapeHtml(r.key)}">
-      <span class="cmp-icon">${icon}</span>
-      <span class="cmp-name">${escapeHtml(r.name)}</span>
-      <span class="cmp-vals">${vals.join('')}</span>
-    </div>`;
-  }).join('');
-  out.querySelectorAll('.cmp-val.diff, .cmp-val.edited').forEach(pill => {
-    pill.addEventListener('click', () => cmpStartEdit(pill));
-  });
-  const applyBtn = $('cmpApplyBtn');
-  const hasEdits = rows.some(r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null));
-  if (applyBtn) applyBtn.style.display = (okCount || hasEdits) ? 'block' : 'none';
-}
-
-/* ПАТЧ 8: применяем совпавшие И исправленные, расхождения без правок — в ⚠ */
-function cmpApplyMatched() {
-  if (!_cmpData) return;
-
-  const hasEdits = r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null);
-  const okRows = _cmpData.rows.filter(r => r.status === 'ok' && r.a);
-  const editedRows = _cmpData.rows.filter(r => r.status !== 'ok' && hasEdits(r));
-  const diffRows = _cmpData.rows.filter(r => r.status !== 'ok');
-
-  const applyRows = [...okRows];
-  const okKeys = new Set(okRows.map(r => r.key));
-  editedRows.forEach(r => { if (!okKeys.has(r.key)) applyRows.push(r); });
-
-  if (!applyRows.length && !diffRows.length) { showToast('Нет данных'); return; }
-
-  const byKey = new Map();
-  applyRows.forEach(r => {
-    const incoming = { ...(r.a ? r.a.incoming : {}) };
-    if (r.edits && r.edits.incoming) Object.assign(incoming, r.edits.incoming);
-    const sales = (r.edits && r.edits.sales != null) ? r.edits.sales : (r.a ? r.a.sales : 0);
-    byKey.set(normalizeName(r.name), { incoming, sales });
-  });
-
-  const year = new Date().getFullYear();
-  let applied = 0;
-
-  tableRows.forEach(row => {
-    const key = normalizeName(row.name);
-    const match = byKey.get(key);
-    if (!match) return;
-    Object.keys(match.incoming).forEach(dk => {
-      const m = dk.match(/^(\d{1,2})\.(\d{1,2})$/);
-      if (!m) return;
-      const iso = `${year}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
-      let p = (row.incoming || []).find(x => x.date === iso);
-      if (!p) { p = { date: iso, qty: 0, _originalQty: 0 }; row.incoming.push(p); }
-      p.qty = match.incoming[dk];
-      p._originalQty = match.incoming[dk];
-    });
-    if (typeof match.sales === 'number') {
-      row.sales = match.sales;
-      row._originalSales = match.sales;
-    }
-    applied++;
-  });
-
-  _needsCheckNames = new Set();
-  diffRows.forEach(r => {
-    if (hasEdits(r)) return;
-    if (r.name) _needsCheckNames.add(normalizeName(r.name));
-  });
-
-  renderTable();
-  updateSegmentedCounters();
-  scheduleSessionSave();
-  if (_needsCheckNames.size) {
-    showToast(`Применено: ${applied}. Проверить вручную: ${_needsCheckNames.size}`);
-  } else {
-    showToast(`Применено: ${applied}`);
-  }
-  closeCompareModal();
-}
-
-function cmpBindUI() {
-  const openBtn = $('openCompareBtn');
-  if (openBtn) openBtn.onclick = openCompareModal;
-  const runBtn = $('cmpRunBtn');
-  if (runBtn) runBtn.onclick = cmpRunCompare;
-  const clearBtn = $('cmpClearBtn');
-  if (clearBtn) clearBtn.onclick = () => {
-    const a = $('cmpCsv1'); const b = $('cmpCsv2');
-    if (a) a.value = '';
-    if (b) b.value = '';
-    const cp = $('cmpCheckPrinted'); if (cp) cp.value = '';
-    _cmpNakls = [{ date: '', num: '', lastNum: '', total: '' }];
-    cmpRenderNakls();
-    const st = $('cmpStats'); if (st) st.style.display = 'none';
-    const chk = $('cmpCheckResults'); if (chk) chk.innerHTML = '';
-    const res = $('cmpResults'); if (res) res.innerHTML = '';
-    const ap = $('cmpApplyBtn'); if (ap) ap.style.display = 'none';
-    _cmpData = null;
-  };
-  const addNaklBtn = $('cmpAddNaklBtn');
-  if (addNaklBtn) addNaklBtn.onclick = () => {
-    if (_cmpNakls.length >= 4) { showToast('Максимум 4 накладные'); return; }
-    _cmpNakls.push({ date: '', num: '', lastNum: '', total: '' });
-    cmpRenderNakls();
-  };
-  const closeBtn = $('cmpCloseBtn');
-  if (closeBtn) closeBtn.onclick = closeCompareModal;
-  const applyBtn = $('cmpApplyBtn');
-  if (applyBtn) applyBtn.onclick = cmpApplyMatched;
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.8.1 · загрузка по датам · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length, '· aliases:', ALIASES.length, '· prices:', Object.keys(PRICES).length);
 }
 
 /* ═══════════════════════════════════════════
