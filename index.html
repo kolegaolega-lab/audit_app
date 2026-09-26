@@ -420,6 +420,39 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .cmp-check-detail{font-size:11.5px;color:var(--text-secondary);word-break:break-word}
 .cmp-check-detail b{color:var(--text);font-weight:600}
 .cmp-empty{text-align:center;padding:20px;color:var(--text-tertiary);font-size:12.5px}
+/* === Редактор расхождений: карточка разбора под строкой === */
+.cmp-edit-card{margin:-3px 0 8px;padding:14px 12px;border-radius:0 0 8px 8px;background:var(--bg-elev-2);border:1px solid var(--separator-opaque);border-top:0}
+.cmp-edit-title{font-size:14.5px;font-weight:700;margin:0 0 3px;line-height:1.3}
+.cmp-edit-sub{font-size:11.5px;color:var(--text-secondary);margin:0 0 12px;line-height:1.4}
+.cmp-edit-choice{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;background:var(--bg-card);border:1px solid var(--separator-opaque);margin-bottom:7px;cursor:pointer;width:100%;text-align:left;min-height:auto;font-family:inherit;color:var(--text)}
+.cmp-edit-choice:active{background:var(--bg-input)}
+.cmp-edit-choice.selected{border-color:var(--accent);background:var(--accent-soft);border-width:1.5px}
+.cmp-edit-radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--separator-opaque);flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:var(--bg-card);box-sizing:border-box;position:relative}
+.cmp-edit-choice.selected .cmp-edit-radio{border-color:var(--accent);background:var(--accent)}
+.cmp-edit-choice.selected .cmp-edit-radio::after{content:'';position:absolute;inset:5px;border-radius:50%;background:#fff}
+.cmp-edit-choice-body{flex:1;min-width:0;display:flex;flex-direction:column}
+.cmp-edit-choice-label{font-size:10px;color:var(--text-tertiary);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px}
+.cmp-edit-choice-value{font-size:17px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+.cmp-edit-custom{padding:9px 12px;border-radius:10px;background:var(--bg-input);border:1px solid var(--separator-opaque);display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cmp-edit-custom.selected{border-color:var(--accent);background:var(--accent-soft);border-width:1.5px}
+.cmp-edit-custom label{font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.05em;font-weight:700;flex:0 0 auto;margin:0;display:block}
+.cmp-edit-custom input{flex:1;min-width:0;background:transparent;border:0;font-size:17px;font-weight:700;color:var(--text);text-align:right;font-family:inherit;outline:none;padding:0;font-variant-numeric:tabular-nums;min-height:auto;width:auto}
+.cmp-edit-actions{display:flex;gap:8px}
+.cmp-edit-actions button{flex:1;padding:11px 16px;border-radius:9px;min-height:42px;font-size:14px;font-weight:600;font-family:inherit;border:0;cursor:pointer}
+.cmp-edit-actions .cancel{background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator-opaque);font-weight:500}
+.cmp-edit-actions .save{background:#0a84ff;color:#fff}
+.cmp-val{cursor:pointer}
+/* === Ручной режим: плашка «ИИ не отвечает?» === */
+.manual-plate{padding:12px;border-radius:10px;background:var(--bg-input);display:flex;flex-direction:column;gap:10px}
+.manual-top{display:flex;align-items:center;gap:8px}
+.manual-dot{width:8px;height:8px;border-radius:50%;background:var(--text-tertiary);flex:0 0 auto}
+.manual-text{font-size:12.5px;color:var(--text-secondary);line-height:1.35;flex:1}
+.manual-text b{color:var(--text);font-weight:600}
+.manual-btn{background:var(--bg-card);border:1px solid var(--separator-opaque);font-size:13.5px;font-weight:600;padding:9px 14px;min-height:38px;width:100%;border-radius:var(--r-sm);color:var(--text);font-family:inherit;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.manual-btn:active{background:var(--bg-elev-2)}
+.manual-link{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:transparent;border:0;padding:8px 0;color:var(--accent);font-size:13px;font-weight:600;min-height:auto;width:100%;font-family:inherit;cursor:pointer}
+.manual-link:active{opacity:.6}
+.manual-link svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
 @media (orientation: landscape) and (max-height: 500px){
   .cat-btn{height:78px}
   .cat-btn .cat-emoji{font-size:24px}
@@ -530,7 +563,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
           </div>
           <div>
             <label>&nbsp;</label>
-            <button id="dailyRecognizeBtn" class="primary block">Распознать дату</button>
+            <button id="dailyRecognizeBtn" class="primary block">Распознать накладную</button>
           </div>
         </div>
         <div id="dailyStatus" class="status" style="margin-top:10px"></div>
@@ -549,11 +582,18 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 
       <div style="height:1px;background:var(--separator);margin:16px 0"></div>
 
-      <label>Если ИИ недоступен</label>
-      <div class="row">
-        <button id="shareToAIBtn" class="secondary">Отправить</button>
-        <button id="copyPromptBtn" class="secondary">Промпт</button>
+      <div class="manual-plate">
+        <div class="manual-top">
+          <span class="manual-dot"></span>
+          <span class="manual-text"><b>ИИ не отвечает?</b> Отправьте фото напрямую — без ключа и лимитов.</span>
+        </div>
+        <button id="shareToAIBtn" class="manual-btn">Отправить фото в чат</button>
       </div>
+      <div style="height:1px;background:var(--separator);margin:10px 0 2px"></div>
+      <button id="copyPromptBtn" class="manual-link">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Или скопировать промпт
+      </button>
 
       <details class="settings" style="margin-top:14px">
         <summary>Настройки распознавания</summary>
@@ -733,7 +773,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint version">French Bakery Аудит · v9.8.3 · +Gemini · распознавание</div>
+  <div class="hint version">French Bakery Аудит · v9.8.4 · +Gemini · редактор расхождений</div>
 
 </main>
 
@@ -1034,7 +1074,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 <div id="updateBanner" class="toast">Доступно обновление · нажмите, чтобы перезагрузить</div>
 
 <script>
-    'use strict';
+      'use strict';
 
 /* ═══════════════════════════════════════════
    КОНСТАНТЫ
@@ -1069,7 +1109,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.8.3';
+const APP_VERSION = 'v9.8.4';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -1144,6 +1184,10 @@ let _needsCheckNames = new Set();
 let _lastGeminiCsvs = { first: '', second: '' };
 let _cmpData = null;
 let _cmpNakls = [];
+let _cmpEditKey = null;
+let _cmpEditDk = null;
+let _cmpEditKind = null;
+let _cmpAppliedForDaily = false;
 let _xlsxPromise = null;
 let _dailyAccum = [];
 let _dailyEditing = null;
@@ -2319,7 +2363,7 @@ function applySession(data) {
     return true;
   } finally { isRestoring = false; }
 }
-  /* ═══════════════════════════════════════════
+    /* ═══════════════════════════════════════════
    RESULT META + NAV
    ═══════════════════════════════════════════ */
 function updateResultMeta() {
@@ -3942,7 +3986,7 @@ function showToast(text) {
     setTimeout(() => { el.remove(); if (_currentToast === el) _currentToast = null; }, 300);
   }, 3000);
 }
-  /* ═══════════════════════════════════════════
+    /* ═══════════════════════════════════════════
    ПРОМПТЫ
    ═══════════════════════════════════════════ */
 function buildCatalogListForPrompt() {
@@ -5126,7 +5170,7 @@ async function recognizeDaily() {
       try { await clearAllPhotos(); } catch (e) {}
       await renderPhotoQueue();
     } else if (csv1 && csv2) {
-      setStatus('warn', `Дата ${parsed.label}: расхождения между прогонами. Разберитесь в сверке — после закрытия данные этой даты перезапишутся из таблицы.`);
+      setStatus('warn', `Дата ${parsed.label}: расхождения между прогонами. Разберитесь в сверке.`);
       _lastGeminiCsvs = { first: csv1, second: csv2 };
       _dailyEditing = parsed.iso;
       setTimeout(() => openCompareModal({ first: csv1, second: csv2 }), 400);
@@ -5178,7 +5222,8 @@ function rebuildDailyCsvFromTable(iso) {
   return true;
 }
 function finalizeDailyEditing() {
-  if (!_dailyEditing) return;
+  if (!_dailyEditing) { _cmpAppliedForDaily = false; return; }
+  if (!_cmpAppliedForDaily) { _dailyEditing = null; return; }
   const iso = _dailyEditing;
   _dailyEditing = null;
   const ok = rebuildDailyCsvFromTable(iso);
@@ -5588,7 +5633,7 @@ function measureHeader() {
   const height = h.getBoundingClientRect().height;
   document.documentElement.style.setProperty('--header-h', height + 'px');
 }
-  /* ═══════════════════════════════════════════
+    /* ═══════════════════════════════════════════
    СВЕРКА ДВУХ CSV
    ═══════════════════════════════════════════ */
 function cmpSplitLine(line, sep) {
@@ -5760,6 +5805,7 @@ function cmpRenderNakls() {
   });
 }
 function openCompareModal(prefill) {
+  _cmpAppliedForDaily = false;
   const st = $('cmpStats'); if (st) st.style.display = 'none';
   const res = $('cmpResults'); if (res) res.innerHTML = '';
   const chk = $('cmpCheckResults'); if (chk) chk.innerHTML = '';
@@ -5782,6 +5828,10 @@ function openCompareModal(prefill) {
 function closeCompareModal() {
   closeModal('compareModal');
   finalizeDailyEditing();
+  _cmpEditKey = null;
+  _cmpEditDk = null;
+  _cmpEditKind = null;
+  _cmpAppliedForDaily = false;
 }
 function cmpRunCompare() {
   const t1 = $('cmpCsv1') ? $('cmpCsv1').value : '';
@@ -5896,6 +5946,10 @@ function cmpRunCompare() {
     checks.push({ ok: true, title: 'Сверка чека', detail: 'Печатный итог чека не задан — пропущено.' });
   }
 
+  _cmpEditKey = null;
+  _cmpEditDk = null;
+  _cmpEditKind = null;
+  _cmpAppliedForDaily = false;
   _cmpData = { rows, dateLabels, okCount, warnCount, errCount, csv1: d1, csv2: d2, checks };
   cmpRenderChecks(checks);
   cmpRenderResults();
@@ -5915,57 +5969,131 @@ function cmpRenderChecks(checks) {
     </div>`;
   }).join('');
 }
-function cmpStartEdit(pill) {
-  if (pill.querySelector('input')) return;
-  const key = pill.dataset.key;
-  const dk = pill.dataset.dk;
-  const kind = pill.dataset.kind;
-  const row = _cmpData && _cmpData.rows.find(r => r.key === key);
-  if (!row) return;
-
-  let current;
-  if (kind === 'sales') {
-    current = (row.edits && row.edits.sales != null) ? row.edits.sales : (row.a ? row.a.sales : 0);
-  } else {
-    current = (row.edits && row.edits.incoming && row.edits.incoming[dk] != null)
-      ? row.edits.incoming[dk]
-      : (row.a ? (row.a.incoming[dk] || 0) : 0);
+function cmpOpenEdit(key, dk, kind) {
+  _cmpEditKey = key;
+  _cmpEditDk = dk;
+  _cmpEditKind = kind;
+  cmpRenderResults();
+}
+function cmpCloseEdit() {
+  _cmpEditKey = null;
+  _cmpEditDk = null;
+  _cmpEditKind = null;
+  cmpRenderResults();
+}
+function cmpSaveEdit() {
+  if (!_cmpData || !_cmpEditKey) return;
+  const row = _cmpData.rows.find(r => r.key === _cmpEditKey);
+  if (!row) { cmpCloseEdit(); return; }
+  const card = document.querySelector('.cmp-edit-card');
+  if (!card) { cmpCloseEdit(); return; }
+  const customInput = card.querySelector('.cmp-edit-custom input');
+  const customVal = customInput ? String(customInput.value).replace(/[^\d]/g, '') : '';
+  const selectedChoice = card.querySelector('.cmp-edit-choice.selected');
+  let val = null;
+  if (customVal !== '') {
+    const n = parseInt(customVal, 10);
+    if (isFinite(n)) val = n;
+  } else if (selectedChoice) {
+    const n = parseInt(selectedChoice.dataset.v, 10);
+    if (isFinite(n)) val = n;
   }
-  pill.innerHTML = '';
-  pill.classList.add('editing');
-  const inp = document.createElement('input');
-  inp.type = 'text';
-  inp.inputMode = 'numeric';
-  inp.pattern = '[0-9]*';
-  inp.autocomplete = 'off';
-  inp.className = 'cmp-edit-input';
-  inp.value = String(current);
-  pill.appendChild(inp);
-  setTimeout(() => { try { inp.focus(); inp.select(); } catch (e) {} }, 30);
+  if (val === null) { cmpCloseEdit(); return; }
+  if (!row.edits) row.edits = { incoming: {}, sales: null };
+  if (_cmpEditKind === 'sales') row.edits.sales = val;
+  else row.edits.incoming[_cmpEditDk] = val;
+  cmpCloseEdit();
+}
+function cmpRenderEditCard(row) {
+  const isSales = _cmpEditKind === 'sales';
+  const label = (_cmpData && _cmpData.dateLabels) ? (_cmpData.dateLabels[_cmpEditDk] || _cmpEditDk) : _cmpEditDk;
+  const vaRaw = row.a ? (isSales ? row.a.sales : (row.a.incoming[_cmpEditDk] || 0)) : null;
+  const vbRaw = row.b ? (isSales ? row.b.sales : (row.b.incoming[_cmpEditDk] || 0)) : null;
+  const va = (vaRaw != null) ? String(vaRaw) : '—';
+  const vb = (vbRaw != null) ? String(vbRaw) : '—';
+  const currentEdit = row.edits
+    ? (isSales ? row.edits.sales : (row.edits.incoming && row.edits.incoming[_cmpEditDk]))
+    : null;
 
-  inp.addEventListener('input', () => {
-    const cleaned = inp.value.replace(/[^\d]/g, '');
-    if (cleaned !== inp.value) inp.value = cleaned;
-  });
-  inp.addEventListener('click', e => e.stopPropagation());
+  let selA = '', selB = '', customVal = '', showCustom = false;
+  if (currentEdit != null) {
+    if (vaRaw != null && String(currentEdit) === String(vaRaw)) selA = ' selected';
+    else if (vbRaw != null && String(currentEdit) === String(vbRaw)) selB = ' selected';
+    else { showCustom = true; customVal = String(currentEdit); }
+  } else {
+    if (vaRaw != null) selA = ' selected';
+    else if (vbRaw != null) selB = ' selected';
+  }
 
-  let done = false;
-  const finish = (save) => {
-    if (done) return;
-    done = true;
-    if (save) {
-      const val = parseInt(inp.value.replace(/[^\d]/g, ''), 10) || 0;
-      if (!row.edits) row.edits = { incoming: {}, sales: null };
-      if (kind === 'sales') row.edits.sales = val;
-      else row.edits.incoming[dk] = val;
-    }
-    cmpRenderResults();
-  };
-  inp.addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); finish(true); }
-    else if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+  const subTitle = isSales
+    ? `Продажи · Прогон 1 дал ${va} · Прогон 2 дал ${vb}`
+    : `Дата ${label} · Прогон 1 дал ${va} · Прогон 2 дал ${vb}`;
+
+  const card = document.createElement('div');
+  card.className = 'cmp-edit-card';
+  card.innerHTML = `
+    <h3 class="cmp-edit-title">${escapeHtml(row.name)}</h3>
+    <p class="cmp-edit-sub">${escapeHtml(subTitle)}</p>
+    <button type="button" class="cmp-edit-choice${selA}" data-v="${escapeHtml(va)}">
+      <span class="cmp-edit-radio"></span>
+      <span class="cmp-edit-choice-body">
+        <span class="cmp-edit-choice-label">Прогон 1</span>
+        <span class="cmp-edit-choice-value">${escapeHtml(va)}</span>
+      </span>
+    </button>
+    <button type="button" class="cmp-edit-choice${selB}" data-v="${escapeHtml(vb)}">
+      <span class="cmp-edit-radio"></span>
+      <span class="cmp-edit-choice-body">
+        <span class="cmp-edit-choice-label">Прогон 2</span>
+        <span class="cmp-edit-choice-value">${escapeHtml(vb)}</span>
+      </span>
+    </button>
+    <div class="cmp-edit-custom${showCustom ? ' selected' : ''}">
+      <label>Своё</label>
+      <input type="text" inputmode="numeric" placeholder="—" value="${showCustom ? escapeHtml(customVal) : ''}">
+    </div>
+    <div class="cmp-edit-actions">
+      <button type="button" class="cancel">Отмена</button>
+      <button type="button" class="save">Сохранить</button>
+    </div>
+  `;
+
+  card.querySelectorAll('.cmp-edit-choice').forEach(btn => {
+    btn.addEventListener('click', () => {
+      card.querySelectorAll('.cmp-edit-choice').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      const custom = card.querySelector('.cmp-edit-custom');
+      if (custom) {
+        custom.classList.remove('selected');
+        const ci = custom.querySelector('input');
+        if (ci) ci.value = '';
+      }
+    });
   });
-  inp.addEventListener('blur', () => finish(true));
+
+  const customInput = card.querySelector('.cmp-edit-custom input');
+  if (customInput) {
+    customInput.addEventListener('input', () => {
+      const cleaned = customInput.value.replace(/[^\d]/g, '');
+      if (cleaned !== customInput.value) customInput.value = cleaned;
+      const custom = card.querySelector('.cmp-edit-custom');
+      if (cleaned !== '') {
+        card.querySelectorAll('.cmp-edit-choice').forEach(b => b.classList.remove('selected'));
+        if (custom) custom.classList.add('selected');
+      } else {
+        if (custom) custom.classList.remove('selected');
+      }
+    });
+    customInput.addEventListener('focus', () => {
+      setTimeout(() => { try { customInput.select(); } catch (e) {} }, 50);
+    });
+  }
+  const cancelBtn = card.querySelector('.cancel');
+  if (cancelBtn) cancelBtn.addEventListener('click', () => cmpCloseEdit());
+  const saveBtn = card.querySelector('.save');
+  if (saveBtn) saveBtn.addEventListener('click', () => cmpSaveEdit());
+
+  return card;
 }
 function cmpRenderResults() {
   if (!_cmpData) return;
@@ -6007,9 +6135,24 @@ function cmpRenderResults() {
       <span class="cmp-vals">${vals.join('')}</span>
     </div>`;
   }).join('');
-  out.querySelectorAll('.cmp-val.diff, .cmp-val.edited').forEach(pill => {
-    pill.addEventListener('click', () => cmpStartEdit(pill));
+  out.querySelectorAll('.cmp-val').forEach(pill => {
+    pill.addEventListener('click', e => {
+      e.stopPropagation();
+      cmpOpenEdit(pill.dataset.key, pill.dataset.dk, pill.dataset.kind);
+    });
   });
+  if (_cmpEditKey && _cmpEditDk != null) {
+    const rowToEdit = _cmpData.rows.find(r => r.key === _cmpEditKey);
+    if (rowToEdit) {
+      const rowEls = out.querySelectorAll('.cmp-row');
+      for (const el of rowEls) {
+        if (el.dataset.key === _cmpEditKey) {
+          el.after(cmpRenderEditCard(rowToEdit));
+          break;
+        }
+      }
+    }
+  }
   const applyBtn = $('cmpApplyBtn');
   const hasEdits = rows.some(r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null));
   if (applyBtn) applyBtn.style.display = (okCount || hasEdits) ? 'block' : 'none';
@@ -6052,6 +6195,7 @@ function cmpApplyMatched() {
     }
     applied++;
   });
+  _cmpAppliedForDaily = true;
   _needsCheckNames = new Set();
   diffRows.forEach(r => {
     if (hasEdits(r)) return;
@@ -6085,6 +6229,10 @@ function cmpBindUI() {
     _cmpData = null;
     _lastGeminiCsvs = { first: '', second: '' };
     _dailyEditing = null;
+    _cmpEditKey = null;
+    _cmpEditDk = null;
+    _cmpEditKind = null;
+    _cmpAppliedForDaily = false;
   };
   const addNaklBtn = $('cmpAddNaklBtn');
   if (addNaklBtn) addNaklBtn.onclick = () => {
@@ -6762,7 +6910,8 @@ function bindModalBackdrops() {
     }
   });
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    LOGO / SW / INIT
    ═══════════════════════════════════════════ */
 function initLogoFallback() {
@@ -6881,7 +7030,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.8.3 · распознавание · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length, '· aliases:', ALIASES.length, '· prices:', Object.keys(PRICES).length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.8.4 · распознавание · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length, '· aliases:', ALIASES.length, '· prices:', Object.keys(PRICES).length);
 }
 
 /* ═══════════════════════════════════════════
