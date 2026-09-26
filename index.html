@@ -534,6 +534,13 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
               <button type="button" id="refreshModelsBtn" class="secondary" style="flex:0 0 auto;min-height:44px;padding:0 14px;font-size:16px" title="Обновить список моделей">↻</button>
             </div>
           </div>
+          <div>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:13px">
+              <input type="checkbox" id="geminiDoubleRunCheck" style="width:18px;height:18px;min-height:auto;padding:0;margin:0;accent-color:var(--accent)">
+              <span>Двойной прогон (сравнение двух ответов)</span>
+            </label>
+            <p class="hint" style="margin:6px 0 0;font-size:11.5px">Включите для сверки. Расход — 2 запроса на дату.</p>
+          </div>
           <p class="hint" style="margin:0">Ключ хранится только в вашем браузере.
             Получить: <b>aistudio.google.com</b> → Get API key.</p>
         </div>
@@ -716,7 +723,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint version">French Bakery Аудит · v9.8.1 · +Gemini · загрузка по датам</div>
+  <div class="hint version">French Bakery Аудит · v9.8.2 · +Gemini · загрузка по датам</div>
 
 </main>
 
@@ -1052,7 +1059,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.8.1';
+const APP_VERSION = 'v9.8.2';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -1246,8 +1253,8 @@ function normalizeName(s) {
   return String(s || '')
     .toLowerCase()
     .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '')
+    .replace(/[«»""„"']/g, '')
     .replace(/[\u2010-\u2015\u2212]/g, '-')
-    .replace(/[«»""„"']/g, '"')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -4225,6 +4232,41 @@ function buildDailyPrompt(dateLabel) {
 🔴 ВСЕ приложенные фото относятся к ОДНОЙ дате — ${dateLabel}.
 Не путай с другими датами.
 
+═══════════════════════════════════════════
+🧠 ОСОБО ВНИМАТЕЛЬНОЕ ЧТЕНИЕ (для Flash Lite)
+═══════════════════════════════════════════
+Ты — быстрая модель. Твоя главная задача — НЕ УГАДЫВАТЬ.
+Работай вдумчиво. Лучше медленнее, но точнее.
+
+🔴 ПОРЯДОК РАБОТЫ:
+
+1. Сначала прочитай ВСЕ фото целиком, пойми структуру документа.
+   Не пиши CSV сразу.
+
+2. Затем читай строки ОДНУ ЗА ДРУГОЙ сверху вниз.
+   Для КАЖДОЙ строки:
+   — посмотри в колонку 8 именно ЭТОЙ строки
+   — НЕ запоминай цифру из предыдущей строки
+   — проверь: К-во × Цена = Сумма
+
+3. Если цифра размыта, повёрнута, засвечена — сделай ПАУЗУ,
+   приблизь мысленно, попробуй ещё раз.
+   Если всё равно неясно — пиши #НЕЧИТАЕМО.
+   НЕ ВЫДУМЫВАЙ. НЕ ПОДСТАВЛЯЙ похожую цифру.
+
+4. Особое внимание — РЯДАМ похожих названий:
+   Грилата, Пирожок, Эклер, Круассан, Булочка, Макарун, Улитка.
+   Для каждой строки ряда смотри заново в колонку 8.
+   Числа не должны «выравниваться» — если 15, 9, 15, 10 — так и пиши.
+
+5. В КОНЦЕ обязательно выведи таблицу #РЯДЫ_ПОД_ПРОВЕРКОЙ —
+   даже если она покажется тебе «очевидной». Это самопроверка.
+
+6. Перед выдачей CSV — перечитай блок #СВЕРКА.
+   Если Σ не сходится — напиши #РАСХОЖДЕНИЕ, НЕ пиши «совпало».
+
+═══════════════════════════════════════════
+
 ${searchBlock}
 
 ═══════════════════════════════════════════
@@ -4819,11 +4861,21 @@ async function recognizeWithGemini() {
       return csv;
     };
 
-    const results = await Promise.allSettled([sendOne('Прогон 1'), sendOne('Прогон 2')]);
-    const csv1 = results[0].status === 'fulfilled' ? results[0].value : null;
-    const csv2 = results[1].status === 'fulfilled' ? results[1].value : null;
-    const err1 = results[0].status === 'rejected' ? (results[0].reason && results[0].reason.message) : '';
-    const err2 = results[1].status === 'rejected' ? (results[1].reason && results[1].reason.message) : '';
+    const doubleRun = $('geminiDoubleRunCheck') && $('geminiDoubleRunCheck').checked;
+    let csv1 = null, csv2 = null, err1 = '', err2 = '';
+    if (doubleRun) {
+      const results = await Promise.allSettled([sendOne('Прогон 1'), sendOne('Прогон 2')]);
+      csv1 = results[0].status === 'fulfilled' ? results[0].value : null;
+      csv2 = results[1].status === 'fulfilled' ? results[1].value : null;
+      err1 = results[0].status === 'rejected' ? results[0].reason.message : '';
+      err2 = results[1].status === 'rejected' ? results[1].reason.message : '';
+    } else {
+      try {
+        csv1 = await sendOne('Прогон 1');
+      } catch (e) {
+        err1 = e.message || String(e);
+      }
+    }
 
     if (!csv1 && !csv2) throw new Error(err1 || err2 || 'Оба запроса не удались.');
 
@@ -6128,6 +6180,13 @@ function bindUI() {
   if (geminiModelSelect) {
     geminiModelSelect.value = getGeminiModel();
     geminiModelSelect.addEventListener('change', () => setGeminiModel(geminiModelSelect.value));
+  }
+  const geminiDoubleRunCheck = $('geminiDoubleRunCheck');
+  if (geminiDoubleRunCheck) {
+    try { geminiDoubleRunCheck.checked = localStorage.getItem('fbAuditGeminiDoubleRun') === '1'; } catch (e) {}
+    geminiDoubleRunCheck.addEventListener('change', () => {
+      try { localStorage.setItem('fbAuditGeminiDoubleRun', geminiDoubleRunCheck.checked ? '1' : '0'); } catch (e) {}
+    });
   }
 
   /* === Share fallback === */
