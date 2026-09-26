@@ -6740,7 +6740,7 @@ function initSW() {
             if (b) {
               b.classList.add('show');
               b.onclick = () => {
-                if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                if (reg.waiting) reg.waiting.postMessage('SKIP_WAITING');
               };
             }
           }
