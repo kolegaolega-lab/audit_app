@@ -1243,7 +1243,13 @@ function formatDateTimeRu(iso) {
   return `${d.getDate()} ${months[d.getMonth()]}, ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 function normalizeName(s) {
-  return String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
+  return String(s || '')
+    .toLowerCase()
+    .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '')
+    .replace(/[\u2010-\u2015\u2212]/g, '-')
+    .replace(/[«»""„"']/g, '"')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 function normalizeForSearch(s) {
   return String(s || '').toLowerCase().trim().replace(/\s+/g, ' ').replace(/ё/g, 'е');
