@@ -507,20 +507,55 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <!-- ═══════════════ Распознавание ═══════════════ -->
+  <!-- ═══════════════ Распознавание (ОБЪЕДИНЁННАЯ) ═══════════════ -->
   <div class="section">
     <div class="section-header">
       <h2>Распознавание</h2>
-      <p class="desc">Отправьте материалы — приложение вернёт CSV с приходами и продажами.</p>
+      <p class="desc">Отправьте фото в ИИ — он вернёт CSV с приходами и продажами.</p>
     </div>
     <div class="section-body">
-      <button id="recognizeGeminiBtn" class="success block" style="display:none">Распознать</button>
-      <div class="row" style="margin-top:8px">
-        <button id="shareToAIBtn" class="primary">Отправить</button>
+
+      <label>Режим</label>
+      <div class="segmented" id="recognizeModeSegmented" style="margin-top:0;margin-bottom:14px">
+        <button type="button" data-mode="daily" class="active">По одной дате</button>
+        <button type="button" data-mode="all">Всё сразу</button>
+      </div>
+
+      <!-- Режим: по одной дате -->
+      <div id="dailyModeBlock">
+        <div class="row">
+          <div>
+            <label>Дата накладной</label>
+            <input id="dailyDate" type="text" placeholder="23.09" maxlength="10" autocomplete="off">
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button id="dailyRecognizeBtn" class="primary block">Распознать дату</button>
+          </div>
+        </div>
+        <div id="dailyStatus" class="status" style="margin-top:10px"></div>
+        <div id="dailyList" style="margin-top:12px"></div>
+        <div id="dailyActions" style="margin-top:12px;display:none">
+          <button id="dailyBuildBtn" class="success block">Применить</button>
+          <button id="dailyClearBtn" class="secondary block" style="margin-top:8px">Очистить</button>
+        </div>
+      </div>
+
+      <!-- Режим: всё сразу -->
+      <div id="allModeBlock" style="display:none">
+        <button id="recognizeGeminiBtn" class="success block">Распознать все</button>
+        <p class="hint" style="margin-top:10px">Все загруженные фото уйдут одним запросом. Результат сразу попадёт в таблицу, и откроется <b>Сверка</b>.</p>
+      </div>
+
+      <div style="height:1px;background:var(--separator);margin:16px 0"></div>
+
+      <label>Если ИИ недоступен</label>
+      <div class="row">
+        <button id="shareToAIBtn" class="secondary">Отправить</button>
         <button id="copyPromptBtn" class="secondary">Промпт</button>
       </div>
-      <p class="hint" style="margin-top:10px">Для распознавания накладных используйте раздел <b>«Загрузка по датам»</b> ниже — там обработка идёт по одной дате.</p>
-      <details class="settings" style="margin-top:12px">
+
+      <details class="settings" style="margin-top:14px">
         <summary>Настройки распознавания</summary>
         <div class="content">
           <div>
@@ -545,33 +580,8 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
             Получить: <b>aistudio.google.com</b> → Get API key.</p>
         </div>
       </details>
-      <div id="shareStatus" class="status"></div>
-    </div>
-  </div>
 
-  <!-- ═══════════════ Загрузка по датам ═══════════════ -->
-  <div class="section" id="dailySection">
-    <div class="section-header">
-      <h2>Загрузка по датам</h2>
-      <p class="desc">Распознайте накладные по одной дате. Затем соберите итоговый CSV.</p>
-    </div>
-    <div class="section-body">
-      <div class="row">
-        <div>
-          <label>Дата накладной</label>
-          <input id="dailyDate" type="text" placeholder="23.09" maxlength="10" autocomplete="off">
-        </div>
-        <div>
-          <label>&nbsp;</label>
-          <button id="dailyRecognizeBtn" class="primary block">Распознать дату</button>
-        </div>
-      </div>
-      <div id="dailyStatus" class="status" style="margin-top:10px"></div>
-      <div id="dailyList" style="margin-top:12px"></div>
-      <div id="dailyActions" style="margin-top:12px;display:none">
-        <button id="dailyBuildBtn" class="success block">Применить</button>
-        <button id="dailyClearBtn" class="secondary block" style="margin-top:8px">Очистить</button>
-      </div>
+      <div id="shareStatus" class="status"></div>
     </div>
   </div>
 
@@ -723,7 +733,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
     </div>
   </div>
 
-  <div class="hint version">French Bakery Аудит · v9.8.2 · +Gemini · загрузка по датам</div>
+  <div class="hint version">French Bakery Аудит · v9.8.3 · +Gemini · распознавание</div>
 
 </main>
 
@@ -1059,7 +1069,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.8.2';
+const APP_VERSION = 'v9.8.3';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -2309,8 +2319,7 @@ function applySession(data) {
     return true;
   } finally { isRestoring = false; }
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    RESULT META + NAV
    ═══════════════════════════════════════════ */
 function updateResultMeta() {
@@ -2375,7 +2384,8 @@ function tableKey(e) {
   e.preventDefault();
   tableNav(e.target, k);
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    RENDER TABLE
    ═══════════════════════════════════════════ */
 function buildColgroupHTML(dates) {
@@ -2921,10 +2931,9 @@ function renderUnknownModal() {
 
     const main = document.createElement('div');
     main.className = 'unk-main';
-    const nameField = document.createElement('input');
-    nameField.type = 'text'; nameField.className = 'unk-name-field';
-    nameField.value = r.name; nameField.readOnly = true;
-    nameField.addEventListener('click', e => e.stopPropagation());
+    const nameField = document.createElement('div');
+    nameField.className = 'unk-name-field';
+    nameField.textContent = r.name;
     main.appendChild(nameField);
 
     const infoEl = document.createElement('div');
@@ -3933,8 +3942,7 @@ function showToast(text) {
     setTimeout(() => { el.remove(); if (_currentToast === el) _currentToast = null; }, 300);
   }, 3000);
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    ПРОМПТЫ
    ═══════════════════════════════════════════ */
 function buildCatalogListForPrompt() {
@@ -4458,7 +4466,8 @@ ${catalogList}
 function buildSystemInstructionForGemini() {
   return 'Ты OCR-ассистент French Bakery. Читаешь фото накладных и чеков, выдаёшь CSV строго по правилам из сообщения пользователя.';
 }
-  /* ═══════════════════════════════════════════
+
+/* ═══════════════════════════════════════════
    GEMINI — настройки
    ═══════════════════════════════════════════ */
 function getGeminiKey() {
@@ -4498,7 +4507,6 @@ function getGeminiTestImage() {
   _geminiTestImageCache = dataUrl.split(',')[1];
   return _geminiTestImageCache;
 }
-
 function loadModelsCache() {
   try {
     const raw = localStorage.getItem(GEMINI_MODELS_CACHE_KEY);
@@ -4524,7 +4532,6 @@ function getCachedModelsAge() {
     return Date.now() - d.ts;
   } catch (e) { return Infinity; }
 }
-
 function prettyModelName(id) {
   const hasPro = /pro/.test(id);
   const hasLite = /lite/.test(id);
@@ -4574,7 +4581,6 @@ async function testGeminiModel(apiKey, id) {
     return true;
   }
 }
-
 async function discoverGeminiModels(apiKey, onProgress) {
   const listRes = await fetch(`${GEMINI_API}?key=${encodeURIComponent(apiKey)}`);
   if (!listRes.ok) throw new Error('Не удалось получить список моделей');
@@ -4612,7 +4618,6 @@ async function discoverGeminiModels(apiKey, onProgress) {
   if (!working.length) throw new Error('Ни одна модель не ответила');
   return working;
 }
-
 function fillModelSelect(models) {
   const sel = $('geminiModelSelect');
   if (!sel) return;
@@ -4628,7 +4633,6 @@ function fillModelSelect(models) {
   sel.value = hasCurrent ? current : models[0].id;
   setGeminiModel(sel.value);
 }
-
 async function refreshModelSelect(force) {
   const sel = $('geminiModelSelect');
   const statusEl = $('shareStatus');
@@ -4657,7 +4661,6 @@ async function refreshModelSelect(force) {
     setStatus('warn', 'Не удалось обновить список моделей. Использую ' + GEMINI_MODEL_DEFAULT);
   }
 }
-
 function scheduleModelsRefreshOncePerDay() {
   if (_modelsRefreshScheduled) return;
   _modelsRefreshScheduled = true;
@@ -4668,7 +4671,6 @@ function scheduleModelsRefreshOncePerDay() {
     _silentRefreshModels();
   }, 60 * 1000);
 }
-
 async function _silentRefreshModels() {
   const apiKey = getGeminiKey();
   if (!apiKey) return;
@@ -4794,7 +4796,7 @@ function extractCsvFromGeminiText(text) {
 }
 
 /* ═══════════════════════════════════════════
-   GEMINI — общий распознаватель (скрыт)
+   GEMINI — распознаватель «Всё сразу»
    ═══════════════════════════════════════════ */
 async function recognizeWithGemini() {
   if (shareBusy) return;
@@ -4828,7 +4830,8 @@ async function recognizeWithGemini() {
       generationConfig: { temperature: 0.1, maxOutputTokens: GEMINI_MAX_OUTPUT_TOKENS }
     };
 
-    setStatus('info', 'Отправка 2 запросов…');
+    const doubleRun = $('geminiDoubleRunCheck') && $('geminiDoubleRunCheck').checked;
+    setStatus('info', doubleRun ? 'Отправка 2 запросов…' : 'Отправка запроса…');
 
     const sendOne = async (label) => {
       const res = await fetch(url, {
@@ -4861,7 +4864,6 @@ async function recognizeWithGemini() {
       return csv;
     };
 
-    const doubleRun = $('geminiDoubleRunCheck') && $('geminiDoubleRunCheck').checked;
     let csv1 = null, csv2 = null, err1 = '', err2 = '';
     if (doubleRun) {
       const results = await Promise.allSettled([sendOne('Прогон 1'), sendOne('Прогон 2')]);
@@ -4870,14 +4872,11 @@ async function recognizeWithGemini() {
       err1 = results[0].status === 'rejected' ? results[0].reason.message : '';
       err2 = results[1].status === 'rejected' ? results[1].reason.message : '';
     } else {
-      try {
-        csv1 = await sendOne('Прогон 1');
-      } catch (e) {
-        err1 = e.message || String(e);
-      }
+      try { csv1 = await sendOne('Прогон 1'); }
+      catch (e) { err1 = e.message || String(e); }
     }
 
-    if (!csv1 && !csv2) throw new Error(err1 || err2 || 'Оба запроса не удались.');
+    if (!csv1 && !csv2) throw new Error(err1 || err2 || 'Запрос не удался.');
 
     const primaryCsv = csv1 || csv2;
     const csvField = $('csvInput');
@@ -4903,17 +4902,15 @@ async function recognizeWithGemini() {
       showToast('Открываю сверку двух CSV');
       setTimeout(() => openCompareModal({ first: csv1, second: csv2 }), 300);
     } else if (csv1) {
-      setStatus('info', 'Второй прогон не удался. Применяю первый CSV…');
-      showToast('Применяю CSV первого прогона');
+      setStatus('info', 'Применяю CSV…');
+      showToast('Применяю CSV');
       await new Promise(r => setTimeout(r, 250));
       try { await applyCSV(); } catch (e) { console.warn('Auto-apply failed:', e); }
-      setStatus('warn', `Применён только CSV первого прогона. ${err2 ? 'Причина сбоя второго: ' + err2 : ''}`);
+      setStatus('ok', 'CSV применён.');
     } else {
-      setStatus('info', 'Первый прогон не удался. Применяю второй CSV…');
-      showToast('Применяю CSV второго прогона');
+      setStatus('warn', 'Применён только CSV второго прогона. ' + err1);
       await new Promise(r => setTimeout(r, 250));
       try { await applyCSV(); } catch (e) { console.warn('Auto-apply failed:', e); }
-      setStatus('warn', `Применён только CSV второго прогона. ${err1 ? 'Причина сбоя первого: ' + err1 : ''}`);
     }
   } catch (e) {
     setStatus('err', 'Ошибка: ' + (e.message || e));
@@ -4938,7 +4935,6 @@ function loadDailyAccum() {
 function saveDailyAccum() {
   try { localStorage.setItem(DAILY_KEY, JSON.stringify(_dailyAccum)); } catch (e) {}
 }
-
 function dailyParseDateInput(str) {
   const s = String(str || '').trim();
   if (!s) return null;
@@ -4955,7 +4951,6 @@ function dailyParseDateInput(str) {
   const label = `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}`;
   return { iso, label };
 }
-
 function dailyRender() {
   const list = $('dailyList');
   const status = $('dailyStatus');
@@ -5015,7 +5010,6 @@ function dailyRender() {
     status.textContent = `В пакете дат: ${_dailyAccum.length}. Даты: ${_dailyAccum.map(d => d.label).join(', ')}.`;
   }
 }
-
 async function recognizeDaily() {
   if (shareBusy) return;
   const dateInput = $('dailyDate');
@@ -5050,7 +5044,8 @@ async function recognizeDaily() {
       generationConfig: { temperature: 0.1, maxOutputTokens: GEMINI_MAX_OUTPUT_TOKENS }
     };
 
-    setStatus('info', 'Отправка 2 запросов…');
+    const doubleRun = $('geminiDoubleRunCheck') && $('geminiDoubleRunCheck').checked;
+    setStatus('info', doubleRun ? 'Отправка 2 запросов…' : 'Отправка запроса…');
 
     const sendOne = async (label) => {
       const res = await fetch(url, {
@@ -5078,13 +5073,19 @@ async function recognizeDaily() {
       return csv;
     };
 
-    const results = await Promise.allSettled([sendOne('Прогон 1'), sendOne('Прогон 2')]);
-    const csv1 = results[0].status === 'fulfilled' ? results[0].value : null;
-    const csv2 = results[1].status === 'fulfilled' ? results[1].value : null;
-    const err1 = results[0].status === 'rejected' ? results[0].reason.message : '';
-    const err2 = results[1].status === 'rejected' ? results[1].reason.message : '';
+    let csv1 = null, csv2 = null, err1 = '', err2 = '';
+    if (doubleRun) {
+      const results = await Promise.allSettled([sendOne('Прогон 1'), sendOne('Прогон 2')]);
+      csv1 = results[0].status === 'fulfilled' ? results[0].value : null;
+      csv2 = results[1].status === 'fulfilled' ? results[1].value : null;
+      err1 = results[0].status === 'rejected' ? results[0].reason.message : '';
+      err2 = results[1].status === 'rejected' ? results[1].reason.message : '';
+    } else {
+      try { csv1 = await sendOne('Прогон 1'); }
+      catch (e) { err1 = e.message || String(e); }
+    }
 
-    if (!csv1 && !csv2) throw new Error(err1 || err2 || 'Оба запроса не удались.');
+    if (!csv1 && !csv2) throw new Error(err1 || err2 || 'Запрос не удался.');
 
     let bothMatch = false;
     if (csv1 && csv2) {
@@ -5143,7 +5144,6 @@ async function recognizeDaily() {
     if (btn) btn.classList.remove('busy');
   }
 }
-
 function rebuildDailyCsvFromTable(iso) {
   const idx = _dailyAccum.findIndex(x => x.iso === iso);
   if (idx < 0) return false;
@@ -5160,7 +5160,6 @@ function rebuildDailyCsvFromTable(iso) {
     if (qty === 0 && sales === 0) continue;
     rows.push({ name: row.name, qty, sales, shelfLife: row.shelfLife });
   }
-
   if (!rows.length) return false;
 
   const header = ['Наименование', `Получено за ${entry.label}`, 'Продано сегодня', 'Срок годности'];
@@ -5178,7 +5177,6 @@ function rebuildDailyCsvFromTable(iso) {
   saveDailyAccum();
   return true;
 }
-
 function finalizeDailyEditing() {
   if (!_dailyEditing) return;
   const iso = _dailyEditing;
@@ -5190,7 +5188,6 @@ function finalizeDailyEditing() {
     if (entry) showToast(`Дата ${entry.label} обновлена из таблицы`);
   }
 }
-
 async function buildDailyCsv() {
   const statusEl = $('dailyStatus');
   if (!_dailyAccum.length) {
@@ -5277,12 +5274,10 @@ async function buildDailyCsv() {
     autoResizeTextarea();
     updateCsvCounter();
   }
-
   if (statusEl) {
     statusEl.className = 'status show info';
     statusEl.textContent = `Итоговый CSV собран: ${namesSorted.length} позиций. Применяю…`;
   }
-
   await new Promise(r => setTimeout(r, 250));
   try {
     await applyCSV();
@@ -5290,19 +5285,15 @@ async function buildDailyCsv() {
     if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Ошибка применения: ' + (e.message || e); }
     return;
   }
-
   _dailyAccum = [];
   saveDailyAccum();
   dailyRender();
-
   const summaryEl = $('summary');
   if (summaryEl) {
     try { summaryEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
   }
-
   showToast(`Применено: ${namesSorted.length} позиций`);
 }
-
 function dailyClear() {
   if (!_dailyAccum.length) return;
   if (!confirm(`Очистить пакет из ${_dailyAccum.length} дат?`)) return;
@@ -5614,7 +5605,6 @@ function cmpSplitLine(line, sep) {
   }
   out.push(cur); return out;
 }
-
 function cmpParseCSV(text) {
   const raw = String(text || '').replace(/^\uFEFF/, '');
   const lines = raw.split(/\r?\n/);
@@ -5633,7 +5623,6 @@ function cmpParseCSV(text) {
     if (serviceMode) continue;
     mainLines.push(line);
   }
-
   function cmpIsServiceLine(line) {
     const t = line.trim();
     if (!t) return true;
@@ -5656,7 +5645,6 @@ function cmpParseCSV(text) {
     if (/^в\s+чеке[: ]/i.test(t)) return true;
     return false;
   }
-
   const dataLines = mainLines.filter(l => l.trim() && !cmpIsServiceLine(l));
   if (dataLines.length < 2) return null;
   const sep = dataLines[0].includes(';') ? ';' : ',';
@@ -5715,7 +5703,6 @@ function cmpParseCSV(text) {
   }
   return { rows, dateCols, order, count: order.length, checkRows, checkTotal };
 }
-
 function cmpCalcSigmaForDate(csvData, dateKey) {
   let total = 0; let count = 0; const missing = [];
   for (const key of csvData.order) {
@@ -5729,7 +5716,6 @@ function cmpCalcSigmaForDate(csvData, dateKey) {
   }
   return { total, count, missing };
 }
-
 function cmpFindRowByDiff(csvData, diff) {
   const tol = 0.05;
   for (const key of csvData.order) {
@@ -5745,7 +5731,6 @@ function cmpFindRowByDiff(csvData, diff) {
   }
   return null;
 }
-
 function cmpRenderNakls() {
   const list = $('cmpNaklList'); if (!list) return;
   list.innerHTML = '';
@@ -5774,7 +5759,6 @@ function cmpRenderNakls() {
     };
   });
 }
-
 function openCompareModal(prefill) {
   const st = $('cmpStats'); if (st) st.style.display = 'none';
   const res = $('cmpResults'); if (res) res.innerHTML = '';
@@ -5783,10 +5767,8 @@ function openCompareModal(prefill) {
   _cmpData = null;
   if (_cmpNakls.length === 0) _cmpNakls = [{ date: '', num: '', lastNum: '', total: '' }];
   cmpRenderNakls();
-
   const t1 = $('cmpCsv1');
   const t2 = $('cmpCsv2');
-
   if (t1) {
     if (prefill && prefill.first != null) t1.value = prefill.first;
     else if (!t1.value.trim() && _lastGeminiCsvs.first) t1.value = _lastGeminiCsvs.first;
@@ -5795,14 +5777,12 @@ function openCompareModal(prefill) {
     if (prefill && prefill.second != null) t2.value = prefill.second;
     else if (!t2.value.trim() && _lastGeminiCsvs.second) t2.value = _lastGeminiCsvs.second;
   }
-
   openModal('compareModal');
 }
 function closeCompareModal() {
   closeModal('compareModal');
   finalizeDailyEditing();
 }
-
 function cmpRunCompare() {
   const t1 = $('cmpCsv1') ? $('cmpCsv1').value : '';
   const t2 = $('cmpCsv2') ? $('cmpCsv2').value : '';
@@ -5920,7 +5900,6 @@ function cmpRunCompare() {
   cmpRenderChecks(checks);
   cmpRenderResults();
 }
-
 function cmpRenderChecks(checks) {
   const el = $('cmpCheckResults'); if (!el) return;
   if (!checks.length) { el.innerHTML = '<div class="cmp-empty">Нет контролей.</div>'; return; }
@@ -5936,7 +5915,6 @@ function cmpRenderChecks(checks) {
     </div>`;
   }).join('');
 }
-
 function cmpStartEdit(pill) {
   if (pill.querySelector('input')) return;
   const key = pill.dataset.key;
@@ -5953,7 +5931,6 @@ function cmpStartEdit(pill) {
       ? row.edits.incoming[dk]
       : (row.a ? (row.a.incoming[dk] || 0) : 0);
   }
-
   pill.innerHTML = '';
   pill.classList.add('editing');
   const inp = document.createElement('input');
@@ -5990,7 +5967,6 @@ function cmpStartEdit(pill) {
   });
   inp.addEventListener('blur', () => finish(true));
 }
-
 function cmpRenderResults() {
   if (!_cmpData) return;
   const { rows, dateLabels, okCount, warnCount, errCount } = _cmpData;
@@ -6038,21 +6014,16 @@ function cmpRenderResults() {
   const hasEdits = rows.some(r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null));
   if (applyBtn) applyBtn.style.display = (okCount || hasEdits) ? 'block' : 'none';
 }
-
 function cmpApplyMatched() {
   if (!_cmpData) return;
-
   const hasEdits = r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null);
   const okRows = _cmpData.rows.filter(r => r.status === 'ok' && r.a);
   const editedRows = _cmpData.rows.filter(r => r.status !== 'ok' && hasEdits(r));
   const diffRows = _cmpData.rows.filter(r => r.status !== 'ok');
-
   const applyRows = [...okRows];
   const okKeys = new Set(okRows.map(r => r.key));
   editedRows.forEach(r => { if (!okKeys.has(r.key)) applyRows.push(r); });
-
   if (!applyRows.length && !diffRows.length) { showToast('Нет данных'); return; }
-
   const byKey = new Map();
   applyRows.forEach(r => {
     const incoming = { ...(r.a ? r.a.incoming : {}) };
@@ -6060,10 +6031,8 @@ function cmpApplyMatched() {
     const sales = (r.edits && r.edits.sales != null) ? r.edits.sales : (r.a ? r.a.sales : 0);
     byKey.set(normalizeName(r.name), { incoming, sales });
   });
-
   const year = new Date().getFullYear();
   let applied = 0;
-
   tableRows.forEach(row => {
     const key = normalizeName(row.name);
     const match = byKey.get(key);
@@ -6083,13 +6052,11 @@ function cmpApplyMatched() {
     }
     applied++;
   });
-
   _needsCheckNames = new Set();
   diffRows.forEach(r => {
     if (hasEdits(r)) return;
     if (r.name) _needsCheckNames.add(normalizeName(r.name));
   });
-
   renderTable();
   updateSegmentedCounters();
   scheduleSessionSave();
@@ -6100,7 +6067,6 @@ function cmpApplyMatched() {
   }
   closeCompareModal();
 }
-
 function cmpBindUI() {
   const openBtn = $('openCompareBtn'); if (openBtn) openBtn.onclick = () => openCompareModal();
   const runBtn = $('cmpRunBtn'); if (runBtn) runBtn.onclick = cmpRunCompare;
@@ -6134,6 +6100,18 @@ function cmpBindUI() {
    BIND UI
    ═══════════════════════════════════════════ */
 function bindUI() {
+  /* === Загрузка фото === */
+  const invBtn = $('uploadInvoicePhotosBtn'); if (invBtn) invBtn.onclick = () => { const i = $('invoicePhotoInput'); if (i) i.click(); };
+  const salBtn = $('uploadSalesPhotosBtn'); if (salBtn) salBtn.onclick = () => { const i = $('salesPhotoInput'); if (i) i.click(); };
+  const invInput = $('invoicePhotoInput');
+  if (invInput) invInput.onchange = async e => { try { if (e.target.files && e.target.files.length) await addPhotos(e.target.files, 'invoice'); } finally { e.target.value = ''; } };
+  const salInput = $('salesPhotoInput');
+  if (salInput) salInput.onchange = async e => { try { if (e.target.files && e.target.files.length) await addPhotos(e.target.files, 'sales'); } finally { e.target.value = ''; } };
+
+  /* === Gemini: общая кнопка «Распознать все» === */
+  const geminiBtn = $('recognizeGeminiBtn');
+  if (geminiBtn) geminiBtn.onclick = recognizeWithGemini;
+
   /* === Загрузка по датам === */
   const dailyRec = $('dailyRecognizeBtn'); if (dailyRec) dailyRec.onclick = recognizeDaily;
   const dailyBuild = $('dailyBuildBtn'); if (dailyBuild) dailyBuild.onclick = buildDailyCsv;
@@ -6147,18 +6125,18 @@ function bindUI() {
     });
   }
 
-  /* === Загрузка фото === */
-  const invBtn = $('uploadInvoicePhotosBtn'); if (invBtn) invBtn.onclick = () => { const i = $('invoicePhotoInput'); if (i) i.click(); };
-  const salBtn = $('uploadSalesPhotosBtn'); if (salBtn) salBtn.onclick = () => { const i = $('salesPhotoInput'); if (i) i.click(); };
-  const invInput = $('invoicePhotoInput');
-  if (invInput) invInput.onchange = async e => { try { if (e.target.files && e.target.files.length) await addPhotos(e.target.files, 'invoice'); } finally { e.target.value = ''; } };
-  const salInput = $('salesPhotoInput');
-  if (salInput) salInput.onchange = async e => { try { if (e.target.files && e.target.files.length) await addPhotos(e.target.files, 'sales'); } finally { e.target.value = ''; } };
+  /* === Переключатель режима распознавания === */
+  const recognizeModeSeg = $('recognizeModeSegmented');
+  if (recognizeModeSeg) {
+    let savedMode = 'daily';
+    try { savedMode = localStorage.getItem('fbAuditRecognizeMode') || 'daily'; } catch (e) {}
+    setRecognizeMode(savedMode);
+    recognizeModeSeg.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => setRecognizeMode(btn.dataset.mode));
+    });
+  }
 
-  /* === Gemini === */
-  const geminiBtn = $('recognizeGeminiBtn');
-  if (geminiBtn) geminiBtn.onclick = recognizeWithGemini;
-
+  /* === Ключ и модель === */
   const geminiKeyInput = $('geminiKeyInput');
   if (geminiKeyInput) {
     geminiKeyInput.value = getGeminiKey();
@@ -6189,9 +6167,8 @@ function bindUI() {
     });
   }
 
-  /* === Share fallback === */
+  /* === Ручной режим === */
   const shareBtn = $('shareToAIBtn'); if (shareBtn) shareBtn.onclick = shareToAI;
-
   const copyPromptBtn = $('copyPromptBtn');
   if (copyPromptBtn) copyPromptBtn.onclick = async () => {
     const prompt = buildPrompt();
@@ -6217,7 +6194,6 @@ function bindUI() {
       } else throw new Error();
     } catch (e) { const st = $('csvStatus'); if (st) { st.className = 'status show'; st.textContent = 'Вставьте CSV вручную.'; } }
   };
-
   const loadCsvBtn = $('loadCsvFileBtn');
   if (loadCsvBtn) loadCsvBtn.onclick = () => {
     if (_fileBusy) return;
@@ -6225,7 +6201,6 @@ function bindUI() {
     setTimeout(() => _fileBusy = false, 500);
     const i = $('csvFileInput'); if (i) i.click();
   };
-
   const csvFileInput = $('csvFileInput');
   if (csvFileInput) csvFileInput.onchange = async e => {
     const f = e.target.files && e.target.files[0];
@@ -6241,7 +6216,6 @@ function bindUI() {
     } catch (err) { const st = $('csvStatus'); if (st) { st.className = 'status show err'; st.textContent = 'Ошибка чтения.'; } }
     finally { e.target.value = ''; }
   };
-
   const csvInput = $('csvInput');
   if (csvInput) {
     csvInput.addEventListener('input', () => { autoResizeTextarea(); updateCsvCounter(); });
@@ -6266,7 +6240,6 @@ function bindUI() {
       tableSearchClear.classList.remove('show');
     };
   }
-
   const problemSeg = $('problemSegmented');
   if (problemSeg) {
     problemSeg.querySelectorAll('button').forEach(btn => {
@@ -6297,7 +6270,6 @@ function bindUI() {
     const st = $('csvStatus');
     if (st) { st.className = 'status show ok'; st.textContent = 'Сессия восстановлена.'; }
   };
-
   const clearBtn = $('clearBtn');
   if (clearBtn) clearBtn.onclick = async () => {
     if (pendingSessionReset) return;
@@ -6723,6 +6695,24 @@ function bindUI() {
 }
 
 /* ═══════════════════════════════════════════
+   ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМА РАСПОЗНАВАНИЯ
+   ═══════════════════════════════════════════ */
+function setRecognizeMode(mode) {
+  if (mode !== 'daily' && mode !== 'all') mode = 'daily';
+  const seg = $('recognizeModeSegmented');
+  if (seg) {
+    seg.querySelectorAll('button').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
+  }
+  const dailyBlock = $('dailyModeBlock');
+  const allBlock = $('allModeBlock');
+  if (dailyBlock) dailyBlock.style.display = (mode === 'daily') ? 'block' : 'none';
+  if (allBlock) allBlock.style.display = (mode === 'all') ? 'block' : 'none';
+  try { localStorage.setItem('fbAuditRecognizeMode', mode); } catch (e) {}
+}
+
+/* ═══════════════════════════════════════════
    BIND MODAL BACKDROPS
    ═══════════════════════════════════════════ */
 function bindModalBackdrops() {
@@ -6756,7 +6746,6 @@ function bindModalBackdrops() {
       else if (id === 'compareModal') closeCompareModal();
     });
   });
-
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       if (!$('reportModal').classList.contains('hidden')) closeReport();
@@ -6773,8 +6762,7 @@ function bindModalBackdrops() {
     }
   });
 }
-
-/* ═══════════════════════════════════════════
+  /* ═══════════════════════════════════════════
    LOGO / SW / INIT
    ═══════════════════════════════════════════ */
 function initLogoFallback() {
@@ -6893,7 +6881,7 @@ function init() {
     }
   });
   window.addEventListener('error', e => console.warn('Global error:', e.message));
-  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.8.1 · загрузка по датам · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length, '· aliases:', ALIASES.length, '· prices:', Object.keys(PRICES).length);
+  console.log('%c French Bakery Аудит ', 'background:#0a84ff;color:#fff;padding:4px 10px;border-radius:6px;font-weight:800', 'v9.8.3 · распознавание · catalog:', PRODUCTS.length, '· ignored:', IGNORED.length, '· aliases:', ALIASES.length, '· prices:', Object.keys(PRICES).length);
 }
 
 /* ═══════════════════════════════════════════
