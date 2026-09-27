@@ -1,0 +1,802 @@
+{
+  "version": 1,
+  "createdAt": "2026-09-27T01:41:27.199Z",
+  "date": "2026-09-27",
+  "pointId": "pmuj4o11vkkuh",
+  "pointNum": "Павелецкая",
+  "pointName": "",
+  "pointAddress": "",
+  "authorName": "Олег",
+  "authorLogin": "kolegaolega-lab",
+  "categories": {
+    "pastry": [
+      {
+        "name": "Бабушкин рецепт маленький",
+        "stock": null,
+        "sales": 1,
+        "shelfLife": 24,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 1
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 1
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Багет на закваске",
+        "stock": null,
+        "sales": 0,
+        "shelfLife": 24,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 1
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 1
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Багет французский",
+        "stock": null,
+        "sales": 0,
+        "shelfLife": 24,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 1
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 1
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Батон 8 злаков",
+        "stock": null,
+        "sales": 0,
+        "shelfLife": 48,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 1
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 1
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Бриошь с черной смородиной",
+        "stock": null,
+        "sales": 4,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 5
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 5
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Бриошь с шоколадом",
+        "stock": null,
+        "sales": 1,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 3
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 5
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Булочка с ванильным кремом и корицей",
+        "stock": null,
+        "sales": 5,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 3
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 5
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Булочка с маком",
+        "stock": null,
+        "sales": 3,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 1
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 5
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Булочка с фисташкой",
+        "stock": null,
+        "sales": 1,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 2
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 3
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Грилата с брынзой и зеленью",
+        "stock": null,
+        "sales": 2,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 5
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 5
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Грилата с картофелем и грибами",
+        "stock": null,
+        "sales": 4,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 5
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 5
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Грилата с куриным филе",
+        "stock": null,
+        "sales": 6,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 6
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 7
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Грилата с мясом",
+        "stock": null,
+        "sales": 0,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 4
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 5
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Зеленая гречка",
+        "stock": null,
+        "sales": 0,
+        "shelfLife": 48,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 1
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 1
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Киш с ветчиной и грибами",
+        "stock": null,
+        "sales": 0,
+        "shelfLife": 48,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 2
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 3
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Киш с курицей",
+        "stock": null,
+        "sales": 4,
+        "shelfLife": 48,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 2
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 4
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Косичка с шоколадом",
+        "stock": null,
+        "sales": 2,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 0
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 0
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Круассан классический",
+        "stock": null,
+        "sales": 4,
+        "shelfLife": 24,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 0
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 0
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Круассан с ванильным кремом",
+        "stock": null,
+        "sales": 1,
+        "shelfLife": 12,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 0
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 0
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Круассан с клубникой и шоколадом",
+        "stock": null,
+        "sales": 2,
+        "shelfLife": 12,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 0
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 0
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Круассан с миндалем",
+        "stock": null,
+        "sales": 4,
+        "shelfLife": 12,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 0
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 0
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Круассан с творогом",
+        "stock": null,
+        "sales": 3,
+        "shelfLife": 12,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 0
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 0
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Круассан с шоколадом",
+        "stock": null,
+        "sales": 4,
+        "shelfLife": 12,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 0
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 0
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Пирожок с капустой",
+        "stock": null,
+        "sales": 3,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 3
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 4
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Пирожок с картошкой",
+        "stock": null,
+        "sales": 4,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 5
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 5
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Пирожок с курицей",
+        "stock": null,
+        "sales": 3,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 7
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 6
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Пирожок с яблоком",
+        "stock": null,
+        "sales": 0,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 2
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 2
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Пирожок с яйцом",
+        "stock": null,
+        "sales": 1,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 4
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 4
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Ром баба",
+        "stock": null,
+        "sales": 0,
+        "shelfLife": 48,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 1
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 2
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Слойка со сливой",
+        "stock": null,
+        "sales": 0,
+        "shelfLife": 18,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 1
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 1
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Сосиска в тесте",
+        "stock": null,
+        "sales": 7,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 7
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 9
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Сочник",
+        "stock": null,
+        "sales": 0,
+        "shelfLife": 48,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 2
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 2
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Улитка с изюмом",
+        "stock": null,
+        "sales": 4,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 0
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 0
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Улитка с корицей",
+        "stock": null,
+        "sales": 5,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 0
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 0
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Улитка яблочная",
+        "stock": null,
+        "sales": 0,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 2
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 2
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Хлеб Ржаной 100%",
+        "stock": null,
+        "sales": 1,
+        "shelfLife": 48,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 1
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 1
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Хлеб Чесночный",
+        "stock": null,
+        "sales": 0,
+        "shelfLife": 48,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 1
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 1
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      },
+      {
+        "name": "Чиабатта 310гр.",
+        "stock": 0,
+        "sales": 0,
+        "shelfLife": 24,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 1
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 1
+          }
+        ],
+        "freshOnShelf": 0,
+        "freshSold": 0,
+        "expiredOnShelf": 0,
+        "soldExpired": 0
+      },
+      {
+        "name": "Штрудель яблочный",
+        "stock": null,
+        "sales": 1,
+        "shelfLife": 36,
+        "incoming": [
+          {
+            "date": "2026-09-24",
+            "qty": 1
+          },
+          {
+            "date": "2026-09-25",
+            "qty": 1
+          }
+        ],
+        "freshOnShelf": null,
+        "freshSold": null,
+        "expiredOnShelf": null,
+        "soldExpired": null
+      }
+    ]
+  },
+  "totals": {
+    "positions": 39,
+    "freshOnShelf": 0,
+    "freshSold": 0,
+    "expiredOnShelf": 0,
+    "soldExpired": 0
+  }
+}
