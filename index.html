@@ -396,33 +396,58 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .cmp-nakl-item label{font-size:9px;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-secondary);font-weight:600;display:block}
 .cmp-nakl-item input{font-size:12px;padding:7px 8px;min-height:34px;width:100%;border:1px solid var(--separator-opaque);border-radius:7px;background:var(--bg-input);color:var(--text);font-family:inherit;outline:none;box-sizing:border-box}
 .cmp-nakl-item .del-btn{width:30px;height:30px;min-height:30px;padding:0;margin:0;background:var(--red);color:#fff;font-size:15px;border-radius:7px;border:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
-.cmp-row{display:flex;align-items:flex-start;gap:8px;padding:9px 11px;border-radius:8px;margin-bottom:5px;font-size:12.5px;line-height:1.4}
-.cmp-row.ok{background:rgba(52,199,89,.12);border-left:3px solid var(--green)}
-.cmp-row.warn{background:rgba(255,149,0,.12);border-left:3px solid var(--orange)}
-.cmp-row.err{background:rgba(255,59,48,.12);border-left:3px solid var(--red)}
-.cmp-icon{flex:0 0 auto;font-size:13px;width:16px;text-align:center;font-weight:700}
+/* v9.15.0 — Сверка в стиле «Разделы» */
+.cmp-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:var(--bg-card)}
+.cmp-section{background:var(--bg-card);border-bottom:1px solid var(--separator)}
+.cmp-section:last-child{border-bottom:0}
+.cmp-section-header{padding:14px 16px 8px;display:flex;align-items:flex-start;gap:10px}
+.cmp-section-header>div{flex:1;min-width:0}
+.cmp-section-header h2{font-size:14.5px;font-weight:600;margin:0;letter-spacing:-.2px;color:var(--text)}
+.cmp-section-header .desc{font-size:12px;color:var(--text-secondary);margin-top:3px;line-height:1.4}
+.cmp-section-body{padding:0 16px 14px}
+.cmp-section-body label{display:block;font-size:11px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em;margin:0 0 6px}
+.cmp-section-body label:not(:first-child){margin-top:12px}
+.cmp-textarea{width:100%;padding:12px 13px;border:1px solid var(--separator-opaque);border-radius:var(--r-sm);background:var(--bg-input);color:var(--text);font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.5;min-height:80px;resize:vertical;outline:none;box-sizing:border-box;display:block}
+.cmp-textarea:focus{border-color:var(--accent);background:var(--bg-card);box-shadow:0 0 0 3.5px var(--accent-soft)}
+.cmp-input{width:100%;padding:11px 13px;border:1px solid var(--separator-opaque);border-radius:var(--r-sm);background:var(--bg-input);color:var(--text);font-size:14.5px;font-family:inherit;outline:none;box-sizing:border-box;min-height:44px}
+.cmp-input:focus{border-color:var(--accent);background:var(--bg-card);box-shadow:0 0 0 3.5px var(--accent-soft)}
+.cmp-hint{font-size:11.5px;color:var(--text-secondary);margin:6px 0 0;line-height:1.4}
+.cmp-summary{background:var(--bg-input);border-radius:12px;padding:12px;font-size:12.5px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px}
+.cmp-summary .big{display:block;font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+.cmp-summary .row{display:flex;justify-content:space-between;padding:3px 0}
+.cmp-summary .row b{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+.cmp-summary .row b.green{color:var(--green)}
+.cmp-summary .row b.orange{color:var(--orange)}
+.cmp-summary .row b.red{color:var(--red)}
+.cmp-clear-btn{font-size:11.5px;font-weight:600;color:var(--red);background:transparent;border:0;padding:5px 9px;border-radius:7px;font-family:inherit;cursor:pointer;flex:0 0 auto;white-space:nowrap;min-height:auto}
+.cmp-clear-btn:active{background:var(--red-soft)}
+
+.cmp-check{background:var(--bg-input);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.cmp-check:last-child{margin-bottom:0}
+.cmp-check .cmp-check-icon{flex:0 0 auto;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;color:#fff;text-align:center;line-height:1}
+.cmp-check.ok .cmp-check-icon{background:var(--green)}
+.cmp-check.err .cmp-check-icon{background:var(--red)}
+.cmp-check-body{flex:1;min-width:0}
+.cmp-check-title{font-size:13.5px;font-weight:600;margin-bottom:4px;line-height:1.3}
+.cmp-check-detail{font-size:12px;color:var(--text-secondary);line-height:1.4;word-break:break-word}
+.cmp-check-detail b{color:var(--text);font-weight:600}
+.cmp-check-detail .warn{color:var(--orange);font-weight:600}
+
+.cmp-row{background:var(--bg-input);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px}
+.cmp-row:last-child{margin-bottom:0}
+.cmp-icon{flex:0 0 auto;font-size:13px;font-weight:700;width:18px;text-align:center}
 .cmp-row.ok .cmp-icon{color:var(--green)}
 .cmp-row.warn .cmp-icon{color:var(--orange)}
 .cmp-row.err .cmp-icon{color:var(--red)}
-.cmp-name{flex:1;min-width:0;font-weight:600;word-break:break-word}
-.cmp-vals{flex:0 0 auto;display:flex;gap:5px;font-variant-numeric:tabular-nums;flex-wrap:wrap;justify-content:flex-end;max-width:55%}
-.cmp-val{background:rgba(0,0,0,.05);padding:2px 7px;border-radius:6px;font-size:11px;white-space:nowrap;font-weight:600}
-@media (prefers-color-scheme:dark){.cmp-val{background:rgba(255,255,255,.08)}}
+.cmp-name{flex:1;min-width:0;font-weight:600;word-break:break-word;font-size:13.5px}
+.cmp-vals{flex:0 0 auto;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.cmp-val{background:var(--bg-card);padding:3px 7px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap;cursor:pointer}
 .cmp-val.diff{background:var(--orange);color:#fff}
-.cmp-val.same{background:rgba(52,199,89,.2);color:var(--green)}
+.cmp-val.same{background:var(--green);color:#fff}
 .cmp-val.edited{background:var(--accent);color:#fff}
 .cmp-val.editing{padding:0;background:transparent}
+
 .cmp-edit-input{width:72px;height:26px;padding:2px 6px;border:1px solid var(--accent);border-radius:6px;background:var(--bg-card);color:var(--text);font-size:12px;font-weight:600;text-align:center;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none}
-.cmp-check{display:flex;align-items:flex-start;gap:9px;padding:10px 12px;border-radius:8px;margin-bottom:5px;font-size:12.5px;line-height:1.4}
-.cmp-check.ok{background:rgba(52,199,89,.12);border-left:3px solid var(--green)}
-.cmp-check.err{background:rgba(255,59,48,.12);border-left:3px solid var(--red)}
-.cmp-check-icon{flex:0 0 auto;font-size:15px;width:18px;text-align:center;font-weight:700}
-.cmp-check.ok .cmp-check-icon{color:var(--green)}
-.cmp-check.err .cmp-check-icon{color:var(--red)}
-.cmp-check-body{flex:1;min-width:0}
-.cmp-check-title{font-weight:600;margin-bottom:2px}
-.cmp-check-detail{font-size:11.5px;color:var(--text-secondary);word-break:break-word}
-.cmp-check-detail b{color:var(--text);font-weight:600}
 .cmp-empty{text-align:center;padding:20px;color:var(--text-tertiary);font-size:12.5px}
 /* === Редактор расхождений: карточка разбора под строкой === */
 .cmp-edit-card{margin:-3px 0 8px;padding:14px 12px;border-radius:0 0 8px 8px;background:var(--bg-elev-2);border:1px solid var(--separator-opaque);border-top:0}
@@ -1516,35 +1541,77 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
   <div class="modal-content" id="compareModalContent">
     <div class="modal-header">
       <h3>Сверка двух CSV</h3>
-      <p class="hint">Вставьте два ответа от ИИ из разных чатов. Совпавшие — доверяем, расхождения — проверяем.</p>
+      <p class="hint">Совпавшие — доверяем, расхождения — проверяем.</p>
     </div>
-    <div class="modal-body">
-      <label>CSV №1 (первый прогон)</label>
-      <textarea id="cmpCsv1" style="min-height:80px;margin-bottom:12px"></textarea>
 
-      <label>CSV №2 (второй прогон)</label>
-      <textarea id="cmpCsv2" style="min-height:80px;margin-bottom:16px"></textarea>
+    <div class="cmp-scroll">
 
-      <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px">Накладные (до 4 за раз)</div>
-      <p class="hint" style="margin:0 0 8px">Для каждой: дата (дд.мм), №, последний № позиции, печатный итог (кол. 12).</p>
-      <div id="cmpNaklList" class="cmp-nakl-list"></div>
-      <button id="cmpAddNaklBtn" class="secondary block" style="margin-bottom:16px">+ Добавить накладную</button>
+      <!-- Секция 1: CSV -->
+      <div class="cmp-section">
+        <div class="cmp-section-header">
+          <div>
+            <h2>CSV для сравнения</h2>
+            <p class="desc">Вставьте два ответа ИИ из разных чатов.</p>
+          </div>
+          <button type="button" class="cmp-clear-btn" id="cmpClearBtn">Очистить</button>
+        </div>
+        <div class="cmp-section-body">
+          <label>Прогон 1</label>
+          <textarea id="cmpCsv1" class="cmp-textarea"></textarea>
+          <label>Прогон 2</label>
+          <textarea id="cmpCsv2" class="cmp-textarea"></textarea>
+        </div>
+      </div>
 
-      <div style="font-size:12px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px">Печатный итог чека</div>
-      <p class="hint" style="margin:0 0 8px">Число из строки «Итого для продажи». Если чека нет — оставь пустым.</p>
-      <input id="cmpCheckPrinted" type="text" inputmode="decimal" placeholder="32771.50" style="margin-bottom:16px">
+      <!-- Секция 2: Накладные -->
+      <div class="cmp-section">
+        <div class="cmp-section-header">
+          <div>
+            <h2>Контроль накладных</h2>
+            <p class="desc">До 4 накладных. Дата, №, последний № позиции, печатный итог.</p>
+          </div>
+        </div>
+        <div class="cmp-section-body">
+          <div id="cmpNaklList" class="cmp-nakl-list"></div>
+          <button id="cmpAddNaklBtn" class="secondary block" style="margin-bottom:14px">＋ Добавить накладную</button>
+          <label>Печатный итог чека</label>
+          <input id="cmpCheckPrinted" type="text" inputmode="decimal" placeholder="32771.50" class="cmp-input">
+          <p class="cmp-hint">Число из строки «Итого для продажи». Если чека нет — оставьте пустым.</p>
+        </div>
+      </div>
 
-      <button id="cmpRunBtn" class="primary block">Проверить всё</button>
-      <button id="cmpClearBtn" class="secondary block" style="margin-top:8px">Очистить</button>
+      <!-- Секция 3: Контроли -->
+      <div class="cmp-section" id="cmpChecksSection" style="display:none">
+        <div class="cmp-section-header">
+          <div>
+            <h2>Контроли</h2>
+          </div>
+        </div>
+        <div class="cmp-section-body">
+          <div id="cmpStats" class="cmp-summary"></div>
+          <div id="cmpCheckResults"></div>
+        </div>
+      </div>
 
-      <div id="cmpStats" class="kv" style="display:none;margin-top:16px;padding:12px;background:var(--bg-input);border-radius:var(--r-sm)"></div>
+      <!-- Секция 4: Расхождения -->
+      <div class="cmp-section" id="cmpResultsSection" style="display:none">
+        <div class="cmp-section-header">
+          <div>
+            <h2>Расхождения по позициям</h2>
+            <p class="desc">Тап на значение — выбрать.</p>
+          </div>
+        </div>
+        <div class="cmp-section-body">
+          <div id="cmpResults"></div>
+        </div>
+      </div>
 
-      <div id="cmpCheckResults" style="margin-top:16px"></div>
-      <div id="cmpResults" style="margin-top:16px"></div>
     </div>
+
     <div class="modal-footer">
       <button id="cmpApplyBtn" class="success block" style="display:none;margin-bottom:8px">Применить в таблицу</button>
-      <button id="cmpCloseBtn" class="secondary block">Закрыть</button>
+      <button id="cmpRunBtn" class="primary block">Проверить всё</button>
+      <button id="cmpCloseBtn" class="secondary block" style="margin-top:8px">Закрыть</button>
     </div>
   </div>
 </div>
@@ -1792,7 +1859,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.14.2';
+const APP_VERSION = 'v9.15.0';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -8014,9 +8081,11 @@ function cmpRenderNakls() {
 }
 function openCompareModal(prefill) {
   _cmpAppliedForDaily = false;
-  const st = $('cmpStats'); if (st) st.style.display = 'none';
+  const st = $('cmpStats'); if (st) st.innerHTML = '';
   const res = $('cmpResults'); if (res) res.innerHTML = '';
   const chk = $('cmpCheckResults'); if (chk) chk.innerHTML = '';
+  const checksSection = $('cmpChecksSection'); if (checksSection) checksSection.style.display = 'none';
+  const resultsSection = $('cmpResultsSection'); if (resultsSection) resultsSection.style.display = 'none';
   const btn = $('cmpApplyBtn'); if (btn) btn.style.display = 'none';
   _cmpData = null;
   if (_cmpNakls.length === 0) _cmpNakls = [{ date: '', num: '', lastNum: '', total: '' }];
@@ -8308,13 +8377,17 @@ function cmpRenderResults() {
   const { rows, dateLabels, okCount, warnCount, errCount } = _cmpData;
   const stats = $('cmpStats');
   const out = $('cmpResults');
+  const checksSection = $('cmpChecksSection');
+  const resultsSection = $('cmpResultsSection');
+  if (checksSection) checksSection.style.display = 'block';
+  if (resultsSection) resultsSection.style.display = 'block';
   if (stats) {
-    stats.style.display = 'grid';
-    stats.innerHTML = `
-      <span class="k">✓ Совпало</span><span class="v" style="color:var(--green)">${okCount}</span>
-      <span class="k">⚠ Расхождения</span><span class="v" style="color:var(--orange)">${warnCount}</span>
-      <span class="k">✗ Только в одном</span><span class="v" style="color:var(--red)">${errCount}</span>
-    `;
+    const total = okCount + warnCount + errCount;
+    stats.innerHTML =
+      '<span class="big">' + okCount + ' из ' + total + ' совпало</span>' +
+      '<div class="row"><span>✓ Совпало</span><b class="green">' + okCount + '</b></div>' +
+      '<div class="row"><span>⚠ Расхождения</span><b class="orange">' + warnCount + '</b></div>' +
+      '<div class="row"><span>✗ Только в одном</span><b class="red">' + errCount + '</b></div>';
   }
   if (!out) return;
   if (!rows.length) { out.innerHTML = '<div class="cmp-empty">Оба CSV пусты.</div>'; return; }
@@ -8430,9 +8503,11 @@ function cmpBindUI() {
     const cp = $('cmpCheckPrinted'); if (cp) cp.value = '';
     _cmpNakls = [{ date: '', num: '', lastNum: '', total: '' }];
     cmpRenderNakls();
-    const st = $('cmpStats'); if (st) st.style.display = 'none';
+    const st = $('cmpStats'); if (st) st.innerHTML = '';
     const chk = $('cmpCheckResults'); if (chk) chk.innerHTML = '';
     const res = $('cmpResults'); if (res) res.innerHTML = '';
+    const checksSection = $('cmpChecksSection'); if (checksSection) checksSection.style.display = 'none';
+    const resultsSection = $('cmpResultsSection'); if (resultsSection) resultsSection.style.display = 'none';
     const ap = $('cmpApplyBtn'); if (ap) ap.style.display = 'none';
     _cmpData = null;
     _lastGeminiCsvs = { first: '', second: '' };
