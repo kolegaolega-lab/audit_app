@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-27T22:12:58.722Z",
-  "updatedBy": "v9.15.4",
+  "updatedAt": "2026-09-27T23:47:54.788Z",
+  "updatedBy": "v9.15.8",
   "products": [
     {
       "name": "Хлеб Деревенский",
@@ -604,11 +604,6 @@
       "category": "desserts"
     },
     {
-      "name": "\"Чизкейк Чёрная смородина\" Пирожное (НОВАЯ)",
-      "shelfLife": 72,
-      "category": "desserts"
-    },
-    {
       "name": "\"Чизкейк\" пирожное",
       "shelfLife": 72,
       "category": "desserts"
@@ -652,6 +647,11 @@
       "name": "Суп Фирменный (Сырный)",
       "shelfLife": 24,
       "category": "lunches"
+    },
+    {
+      "name": "\"Чизкейк Чёрная Смородина\" пирожное",
+      "shelfLife": 72,
+      "category": "desserts"
     }
   ],
   "ignored": [
@@ -897,7 +897,7 @@
     },
     {
       "alias": "Чизкейк Чёрная смородина Пирожное (НОВАЯ)",
-      "target": "\"Чизкейк Чёрная смородина\" Пирожное (НОВАЯ)"
+      "target": "\"Чизкейк Чёрная Смородина\" пирожное"
     },
     {
       "alias": "Пирожное Чизкейк",
@@ -1186,8 +1186,193 @@
     {
       "alias": "Десерт Ореховый",
       "target": "Десерт \"Ореховый\""
+    },
+    {
+      "alias": "Пирог Вишнёвый",
+      "target": "Вишневый пирог"
     }
   ],
   "prices": {},
-  "points": []
+  "points": [
+    {
+      "id": "pmukgo0938equ",
+      "num": "Авиамоторная",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgoa0fvzx7",
+      "num": "Академическая",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgogi6ie41",
+      "num": "Аквилон",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgpbi4zsxo",
+      "num": "Алексеевская",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgpj5hz9ii",
+      "num": "Алексеевская 2",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgptru5ng5",
+      "num": "Алексеевская 3",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgq1st09g0",
+      "num": "Алкон",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgq9sj2zrb",
+      "num": "Арбат",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgqhtvcyfw",
+      "num": "Арбат 2",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgqqlkam7u",
+      "num": "Афимолл",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgr156cga7",
+      "num": "Аэропорт 4",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgrkhy5vly",
+      "num": "Баррикадная",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgs2aecreu",
+      "num": "Басманный",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgsi93t67a",
+      "num": "Бауманская 1",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgsml4w3xt",
+      "num": "Бауманская 2",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgtfzkmqqu",
+      "num": "Беломорская",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgtoziz4ac",
+      "num": "Беляево",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgtwcsk0mx",
+      "num": "Ботанический сад",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgu6k48smr",
+      "num": "Брестская",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgued65szz",
+      "num": "Брянская",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgus3c1hyp",
+      "num": "Бунинские луга 1",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukguyrck24b",
+      "num": "Бунинские луга 2",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgv7bfelk4",
+      "num": "Бунинский квартал",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgvhn58x79",
+      "num": "Бутырская 2",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgvzxz590q",
+      "num": "Верейская Плаза",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgwb5kk2hu",
+      "num": "Владыкино",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgwhd3vk77",
+      "num": "Внуково",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgwp7uohaf",
+      "num": "Водный стадион",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgx87821fo",
+      "num": "Войковская 2",
+      "name": "",
+      "address": ""
+    },
+    {
+      "id": "pmukgy1vvg4cm",
+      "num": "Волжский Парк",
+      "name": "",
+      "address": ""
+    }
+  ]
 }
