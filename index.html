@@ -1859,7 +1859,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.15.1';
+const APP_VERSION = 'v9.15.2';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -8001,6 +8001,10 @@ function cmpParseCSV(text) {
     const aliased = applyAliases(name);
     if (aliased !== name) name = aliased;
     const key = normalizeName(name);
+    /* v9.15.2: фильтр — игнор и чужие категории */
+    if (isIgnored(name)) continue;
+    const prod = PRODUCTS.find(x => normalizeName(x.name) === key);
+    if (prod && _activeCategory && prod.category && prod.category !== _activeCategory) continue;
     const rec = { name, incoming: {}, sales: 0 };
     dateCols.forEach(dc => {
       const v = String(f[dc.idx] || '').replace(/[^\d]/g, '');
@@ -8485,6 +8489,42 @@ function cmpApplyMatched() {
     if (hasEdits(r)) return;
     if (r.name) _needsCheckNames.add(normalizeName(r.name));
   });
+
+  /* v9.15.2: позиции не из справочника → в «Не в справочнике» */
+  const tableKeys = new Set(tableRows.map(r => normalizeName(r.name)));
+  const unknownKeys = new Set(unknownRows.map(r => normalizeName(r.name)));
+  const newUnknown = [];
+  _cmpData.rows.forEach(r => {
+    const key = normalizeName(r.name);
+    if (tableKeys.has(key)) return;
+    if (unknownKeys.has(key)) return;
+    if (PRODUCTS.some(p => normalizeName(p.name) === key)) return;
+    if (isIgnored(r.name)) return;
+    const incoming = { ...(r.a ? r.a.incoming : {}) };
+    if (r.edits && r.edits.incoming) Object.assign(incoming, r.edits.incoming);
+    const sales = (r.edits && r.edits.sales != null) ? r.edits.sales : (r.a ? r.a.sales : 0);
+    const year = new Date().getFullYear();
+    const incomingArr = [];
+    Object.keys(incoming).forEach(dk => {
+      const m = dk.match(/^(\d{1,2})\.(\d{1,2})$/);
+      if (!m) return;
+      const iso = year + '-' + m[2].padStart(2,'0') + '-' + m[1].padStart(2,'0');
+      incomingArr.push({ date: iso, qty: incoming[dk] || 0 });
+    });
+    newUnknown.push({
+      name: r.name,
+      sales: sales,
+      shelfLife: 0,
+      category: null,
+      incoming: incomingArr,
+      salesOnly: false
+    });
+  });
+  if (newUnknown.length) {
+    unknownRows = sortRowsAlphabetically(unknownRows.concat(newUnknown));
+    updateUnknownBanner();
+  }
+
   renderTable();
   updateSegmentedCounters();
   scheduleSessionSave();
