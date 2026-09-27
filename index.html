@@ -808,6 +808,52 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 .section-body > .list-row[style*="display:none"]:last-child + .list-row,
 .list-row:has(+ .list-row[style*="display:none"]):last-of-type,
 .list-row[style*="display:none"] ~ .list-row:last-of-type{border-bottom:0}
+
+/* ═══════════════════════════════════════════
+   v9.15.6 — Отчёт в стиле «Разделы»
+   ═══════════════════════════════════════════ */
+.report-section{background:var(--bg-card);border-bottom:1px solid var(--separator)}
+.report-section:last-child{border-bottom:0}
+.report-section-header{padding:14px 16px 8px;display:flex;align-items:flex-start;gap:10px}
+.report-section-header>div{flex:1;min-width:0}
+.report-section-header h2{font-size:14.5px;font-weight:600;margin:0;letter-spacing:-.2px;color:var(--text)}
+.report-section-header .desc{font-size:12px;color:var(--text-secondary);margin-top:3px;line-height:1.4}
+.report-section-body{padding:0 16px 14px}
+.report-back-btn{background:transparent;border:0;color:var(--accent);font-family:inherit;font-size:13px;font-weight:600;padding:5px 10px;border-radius:8px;cursor:pointer;flex:0 0 auto;white-space:nowrap;min-height:auto;line-height:1.2}
+.report-back-btn:active{background:var(--accent-soft)}
+
+.report-summary-block{background:var(--bg-input);border-radius:12px;padding:12px;font-size:12.5px;color:var(--text-secondary);line-height:1.5}
+.report-summary-block .big{display:block;font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+.report-summary-block .big.warn{color:var(--orange)}
+.report-summary-block .big.danger{color:var(--red)}
+.report-summary-block .row{display:flex;justify-content:space-between;padding:3px 0}
+.report-summary-block .row b{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+.report-summary-block .row b.red{color:var(--red)}
+
+.report-cat-card{display:flex;align-items:center;gap:12px;background:var(--bg-input);border-radius:12px;padding:12px;margin-bottom:8px;cursor:pointer;border:0;width:100%;text-align:left;font-family:inherit;color:var(--text);min-height:auto}
+.report-cat-card:last-child{margin-bottom:0}
+.report-cat-card:active{background:var(--bg-elev-2)}
+.report-cat-card.empty{cursor:default;opacity:.7}
+.report-cat-card .rc-icon{width:32px;height:32px;border-radius:9px;background:var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:17px;flex:0 0 auto}
+.report-cat-card .rc-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.report-cat-card .rc-name{font-size:14px;font-weight:600;color:var(--text);line-height:1.25}
+.report-cat-card .rc-sub{font-size:11.5px;color:var(--text-secondary);line-height:1.3}
+.report-cat-card .rc-status{font-size:11.5px;font-weight:700;flex:0 0 auto;white-space:nowrap}
+.report-cat-card .rc-status.done{color:var(--green)}
+.report-cat-card .rc-status.wait{color:var(--text-tertiary)}
+.report-cat-card .rc-status.warn{color:var(--orange)}
+.report-cat-card .rc-status.danger{color:var(--red)}
+
+.report-problem-row{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--separator);cursor:pointer;background:transparent;border-left:0;border-right:0;border-top:0;width:100%;text-align:left;font-family:inherit;color:var(--text);min-height:auto}
+.report-problem-row:last-child{border-bottom:0}
+.report-problem-row:active{background:var(--bg-input)}
+.report-problem-row .rp-dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;margin-top:5px}
+.report-problem-row .rp-dot.red{background:var(--red)}
+.report-problem-row .rp-dot.orange{background:var(--orange)}
+.report-problem-row .rp-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.report-problem-row .rp-name{font-size:13.5px;font-weight:600;color:var(--text);line-height:1.35;word-break:break-word}
+.report-problem-row .rp-reason{font-size:12px;color:var(--text-secondary);line-height:1.35}
+</style>[style*="display:none"] ~ .list-row:last-of-type{border-bottom:0}
 </style>
 </head>
 <body>
@@ -1457,19 +1503,10 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 <!-- ═══════════════ Модалка: Отчёт ═══════════════ -->
 <div id="reportModal" class="modal hidden">
   <div class="modal-content" id="reportModalContent">
-    <div class="modal-header">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
-        <h3 id="reportTitle" style="flex:1;min-width:0;margin:0">Проверка завершена</h3>
-        <button type="button" id="reportCloseBtn" class="secondary" style="flex:0 0 auto;min-height:34px;padding:6px 12px;font-size:13px">Закрыть</button>
-      </div>
-      <div id="reportBackWrap" style="display:none;margin-top:6px">
-        <button type="button" id="reportBackBtn" class="report-back">
-          <span aria-hidden="true">←</span> <span id="reportBackLabel">Назад</span>
-        </button>
-      </div>
-      <p class="hint" id="reportSubtitle" style="display:none"></p>
+    <div class="sheet-scroll" id="reportBody"></div>
+    <div class="modal-footer">
+      <button id="reportCloseBtn" class="secondary block">Закрыть</button>
     </div>
-    <div class="modal-body" id="reportBody"></div>
   </div>
 </div>
 
@@ -1860,7 +1897,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.15.6';
+const APP_VERSION = 'v9.15.7';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -7723,122 +7760,144 @@ function closeReport() {
   _reportView = null;
 }
 function renderReport() {
-  const title = $('reportTitle');
-  const backWrap = $('reportBackWrap');
-  const subtitle = $('reportSubtitle');
   const body = $('reportBody');
   if (!body) return;
 
   if (_reportView === null) {
-    if (title) title.textContent = 'Проверка завершена';
-    if (backWrap) backWrap.style.display = 'none';
-    if (subtitle) subtitle.style.display = 'none';
-    body.innerHTML = '';
-
-    CATEGORY_ORDER.forEach(cat => {
-      const rows = tableRows.filter(r => r.category === cat);
-      const problems = rows.filter(r => {
-        const c = computeFIFO(r);
-        return (c.soldExpired != null && c.soldExpired > 0) || (c.expiredOnShelf != null && c.expiredOnShelf > 0);
-      }).length;
-
-      const btn = document.createElement('button');
-      btn.className = 'report-cat';
-      btn.type = 'button';
-
-      const icon = document.createElement('span');
-      icon.className = 'report-cat-icon';
-      icon.textContent = CATEGORY_EMOJI[cat];
-
-      const info = document.createElement('div');
-      info.className = 'report-cat-info';
-      const t = document.createElement('div');
-      t.className = 'report-cat-title';
-      t.textContent = CATEGORY_LABELS[cat];
-      const m = document.createElement('div');
-      m.className = 'report-cat-meta';
-      if (rows.length) {
-        const posWord = pluralize(rows.length, 'позиция', 'позиции', 'позиций');
-        const prWord = pluralize(problems, 'проблема', 'проблемы', 'проблем');
-        m.textContent = `${rows.length} ${posWord} · ${problems} ${prWord}`;
-      } else m.textContent = 'Ожидает загрузки';
-      info.appendChild(t); info.appendChild(m);
-
-      const status = document.createElement('span');
-      status.className = 'report-cat-status ' + (rows.length ? 'done' : 'wait');
-      status.textContent = rows.length ? '✓ готово' : 'не начата';
-
-      btn.appendChild(icon); btn.appendChild(info); btn.appendChild(status);
-      btn.addEventListener('click', () => {
-        if (!rows.length) return;
-        _reportView = cat;
-        renderReport();
-      });
-      body.appendChild(btn);
-    });
-
+    /* ── Главный экран ── */
     let totalFreshOnShelf = 0, totalExpiredOnShelf = 0, totalSoldExpired = 0;
-    let totalPositions = 0;
+    let totalPositions = 0, totalProblems = 0;
     tableRows.forEach(r => {
       const c = computeFIFO(r);
       totalPositions++;
       if (c.freshOnShelf != null) totalFreshOnShelf += c.freshOnShelf;
       if (c.expiredOnShelf != null) totalExpiredOnShelf += c.expiredOnShelf;
       if (c.soldExpired != null) totalSoldExpired += c.soldExpired;
+      if ((c.soldExpired || 0) > 0 || (c.expiredOnShelf || 0) > 0) totalProblems++;
     });
 
-    const summary = document.createElement('div');
-    summary.className = 'report-summary';
-    summary.innerHTML = `
-      <div class="report-summary-title">📊 Итого по проверке</div>
-      <div class="report-summary-row"><span>Позиций</span><b>${totalPositions}</b></div>
-      <div class="report-summary-row"><span>Свежих на витрине</span><b>${totalFreshOnShelf}</b></div>
-      <div class="report-summary-row"><span>Просрочено на витрине</span><b>${totalExpiredOnShelf}</b></div>
-      <div class="report-summary-row"><span>Продано просрочкой</span><b>${totalSoldExpired}</b></div>
-    `;
-    body.appendChild(summary);
+    let bigText, bigCls;
+    if (totalProblems === 0) {
+      bigText = totalPositions + ' ' + pluralize(totalPositions, 'позиция', 'позиции', 'позиций') + ' · всё свежее';
+      bigCls = '';
+    } else {
+      bigText = totalPositions + ' ' + pluralize(totalPositions, 'позиция', 'позиции', 'позиций') + ' · ' + totalProblems + ' ' + pluralize(totalProblems, 'проблема', 'проблемы', 'проблем');
+      bigCls = totalProblems >= 3 ? ' danger' : ' warn';
+    }
 
-    const histBox = document.createElement('div');
-    histBox.className = 'history-btn';
-    const histTitle = document.createElement('p');
-    histTitle.className = 'hb-title';
-    histTitle.innerHTML = '<b>Сохранить в общую историю?</b> Проверка появится у всех аудиторов на графике.';
-    histBox.appendChild(histTitle);
-    const histBtn = document.createElement('button');
-    histBtn.id = 'sendReportBtn';
-    histBtn.type = 'button';
-    histBtn.textContent = 'Отправить в историю';
-    histBox.appendChild(histBtn);
-    const histStatus = document.createElement('div');
-    histStatus.id = 'sendReportStatus';
-    histStatus.className = 'status';
-    histBox.appendChild(histStatus);
-    body.appendChild(histBox);
+    let html = '';
+
+    /* Секция 1: Заголовок + сводка */
+    html +=
+      '<div class="report-section">' +
+        '<div class="report-section-header">' +
+          '<div>' +
+            '<h2>Проверка завершена</h2>' +
+            '<p class="desc">Проверьте итоги и отправьте в общую историю.</p>' +
+          '</div>' +
+        '</div>' +
+        '<div class="report-section-body">' +
+          '<div class="report-summary-block">' +
+            '<span class="big' + bigCls + '">' + escapeHtml(bigText) + '</span>' +
+            '<div class="row"><span>Позиций</span><b>' + totalPositions + '</b></div>' +
+            '<div class="row"><span>Свежих на витрине</span><b>' + totalFreshOnShelf + '</b></div>' +
+            '<div class="row"><span>Просрочено на витрине</span><b>' + totalExpiredOnShelf + '</b></div>' +
+            '<div class="row"><span>Продано просрочкой</span><b' + (totalSoldExpired > 0 ? ' class="red"' : '') + '>' + totalSoldExpired + '</b></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    /* Секция 2: По категориям */
+    let catsHtml = '';
+    CATEGORY_ORDER.forEach(cat => {
+      const rows = tableRows.filter(r => r.category === cat);
+      const problems = rows.filter(r => {
+        const c = computeFIFO(r);
+        return (c.soldExpired != null && c.soldExpired > 0) || (c.expiredOnShelf != null && c.expiredOnShelf > 0);
+      }).length;
+      const hasData = rows.length > 0;
+      let statusCls, statusText, subText;
+      if (!hasData) {
+        statusCls = 'wait';
+        statusText = 'не начата';
+        subText = 'Ожидает загрузки';
+      } else if (problems === 0) {
+        statusCls = 'done';
+        statusText = '✓ готово';
+        subText = rows.length + ' ' + pluralize(rows.length, 'позиция', 'позиции', 'позиций') + ' · 0 проблем';
+      } else {
+        statusCls = problems >= 3 ? 'danger' : 'warn';
+        statusText = problems + ' ' + pluralize(problems, 'проблема', 'проблемы', 'проблем');
+        subText = rows.length + ' ' + pluralize(rows.length, 'позиция', 'позиции', 'позиций');
+      }
+      catsHtml +=
+        '<button type="button" class="report-cat-card' + (hasData ? '' : ' empty') + '"' +
+          (hasData ? ' data-cat="' + cat + '"' : ' disabled') + '>' +
+          '<span class="rc-icon">' + CATEGORY_EMOJI[cat] + '</span>' +
+          '<span class="rc-body">' +
+            '<span class="rc-name">' + CATEGORY_LABELS[cat] + '</span>' +
+            '<span class="rc-sub">' + escapeHtml(subText) + '</span>' +
+          '</span>' +
+          '<span class="rc-status ' + statusCls + '">' + escapeHtml(statusText) + '</span>' +
+        '</button>';
+    });
+    html +=
+      '<div class="report-section">' +
+        '<div class="report-section-header">' +
+          '<div><h2>По категориям</h2></div>' +
+        '</div>' +
+        '<div class="report-section-body">' + catsHtml + '</div>' +
+      '</div>';
+
+    /* Секция 3: Общая история */
+    html +=
+      '<div class="report-section">' +
+        '<div class="report-section-header">' +
+          '<div>' +
+            '<h2>Общая история</h2>' +
+            '<p class="desc">Проверка появится у всех аудиторов на графике.</p>' +
+          '</div>' +
+        '</div>' +
+        '<div class="report-section-body">' +
+          '<button type="button" id="sendReportBtn" class="primary block">Отправить в историю</button>' +
+          '<div id="sendReportStatus" class="status"></div>' +
+        '</div>' +
+      '</div>';
+
+    body.innerHTML = html;
+
+    /* Обработчики категорий */
+    body.querySelectorAll('.report-cat-card[data-cat]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        _reportView = btn.dataset.cat;
+        renderReport();
+      });
+    });
+
   } else {
+    /* ── Детали категории ── */
     const cat = _reportView;
-    if (title) title.textContent = CATEGORY_LABELS[cat];
-    if (backWrap) backWrap.style.display = 'block';
-    if (subtitle) subtitle.style.display = 'block';
-
     const rows = tableRows.filter(r => r.category === cat);
     const problems = rows.map(r => ({ row: r, calc: computeFIFO(r) }))
       .filter(x => (x.calc.soldExpired != null && x.calc.soldExpired > 0) || (x.calc.expiredOnShelf != null && x.calc.expiredOnShelf > 0));
 
-    if (subtitle) {
-      if (!problems.length) subtitle.textContent = 'Проблемных позиций нет';
-      else {
-        const w = pluralize(problems.length, 'проблемная позиция', 'проблемные позиции', 'проблемных позиций');
-        subtitle.textContent = `${problems.length} ${w}`;
-      }
-    }
+    const descText = problems.length
+      ? problems.length + ' ' + pluralize(problems.length, 'проблемная позиция', 'проблемные позиции', 'проблемных позиций')
+      : 'Проблемных позиций нет';
 
-    body.innerHTML = '';
+    let html =
+      '<div class="report-section">' +
+        '<div class="report-section-header">' +
+          '<div>' +
+            '<h2>' + CATEGORY_LABELS[cat] + '</h2>' +
+            '<p class="desc">' + escapeHtml(descText) + '</p>' +
+          '</div>' +
+          '<button type="button" class="report-back-btn" id="reportBackBtn">‹ Назад</button>' +
+        '</div>' +
+        '<div class="report-section-body">';
+
     if (!problems.length) {
-      const empty = document.createElement('div');
-      empty.className = 'hint';
-      empty.style.cssText = 'text-align:center;padding:20px';
-      empty.textContent = 'Все позиции свежие. Отлично!';
-      body.appendChild(empty);
+      html += '<div class="sheet-empty">Все позиции свежие. Отлично!</div>';
     } else {
       problems.sort((a, b) => {
         const aCritical = (a.calc.soldExpired || 0) > 0 ? 1 : 0;
@@ -7847,44 +7906,46 @@ function renderReport() {
         return String(a.row.name).localeCompare(String(b.row.name), 'ru');
       });
       problems.forEach(({ row, calc }) => {
-        const item = document.createElement('button');
-        item.className = 'report-item';
-        item.type = 'button';
-
         const critical = (calc.soldExpired || 0) > 0;
-        const dot = document.createElement('span');
-        dot.className = 'report-item-dot ' + (critical ? 'red' : 'orange');
-
-        const info = document.createElement('div');
-        info.className = 'report-item-info';
-        const name = document.createElement('div');
-        name.className = 'report-item-name';
-        name.textContent = row.name;
-        const reason = document.createElement('div');
-        reason.className = 'report-item-reason';
-        if (critical && calc.expiredOnShelf > 0) reason.textContent = `Продано просрочкой: ${calc.soldExpired} · Просрочено на витрине: ${calc.expiredOnShelf}`;
-        else if (critical) reason.textContent = `Продано просрочкой: ${calc.soldExpired}`;
-        else reason.textContent = `Просрочено на витрине: ${calc.expiredOnShelf}`;
-        info.appendChild(name); info.appendChild(reason);
-
-        item.appendChild(dot); item.appendChild(info);
-        item.addEventListener('click', () => {
-          closeReport();
-          setTimeout(() => {
-            const trs = document.querySelectorAll('#resultTable tbody tr');
-            for (const tr of trs) {
-              if (tr.dataset.name === normalizeName(row.name)) {
-                tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                return;
-              }
-            }
-            const s = $('tableSearchWrap');
-            if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }, 200);
-        });
-        body.appendChild(item);
+        const dotCls = critical ? 'red' : 'orange';
+        let reason;
+        if (critical && calc.expiredOnShelf > 0) reason = 'Продано просрочкой: ' + calc.soldExpired + ' · Просрочено на витрине: ' + calc.expiredOnShelf;
+        else if (critical) reason = 'Продано просрочкой: ' + calc.soldExpired;
+        else reason = 'Просрочено на витрине: ' + calc.expiredOnShelf;
+        html +=
+          '<button type="button" class="report-problem-row" data-name="' + escapeHtml(row.name) + '">' +
+            '<span class="rp-dot ' + dotCls + '"></span>' +
+            '<span class="rp-body">' +
+              '<span class="rp-name">' + escapeHtml(row.name) + '</span>' +
+              '<span class="rp-reason">' + escapeHtml(reason) + '</span>' +
+            '</span>' +
+          '</button>';
       });
     }
+
+    html += '</div></div>';
+    body.innerHTML = html;
+
+    const backBtn = $('reportBackBtn');
+    if (backBtn) backBtn.onclick = () => { _reportView = null; renderReport(); };
+
+    body.querySelectorAll('.report-problem-row').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const name = btn.dataset.name;
+        closeReport();
+        setTimeout(() => {
+          const trs = document.querySelectorAll('#resultTable tbody tr');
+          for (const tr of trs) {
+            if (tr.dataset.name === normalizeName(name)) {
+              tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              return;
+            }
+          }
+          const s = $('tableSearchWrap');
+          if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 200);
+      });
+    });
   }
 }
 
