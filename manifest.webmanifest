@@ -1,14 +1,18 @@
 {
+  "id": "/audit_app/",
   "name": "French Bakery Аудит",
   "short_name": "FB Аудит",
   "description": "Аудит сроков годности: накладные, чеки, FIFO, Excel",
-  "start_url": "./index.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#f5f5f7",
   "theme_color": "#f5f5f7",
   "lang": "ru",
+  "dir": "ltr",
+  "categories": ["business", "productivity", "utilities"],
   "icons": [
     {
       "src": "logo-192.png",
