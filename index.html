@@ -465,7 +465,8 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .cmp-edit-custom{padding:9px 12px;border-radius:10px;background:var(--bg-input);border:1px solid var(--separator-opaque);display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .cmp-edit-custom.selected{border-color:var(--accent);background:var(--accent-soft);border-width:1.5px}
 .cmp-edit-custom label{font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.05em;font-weight:700;flex:0 0 auto;margin:0;display:block}
-.cmp-edit-custom input{flex:1;min-width:0;background:transparent;border:0;font-size:17px;font-weight:700;color:var(--text);text-align:right;font-family:inherit;outline:none;padding:0;font-variant-numeric:tabular-nums;min-height:auto;width:auto}
+.cmp-edit-custom input{flex:1;min-width:0;background:transparent;border:0;font-size:17px;font-weight:700;color:var(--text);text-align:right;font-family:inherit;outline:none;padding:0;font-variant-numeric:tabular-nums;min-height:auto;width:auto;box-shadow:none;-webkit-appearance:none;appearance:none}
+.cmp-edit-custom input:focus{background:transparent;border:0;box-shadow:none;outline:none}
 .cmp-edit-actions{display:flex;gap:8px}
 .cmp-edit-actions button{flex:1;padding:11px 16px;border-radius:9px;min-height:42px;font-size:14px;font-weight:600;font-family:inherit;border:0;cursor:pointer}
 .cmp-edit-actions .cancel{background:var(--bg-elev-2);color:var(--text);border:1px solid var(--separator-opaque);font-weight:500}
@@ -1859,7 +1860,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.15.2';
+const APP_VERSION = 'v9.15.4';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -8237,6 +8238,14 @@ function cmpRunCompare() {
   _cmpData = { rows, dateLabels, okCount, warnCount, errCount, csv1: d1, csv2: d2, checks };
   cmpRenderChecks(checks);
   cmpRenderResults();
+  /* v9.15.3: скролл к секции «Контроли» после проверки */
+  setTimeout(() => {
+    const section = $('cmpChecksSection');
+    if (section) {
+      try { section.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      catch (e) { section.scrollIntoView(); }
+    }
+  }, 80);
 }
 function cmpRenderChecks(checks) {
   const el = $('cmpCheckResults'); if (!el) return;
@@ -8433,11 +8442,20 @@ function cmpRenderResults() {
     const rowToEdit = _cmpData.rows.find(r => r.key === _cmpEditKey);
     if (rowToEdit) {
       const rowEls = out.querySelectorAll('.cmp-row');
+      let insertedCard = null;
       for (const el of rowEls) {
         if (el.dataset.key === _cmpEditKey) {
-          el.after(cmpRenderEditCard(rowToEdit));
+          insertedCard = cmpRenderEditCard(rowToEdit);
+          el.after(insertedCard);
           break;
         }
+      }
+      /* v9.15.4: скролл к карточке редактирования */
+      if (insertedCard) {
+        setTimeout(() => {
+          try { insertedCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+          catch (e) { insertedCard.scrollIntoView(); }
+        }, 80);
       }
     }
   }
