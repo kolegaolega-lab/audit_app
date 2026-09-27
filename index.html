@@ -1860,7 +1860,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.15.5';
+const APP_VERSION = 'v9.15.6';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -8552,6 +8552,7 @@ function cmpApplyMatched() {
     showToast(`Применено: ${applied}`);
   }
   closeCompareModal();
+  setTimeout(() => { scrollToSection($('resultSection')); }, 300);
 }
 function cmpBindUI() {
   const openBtn = $('openCompareBtn'); if (openBtn) openBtn.onclick = () => openCompareModal();
@@ -8705,10 +8706,16 @@ function bindUI() {
 
   /* === Gemini: общая кнопка «Распознать все» === */
   const geminiBtn = $('recognizeGeminiBtn');
-  if (geminiBtn) geminiBtn.onclick = recognizeWithGemini;
+  if (geminiBtn) geminiBtn.onclick = () => {
+    recognizeWithGemini();
+    scrollToSection($('recognizeSection'));
+  };
 
   /* === Загрузка по датам === */
-  const dailyRec = $('dailyRecognizeBtn'); if (dailyRec) dailyRec.onclick = recognizeDaily;
+  const dailyRec = $('dailyRecognizeBtn'); if (dailyRec) dailyRec.onclick = () => {
+    recognizeDaily();
+    scrollToSection($('recognizeSection'));
+  };
   const dailyBuild = $('dailyBuildBtn'); if (dailyBuild) dailyBuild.onclick = buildDailyCsv;
   const dailyClearBtn = $('dailyClearBtn'); if (dailyClearBtn) dailyClearBtn.onclick = dailyClear;
   const dailyDateInput = $('dailyDate');
@@ -8889,7 +8896,10 @@ function bindUI() {
     setTimeout(showFirstRunModal, 300);
   };
 
-  const applyBtn = $('applyCsvBtn'); if (applyBtn) applyBtn.onclick = applyCSV;
+  const applyBtn = $('applyCsvBtn'); if (applyBtn) applyBtn.onclick = () => {
+    applyCSV();
+    setTimeout(() => { scrollToSection($('resultSection')); }, 400);
+  };
   const exportBtn = $('exportBtn'); if (exportBtn) exportBtn.onclick = exportExcel;
   const finishBtn = $('finishCheckBtn'); if (finishBtn) finishBtn.onclick = openReport;
 
@@ -9878,15 +9888,28 @@ function scrollToCheckStep(n) {
   else if (n === 3) el = $('importSection');
   else if (n === 4 || n === 5) el = $('resultSection');
   if (!el) return;
-  try {
-    const header = $('appHeader');
-    const headerH = header ? header.getBoundingClientRect().height : 58;
-    const rect = el.getBoundingClientRect();
-    const top = window.pageYOffset + rect.top - headerH - 12;
-    window.scrollTo({ top, behavior: 'smooth' });
-  } catch (e) {
-    try { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e2) {}
+  scrollToSection(el);
+}
+
+/* v9.15.6: универсальный скролл к секции с учётом вкладки */
+function scrollToSection(el) {
+  if (!el) return;
+  /* Если секция не на активной вкладке — переключаемся */
+  const tab = el.dataset && el.dataset.tab;
+  if (tab && document.body.dataset.activeTab !== tab) {
+    setActiveTab(tab);
   }
+  setTimeout(() => {
+    try {
+      const header = $('appHeader');
+      const headerH = header ? header.getBoundingClientRect().height : 58;
+      const rect = el.getBoundingClientRect();
+      const top = window.pageYOffset + rect.top - headerH - 12;
+      window.scrollTo({ top, behavior: 'smooth' });
+    } catch (e) {
+      try { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e2) {}
+    }
+  }, 50);
 }
 function bindCheckSteps() {
   const track = $('checkStepsTrack');
