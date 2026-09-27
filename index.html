@@ -1859,7 +1859,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.15.0';
+const APP_VERSION = 'v9.15.1';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -7997,6 +7997,9 @@ function cmpParseCSV(text) {
     if (/^сверка[: ]/i.test(name)) continue;
     const hasNumbers = f.some((cell, idx) => idx !== idxName && /\d/.test(String(cell || '')));
     if (!hasNumbers) continue;
+    /* v9.15.1: применяем алиасы, как в основном импорте */
+    const aliased = applyAliases(name);
+    if (aliased !== name) name = aliased;
     const key = normalizeName(name);
     const rec = { name, incoming: {}, sales: 0 };
     dateCols.forEach(dc => {
