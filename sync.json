@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-26T23:01:58.553Z",
-  "updatedBy": "v9.8.3",
+  "updatedAt": "2026-09-27T21:25:04.486Z",
+  "updatedBy": "v9.15.0",
   "products": [
     {
       "name": "Хлеб Деревенский",
@@ -1185,5 +1185,6 @@
       "target": "Десерт \"Ореховый\""
     }
   ],
-  "prices": {}
+  "prices": {},
+  "points": []
 }
