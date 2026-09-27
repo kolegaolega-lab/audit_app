@@ -433,14 +433,14 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .cmp-check-detail b{color:var(--text);font-weight:600}
 .cmp-check-detail .warn{color:var(--orange);font-weight:600}
 
-.cmp-row{background:var(--bg-input);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px}
+.cmp-row{background:var(--bg-input);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;cursor:pointer;font-size:13px}
 .cmp-row:last-child{margin-bottom:0}
 .cmp-icon{flex:0 0 auto;font-size:13px;font-weight:700;width:18px;text-align:center}
 .cmp-row.ok .cmp-icon{color:var(--green)}
 .cmp-row.warn .cmp-icon{color:var(--orange)}
 .cmp-row.err .cmp-icon{color:var(--red)}
-.cmp-name{flex:1;min-width:0;font-weight:600;word-break:break-word;font-size:13.5px}
-.cmp-vals{flex:0 0 auto;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.cmp-name{flex:1 1 auto;min-width:120px;font-weight:600;word-break:break-word;font-size:13.5px;line-height:1.3}
+.cmp-vals{flex:1 1 100%;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-start;padding-left:28px}
 .cmp-val{background:var(--bg-card);padding:3px 7px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap;cursor:pointer}
 .cmp-val.diff{background:var(--orange);color:#fff}
 .cmp-val.same{background:var(--green);color:#fff}
@@ -1860,7 +1860,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.15.4';
+const APP_VERSION = 'v9.15.5';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
