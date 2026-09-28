@@ -8588,6 +8588,7 @@ function cmpBindUI() {
   const openBtn = $('openCompareBtn'); if (openBtn) openBtn.onclick = () => openCompareModal();
   const runBtn = $('cmpRunBtn'); if (runBtn) runBtn.onclick = cmpRunCompare;
   const clearBtn = $('cmpClearBtn');
+  if (clearBtn) clearBtn.onclick = () => {
     const a = $('cmpCsv1'); const b = $('cmpCsv2');
     if (a) a.value = '';
     if (b) b.value = '';
