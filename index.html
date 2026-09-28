@@ -290,7 +290,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .cat-row{display:grid;grid-template-columns:1fr 66px 76px 38px;gap:8px;align-items:center;padding:6px 0}
 .cat-row.add-row{background:transparent;padding:0;margin-top:6px}
 .cat-row .add-btn{background:var(--green-soft);color:var(--green);border:1px solid var(--green-soft);font-size:20px;font-weight:500;min-height:38px;padding:0;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
-.del-btn{width:38px;height:38px;padding:0;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:16px;font-weight:700;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;flex:0 0 auto;line-height:0}
+.del-btn{width:38px;height:38px;min-height:38px;max-height:38px;padding:0;background:var(--red-soft);color:var(--red);border:1px solid var(--red-soft);font-size:16px;font-weight:700;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;flex:0 0 auto;line-height:0;box-sizing:border-box}
 .del-btn .x-icon{width:16px;height:16px}
 .unk-main{min-width:0}
 .unk-name-field{;width:100%;min-height:38px;padding:8px 10px;font-size:13.5px;font-weight:600;border-radius:8px;background:var(--bg-input);border:1px solid var(--separator-opaque);color:var(--text);font-family:inherit;margin:0 0 4px 0;box-sizing:border-box;text-align:left}
@@ -321,7 +321,7 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .ali-card .src{font-size:12px;color:var(--text-secondary);line-height:1.35;word-break:break-word;padding-right:30px}
 .ali-card .dst{margin-top:5px;font-size:13px;font-weight:600;color:var(--text);line-height:1.35;word-break:break-word;padding-right:30px;display:flex;align-items:baseline;gap:6px}
 .ali-card .dst .ar{color:var(--green);font-size:11px;flex:0 0 auto}
-.ali-card .del{position:absolute;top:10px;right:10px;width:26px;height:26px;border:0;border-radius:50%;background:var(--red-soft);color:var(--red);font-size:14px;font-weight:700;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0}
+.ali-card .del{position:absolute;top:10px;right:10px;width:26px;height:26px;min-height:26px;max-height:26px;border:1px solid var(--red-soft);border-radius:8px;background:var(--red-soft);color:var(--red);font-size:14px;font-weight:700;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;padding:0;box-sizing:border-box}
 .alias-target-row{padding:10px 12px;border-radius:8px;background:var(--bg-input);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;font-family:inherit;border:0;width:100%;text-align:left}
 .alias-target-row .cn{font-weight:500;font-size:13px;line-height:1.35;color:var(--text);flex:1;min-width:0;word-break:break-word}
 .alias-target-row .ch{font-size:11px;color:var(--text-secondary);font-variant-numeric:tabular-nums;flex:0 0 auto}
@@ -1896,7 +1896,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.15.8';
+const APP_VERSION = 'v9.15.10';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
