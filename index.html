@@ -1610,10 +1610,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
         </div>
         <div class="cmp-section-body">
           <div id="cmpNaklList" class="cmp-nakl-list"></div>
-          <button id="cmpAddNaklBtn" class="secondary block" style="margin-bottom:14px">＋ Добавить накладную</button>
-          <label>Печатный итог чека</label>
-          <input id="cmpCheckPrinted" type="text" inputmode="decimal" placeholder="32771.50" class="cmp-input">
-          <p class="cmp-hint">Число из строки «Итого для продажи». Если чека нет — оставьте пустым.</p>
+          <button id="cmpAddNaklBtn" class="secondary block">＋ Добавить накладную</button>
         </div>
       </div>
 
@@ -1896,7 +1893,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.15.12';
+const APP_VERSION = 'v9.15.13';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -1923,9 +1920,9 @@ const GEMINI_KEY = 'fbAuditGeminiKey';
 const GEMINI_MODEL_KEY = 'fbAuditGeminiModel';
 const GEMINI_MODEL_DEFAULT = 'gemini-3.1-flash-lite';
 const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta/models';
-const GEMINI_IMG_MAX_SIDE = 1600;
-const GEMINI_IMG_QUALITY = 0.85;
-const GEMINI_MAX_B64_BYTES = 15 * 1024 * 1024;
+const GEMINI_IMG_MAX_SIDE = 2000;
+const GEMINI_IMG_QUALITY = 0.90;
+const GEMINI_MAX_B64_BYTES = 18 * 1024 * 1024;
 const GEMINI_MODELS_CACHE_KEY = 'fbAuditModelsCache';
 const GEMINI_MODELS_CACHE_TTL = 24 * 60 * 60 * 1000;
 const GEMINI_MAX_OUTPUT_TOKENS = 16384;
@@ -7991,17 +7988,10 @@ function cmpSplitLine(line, sep) {
 function cmpParseCSV(text) {
   const raw = String(text || '').replace(/^\uFEFF/, '');
   const lines = raw.split(/\r?\n/);
-  const mainLines = []; const checkLines = [];
-  let inCheck = false; let checkTotal = null; let serviceMode = false;
+  const mainLines = [];
+  let serviceMode = false;
   for (const line of lines) {
     const t = line.trim();
-    if (t === '#ЧЕК_ПОЛНЫЙ:') { inCheck = true; serviceMode = false; continue; }
-    if (t.startsWith('#ЧЕК_ИТОГО:')) {
-      const v = String(t.replace('#ЧЕК_ИТОГО:', '')).replace(',', '.').replace(/[^\d.]/g, '');
-      checkTotal = Number(v) || 0;
-      inCheck = false; serviceMode = false; continue;
-    }
-    if (inCheck) { checkLines.push(line); continue; }
     if (t.startsWith('#')) { serviceMode = true; continue; }
     if (serviceMode) continue;
     mainLines.push(line);
@@ -8080,18 +8070,7 @@ function cmpParseCSV(text) {
     rows[key] = rec;
     order.push(key);
   }
-  const checkRows = [];
-  for (const line of checkLines) {
-    const t = line.trim(); if (!t) continue;
-    const f = cmpSplitLine(t, ';');
-    if (f.length < 4) continue;
-    const name = f[0].trim();
-    const qty = parseInt(String(f[1] || '').replace(/[^\d]/g, ''), 10) || 0;
-    const price = Number(String(f[2] || '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
-    const sum = Number(String(f[3] || '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
-    if (name) checkRows.push({ name, qty, price, sum });
-  }
-  return { rows, dateCols, order, count: order.length, checkRows, checkTotal };
+  return { rows, dateCols, order, count: order.length };
 }
 function cmpCalcSigmaForDate(csvData, dateKey) {
   let total = 0; let count = 0; const missing = [];
@@ -8273,25 +8252,6 @@ function cmpRunCompare() {
       ? 'Все позиции CSV есть в справочнике.'
       : `Не найдены в справочнике: <b>${notFound.map(n => escapeHtml(n)).join('</b>, <b>')}</b>`
   });
-
-  const checkPrinted = Number(String($('cmpCheckPrinted') ? $('cmpCheckPrinted').value : '').replace(',', '.').replace(/[^\d.]/g, '')) || 0;
-  if (checkPrinted > 0 && d1.checkRows.length > 0) {
-    const sig = d1.checkRows.reduce((a, r) => a + r.sum, 0);
-    const declared = d1.checkTotal || 0;
-    const diff = sig - checkPrinted;
-    const tol = 0.05;
-    const ok = Math.abs(diff) <= tol;
-    let detail = `Σ строк отчёта: <b>${sig.toFixed(2)}</b>, печатный итог чека: <b>${checkPrinted.toFixed(2)}</b>.`;
-    if (declared > 0 && Math.abs(declared - checkPrinted) > tol) {
-      detail += `<br>⚠️ ИИ заявил #ЧЕК_ИТОГО: ${declared.toFixed(2)} — не совпадает с печатным.`;
-    }
-    if (!ok) detail += `<br>Разница: ${diff.toFixed(2)}. Проверь чек по фото.`;
-    checks.push({ ok, title: 'Сверка чека', detail });
-  } else if (checkPrinted > 0 && d1.checkRows.length === 0) {
-    checks.push({ ok: false, title: 'Сверка чека', detail: 'В CSV нет блока #ЧЕК_ПОЛНЫЙ — невозможно проверить.' });
-  } else {
-    checks.push({ ok: true, title: 'Сверка чека', detail: 'Печатный итог чека не задан — пропущено.' });
-  }
 
   _cmpEditKey = null;
   _cmpEditDk = null;
@@ -8628,11 +8588,9 @@ function cmpBindUI() {
   const openBtn = $('openCompareBtn'); if (openBtn) openBtn.onclick = () => openCompareModal();
   const runBtn = $('cmpRunBtn'); if (runBtn) runBtn.onclick = cmpRunCompare;
   const clearBtn = $('cmpClearBtn');
-  if (clearBtn) clearBtn.onclick = () => {
     const a = $('cmpCsv1'); const b = $('cmpCsv2');
     if (a) a.value = '';
     if (b) b.value = '';
-    const cp = $('cmpCheckPrinted'); if (cp) cp.value = '';
     _cmpNakls = [{ date: '', num: '', lastNum: '', total: '' }];
     cmpRenderNakls();
     const st = $('cmpStats'); if (st) st.innerHTML = '';
@@ -8833,7 +8791,10 @@ function bindUI() {
   }
   const geminiDoubleRunCheck = $('geminiDoubleRunCheck');
   if (geminiDoubleRunCheck) {
-    try { geminiDoubleRunCheck.checked = localStorage.getItem('fbAuditGeminiDoubleRun') === '1'; } catch (e) {}
+    try {
+      const _dbl = localStorage.getItem('fbAuditGeminiDoubleRun');
+      geminiDoubleRunCheck.checked = _dbl === null ? true : _dbl === '1';
+    } catch (e) { geminiDoubleRunCheck.checked = true; }
     geminiDoubleRunCheck.addEventListener('change', () => {
       try { localStorage.setItem('fbAuditGeminiDoubleRun', geminiDoubleRunCheck.checked ? '1' : '0'); } catch (e) {}
     });
