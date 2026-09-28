@@ -1896,7 +1896,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.15.10';
+const APP_VERSION = 'v9.15.12';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -2336,7 +2336,8 @@ function sanitizeProducts(arr) {
     if (typeof p.name !== 'string') continue;
     const name = p.name.trim().slice(0, MAX_NAME);
     if (!name) continue;
-    const key = name.toLowerCase();
+    /* v9.15.12: normalizeName вместо toLowerCase — ловит дубли с разными пробелами/кавычками */
+    const key = normalizeName(name);
     if (seen.has(key)) continue;
     seen.add(key);
     let shelf;
@@ -6162,6 +6163,7 @@ async function applyCSV() {
         name: p.name, stock: null, sales: 0, _originalSales: 0,
         shelfLife: p.shelfLife, category: _activeCategory, incoming: [], salesOnly: false
       });
+      alreadyKeys.add(key); /* v9.15.12: защита от дублей */
     }
     tableRows = sortRowsAlphabetically(otherRows.concat(inCategory));
     unknownRows = sortRowsAlphabetically(notInCatalog);
@@ -8565,7 +8567,11 @@ function cmpApplyMatched() {
   _needsCheckNames = new Set();
   diffRows.forEach(r => {
     if (hasEdits(r)) return;
-    if (r.name) _needsCheckNames.add(normalizeName(r.name));
+    if (!r.name) return;
+    const key = normalizeName(r.name);
+    /* v9.15.12: если данные применены (byKey) — не помечаем ⚠ */
+    if (byKey.has(key)) return;
+    _needsCheckNames.add(key);
   });
 
   /* v9.15.2: позиции не из справочника → в «Не в справочнике» */
@@ -8599,8 +8605,12 @@ function cmpApplyMatched() {
     });
   });
   if (newUnknown.length) {
-    unknownRows = sortRowsAlphabetically(unknownRows.concat(newUnknown));
-    updateUnknownBanner();
+    const existingKeys = new Set(unknownRows.map(r => normalizeName(r.name)));
+    const trulyNew = newUnknown.filter(r => !existingKeys.has(normalizeName(r.name)));
+    if (trulyNew.length) {
+      unknownRows = sortRowsAlphabetically(unknownRows.concat(trulyNew));
+      updateUnknownBanner();
+    }
   }
 
   renderTable();
