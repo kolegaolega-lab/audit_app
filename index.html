@@ -1973,7 +1973,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.18.0';
+const APP_VERSION = 'v9.19.0';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -2810,8 +2810,34 @@ function parseCSV(text, referenceDate) {
     rows.push({ name, stock: null, sales: salesFinal, _originalSales: salesFinal, shelfLife: shelfRaw, incoming, salesOnly: salesOnlyMode });
   }
   if (!rows.length) throw new Error('Не удалось распознать ни одной строки.');
+
+  /* v9.19.0: дедупликация строк по имени (защита от дублей ИИ) */
+  const dedupMap = new Map();
+  for (const r of rows) {
+    const key = normalizeName(r.name);
+    if (!dedupMap.has(key)) {
+      dedupMap.set(key, r);
+    } else {
+      const existing = dedupMap.get(key);
+      /* Продажи суммируем */
+      existing.sales = (existing.sales || 0) + (r.sales || 0);
+      existing._originalSales = existing.sales;
+      /* Приходы по датам суммируем */
+      for (const p of r.incoming || []) {
+        const ep = (existing.incoming || []).find(x => x.date === p.date);
+        if (ep) ep.qty = (ep.qty || 0) + (p.qty || 0);
+        else existing.incoming.push({ date: p.date, qty: p.qty || 0 });
+      }
+      /* Срок: берём из первой строки, если не нулевой; иначе из второй */
+      if ((!existing.shelfLife || existing.shelfLife === 0) && r.shelfLife) {
+        existing.shelfLife = r.shelfLife;
+      }
+    }
+  }
+  const dedupedRows = [...dedupMap.values()];
+
   const truncated = matrix.length - 1 > MAX_ROWS;
-  return { rows, truncated };
+  return { rows: dedupedRows, truncated };
 }
 function sortRowsAlphabetically(rows) {
   return [...rows].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' }));
@@ -6684,6 +6710,27 @@ ${searchBlock}
    Если позиции нет в справочнике — ВКЛЮЧАЙ КАК ЕСТЬ.
    Сопоставление с справочником — задача системы.
 
+🔴 ОДНА ПОЗИЦИЯ = ОДНА СТРОКА В CSV. Это критично.
+
+   Если позиция есть И в чеке, И в накладной —
+   создавай ОДНУ строку, а не две.
+     Продано — из чека.
+     Получено за дату — из накладной за эту дату.
+
+   ❌ ПЛОХО (две строки для одной позиции):
+     Суп Том Ям;1;1;2;48
+     Суп Том Ям;0;1;2;48
+
+   ✅ ХОРОШО (одна строка):
+     Суп Том Ям;1;1;2;48
+
+   ❌ ПЛОХО: дубли внутри чеков — одна и та же позиция на
+      нескольких фото чека не должна идти отдельными строками.
+   ✅ ХОРОШО: одна строка на позицию, независимо от количества фото.
+
+   🔴 ЕСЛИ ТЫ ПИШЕШЬ ОДНУ И ТУ ЖЕ ПОЗИЦИЮ ВТОРОЙ РАЗ —
+      ОСТАНОВИСЬ и объедини данные в первую строку.
+
 ═══════════════════════════════════════════
 ФОРМАТ CSV
 ═══════════════════════════════════════════
@@ -7053,6 +7100,17 @@ ${searchBlock}
      - в чеке (Продано сегодня > 0).
 
    Единственное исключение — позиция ЕСТЬ в накладной, но Продано = 0.
+
+🔴 ОДНА ПОЗИЦИЯ = ОДНА СТРОКА В CSV.
+
+   Если позиция есть И в накладной, И в чеке —
+   создавай ОДНУ строку, а не две.
+
+   ❌ ПЛОХО:  Суп Том Ям;1;1;48
+             Суп Том Ям;0;1;48
+   ✅ ХОРОШО: Суп Том Ям;1;1;48
+
+   Если пишешь одну позицию дважды — ОСТАНОВИСЬ и объедини.
 
 ═══════════════════════════════════════════
 ФОРМАТ CSV
@@ -7581,8 +7639,9 @@ function parseAIReport(rawText) {
   let gaps = null;
   if (blocks['РАЗРЫВЫ']) {
     const content = blocks['РАЗРЫВЫ'];
-    const noGaps = /разрывов\s+нет/i.test(content);
-    const hasGap = !noGaps && /пропущен|разрыв/i.test(content);
+    /* v9.18.1: сначала проверяем «нет», потом «есть» */
+    const noGaps = /разрывов\s+нет|без\s+разрывов/i.test(content);
+    const hasGap = !noGaps && /пропущен/i.test(content);
     gaps = { hasGap, noGaps, raw: content };
   }
 
@@ -7590,7 +7649,14 @@ function parseAIReport(rawText) {
   let unreadable = null;
   if (blocks['НЕЧИТАЕМО']) {
     const content = blocks['НЕЧИТАЕМО'];
-    const isEmpty = /^[\s\-—]*пусто[\s\-—]*$/i.test(content) || !content;
+    /* v9.18.1: удаляем дублирование имени блока внутри контента */
+    const cleaned = content
+      .replace(/#\s*[А-ЯЁ_]+\s*:?/g, '')   // убрать «#НЕЧИТАЕМО:»
+      .replace(/[—–\-]+/g, '')              // убрать тире
+      .replace(/\s+/g, ' ')                 // нормализовать пробелы
+      .trim()
+      .toLowerCase();
+    const isEmpty = !cleaned || /^пусто\.?$/.test(cleaned);
     unreadable = { isEmpty, raw: content };
   }
 
@@ -8770,8 +8836,17 @@ function cmpParseCSV(text) {
       const s = String(f[idxSales] || '').replace(/[^\d]/g, '');
       rec.sales = s === '' ? 0 : parseInt(s, 10);
     }
-    rows[key] = rec;
-    order.push(key);
+    /* v9.19.0: суммируем дубли вместо перезаписи */
+    if (rows[key]) {
+      const existing = rows[key];
+      existing.sales = (existing.sales || 0) + (rec.sales || 0);
+      for (const dk of Object.keys(rec.incoming)) {
+        existing.incoming[dk] = (existing.incoming[dk] || 0) + (rec.incoming[dk] || 0);
+      }
+    } else {
+      rows[key] = rec;
+      order.push(key);
+    }
   }
   return { rows, dateCols, order, count: order.length };
 }
