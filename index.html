@@ -1893,7 +1893,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.15.13';
+const APP_VERSION = 'v9.16.0';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -9006,26 +9006,65 @@ function bindUI() {
   const clearBtn = $('clearBtn');
   if (clearBtn) clearBtn.onclick = async () => {
     if (pendingSessionReset) return;
-    if (!confirm('Сбросить все данные?')) return;
+    if (!confirm('Сбросить все данные? CSV, сверка, накопитель дат и фото будут очищены.')) return;
     pendingSessionReset = true; resetToken++;
     try {
+      /* — Таблица и неизвестные — */
       tableRows = []; unknownRows = []; noCategoryRows = []; unknownSelected = new Set(); _tableQuery = '';
       _needsCheckNames = new Set();
       _problemFilter = false;
+
+      /* — Поля — */
       const pt = $('point'); if (pt) pt.value = '';
       const ci = $('csvInput'); if (ci) { ci.value = ''; autoResizeTextarea(); updateCsvCounter(); }
       const ts = $('tableSearch'); if (ts) ts.value = '';
       const tsc = $('tableSearchClear'); if (tsc) tsc.classList.remove('show');
       const cs = $('csvStatus'); if (cs) { cs.className = 'status'; cs.textContent = ''; }
       const ss = $('shareStatus'); if (ss) { ss.className = 'status'; ss.textContent = ''; }
+
+      /* v9.16.0: очистка сверки */
+      const cmp1 = $('cmpCsv1'); if (cmp1) cmp1.value = '';
+      const cmp2 = $('cmpCsv2'); if (cmp2) cmp2.value = '';
+      _cmpNakls = [{ date: '', num: '', lastNum: '', total: '' }];
+      if (typeof cmpRenderNakls === 'function') cmpRenderNakls();
+      const cmpStats = $('cmpStats'); if (cmpStats) cmpStats.innerHTML = '';
+      const cmpChk = $('cmpCheckResults'); if (cmpChk) cmpChk.innerHTML = '';
+      const cmpRes = $('cmpResults'); if (cmpRes) cmpRes.innerHTML = '';
+      const cmpChkSec = $('cmpChecksSection'); if (cmpChkSec) cmpChkSec.style.display = 'none';
+      const cmpResSec = $('cmpResultsSection'); if (cmpResSec) cmpResSec.style.display = 'none';
+      const cmpApply = $('cmpApplyBtn'); if (cmpApply) cmpApply.style.display = 'none';
+      _cmpData = null;
+      _lastGeminiCsvs = { first: '', second: '' };
+      _dailyEditing = null;
+      _cmpEditKey = null;
+      _cmpEditDk = null;
+      _cmpEditKind = null;
+      _cmpAppliedForDaily = false;
+
+      /* v9.16.0: очистка накопителя дат */
+      _dailyAccum = [];
+      saveDailyAccum();
+      if (typeof dailyRender === 'function') dailyRender();
+
+      /* v9.16.0: сброс категории */
+      setActiveCategory(null);
+      _lastImportedCategory = null;
+
+      /* v9.16.0: очистка сохранённой сессии */
       try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+
+      /* — Фото — */
       try { await clearAllPhotos(); } catch (e) {}
+
+      /* — Перерисовка — */
       renderTable(); updateUnknownBanner(); updateNoCategoryBanner();
       updateSegmentedCounters();
       setProblemFilter(false);
+      if (typeof renderCheckSteps === 'function') renderCheckSteps();
       await renderPhotoQueue();
+
       const cs2 = $('csvStatus');
-      if (cs2) { cs2.className = 'status show ok'; cs2.textContent = 'Данные очищены.'; }
+      if (cs2) { cs2.className = 'status show ok'; cs2.textContent = 'Данные очищены. Можно загружать новые фото.'; }
     } finally { setTimeout(() => { pendingSessionReset = false; }, 500); }
   };
 
