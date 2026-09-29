@@ -853,6 +853,70 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 .report-problem-row .rp-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .report-problem-row .rp-name{font-size:13.5px;font-weight:600;color:var(--text);line-height:1.35;word-break:break-word}
 .report-problem-row .rp-reason{font-size:12px;color:var(--text-secondary);line-height:1.35}
+
+/* ═══════════════════════════════════════════
+   v9.18.0 — Отчёт ИИ (модалка постпроверок)
+   ═══════════════════════════════════════════ */
+#aiReportModalContent{
+  display:flex;flex-direction:column;padding:0 !important;
+  height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
+  max-height:calc(100dvh - 32px - env(safe-area-inset-bottom,0px) - env(safe-area-inset-top,0px));
+  overflow:hidden;
+}
+.ai-status-bar{
+  flex:0 0 auto;padding:12px 16px;
+  background:var(--bg-input);
+  border-bottom:1px solid var(--separator);
+  display:flex;align-items:center;gap:10px;
+}
+.ai-status-dot{
+  width:10px;height:10px;border-radius:50%;flex:0 0 auto;
+}
+.ai-status-dot.ok{background:var(--green)}
+.ai-status-dot.warn{background:var(--orange)}
+.ai-status-dot.err{background:var(--red)}
+.ai-status-text{font-size:13px;font-weight:600;line-height:1.35;flex:1;min-width:0;color:var(--text)}
+.ai-issue-row{
+  background:var(--bg-card);
+  border-radius:10px;padding:11px 13px;
+  font-size:12.5px;line-height:1.45;
+  margin-bottom:6px;
+  display:flex;gap:9px;align-items:flex-start;
+}
+.ai-issue-row:last-child{margin-bottom:0}
+.ai-issue-row.error{border-left:3px solid var(--red)}
+.ai-issue-row.warn{border-left:3px solid var(--orange)}
+.ai-issue-row.ok{border-left:3px solid var(--green)}
+.ai-issue-icon{
+  flex:0 0 auto;font-size:14px;line-height:1.3;font-weight:700;
+}
+.ai-issue-row.error .ai-issue-icon{color:var(--red)}
+.ai-issue-row.warn .ai-issue-icon{color:var(--orange)}
+.ai-issue-row.ok .ai-issue-icon{color:var(--green)}
+.ai-issue-body{flex:1;min-width:0;color:var(--text-secondary)}
+.ai-issue-body b{color:var(--text);font-weight:600}
+.ai-nakl-row{
+  background:var(--bg-input);border-radius:10px;
+  padding:11px 13px;margin-bottom:6px;
+  display:flex;align-items:center;gap:10px;
+}
+.ai-nakl-row:last-child{margin-bottom:0}
+.ai-nakl-num{font-size:13px;font-weight:700;color:var(--text);flex:0 0 auto}
+.ai-nakl-date{font-size:11.5px;color:var(--text-secondary);flex:1;min-width:0}
+.ai-nakl-diff{font-size:11.5px;color:var(--text-secondary);font-variant-numeric:tabular-nums;flex:0 0 auto;text-align:right;line-height:1.3}
+.ai-nakl-diff.ok{color:var(--green)}
+.ai-nakl-diff.err{color:var(--red)}
+.ai-nakl-diff b{font-weight:600}
+.ai-nakl-diff small{font-size:10.5px;color:var(--text-tertiary);display:block}
+.ai-raw{
+  font-size:11.5px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  line-height:1.5;color:var(--text-secondary);
+  white-space:pre-wrap;word-break:break-word;
+  background:var(--bg-input);border-radius:10px;
+  padding:12px;max-height:280px;overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  margin:0;
+}
 </style>
 </head>
 <body>
@@ -1065,6 +1129,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       <div id="csvCounter" class="counter"></div>
       <button id="applyCsvBtn" class="success block" style="margin-top:10px">Применить</button>
       <button id="openCompareBtn" class="secondary block" style="margin-top:8px">Сверка</button>
+      <button id="openAIReportBtn" class="secondary block" style="margin-top:8px;display:none">Отчёт ИИ</button>
       <div id="csvStatus" class="status"></div>
     </div>
   </div>
@@ -1855,6 +1920,21 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
   </div>
 </div>
 
+<!-- ═══════════════ Модалка: Отчёт ИИ (v9.18.0) ═══════════════ -->
+<div id="aiReportModal" class="modal hidden">
+  <div class="modal-content" id="aiReportModalContent">
+    <div class="sheet-handle"></div>
+    <div class="ai-status-bar" id="aiReportStatusBar">
+      <span class="ai-status-dot" id="aiReportStatusDot"></span>
+      <span class="ai-status-text" id="aiReportStatusText">Отчёт ИИ</span>
+    </div>
+    <div class="sheet-scroll" id="aiReportBody"></div>
+    <div class="modal-footer">
+      <button id="aiReportCloseBtn" class="secondary block">Закрыть</button>
+    </div>
+  </div>
+</div>
+
 <!-- v9.11.1: баннер обновления PWA убран — обновление тихое -->
 
 <script>
@@ -1893,7 +1973,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.17.0';
+const APP_VERSION = 'v9.18.0';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -1994,6 +2074,9 @@ let _dailyAccum = [];
 let _dailyEditing = null;
 let _modelsRefreshScheduled = false;
 let _geminiTestImageCache = null;
+
+/* v9.18.0 — отчёт ИИ (постпроверки) */
+let _lastAIReport = null;
 
 /* === v9.9.0: профиль / точки / маршрут === */
 let _profile = null;
@@ -7426,6 +7509,149 @@ function extractCsvFromGeminiText(text) {
 }
 
 /* ═══════════════════════════════════════════
+   v9.18.0 — ПАРСЕР ОТЧЁТА ИИ
+   Разбивает ответ на блоки по #ИМЯ: и вытаскивает
+   ключевые данные для постпроверок.
+   ═══════════════════════════════════════════ */
+function parseAIReport(rawText) {
+  if (!rawText || typeof rawText !== 'string') return null;
+  const text = rawText;
+
+  /* Найти все блоки вида #ИМЯ: или #ИМЯ (с новой строки) */
+  const pattern = /^#([А-ЯЁ_]+):?\s*$/gm;
+  const positions = [];
+  let match;
+  while ((match = pattern.exec(text)) !== null) {
+    positions.push({ name: match[1], index: match.index, length: match[0].length });
+  }
+  if (!positions.length) return null;
+
+  const blocks = {};
+  for (let i = 0; i < positions.length; i++) {
+    const start = positions[i].index + positions[i].length;
+    const end = i + 1 < positions.length ? positions[i + 1].index : text.length;
+    blocks[positions[i].name] = text.slice(start, end).trim();
+  }
+
+  /* --- Парсинг #СВЕРКА --- */
+  const checks = [];
+  if (blocks['СВЕРКА']) {
+    const lines = blocks['СВЕРКА'].split(/\r?\n/);
+    let current = null;
+    for (const line of lines) {
+      const t = line.trim();
+      const naklMatch = t.match(/^Накладная\s+(№\S+)\s+от\s+(\S+)/i);
+      if (naklMatch) {
+        if (current) checks.push(current);
+        current = { num: naklMatch[1], date: naklMatch[2], sum: '', printed: '', diff: '', status: '' };
+        continue;
+      }
+      if (!current) continue;
+      const sumMatch = t.match(/^Σ\s+пересчитано.*?:\s*([\d.,\s]+)/);
+      if (sumMatch) current.sum = sumMatch[1].trim();
+      const printedMatch = t.match(/^Печатный итог:\s*([\d.,\s]+)/);
+      if (printedMatch) current.printed = printedMatch[1].trim();
+      const diffMatch = t.match(/^Разница:\s*([\d.,\-−\s]+)/);
+      if (diffMatch) current.diff = diffMatch[1].trim();
+      const statusMatch = t.match(/^Статус:\s*(.+)/);
+      if (statusMatch) {
+        const st = statusMatch[1].trim().toLowerCase();
+        current.status = /расхожд/i.test(st) ? 'mismatch' : /совпал/i.test(st) ? 'ok' : 'unknown';
+      }
+    }
+    if (current) checks.push(current);
+  }
+
+  /* --- Парсинг #ПРОВЕРКА_ПОЛНОТЫ --- */
+  let completeness = null;
+  if (blocks['ПРОВЕРКА_ПОЛНОТЫ']) {
+    const content = blocks['ПРОВЕРКА_ПОЛНОТЫ'];
+    const recvMatch = content.match(/Получено[:\s]+(\d+)/i);
+    const procMatch = content.match(/обработано[:\s]+(\d+)/i);
+    if (recvMatch) {
+      completeness = {
+        received: parseInt(recvMatch[1], 10),
+        processed: procMatch ? parseInt(procMatch[1], 10) : null,
+        raw: content
+      };
+    }
+  }
+
+  /* --- Парсинг #РАЗРЫВЫ --- */
+  let gaps = null;
+  if (blocks['РАЗРЫВЫ']) {
+    const content = blocks['РАЗРЫВЫ'];
+    const noGaps = /разрывов\s+нет/i.test(content);
+    const hasGap = !noGaps && /пропущен|разрыв/i.test(content);
+    gaps = { hasGap, noGaps, raw: content };
+  }
+
+  /* --- Парсинг #НЕЧИТАЕМО --- */
+  let unreadable = null;
+  if (blocks['НЕЧИТАЕМО']) {
+    const content = blocks['НЕЧИТАЕМО'];
+    const isEmpty = /^[\s\-—]*пусто[\s\-—]*$/i.test(content) || !content;
+    unreadable = { isEmpty, raw: content };
+  }
+
+  return {
+    hasBlocks: true,
+    blocks,
+    checks,
+    completeness,
+    gaps,
+    unreadable,
+    fullRaw: rawText
+  };
+}
+
+/* Короткая сводка отчёта для индикатора в статусе */
+function summarizeAIReport(report) {
+  if (!report || !report.hasBlocks) return null;
+  const issues = [];
+  let hasBlockingIssue = false;
+
+  /* Сверка */
+  if (report.checks && report.checks.length) {
+    const bad = report.checks.filter(c => c.status === 'mismatch');
+    if (bad.length) {
+      issues.push({ type: 'error', text: 'Расхождение в сверке: ' + bad.map(c => c.num).join(', ') });
+      hasBlockingIssue = true;
+    }
+  }
+
+  /* Полнота */
+  if (report.completeness) {
+    const r = report.completeness.received;
+    const p = report.completeness.processed;
+    if (p != null && p < r) {
+      issues.push({ type: 'error', text: `Обработано ${p} из ${r} изображений` });
+      hasBlockingIssue = true;
+    }
+  }
+
+  /* Разрывы */
+  if (report.gaps && report.gaps.hasGap) {
+    issues.push({ type: 'warn', text: 'Возможен разрыв в нумерации строк' });
+  }
+
+  /* Нечитаемое */
+  if (report.unreadable && !report.unreadable.isEmpty) {
+    issues.push({ type: 'warn', text: 'Есть нечитаемые ячейки' });
+  }
+
+  if (!issues.length) {
+    return { ok: true, hasBlockingIssue: false, issues: [], text: 'Отчёт ИИ: проверки пройдены' };
+  }
+  return {
+    ok: false,
+    hasBlockingIssue,
+    issues,
+    text: 'Отчёт ИИ: ' + issues.map(i => i.text).join(' · ')
+  };
+}
+
+/* ═══════════════════════════════════════════
    GEMINI — распознаватель «Всё сразу»
    ═══════════════════════════════════════════ */
 async function recognizeWithGemini() {
@@ -7518,6 +7744,11 @@ async function recognizeWithGemini() {
     }
 
     _lastGeminiCsvs = { first: csv1 || '', second: csv2 || '' };
+
+    /* v9.18.0: сохраняем отчёт ИИ из первого прогона */
+    _lastAIReport = parseAIReport(primaryCsv);
+    const aiBtn = $('openAIReportBtn');
+    if (aiBtn) aiBtn.style.display = _lastAIReport && _lastAIReport.hasBlocks ? 'block' : 'none';
 
     if (csv1 && csv2) {
       const lines = primaryCsv.split(/\r?\n/).length;
@@ -7744,6 +7975,9 @@ async function recognizeDaily() {
 
     const chosen = csv1 || csv2;
     const needsCheck = !!(csv1 && csv2 && !bothMatch);
+    _lastAIReport = parseAIReport(chosen);
+    const aiBtn = $('openAIReportBtn');
+    if (aiBtn) aiBtn.style.display = _lastAIReport && _lastAIReport.hasBlocks ? 'block' : 'none';
     const idx = _dailyAccum.findIndex(x => x.iso === parsed.iso);
     const entry = { iso: parsed.iso, label: parsed.label, csv: chosen, ts: Date.now(), needsCheck: needsCheck, category: _activeCategory };
     if (idx >= 0) _dailyAccum[idx] = entry;
@@ -8238,6 +8472,182 @@ function renderReport() {
       });
     });
   }
+}
+
+/* ═══════════════════════════════════════════
+   v9.18.0 — ОТЧЁТ ИИ: РЕНДЕР МОДАЛКИ
+   ═══════════════════════════════════════════ */
+function openAIReport() {
+  if (!_lastAIReport || !_lastAIReport.hasBlocks) {
+    showToast('Отчёт ИИ пока пуст');
+    return;
+  }
+  renderAIReportModal(_lastAIReport);
+  openModal('aiReportModal');
+}
+
+function closeAIReport() {
+  closeModal('aiReportModal');
+}
+
+function renderAIReportModal(report) {
+  const body = $('aiReportBody');
+  const statusBar = $('aiReportStatusBar');
+  const statusDot = $('aiReportStatusDot');
+  const statusText = $('aiReportStatusText');
+  if (!body) return;
+
+  const summary = summarizeAIReport(report);
+  let overall = 'ok';
+  if (summary && !summary.ok) {
+    overall = summary.hasBlockingIssue ? 'err' : 'warn';
+  }
+
+  /* Полоса статуса */
+  if (statusDot) {
+    statusDot.className = 'ai-status-dot ' + overall;
+  }
+  if (statusText) {
+    if (overall === 'ok') statusText.textContent = 'Все проверки пройдены';
+    else if (overall === 'err') statusText.textContent = 'Есть критичные проблемы';
+    else statusText.textContent = 'Есть замечания';
+  }
+  if (statusBar) {
+    statusBar.style.background = overall === 'err' ? 'var(--red-soft)'
+      : overall === 'warn' ? 'var(--orange-soft)' : 'var(--green-soft)';
+  }
+
+  let html = '';
+
+  /* ── Секция 1: Проблемы (если есть) ── */
+  if (summary && !summary.ok) {
+    html +=
+      '<div class="sheet-section">' +
+        '<div class="sheet-section-header">' +
+          '<h2>Замечания</h2>' +
+          '<p class="desc">Что ИИ увидел в этом ответе.</p>' +
+        '</div>' +
+        '<div class="sheet-section-body">';
+    summary.issues.forEach(i => {
+      const cls = i.type === 'error' ? 'error' : 'warn';
+      const icon = i.type === 'error' ? '✗' : '⚠';
+      html +=
+        '<div class="ai-issue-row ' + cls + '">' +
+          '<span class="ai-issue-icon">' + icon + '</span>' +
+          '<span class="ai-issue-body">' + escapeHtml(i.text) + '</span>' +
+        '</div>';
+    });
+    html += '</div></div>';
+  } else {
+    html +=
+      '<div class="sheet-section">' +
+        '<div class="sheet-section-header">' +
+          '<h2>Проверки пройдены</h2>' +
+        '</div>' +
+        '<div class="sheet-section-body">' +
+          '<div class="ai-issue-row ok">' +
+            '<span class="ai-issue-icon">✓</span>' +
+            '<span class="ai-issue-body">Полнота фото, сверка сумм, разрывы и нечитаемое — всё чисто.</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  /* ── Секция 2: Сверка накладных ── */
+  if (report.checks && report.checks.length) {
+    html +=
+      '<div class="sheet-section">' +
+        '<div class="sheet-section-header">' +
+          '<h2>Сверка сумм</h2>' +
+          '<p class="desc">Σ пересчитано vs печатный итог накладной.</p>' +
+        '</div>' +
+        '<div class="sheet-section-body">';
+    report.checks.forEach(c => {
+      const ok = c.status === 'ok';
+      const cls = ok ? 'ok' : 'err';
+      html +=
+        '<div class="ai-nakl-row">' +
+          '<span class="ai-nakl-num">' + escapeHtml(c.num) + '</span>' +
+          '<span class="ai-nakl-date">' + escapeHtml(c.date || '') + '</span>' +
+          '<span class="ai-nakl-diff ' + cls + '">' +
+            (c.sum ? 'Σ ' + escapeHtml(c.sum) : '—') +
+            (c.diff ? '<small>Δ ' + escapeHtml(c.diff) + '</small>' : '') +
+          '</span>' +
+        '</div>';
+    });
+    html += '</div></div>';
+  }
+
+  /* ── Секция 3: Полнота изображений ── */
+  if (report.completeness) {
+    const r = report.completeness.received;
+    const p = report.completeness.processed;
+    const ok = p == null || p === r;
+    html +=
+      '<div class="sheet-section">' +
+        '<div class="sheet-section-header">' +
+          '<h2>Полнота изображений</h2>' +
+        '</div>' +
+        '<div class="sheet-section-body">' +
+          '<div class="ai-issue-row ' + (ok ? 'ok' : 'error') + '">' +
+            '<span class="ai-issue-icon">' + (ok ? '✓' : '✗') + '</span>' +
+            '<span class="ai-issue-body">Получено: <b>' + r + '</b> · Обработано: <b>' + (p == null ? '—' : p) + '</b>' +
+            (ok ? '' : ' — возможно, часть фото потеряна.') +
+            '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  /* ── Секция 4: Разрывы нумерации ── */
+  if (report.gaps) {
+    const hasGap = report.gaps.hasGap;
+    html +=
+      '<div class="sheet-section">' +
+        '<div class="sheet-section-header">' +
+          '<h2>Разрывы нумерации</h2>' +
+        '</div>' +
+        '<div class="sheet-section-body">' +
+          '<div class="ai-issue-row ' + (hasGap ? 'warn' : 'ok') + '">' +
+            '<span class="ai-issue-icon">' + (hasGap ? '⚠' : '✓') + '</span>' +
+            '<span class="ai-issue-body">' + (hasGap ? 'Найден разрыв — проверь нумерацию строк.' : 'Разрывов нет.') + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  /* ── Секция 5: Нечитаемые ── */
+  if (report.unreadable) {
+    const clean = report.unreadable.isEmpty;
+    html +=
+      '<div class="sheet-section">' +
+        '<div class="sheet-section-header">' +
+          '<h2>Нечитаемые ячейки</h2>' +
+        '</div>' +
+        '<div class="sheet-section-body">' +
+          '<div class="ai-issue-row ' + (clean ? 'ok' : 'warn') + '">' +
+            '<span class="ai-issue-icon">' + (clean ? '✓' : '⚠') + '</span>' +
+            '<span class="ai-issue-body">' + (clean ? 'Нечитаемых ячеек нет.' : 'Есть нечитаемое — проверь по фото.') + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+  }
+
+  /* ── Секция 6: Сырой ответ ИИ ── */
+  if (report.fullRaw) {
+    html +=
+      '<div class="sheet-section">' +
+        '<div class="sheet-section-header">' +
+          '<h2>Сырой ответ ИИ</h2>' +
+          '<p class="desc">Полный текст, включая блоки #ИМЯ.</p>' +
+        '</div>' +
+        '<div class="sheet-section-body">' +
+          '<pre class="ai-raw">' + escapeHtml(report.fullRaw) + '</pre>' +
+        '</div>' +
+      '</div>';
+  }
+
+  body.innerHTML = html;
 }
 
 /* ═══════════════════════════════════════════
@@ -9227,6 +9637,10 @@ function bindUI() {
   };
   const exportBtn = $('exportBtn'); if (exportBtn) exportBtn.onclick = exportExcel;
   const finishBtn = $('finishCheckBtn'); if (finishBtn) finishBtn.onclick = openReport;
+  const aiReportBtn = $('openAIReportBtn');
+  if (aiReportBtn) aiReportBtn.onclick = () => openAIReport();
+  const aiReportCloseBtn = $('aiReportCloseBtn');
+  if (aiReportCloseBtn) aiReportCloseBtn.onclick = () => closeAIReport();
 
   /* === v9.9.2: календарь истории === */
   const dayModalClose = $('dayModalCloseBtn');
@@ -9314,6 +9728,11 @@ function bindUI() {
       const tsc = $('tableSearchClear'); if (tsc) tsc.classList.remove('show');
       const cs = $('csvStatus'); if (cs) { cs.className = 'status'; cs.textContent = ''; }
       const ss = $('shareStatus'); if (ss) { ss.className = 'status'; ss.textContent = ''; }
+
+      /* v9.18.0: очистка отчёта ИИ */
+      _lastAIReport = null;
+      const aiBtn = $('openAIReportBtn');
+      if (aiBtn) aiBtn.style.display = 'none';
 
       /* v9.16.0: очистка сверки */
       const cmp1 = $('cmpCsv1'); if (cmp1) cmp1.value = '';
@@ -9917,7 +10336,7 @@ function setRecognizeMode(mode) {
    BIND MODAL BACKDROPS
    ═══════════════════════════════════════════ */
 function bindModalBackdrops() {
-  ['catalogModal', 'unknownModal', 'ignoredModal', 'aliasesModal', 'aliasTargetModal', 'reportModal', 'noCategoryModal', 'pricesModal', 'priceEditModal', 'compareModal', 'firstRunModal', 'pointPickerModal', 'pointsManagerModal', 'dayModal', 'checkDetailsModal', 'syncSettingsModal', 'myProfileModal', 'auditorsModal', 'aboutModal'].forEach(id => {
+  ['catalogModal', 'unknownModal', 'ignoredModal', 'aliasesModal', 'aliasTargetModal', 'reportModal', 'noCategoryModal', 'pricesModal', 'priceEditModal', 'compareModal', 'firstRunModal', 'pointPickerModal', 'pointsManagerModal', 'dayModal', 'checkDetailsModal', 'syncSettingsModal', 'myProfileModal', 'auditorsModal', 'aboutModal', 'aiReportModal'].forEach(id => {
     const m = $(id); if (!m) return;
     m.addEventListener('click', e => {
       if (e.target !== m) return;
@@ -9952,6 +10371,7 @@ function bindModalBackdrops() {
       else if (id === 'myProfileModal') closeModal('myProfileModal');
       else if (id === 'auditorsModal') closeModal('auditorsModal');
       else if (id === 'aboutModal') closeModal('aboutModal');
+      else if (id === 'aiReportModal') closeAIReport();
     });
   });
   document.addEventListener('keydown', e => {
@@ -9976,6 +10396,7 @@ function bindModalBackdrops() {
       else if (!$('myProfileModal').classList.contains('hidden')) closeModal('myProfileModal');
       else if (!$('auditorsModal').classList.contains('hidden')) closeModal('auditorsModal');
       else if (!$('aboutModal').classList.contains('hidden')) closeModal('aboutModal');
+      else if (!$('aiReportModal').classList.contains('hidden')) closeAIReport();
     }
   });
 }
