@@ -759,7 +759,8 @@ body[data-active-tab="check"] .check-steps{display:block}
 @keyframes sheetSlideUp{from{transform:translateY(100%);opacity:.7}to{transform:translateY(0);opacity:1}}
 .sheet-handle{width:38px;height:5px;border-radius:3px;background:var(--separator-opaque);margin:10px auto 4px;flex:0 0 auto;pointer-events:none}
 .modal.bottom-sheet #dayModalContent,
-.modal.bottom-sheet #checkDetailsContent{height:auto !important;max-height:88dvh !important;border-radius:20px 20px 0 0}
+.modal.bottom-sheet #checkDetailsContent,
+.modal.bottom-sheet #aiReportModalContent{height:auto !important;max-height:88dvh !important;border-radius:20px 20px 0 0}
 
 /* Аватары авторов */
 .avatar{width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex:0 0 auto;letter-spacing:0;text-transform:uppercase;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif;line-height:1;user-select:none;-webkit-user-select:none}
@@ -1924,7 +1925,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 </div>
 
 <!-- ═══════════════ Модалка: Отчёт ИИ (v9.18.0) ═══════════════ -->
-<div id="aiReportModal" class="modal hidden">
+<div id="aiReportModal" class="modal bottom-sheet hidden">
   <div class="modal-content" id="aiReportModalContent">
     <div class="sheet-handle"></div>
     <div class="ai-status-bar" id="aiReportStatusBar">
@@ -1976,7 +1977,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.19.2';
+const APP_VERSION = 'v9.19.4';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -3287,7 +3288,10 @@ function saveSession() {
         incoming: (r.incoming || []).slice(0, MAX_DATES).map(p => ({ date: p.date, qty: p.qty })),
         salesOnly: !!r.salesOnly
       })),
-      noCategory: noCategoryRows.slice(0, MAX_ROWS).map(r => ({ name: r.name }))
+      noCategory: noCategoryRows.slice(0, MAX_ROWS).map(r => ({ name: r.name })),
+      /* v9.19.3: сохраняем ⚠-метки из сверки, чтобы не терялись
+         при перезапуске PWA */
+      needsCheck: [..._needsCheckNames].slice(0, MAX_ROWS)
     };
     localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
     showAutosaveBadge();
@@ -3352,6 +3356,16 @@ function applySession(data) {
     if (Array.isArray(data.noCategory) && data.noCategory.length) {
       noCategoryRows = data.noCategory.slice(0, MAX_ROWS).map(r => ({ name: safeStr(r.name, MAX_NAME) })).filter(r => r.name);
     } else noCategoryRows = [];
+    /* v9.19.3: восстанавливаем ⚠-метки из сверки */
+    if (Array.isArray(data.needsCheck)) {
+      _needsCheckNames = new Set(
+        data.needsCheck
+          .filter(x => typeof x === 'string' && x)
+          .slice(0, MAX_ROWS)
+      );
+    } else {
+      _needsCheckNames = new Set();
+    }
     return true;
   } finally { isRestoring = false; }
 }
@@ -8656,33 +8670,43 @@ function renderReport() {
 /* v9.19.1: персистентность отчёта ИИ + управление кнопкой */
 const AI_REPORT_KEY = 'fbAuditLastReport';
 
+/* v9.19.3: переехали с sessionStorage на localStorage.
+   Причина: на iOS sessionStorage очищается, когда PWA убивают
+   свайпом вверх (не просто сворачивают). Отчёт ИИ терялся. */
 function persistAIReport(report) {
   try {
     if (report && report.hasBlocks) {
-      sessionStorage.setItem(AI_REPORT_KEY, JSON.stringify(report));
+      localStorage.setItem(AI_REPORT_KEY, JSON.stringify(report));
     } else {
-      sessionStorage.removeItem(AI_REPORT_KEY);
+      localStorage.removeItem(AI_REPORT_KEY);
     }
   } catch (e) {}
 }
 
 function clearPersistedAIReport() {
-  try { sessionStorage.removeItem(AI_REPORT_KEY); } catch (e) {}
+  try { localStorage.removeItem(AI_REPORT_KEY); } catch (e) {}
 }
 
 function restoreAIReport() {
   try {
-    const raw = sessionStorage.getItem(AI_REPORT_KEY);
+    /* миграция со старого sessionStorage (на всякий случай) */
+    const legacy = sessionStorage.getItem(AI_REPORT_KEY);
+    if (legacy) {
+      sessionStorage.removeItem(AI_REPORT_KEY);
+      try { localStorage.setItem(AI_REPORT_KEY, legacy); } catch (e) {}
+    }
+    const raw = localStorage.getItem(AI_REPORT_KEY);
     if (!raw) return null;
     return JSON.parse(raw);
   } catch (e) { return null; }
 }
 
 function updateAIReportBtnVisibility() {
-  /* v9.19.2: кешируем ссылку на элемент, чтобы не дёргать DOM */
+  /* v9.19.4: кешируем ссылку только если элемент реально найден.
+     Иначе — повторяем попытку при следующем вызове. */
   if (!_aiReportBtnCached) {
     _aiReportBtnEl = $('openAIReportBtn');
-    _aiReportBtnCached = true;
+    if (_aiReportBtnEl) _aiReportBtnCached = true;
   }
   const aiBtn = _aiReportBtnEl;
   if (!aiBtn) return;
@@ -10459,7 +10483,16 @@ function bindBodyScrollGuard() {
    v9.14.1 — Свайп-закрытие bottom-sheet модалок
    ═══════════════════════════════════════════ */
 function bindSheetSwipe() {
-  ['dayModal', 'checkDetailsModal'].forEach(id => {
+  /* v9.19.4: конфиги — для каждого id свой onClose,
+     чтобы aiReportModal закрывался через closeAIReport(),
+     а не голым closeModal(). */
+  const sheetConfigs = [
+    { id: 'dayModal', onClose: () => closeModal('dayModal') },
+    { id: 'checkDetailsModal', onClose: () => closeModal('checkDetailsModal') },
+    { id: 'aiReportModal', onClose: () => closeAIReport() }
+  ];
+  sheetConfigs.forEach(cfg => {
+    const id = cfg.id;
     const modal = $(id);
     if (!modal) return;
     const content = modal.querySelector('.modal-content');
@@ -10524,7 +10557,7 @@ function bindSheetSwipe() {
         content.style.transition = 'transform .25s cubic-bezier(.32,.72,0,1)';
         content.style.transform = 'translateY(100%)';
         setTimeout(() => {
-          closeModal(id);
+          cfg.onClose();
           content.style.transition = '';
           content.style.transform = '';
         }, 250);
