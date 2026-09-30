@@ -2245,10 +2245,59 @@ function normalizeName(s) {
     .replace(/(\d)\s*,\s*(\d)/g, '$1.$2')
     /* v9.19.9: пробел перед скобкой убираем (Адреналин 0.25(12) = Адреналин 0.25 (12)) */
     .replace(/\s+\(/g, '(')
+    /* v9.19.11: типографские тире → обычный дефис */
     .replace(/[\u2010-\u2015\u2212]/g, '-')
+    /* v9.19.11: любой дефис → пробел. «Суп Том-Ям» = «Суп Том Ям»,
+       «Хлеб 8-злаков» = «Хлеб 8 злаков». ИИ часто пишет с дефисом,
+       справочник — без, или наоборот. */
+    .replace(/-/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
+/* v9.19.11: единая нормализация имени товара после чтения из CSV.
+   Раньше копии жили в parseCSV, cmpParseCSV и buildDailyCsv и
+   постепенно разъехались — позиции не совпадали между таблицей
+   и сверкой, служебные строки ловились по-разному. */
+function cleanProductName(raw) {
+  let s = String(raw == null ? '' : raw);
+  /* Кавычки — все варианты. ИИ часто обрамляет названия. */
+  s = s.replace(/["'«»""„"']/g, '');
+  /* Префикс «Т » / «T » — служебный маркер товара.
+     Ловим и кириллическую Т, и латинскую T. */
+  s = s.replace(/^[ТT]\s+/, '');
+  /* Суффиксы «п/ф» и «полуфабрикат». */
+  s = s.replace(/\s*п\/ф\s*$/i, '').replace(/\s+полуфабрикат\s*$/i, '');
+  /* Хвост «, для набора» / «для набора» — плодит дубли. */
+  s = s.replace(/[,\s]+для\s+набора\s*$/i, '');
+  /* Схлопываем пробелы. */
+  s = s.replace(/\s+/g, ' ').trim();
+  return s;
+}
+
+/* Служебная ли это строка (не товар). Используется к имени позиции
+   после сплита CSV. */
+function isServiceLine(name) {
+  const s = String(name || '').trim();
+  if (!s) return true;
+  if (s.startsWith('#')) return true;
+  if (/^[-–—•·*]/.test(s)) return true;
+  if (/^фото\s+\d/i.test(s)) return true;
+  if (/^накладная\s+№/i.test(s)) return true;
+  if (/^чек\s+(продаж|от)/i.test(s)) return true;
+  if (/\(не\s+в\s+справочнике/i.test(s)) return true;
+  if (/\(нет\s+в\s+справочнике/i.test(s)) return true;
+  if (/\(есть\s+в\s+чеке/i.test(s)) return true;
+  if (/\(есть\s+в\s+справочнике/i.test(s)) return true;
+  if (/^источник/i.test(s)) return true;
+  if (/^проверка[: ]/i.test(s)) return true;
+  if (/^сверка[: ]/i.test(s)) return true;
+  if (/^нечитаемо[: ]/i.test(s)) return true;
+  if (/^всего\s+в\s+csv/i.test(s)) return true;
+  if (/^в\s+накладной\s+№/i.test(s)) return true;
+  if (/^в\s+чеке[: ]/i.test(s)) return true;
+  return false;
+}
+
 function normalizeForSearch(s) {
   return String(s || '').toLowerCase().trim().replace(/\s+/g, ' ').replace(/ё/g, 'е');
 }
@@ -2552,6 +2601,24 @@ function removeAlias(aliasName) {
 /* ═══════════════════════════════════════════
    PRICES
    ═══════════════════════════════════════════ */
+/* Индекс: normalizeName(название) → цена.
+   Строится один раз при загрузке/изменении PRICES,
+   чтобы getPriceFor не перебирал все ключи в цикле. */
+let _priceIndex = new Map();
+
+function rebuildPriceIndex() {
+  _priceIndex = new Map();
+  try {
+    for (const n of Object.keys(PRICES)) {
+      const key = normalizeName(n);
+      if (!key) continue;
+      /* Если два имени нормализуются в один ключ — оставляем первое
+         (обычно точное совпадение по написанию важнее). */
+      if (!_priceIndex.has(key)) _priceIndex.set(key, PRICES[n]);
+    }
+  } catch (e) { console.warn('rebuildPriceIndex:', e); }
+}
+
 function loadPrices() {
   try {
     const raw = localStorage.getItem(PRICES_KEY);
@@ -2572,16 +2639,18 @@ function loadPrices() {
 function savePrices() {
   try { localStorage.setItem(PRICES_KEY, JSON.stringify(PRICES)); }
   catch (e) { console.warn('savePrices:', e); }
+  rebuildPriceIndex();
   if (typeof renderMoreCounts === 'function') renderMoreCounts();
 }
 function getPriceFor(name) {
   if (!name) return 0;
+  /* Точное совпадение — самый частый случай, когда имя пришло
+     из справочника цен. Не нормализуем. */
   if (PRICES[name] != null) return PRICES[name];
   const key = normalizeName(name);
-  for (const n of Object.keys(PRICES)) {
-    if (normalizeName(n) === key) return PRICES[n];
-  }
-  return 0;
+  if (!key) return 0;
+  const v = _priceIndex.get(key);
+  return v != null ? v : 0;
 }
 function setPrice(name, value) {
   const n = safeStr(name, MAX_NAME).trim();
@@ -2630,9 +2699,31 @@ function parseDateRu(str, referenceDate) {
   } else {
     const ref = isValidDate(referenceDate) ? referenceDate : new Date();
     year = ref.getFullYear();
-    if (month > ref.getMonth() + 1) year -= 1;
+    /* Окно ±6 месяцев: если месяц сильно впереди текущего — прошлый
+       год; если сильно позади — следующий. Ловит декабрь↔январь,
+       но не ломается на ±1 месяц (например, янв→фев). */
+    const refM = ref.getMonth() + 1;
+    if (month - refM > 6) year -= 1;
+    else if (refM - month > 6) year += 1;
   }
   return safeDate(year, month, day) || '';
+}
+/* Разбор даты без года (dd.mm) с окном ±6 месяцев.
+   Раньше год жёстко брался из new Date().getFullYear(), из-за чего
+   декабрьские накладные в январе уезжали на год вперёд, а январские
+   в декабре — на год назад. */
+function inferIsoFromDdmm(ddmm, refDate) {
+  const m = String(ddmm || '').match(/^(\d{1,2})\.(\d{1,2})$/);
+  if (!m) return null;
+  const day = parseInt(m[1], 10);
+  const month = parseInt(m[2], 10);
+  if (!isFinite(day) || !isFinite(month)) return null;
+  const ref = isValidDate(refDate) ? refDate : new Date();
+  const refM = ref.getMonth() + 1;
+  let year = ref.getFullYear();
+  if (month - refM > 6) year -= 1;
+  else if (refM - month > 6) year += 1;
+  return safeDate(year, month, day);
 }
 function mergeIncomingByDate(incoming) {
   const map = new Map();
@@ -2795,29 +2886,10 @@ function parseCSV(text, referenceDate) {
   for (let i = 1; i < maxRow; i++) {
     const vals = matrix[i].slice(0, maxCols).map(v => String(v ?? '').trim());
     if (!vals.some(v => v !== '')) continue;
-    let name = safeStr(vals[idxName], MAX_NAME);
+    /* v9.19.11: единая нормализация имени. */
+    let name = cleanProductName(safeStr(vals[idxName], MAX_NAME));
     if (!name) continue;
-    /* v9.19.7: ловим и кириллическую Т, и латинскую T.
-       П/ф снимаем даже без пробела перед ним. */
-    name = name.replace(/^[ТT]\s+/, '');
-    name = name.replace(/\s*п\/ф\s*$/i, '').replace(/\s+полуфабрикат\s*$/i, '');
-    /* v9.19.9: снимаем хвосты «для набора» — они плодят дубли
-       («Чизкейк орео» vs «Чизкейк орео, для набора») */
-    name = name.replace(/[,\s]+для\s+набора\s*$/i, '');
-    name = name.trim();
-    if (!name) continue;
-    if (name.startsWith('#')) continue;
-    if (/^[-–—•·*]\s/.test(name)) continue;
-    if (/^фото\s+\d/i.test(name)) continue;
-    if (/^накладная\s+№/i.test(name)) continue;
-    if (/^чек\s+(продаж|от)/i.test(name)) continue;
-    if (/\(не\s+в\s+справочнике/i.test(name)) continue;
-    if (/\(нет\s+в\s+справочнике/i.test(name)) continue;
-    if (/\(есть\s+в\s+чеке/i.test(name)) continue;
-    if (/\(есть\s+в\s+справочнике/i.test(name)) continue;
-    if (/^источник/i.test(name)) continue;
-    if (/^проверка[: ]/i.test(name)) continue;
-    if (/^сверка[: ]/i.test(name)) continue;
+    if (isServiceLine(name)) continue;
     const salesVal = idxSales >= 0 ? parseNum(vals[idxSales]) : 0;
     const shelfRaw = idxShelf >= 0 ? parseShelfLife(vals[idxShelf]) : null;
     const incoming = [];
@@ -2827,27 +2899,49 @@ function parseCSV(text, referenceDate) {
   }
   if (!rows.length) throw new Error('Не удалось распознать ни одной строки.');
 
-  /* v9.19.0: дедупликация строк по имени (защита от дублей ИИ) */
+  /* v9.19.0 + v9.19.11: дедупликация строк по имени.
+     Различаем два случая:
+       1. Полный дубликат (те же продажи + те же приходы) —
+          скорее всего ИИ выдал строку дважды. Пропускаем.
+       2. Данные отличаются (другая дата / другой объём / другие
+          продажи) — реально разные источники (чек + накладная,
+          несколько фото). Суммируем. */
+  function _incomingSignature(arr) {
+    return (arr || [])
+      .slice()
+      .filter(p => p && p.date && (p.qty || 0) > 0)
+      .sort((a, b) => String(a.date).localeCompare(String(b.date)))
+      .map(p => `${p.date}:${p.qty || 0}`)
+      .join('|');
+  }
   const dedupMap = new Map();
   for (const r of rows) {
     const key = normalizeName(r.name);
     if (!dedupMap.has(key)) {
       dedupMap.set(key, r);
-    } else {
-      const existing = dedupMap.get(key);
-      /* Продажи суммируем */
-      existing.sales = (existing.sales || 0) + (r.sales || 0);
-      existing._originalSales = existing.sales;
-      /* Приходы по датам суммируем */
-      for (const p of r.incoming || []) {
-        const ep = (existing.incoming || []).find(x => x.date === p.date);
-        if (ep) ep.qty = (ep.qty || 0) + (p.qty || 0);
-        else existing.incoming.push({ date: p.date, qty: p.qty || 0 });
-      }
-      /* Срок: берём из первой строки, если не нулевой; иначе из второй */
+      continue;
+    }
+    const existing = dedupMap.get(key);
+    const sameSales = (existing.sales || 0) === (r.sales || 0);
+    const sameIncoming = _incomingSignature(existing.incoming) === _incomingSignature(r.incoming);
+    if (sameSales && sameIncoming) {
+      /* Полный дубликат — не суммируем, пропускаем.
+         Иначе двойной приход «надувает» просрочку. */
       if ((!existing.shelfLife || existing.shelfLife === 0) && r.shelfLife) {
         existing.shelfLife = r.shelfLife;
       }
+      continue;
+    }
+    /* Данные разные — суммируем (реальные разные источники). */
+    existing.sales = (existing.sales || 0) + (r.sales || 0);
+    existing._originalSales = existing.sales;
+    for (const p of r.incoming || []) {
+      const ep = (existing.incoming || []).find(x => x.date === p.date);
+      if (ep) ep.qty = (ep.qty || 0) + (p.qty || 0);
+      else existing.incoming.push({ date: p.date, qty: p.qty || 0 });
+    }
+    if ((!existing.shelfLife || existing.shelfLife === 0) && r.shelfLife) {
+      existing.shelfLife = r.shelfLife;
     }
   }
   const dedupedRows = [...dedupMap.values()];
@@ -3909,6 +4003,43 @@ async function flushHistoryQueue() {
   return { ok, fail };
 }
 
+/* Ищем файл-близнец в текущем месяце: тот же автор, та же точка,
+   тот же день, время создания в пределах ±5 минут. Защита от
+   двойной отправки (например, повторный тап при обрыве сети). */
+async function findRecentTwin(login, pointId, tsMs) {
+  if (!login && !pointId) return null;
+  const ref = new Date(tsMs);
+  const ym = `${ref.getFullYear()}-${String(ref.getMonth() + 1).padStart(2, '0')}`;
+  let files;
+  try {
+    files = await fetchHistoryMonthFolder(ym);
+  } catch (e) {
+    return null;
+  }
+  const TWIN_WINDOW_MS = 5 * 60 * 1000;
+  let best = null;
+  let bestDelta = Infinity;
+  for (const f of files) {
+    const p = parseHistoryFilename(f.name);
+    if (!p) continue;
+    if (p.pointId !== pointId) continue;
+    if (p.login !== login) continue;
+    if (p.day !== ref.getDate()) continue;
+    const fileTime = new Date(
+      ref.getFullYear(), ref.getMonth(), p.day,
+      parseInt(p.timeHH, 10) || 0,
+      parseInt(p.timeMM, 10) || 0,
+      0
+    ).getTime();
+    const delta = Math.abs(fileTime - tsMs);
+    if (delta <= TWIN_WINDOW_MS && delta < bestDelta) {
+      bestDelta = delta;
+      best = `${HISTORY_DIR}/${ym}/${f.name}`;
+    }
+  }
+  return best;
+}
+
 /* --- Публичная функция «отправить отчёт» --- */
 async function sendReportToHistory() {
   const btn = $('sendReportBtn');
@@ -3937,10 +4068,24 @@ async function sendReportToHistory() {
     return;
   }
   const snapshot = buildCheckSnapshot();
-  const path = buildHistoryFilename();
+  const defaultPath = buildHistoryFilename();
   setBtn('busy', 'Отправка…', true);
   updateSyncIndicator('syncing');
   try {
+    /* Нормализуем login так же, как в buildHistoryFilename, чтобы
+       сравнивать «яблоко с яблоком». */
+    const myLogin = (_profile && _profile.login)
+      ? _profile.login
+      : ((_profile && _profile.name)
+          ? _profile.name.toLowerCase().replace(/[^a-z0-9а-яё_-]/gi, '_').slice(0, 20)
+          : 'anon');
+    const activePoint = getActivePoint();
+    const twinPath = await findRecentTwin(
+      myLogin,
+      activePoint ? activePoint.id : 'nopoint',
+      Date.now()
+    );
+    const path = twinPath || defaultPath;
     await pushHistoryFile(path, snapshot);
     setBtn('ok', '✓ Отправлено', true);
     setStatus('ok', 'Проверка сохранена в общую историю.');
@@ -4007,17 +4152,44 @@ function loadHistoryCache() {
     return d;
   } catch (e) { return {}; }
 }
+/* v9.19.11: было 6 месяцев — каждый свайп на 7-й месяц назад
+   тянул данные заново из GitHub, что при быстром листании упирало
+   в лимит API. Теперь 24 месяца, а если JSON внезапно станет
+   слишком большим (> 1 МБ) — режем до 12 месяцев. */
+const HISTORY_CACHE_MONTHS_MAX = 24;
+const HISTORY_CACHE_BYTES_MAX = 1024 * 1024;
+
 function saveHistoryCache() {
   try {
-    // Ограничим: оставим не больше 6 месяцев
-    const keys = Object.keys(_historyCache).sort().reverse();
-    if (keys.length > 6) {
+    let keys = Object.keys(_historyCache).sort().reverse();
+    if (keys.length > HISTORY_CACHE_MONTHS_MAX) {
       const trimmed = {};
-      for (let i = 0; i < 6; i++) trimmed[keys[i]] = _historyCache[keys[i]];
+      for (let i = 0; i < HISTORY_CACHE_MONTHS_MAX; i++) trimmed[keys[i]] = _historyCache[keys[i]];
       _historyCache = trimmed;
+      keys = Object.keys(_historyCache);
     }
-    localStorage.setItem(HISTORY_CACHE_KEY, JSON.stringify(_historyCache));
-  } catch (e) { console.warn('saveHistoryCache:', e); }
+    let json = JSON.stringify(_historyCache);
+    if (json.length > HISTORY_CACHE_BYTES_MAX) {
+      /* Слишком много — оставляем свежие 12 месяцев. */
+      const half = Math.max(12, Math.floor(keys.length / 2));
+      const trimmed = {};
+      for (let i = 0; i < half && i < keys.length; i++) trimmed[keys[i]] = _historyCache[keys[i]];
+      _historyCache = trimmed;
+      json = JSON.stringify(_historyCache);
+    }
+    localStorage.setItem(HISTORY_CACHE_KEY, json);
+  } catch (e) {
+    /* QuotaExceededError — режем до 12 месяцев и пробуем снова. */
+    try {
+      const keys = Object.keys(_historyCache).sort().reverse().slice(0, 12);
+      const trimmed = {};
+      keys.forEach(k => { trimmed[k] = _historyCache[k]; });
+      _historyCache = trimmed;
+      localStorage.setItem(HISTORY_CACHE_KEY, JSON.stringify(_historyCache));
+    } catch (e2) {
+      console.warn('saveHistoryCache: не удалось сохранить даже урезанный кеш', e2);
+    }
+  }
 }
 function getMonthKeyFromDate(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
@@ -7820,22 +7992,45 @@ function extractCsvFromGeminiText(text) {
    ═══════════════════════════════════════════ */
 function parseAIReport(rawText) {
   if (!rawText || typeof rawText !== 'string') return null;
-  const text = rawText;
 
-  /* Найти все блоки вида #ИМЯ: или #ИМЯ (с новой строки) */
-  const pattern = /^#([А-ЯЁ_]+):?\s*$/gm;
+  /* v9.19.11: нормализуем переводы строк и снимаем markdown-обёртки
+     вокруг заголовков. Раньше:
+       • «#НЕЧИТАЕМО: пусто» в одну строку — не ловилось;
+       • «**#СВЕРКА**» — не ловилось;
+       • «#СВЕРКА Накладная №...» — не ловилось.
+     Теперь всё это распознаётся. */
+  const text = rawText
+    .replace(/\r\n?/g, '\n')
+    .replace(/^[ \t]*\*\*[ \t]*(#[А-ЯЁ_]{2,})[ \t]*\*\*[ \t]*$/gm, '$1')
+    .replace(/^[ \t]*__[ \t]*(#[А-ЯЁ_]{2,})[ \t]*__[ \t]*$/gm, '$1')
+    .replace(/^[ \t]*`[ \t]*(#[А-ЯЁ_]{2,})[ \t]*`[ \t]*$/gm, '$1');
+
+  /* Ослабленный regex: имя блока — от 2 заглавных букв (кириллица + «_»),
+     опциональное «:», а остаток строки идёт во вторую группу.
+     Если остаток непустой — это первая строка содержимого блока. */
+  const pattern = /^[ \t]*#([А-ЯЁ_]{2,})[ \t]*:?[ \t]*(.*)$/gm;
   const positions = [];
   let match;
   while ((match = pattern.exec(text)) !== null) {
-    positions.push({ name: match[1], index: match.index, length: match[0].length });
+    positions.push({
+      name: match[1],
+      rest: match[2] || '',
+      index: match.index,
+      length: match[0].length
+    });
   }
   if (!positions.length) return null;
 
   const blocks = {};
   for (let i = 0; i < positions.length; i++) {
-    const start = positions[i].index + positions[i].length;
+    const headerEnd = positions[i].index + positions[i].length;
     const end = i + 1 < positions.length ? positions[i + 1].index : text.length;
-    blocks[positions[i].name] = text.slice(start, end).trim();
+    const tail = text.slice(headerEnd, end).trim();
+    const rest = positions[i].rest.trim();
+    /* Если на строке заголовка был текст — приклеиваем его как первую строку. */
+    blocks[positions[i].name] = rest
+      ? (tail ? rest + '\n' + tail : rest)
+      : tail;
   }
 
   /* --- Парсинг #СВЕРКА --- */
@@ -7907,6 +8102,42 @@ function parseAIReport(rawText) {
     unreadable = { isEmpty, raw: content };
   }
 
+  /* --- Парсинг #ПОСТРОЧНО --- */
+  /* Строки формата: <№> | <Название> | <К-во> × <Цена> = <Сумма> */
+  let postrochno = null;
+  if (blocks['ПОСТРОЧНО']) {
+    const lines = blocks['ПОСТРОЧНО'].split('\n').map(l => l.trim()).filter(Boolean);
+    const rows = [];
+    /* Разделитель может быть |, │, или длинный набор пробелов.
+       Умножение — ×, x, X, *. Десятичный — точка или запятая. */
+    const lineRe = /^(\d+)\s*[|│]\s*(.+?)\s*[|│]\s*([\d.,\s]+?)\s*[×xX*]\s*([\d.,\s]+?)\s*=\s*([\d.,\s]+?)\s*$/;
+    for (const line of lines) {
+      const m = line.match(lineRe);
+      if (!m) continue;
+      const num = parseInt(m[1], 10);
+      const name = m[2].trim();
+      const qty = Number(String(m[3]).replace(/[\s,]/g, '.').replace(/\.+/g, '.'));
+      const price = Number(String(m[4]).replace(/\s/g, '').replace(',', '.'));
+      const sum = Number(String(m[5]).replace(/\s/g, '').replace(',', '.'));
+      if (!isFinite(num) || !isFinite(qty) || !isFinite(price) || !isFinite(sum)) continue;
+      const expected = qty * price;
+      /* Толерантность: 0.5 руб или 1% от суммы — что больше.
+         В ТОРГ-12 цены часто с 2 знаками, суммы с 2 знаками, но
+         округления бывают. */
+      const tol = Math.max(0.5, Math.abs(sum) * 0.01);
+      const ok = Math.abs(expected - sum) <= tol;
+      rows.push({ num, name, qty, price, sum, ok, expected, diff: expected - sum });
+    }
+    if (rows.length) postrochno = rows;
+  }
+
+  /* --- Парсинг #ПРОВЕРКА (просто текст сводки) --- */
+  let verdict = null;
+  if (blocks['ПРОВЕРКА']) {
+    const t = blocks['ПРОВЕРКА'].trim();
+    if (t) verdict = t;
+  }
+
   return {
     hasBlocks: true,
     blocks,
@@ -7914,6 +8145,8 @@ function parseAIReport(rawText) {
     completeness,
     gaps,
     unreadable,
+    postrochno,
+    verdict,
     fullRaw: rawText
   };
 }
@@ -7951,6 +8184,20 @@ function summarizeAIReport(report) {
   /* Нечитаемое */
   if (report.unreadable && !report.unreadable.isEmpty) {
     issues.push({ type: 'warn', text: 'Есть нечитаемые ячейки' });
+  }
+
+  /* Построчная проверка */
+  if (report.postrochno && report.postrochno.length) {
+    const bad = report.postrochno.filter(r => !r.ok);
+    if (bad.length) {
+      issues.push({
+        type: 'error',
+        text: 'Построчная проверка: ' + bad.length + ' ' +
+              (bad.length === 1 ? 'строка не сходится' : 'строк не сходится') +
+              ' (К-во × Цена ≠ Сумма)'
+      });
+      hasBlockingIssue = true;
+    }
   }
 
   if (!issues.length) {
@@ -8315,11 +8562,17 @@ async function recognizeDaily() {
               const b = d2.rows[k];
               if (!b) return false;
               if ((a.sales || 0) !== (b.sales || 0)) return false;
-              const aKeys = Object.keys(a.incoming);
-              const bKeys = Object.keys(b.incoming);
-              const aVal = aKeys.length ? (a.incoming[aKeys[0]] || 0) : 0;
-              const bVal = bKeys.length ? (b.incoming[bKeys[0]] || 0) : 0;
-              return aVal === bVal;
+              /* Сравниваем ВСЕ даты из обоих прогонов, а не только первую.
+                 Раньше расхождение по 2-й и следующими датам терялось,
+                 фото удалялись, и ошибка ИИ не всплывала. */
+              const allDates = new Set([
+                ...Object.keys(a.incoming || {}),
+                ...Object.keys(b.incoming || {})
+              ]);
+              for (const dk of allDates) {
+                if ((a.incoming[dk] || 0) !== (b.incoming[dk] || 0)) return false;
+              }
+              return true;
             });
           }
         }
@@ -8416,16 +8669,6 @@ async function buildDailyCsv() {
     if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Сначала выберите категорию.'; }
     return;
   }
-  function cleanName(raw) {
-    let s = String(raw || '');
-    s = s.replace(/^["'«»]+|["'«»]+$/g, '');
-    s = s.replace(/["'«»]/g, '');
-    s = s.replace(/^Т\s+/, '');
-    s = s.replace(/\s+п\/ф\s*$/i, '').replace(/\s+полуфабрикат\s*$/i, '');
-    s = s.replace(/\s+/g, ' ').trim();
-    return s;
-  }
-
   _dailyAccum.sort((a, b) => a.iso.localeCompare(b.iso));
 
   const allNames = new Set();
@@ -8443,7 +8686,7 @@ async function buildDailyCsv() {
       return;
     }
     for (const r of parsed.rows) {
-      const clean = cleanName(r.name);
+      const clean = cleanProductName(r.name);
       if (!clean) continue;
       if (clean.length > 80) continue;
       if (/;\d/.test(clean)) continue;
@@ -9038,6 +9281,64 @@ function renderAIReportModal(report) {
       '</div>';
   }
 
+  /* ── Секция 5a: Сводка (#ПРОВЕРКА) ── */
+  if (report.verdict) {
+    html +=
+      '<div class="sheet-section">' +
+        '<div class="sheet-section-header">' +
+          '<h2>Сводка</h2>' +
+          '<p class="desc">Что ИИ насчитал по документам.</p>' +
+        '</div>' +
+        '<div class="sheet-section-body">' +
+          '<pre class="ai-raw">' + escapeHtml(report.verdict) + '</pre>' +
+        '</div>' +
+      '</div>';
+  }
+
+  /* ── Секция 5b: Построчная проверка (#ПОСТРОЧНО) ── */
+  if (report.postrochno && report.postrochno.length) {
+    const rows = report.postrochno.slice().sort((a, b) => {
+      /* Расхождения — сверху */
+      if (a.ok !== b.ok) return a.ok ? 1 : -1;
+      return a.num - b.num;
+    });
+    const badCount = rows.filter(r => !r.ok).length;
+    const subDesc = badCount
+      ? '<span style="color:var(--red);font-weight:600">' + badCount + ' из ' + rows.length + ' не сходится</span>'
+      : 'Все ' + rows.length + ' строк сходятся';
+
+    html +=
+      '<div class="sheet-section">' +
+        '<div class="sheet-section-header">' +
+          '<h2>Построчная проверка</h2>' +
+          '<p class="desc">' + subDesc + '</p>' +
+        '</div>' +
+        '<div class="sheet-section-body">';
+
+    rows.forEach(r => {
+      const cls = r.ok ? 'ok' : 'error';
+      const icon = r.ok ? '✓' : '✗';
+      const qtyStr = String(r.qty).replace('.', ',');
+      const priceStr = String(r.price.toFixed(2)).replace('.', ',');
+      const sumStr = String(r.sum.toFixed(2)).replace('.', ',');
+      const expStr = String(r.expected.toFixed(2)).replace('.', ',');
+      const diffStr = String(r.diff.toFixed(2)).replace('.', ',');
+      const detail = r.ok
+        ? '<b>' + escapeHtml(qtyStr) + '</b> × ' + escapeHtml(priceStr) + ' = <b>' + escapeHtml(sumStr) + '</b>'
+        : '<b>' + escapeHtml(qtyStr) + '</b> × ' + escapeHtml(priceStr) + ' = ' + escapeHtml(sumStr) +
+          ' · ожидалось <b style="color:var(--red)">' + escapeHtml(expStr) + '</b> (Δ ' + escapeHtml(diffStr) + ')';
+      html +=
+        '<div class="ai-issue-row ' + cls + '">' +
+          '<span class="ai-issue-icon">' + icon + '</span>' +
+          '<span class="ai-issue-body">' +
+            '<b>' + escapeHtml(String(r.num)) + '. ' + escapeHtml(r.name) + '</b><br>' +
+            detail +
+          '</span>' +
+        '</div>';
+    });
+    html += '</div></div>';
+  }
+
   /* ── Секция 6: Сырой ответ ИИ ── */
   if (report.fullRaw) {
     html +=
@@ -9143,28 +9444,10 @@ function cmpParseCSV(text) {
   const rows = {}; const order = [];
   for (let i = 1; i < dataLines.length; i++) {
     const f = cmpSplitLine(dataLines[i], sep);
-    let name = (f[idxName] || '').trim().replace(/^"|"$/g, '');
+    /* v9.19.11: единая нормализация имени через cleanProductName(). */
+    let name = cleanProductName(f[idxName]);
     if (!name) continue;
-    /* v9.19.7: та же нормализация, что в parseCSV. Без неё позиции
-       с «Т » и «п/ф» не совпадают со справочником и создают дубли
-       при «Применить в таблицу». */
-    name = name.replace(/^[ТT]\s+/, '');
-    name = name.replace(/\s*п\/ф\s*$/i, '').replace(/\s+полуфабрикат\s*$/i, '');
-    /* v9.19.9: снимаем хвосты «для набора» */
-    name = name.replace(/[,\s]+для\s+набора\s*$/i, '');
-    name = name.trim();
-    if (!name) continue;
-    if (/^[-–—•·*]/.test(name)) continue;
-    if (/^фото\s+\d/i.test(name)) continue;
-    if (/^накладная\s+№/i.test(name)) continue;
-    if (/^чек\s+(продаж|от)/i.test(name)) continue;
-    if (/\(не\s+в\s+справочнике/i.test(name)) continue;
-    if (/\(нет\s+в\s+справочнике/i.test(name)) continue;
-    if (/\(есть\s+в\s+чеке/i.test(name)) continue;
-    if (/\(есть\s+в\s+справочнике/i.test(name)) continue;
-    if (/^источник/i.test(name)) continue;
-    if (/^проверка[: ]/i.test(name)) continue;
-    if (/^сверка[: ]/i.test(name)) continue;
+    if (isServiceLine(name)) continue;
     const hasNumbers = f.some((cell, idx) => idx !== idxName && /\d/.test(String(cell || '')));
     if (!hasNumbers) continue;
     /* v9.15.1: применяем алиасы, как в основном импорте */
@@ -9262,7 +9545,7 @@ function openCompareModal(prefill) {
   const checksSection = $('cmpChecksSection'); if (checksSection) checksSection.style.display = 'none';
   const resultsSection = $('cmpResultsSection'); if (resultsSection) resultsSection.style.display = 'none';
   const btn = $('cmpApplyBtn'); if (btn) btn.style.display = 'none';
-  _cmpData = null;
+  
   if (_cmpNakls.length === 0) _cmpNakls = [{ date: '', num: '', lastNum: '', total: '' }];
   cmpRenderNakls();
   const t1 = $('cmpCsv1');
@@ -9628,16 +9911,15 @@ function cmpApplyMatched() {
     const sales = (r.edits && r.edits.sales != null) ? r.edits.sales : (r.a ? r.a.sales : 0);
     byKey.set(normalizeName(r.name), { incoming, sales });
   });
-  const year = new Date().getFullYear();
   let applied = 0;
+  const _refDate = new Date();
   tableRows.forEach(row => {
     const key = normalizeName(row.name);
     const match = byKey.get(key);
     if (!match) return;
     Object.keys(match.incoming).forEach(dk => {
-      const m = dk.match(/^(\d{1,2})\.(\d{1,2})$/);
-      if (!m) return;
-      const iso = `${year}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+      const iso = inferIsoFromDdmm(dk, _refDate);
+      if (!iso) return;
       let p = (row.incoming || []).find(x => x.date === iso);
       if (!p) { p = { date: iso, qty: 0, _originalQty: 0 }; row.incoming.push(p); }
       p.qty = match.incoming[dk];
@@ -9673,12 +9955,10 @@ function cmpApplyMatched() {
     const incoming = { ...(r.a ? r.a.incoming : {}) };
     if (r.edits && r.edits.incoming) Object.assign(incoming, r.edits.incoming);
     const sales = (r.edits && r.edits.sales != null) ? r.edits.sales : (r.a ? r.a.sales : 0);
-    const year = new Date().getFullYear();
     const incomingArr = [];
     Object.keys(incoming).forEach(dk => {
-      const m = dk.match(/^(\d{1,2})\.(\d{1,2})$/);
-      if (!m) return;
-      const iso = year + '-' + m[2].padStart(2,'0') + '-' + m[1].padStart(2,'0');
+      const iso = inferIsoFromDdmm(dk, new Date());
+      if (!iso) return;
       incomingArr.push({ date: iso, qty: incoming[dk] || 0 });
     });
     newUnknown.push({
@@ -10175,6 +10455,31 @@ function bindUI() {
       _cmpEditDk = null;
       _cmpEditKind = null;
       _cmpAppliedForDaily = false;
+
+      /* v9.19.11: сброс JS-состояния модалок и режимов.
+         Раньше после «Сброса» отчёт открывался на прошлой категории,
+         каталог оставался read-only, игнор-лист — в режиме выбора. */
+      _reportView = null;
+      _pointPickerMode = null;
+      _catalogReadOnly = false;
+      _catalogSelectMode = false;
+      _catalogSelected = new Set();
+      _ignoredSelectMode = false;
+      _ignoredSelected = new Set();
+      _aliasTargetFor = null;
+      _aliasTargetForList = [];
+      _aliasTargetMode = null;
+      _unknownQuery = '';
+      _unknownVisible = UNKNOWN_PAGE_SIZE;
+      _historyContentCache = {};
+      _lastAIReport = null;
+
+      /* Сбросить UI модалок, если были открыты в момент очистки. */
+      try {
+        if (typeof updateCatalogSelectUI === 'function') updateCatalogSelectUI();
+        if (typeof updateIgnoredSelectUI === 'function') updateIgnoredSelectUI();
+        if (typeof updateAIReportBtnVisibility === 'function') updateAIReportBtnVisibility();
+      } catch (e) {}
 
       /* v9.16.0: очистка накопителя дат */
       _dailyAccum = [];
@@ -10977,7 +11282,7 @@ function init() {
     }
     if (e.key === IGNORED_KEY) { IGNORED = loadIgnored(); updateIgnoredCount(); updateUnknownBanner(); }
     if (e.key === ALIASES_KEY) { ALIASES = loadAliases(); updateAliasesCount(); }
-    if (e.key === PRICES_KEY) { PRICES = loadPrices(); }
+    if (e.key === PRICES_KEY) { PRICES = loadPrices(); rebuildPriceIndex(); }
     if (e.key === POINTS_KEY) { _points = loadPoints();  updatePointsCount(); renderToday(); }
     if (e.key === ACTIVE_POINT_KEY) { _activePointId = loadActivePointId();  syncActivePointToInput(); renderToday(); }
     if (e.key === PROFILE_KEY) { _profile = loadProfile(); updateHeaderProfile(); updateProfileInfoBlock(); renderToday(); }
@@ -11158,6 +11463,7 @@ PRODUCTS = loadCatalog();
 IGNORED = loadIgnored();
 ALIASES = loadAliases();
 PRICES = loadPrices();
+rebuildPriceIndex();
 bindUI();
 bindModalBackdrops();
 init();
