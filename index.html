@@ -911,7 +911,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 .ai-nakl-diff small{font-size:10.5px;color:var(--text-tertiary);display:block}
 /* v9.19.1: управление видимостью кнопки через класс, не inline-стиль */
 #openAIReportBtn{display:none !important}
-#openAIReportBtn.is-visible{display:block !important}
+#openAIReportBtn.is-visible{display:inline-flex !important}
 .ai-raw{
   font-size:11.5px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   line-height:1.5;color:var(--text-secondary);
@@ -1977,7 +1977,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.19.4';
+const APP_VERSION = 'v9.19.5';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -7151,11 +7151,8 @@ ${searchBlock}
    №24 Грилата с кур.филе    К-во=10  Цена=47,27  Сумма=472,73 ✓
 
 ═══════════════════════════════════════════
-ФИЛЬТР
+ФИЛЬТР ПО ДОКУМЕНТАМ
 ═══════════════════════════════════════════
-В CSV включай только позиции выбранной категории, найденные
-в справочнике. Чужие категории пропускай.
-
 🔴 В CSV — ТОЛЬКО ТЕ ПОЗИЦИИ, КОТОРЫЕ ФИЗИЧЕСКИ ЕСТЬ
    В НАКЛАДНОЙ ЗА ${dateLabel} ИЛИ В ЧЕКЕ.
    
@@ -7164,6 +7161,11 @@ ${searchBlock}
      - в чеке (Продано сегодня > 0).
 
    Единственное исключение — позиция ЕСТЬ в накладной, но Продано = 0.
+
+🔴 ФИЛЬТРАЦИЮ ПО КАТЕГОРИИ делает СИСТЕМА, не ты.
+   В CSV включай ВСЕ позиции из документа, независимо от категории.
+   Если позиции нет в справочнике — ВКЛЮЧАЙ КАК ЕСТЬ.
+   Сопоставление с справочником — задача системы.
 
 🔴 ОДНА ПОЗИЦИЯ = ОДНА СТРОКА В CSV.
 
@@ -8727,10 +8729,9 @@ function openAIReport() {
 
 function closeAIReport() {
   closeModal('aiReportModal');
-  /* v9.19.1: на iOS после закрытия модалки что-то сбивает inline-стиль.
-     Пересчитываем дважды — сразу и через 400мс. */
+  /* v9.19.5: пересчёт видимости кнопки после закрытия.
+     Второй вызов убран — работаем через classList, iOS больше не сбивает стиль. */
   setTimeout(() => { if (typeof updateAIReportBtnVisibility === 'function') updateAIReportBtnVisibility(); }, 50);
-  setTimeout(() => { if (typeof updateAIReportBtnVisibility === 'function') updateAIReportBtnVisibility(); }, 400);
 }
 
 function renderAIReportModal(report) {
@@ -10758,7 +10759,7 @@ function init() {
   setActiveCategory(_activeCategory);
   setActiveTab(loadActiveTab());
 
-  /* v9.19.1: восстанавливаем отчёт ИИ из sessionStorage */
+  /* v9.19.3: восстанавливаем отчёт ИИ из localStorage */
   const _savedAIReport = restoreAIReport();
   if (_savedAIReport) {
     _lastAIReport = _savedAIReport;
