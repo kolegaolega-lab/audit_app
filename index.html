@@ -908,6 +908,9 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 .ai-nakl-diff.err{color:var(--red)}
 .ai-nakl-diff b{font-weight:600}
 .ai-nakl-diff small{font-size:10.5px;color:var(--text-tertiary);display:block}
+/* v9.19.1: управление видимостью кнопки через класс, не inline-стиль */
+#openAIReportBtn{display:none !important}
+#openAIReportBtn.is-visible{display:block !important}
 .ai-raw{
   font-size:11.5px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   line-height:1.5;color:var(--text-secondary);
@@ -1129,7 +1132,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       <div id="csvCounter" class="counter"></div>
       <button id="applyCsvBtn" class="success block" style="margin-top:10px">Применить</button>
       <button id="openCompareBtn" class="secondary block" style="margin-top:8px">Сверка</button>
-      <button id="openAIReportBtn" class="secondary block" style="margin-top:8px;display:none">Отчёт ИИ</button>
+      <button id="openAIReportBtn" class="secondary block" style="margin-top:8px">Отчёт ИИ</button>
       <div id="csvStatus" class="status"></div>
     </div>
   </div>
@@ -1973,7 +1976,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.19.0';
+const APP_VERSION = 'v9.19.1';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -7786,15 +7789,35 @@ async function recognizeWithGemini() {
       return csv;
     };
 
+    const sendWithRetry = async (label, maxAttempts) => {
+      let lastErr = '';
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          return await sendOne(label + (attempt > 1 ? ' (попытка ' + attempt + ')' : ''));
+        } catch (e) {
+          lastErr = e.message || String(e);
+          const isRetriable = /503|429|overloaded|high demand|перегружен|resource.?exhausted|temporarily|unavailable/i.test(lastErr);
+          if (!isRetriable || attempt === maxAttempts) throw e;
+          const wait = attempt * 3000;
+          setStatus('info', label + ': сервер занят, повтор через ' + Math.round(wait / 1000) + ' с…');
+          await new Promise(r => setTimeout(r, wait));
+        }
+      }
+      throw new Error(lastErr);
+    };
+
     let csv1 = null, csv2 = null, err1 = '', err2 = '';
     if (doubleRun) {
-      const results = await Promise.allSettled([sendOne('Прогон 1'), sendOne('Прогон 2')]);
-      csv1 = results[0].status === 'fulfilled' ? results[0].value : null;
-      csv2 = results[1].status === 'fulfilled' ? results[1].value : null;
-      err1 = results[0].status === 'rejected' ? results[0].reason.message : '';
-      err2 = results[1].status === 'rejected' ? results[1].reason.message : '';
+      try { csv1 = await sendWithRetry('Прогон 1', 3); }
+      catch (e) { err1 = e.message || String(e); }
+      if (csv1) {
+        setStatus('info', 'Прогон 1 готов. Отправка прогона 2…');
+        await new Promise(r => setTimeout(r, 1500));
+        try { csv2 = await sendWithRetry('Прогон 2', 3); }
+        catch (e) { err2 = e.message || String(e); }
+      }
     } else {
-      try { csv1 = await sendOne('Прогон 1'); }
+      try { csv1 = await sendWithRetry('Прогон 1', 3); }
       catch (e) { err1 = e.message || String(e); }
     }
 
@@ -7811,10 +7834,10 @@ async function recognizeWithGemini() {
 
     _lastGeminiCsvs = { first: csv1 || '', second: csv2 || '' };
 
-    /* v9.18.0: сохраняем отчёт ИИ из первого прогона */
+    /* v9.18.0/v9.19.1: сохраняем отчёт ИИ и обновляем кнопку */
     _lastAIReport = parseAIReport(primaryCsv);
-    const aiBtn = $('openAIReportBtn');
-    if (aiBtn) aiBtn.style.display = _lastAIReport && _lastAIReport.hasBlocks ? 'block' : 'none';
+    persistAIReport(_lastAIReport);
+    updateAIReportBtnVisibility();
 
     if (csv1 && csv2) {
       const lines = primaryCsv.split(/\r?\n/).length;
@@ -8000,15 +8023,35 @@ async function recognizeDaily() {
       return csv;
     };
 
+    const sendWithRetry = async (label, maxAttempts) => {
+      let lastErr = '';
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          return await sendOne(label + (attempt > 1 ? ' (попытка ' + attempt + ')' : ''));
+        } catch (e) {
+          lastErr = e.message || String(e);
+          const isRetriable = /503|429|overloaded|high demand|перегружен|resource.?exhausted|temporarily|unavailable/i.test(lastErr);
+          if (!isRetriable || attempt === maxAttempts) throw e;
+          const wait = attempt * 3000;
+          setStatus('info', label + ': сервер занят, повтор через ' + Math.round(wait / 1000) + ' с…');
+          await new Promise(r => setTimeout(r, wait));
+        }
+      }
+      throw new Error(lastErr);
+    };
+
     let csv1 = null, csv2 = null, err1 = '', err2 = '';
     if (doubleRun) {
-      const results = await Promise.allSettled([sendOne('Прогон 1'), sendOne('Прогон 2')]);
-      csv1 = results[0].status === 'fulfilled' ? results[0].value : null;
-      csv2 = results[1].status === 'fulfilled' ? results[1].value : null;
-      err1 = results[0].status === 'rejected' ? results[0].reason.message : '';
-      err2 = results[1].status === 'rejected' ? results[1].reason.message : '';
+      try { csv1 = await sendWithRetry('Прогон 1', 3); }
+      catch (e) { err1 = e.message || String(e); }
+      if (csv1) {
+        setStatus('info', 'Прогон 1 готов. Отправка прогона 2…');
+        await new Promise(r => setTimeout(r, 1500));
+        try { csv2 = await sendWithRetry('Прогон 2', 3); }
+        catch (e) { err2 = e.message || String(e); }
+      }
     } else {
-      try { csv1 = await sendOne('Прогон 1'); }
+      try { csv1 = await sendWithRetry('Прогон 1', 3); }
       catch (e) { err1 = e.message || String(e); }
     }
 
@@ -8042,8 +8085,8 @@ async function recognizeDaily() {
     const chosen = csv1 || csv2;
     const needsCheck = !!(csv1 && csv2 && !bothMatch);
     _lastAIReport = parseAIReport(chosen);
-    const aiBtn = $('openAIReportBtn');
-    if (aiBtn) aiBtn.style.display = _lastAIReport && _lastAIReport.hasBlocks ? 'block' : 'none';
+    persistAIReport(_lastAIReport);
+    updateAIReportBtnVisibility();
     const idx = _dailyAccum.findIndex(x => x.iso === parsed.iso);
     const entry = { iso: parsed.iso, label: parsed.label, csv: chosen, ts: Date.now(), needsCheck: needsCheck, category: _activeCategory };
     if (idx >= 0) _dailyAccum[idx] = entry;
@@ -8543,6 +8586,38 @@ function renderReport() {
 /* ═══════════════════════════════════════════
    v9.18.0 — ОТЧЁТ ИИ: РЕНДЕР МОДАЛКИ
    ═══════════════════════════════════════════ */
+/* v9.19.1: персистентность отчёта ИИ + управление кнопкой */
+const AI_REPORT_KEY = 'fbAuditLastReport';
+
+function persistAIReport(report) {
+  try {
+    if (report && report.hasBlocks) {
+      sessionStorage.setItem(AI_REPORT_KEY, JSON.stringify(report));
+    } else {
+      sessionStorage.removeItem(AI_REPORT_KEY);
+    }
+  } catch (e) {}
+}
+
+function clearPersistedAIReport() {
+  try { sessionStorage.removeItem(AI_REPORT_KEY); } catch (e) {}
+}
+
+function restoreAIReport() {
+  try {
+    const raw = sessionStorage.getItem(AI_REPORT_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) { return null; }
+}
+
+function updateAIReportBtnVisibility() {
+  const aiBtn = $('openAIReportBtn');
+  if (!aiBtn) return;
+  const has = _lastAIReport && _lastAIReport.hasBlocks;
+  aiBtn.classList.toggle('is-visible', !!has);
+}
+
 function openAIReport() {
   if (!_lastAIReport || !_lastAIReport.hasBlocks) {
     showToast('Отчёт ИИ пока пуст');
@@ -8554,6 +8629,10 @@ function openAIReport() {
 
 function closeAIReport() {
   closeModal('aiReportModal');
+  /* v9.19.1: на iOS после закрытия модалки что-то сбивает inline-стиль.
+     Пересчитываем дважды — сразу и через 400мс. */
+  setTimeout(() => { if (typeof updateAIReportBtnVisibility === 'function') updateAIReportBtnVisibility(); }, 50);
+  setTimeout(() => { if (typeof updateAIReportBtnVisibility === 'function') updateAIReportBtnVisibility(); }, 400);
 }
 
 function renderAIReportModal(report) {
@@ -9804,10 +9883,10 @@ function bindUI() {
       const cs = $('csvStatus'); if (cs) { cs.className = 'status'; cs.textContent = ''; }
       const ss = $('shareStatus'); if (ss) { ss.className = 'status'; ss.textContent = ''; }
 
-      /* v9.18.0: очистка отчёта ИИ */
+      /* v9.18.0/v9.19.1: очистка отчёта ИИ */
       _lastAIReport = null;
-      const aiBtn = $('openAIReportBtn');
-      if (aiBtn) aiBtn.style.display = 'none';
+      clearPersistedAIReport();
+      updateAIReportBtnVisibility();
 
       /* v9.16.0: очистка сверки */
       const cmp1 = $('cmpCsv1'); if (cmp1) cmp1.value = '';
@@ -10571,6 +10650,14 @@ function init() {
 
   setActiveCategory(_activeCategory);
   setActiveTab(loadActiveTab());
+
+  /* v9.19.1: восстанавливаем отчёт ИИ из sessionStorage */
+  const _savedAIReport = restoreAIReport();
+  if (_savedAIReport) {
+    _lastAIReport = _savedAIReport;
+    updateAIReportBtnVisibility();
+  }
+
   renderCheckSteps();
   renderTable();
   updateUnknownBanner();
@@ -10666,6 +10753,7 @@ function setActiveTab(tab) {
   if (tab === 'check' && typeof renderCheckSteps === 'function') {
     renderCheckSteps();
   }
+  if (typeof updateAIReportBtnVisibility === 'function') updateAIReportBtnVisibility();
   // При возврате на вкладку «График» — тихо обновить календарь, если давно не читали
   if (tab === 'history' && _profile && _profile.token && _calendarMonth) {
     const lastFetch = _historyCache[_calendarMonth] && _historyCache[_calendarMonth].fetchedAt;
@@ -10728,6 +10816,9 @@ function renderCheckSteps() {
     if (n < current) btn.classList.add('done');
     else if (n === current) btn.classList.add('active');
   });
+
+  /* v9.19.1: синхронизируем видимость кнопки отчёта */
+  if (typeof updateAIReportBtnVisibility === 'function') updateAIReportBtnVisibility();
 
   if (hintEl) {
     const hints = {
