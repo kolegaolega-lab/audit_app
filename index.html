@@ -1976,7 +1976,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.19.1';
+const APP_VERSION = 'v9.19.2';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -2080,6 +2080,9 @@ let _geminiTestImageCache = null;
 
 /* v9.18.0 — отчёт ИИ (постпроверки) */
 let _lastAIReport = null;
+/* v9.19.2: кеш элемента кнопки — избегаем лишних getElementById */
+let _aiReportBtnEl = null;
+let _aiReportBtnCached = false;
 
 /* === v9.9.0: профиль / точки / маршрут === */
 let _profile = null;
@@ -2870,6 +2873,8 @@ async function verifyToken(token) {
     const res = await fetchWithTimeout(`${GITHUB_API}/user`, { headers: { 'Authorization': `token ${token}` } }, 15000);
     if (res.ok) return 'ok';
     if (res.status === 401) return 'invalid';
+    /* v9.19.2: 403 — токен валиден, но нет прав (scope repo). Различаем. */
+    if (res.status === 403) return 'forbidden';
     return 'network';
   } catch (e) { return 'network'; }
 }
@@ -3121,6 +3126,7 @@ async function activateOwner() {
   const status = await verifyToken(token);
   if (btn) btn.classList.remove('busy');
   if (status === 'invalid') { if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Неверный токен'; } return; }
+  if (status === 'forbidden') { if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Токен без прав (нужен scope repo)'; } return; }
   if (status === 'network') { if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Нет связи с сервером'; } return; }
   try { localStorage.setItem(ACCESS_KEY, token); } catch (e) {}
   setOwnerMode(true);
@@ -3138,7 +3144,7 @@ async function restoreOwnerMode() {
     if (!token) return;
     const status = await verifyToken(token);
     if (status === 'ok') setOwnerMode(true);
-    else if (status === 'invalid') { try { localStorage.removeItem(ACCESS_KEY); } catch (e) {} setOwnerMode(false); }
+    else if (status === 'invalid' || status === 'forbidden') { try { localStorage.removeItem(ACCESS_KEY); } catch (e) {} setOwnerMode(false); }
   } catch (e) {}
 }
 
@@ -6228,7 +6234,8 @@ async function applyCSV() {
     if (!isValidCategory(_activeCategory)) throw new Error('Сначала выберите категорию.');
     const importedCategoryLabel = CATEGORY_LABELS[_activeCategory];
     _lastImportedCategory = _activeCategory;
-    _needsCheckNames = new Set();
+    /* v9.19.2: сохраняем ⚠-пометки из сверки — не сбрасываем при импорте.
+       Сброс остаётся только в clearBtn. */
     setProblemFilter(false);
     const csvInput = $('csvInput');
     if (!csvInput) throw new Error('Поле ввода не найдено.');
@@ -7049,14 +7056,54 @@ ${searchBlock}
 Цены и суммы в листе заказа НЕТ → арифметикой не проверить.
 Читай колонку 5 ГЛАЗАМИ, внимательно каждую строку.
 
-🔴 РУКОПИСНЫЕ ПОМЕТКИ В ЛИСТЕ ЗАКАЗА:
-  √ (галочка)               → игнорируй, бери печатное число.
-  зачёркнуто + новое число  → бери НОВОЕ (это исправление).
-  +N или -N рядом           → НЕ применяй. Пиши в #НЕЧИТАЕМО.
+🔴 РУКОПИСНЫЕ ПОМЕТКИ В ЛИСТЕ ЗАКАЗА — ЧИТАЙ И ПРИМЕНЯЙ.
+   Кладовщик при приёмке сверяет бумагу с фактом и вписывает
+   разницу от руки. Это ФАКТИЧЕСКОЕ количество, а не заметка.
 
-Названия:
-  - снимай префикс «Т » (пробел после Т);
-  - снимай суффикс «п/ф».
+   1. ГАЛОЧКА ✓ — отметка «проверено». ИГНОРИРУЙ.
+
+   2. ЧИСЛО СО ЗНАКОМ (+N или -N) рядом с печатным —
+      это расхождение с фактом.
+      ИТОГ = печатное + пометка.
+
+      Пример: Булочка с маком — печатное 2, пометка +2 → итог 4
+      Пример: Зерновой 450 гр — печатное 1, пометка +1 → итог 2
+      Пример: Чизкейк Чёрная смородина — печатное 2, +2 → итог 4
+      Пример: Салат с куриной грудкой — печатное 3, -1 → итог 2
+
+   3. ЗАЧЁРКНУТО печатное + ВПИСАНО от руки новое —
+      исправление бумажного количества.
+      Сначала взять новое число, потом применить пометку ±N, если есть.
+
+      Пример: печатное 1 зачёркнуто, вписано 3, пометка -1 → итог 2.
+
+   4. ВСЁ ЗАЧЁРКНУТО (каракули, отменённое исправление) —
+      взять печатное число. Молча, без пометок в #НЕЧИТАЕМО.
+
+   5. КАРАКУЛИ, загогулины без смысла — игнорируй МОЛЧА.
+
+🔴 ПОРЯДОК ДЛЯ КАЖДОЙ СТРОКИ:
+   шаг 1: взять печатное число из колонки 5
+   шаг 2: если зачёркнуто и вписано новое — взять новое
+   шаг 3: если есть ±N — прибавить или вычесть
+   шаг 4: результат — в CSV
+
+🔴 СТРОКИ ВНИЗУ ТАБЛИЦЫ.
+   Иногда под таблицей от руки дописаны позиции
+   (например: «Герман пирожное — 5»). Это ТОЖЕ приход,
+   привезли сверх заказа. ВКЛЮЧАЙ их в CSV как обычную
+   позицию с указанным количеством.
+
+🔴 НАЗВАНИЯ — очищай ВСЕГДА:
+  - снимай префикс «Т » (латинская Т + пробел в начале);
+  - снимай суффикс «п/ф» (с пробелом перед ним);
+  - снимай суффикс «полуфабрикат»;
+  - снимай уточнения в скобках: «(НОВАЯ)», «(Сырный)», «( Сырный )»;
+  - снимай хвосты: «650гр.», «1 кус.», «0,150 ГР», «310гр».
+
+  Примеры:
+    «Т Суп Фирменный ( Сырный ) п/ф»  → «Суп Фирменный»
+    «Бриошь с шоколадом п/ф»          → «Бриошь с шоколадом»
 
 ═══════════════════════════════════════════
 ЧТЕНИЕ ЧЕКА
@@ -7175,14 +7222,34 @@ ${searchBlock}
     Разница: <число>
     Статус: совпало / РАСХОЖДЕНИЕ
 
-🔴 :
-
 🔴 1. #РЯДЫ_ПОД_ПРОВЕРКОЙ — обязателен, если в накладной
-      есть ряды из 2+ строк с одинаковым первым словом.
+      есть ряды.
 
+🔴 ЧТО ТАКОЕ РЯД:
+   Это 2 ИЛИ БОЛЬШЕ СОСЕДНИХ СТРОК (подряд, не через позицию),
+   у которых СОВПАДАЕТ ПЕРВОЕ СЛОВО.
+
+   Пример ряда:
+     №21 Грилата с мясом
+     №22 Грилата с брынзой
+     №23 Грилата с картофелем
+     №24 Грилата с курицей
+   → ряд «Грилата» из 4 строк.
+
+   ❌ НЕ РЯД: строки, у которых совпадает только категория
+      («Суп», «Салат» — это группы), но первое слово разное.
+
+🔴 В #РЯДЫ_ПОД_ПРОВЕРКОЙ указывай ТОЛЬКО реальные ряды.
+   Если ряда нет — не пиши ничего.
+
+Формат:
 #РЯДЫ_ПОД_ПРОВЕРКОЙ:
   <первое слово>: <№1 название, К-во> | <№2 название, К-во> | ...
   Пример: Грилата: №21 мясо=15, №22 брынза=9, №23 картоф=15, №24 кур.филе=10
+
+   Эта таблица — доказательство, что ты читал каждую строку ряда
+   отдельно. Если в ней числа визуально «перепутаны» или
+   повторяются без причины — перечитай ряд ещё раз.
 
 🔴 2. #РАЗРЫВЫ — проверь связность нумерации строк по фото.
 
@@ -8612,9 +8679,16 @@ function restoreAIReport() {
 }
 
 function updateAIReportBtnVisibility() {
-  const aiBtn = $('openAIReportBtn');
+  /* v9.19.2: кешируем ссылку на элемент, чтобы не дёргать DOM */
+  if (!_aiReportBtnCached) {
+    _aiReportBtnEl = $('openAIReportBtn');
+    _aiReportBtnCached = true;
+  }
+  const aiBtn = _aiReportBtnEl;
   if (!aiBtn) return;
   const has = _lastAIReport && _lastAIReport.hasBlocks;
+  const isVisible = aiBtn.classList.contains('is-visible');
+  if (has === isVisible) return;  /* уже в нужном состоянии — не трогаем DOM */
   aiBtn.classList.toggle('is-visible', !!has);
 }
 
