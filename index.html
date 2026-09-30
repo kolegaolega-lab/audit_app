@@ -1977,7 +1977,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.19.8';
+const APP_VERSION = 'v9.19.9';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -2241,6 +2241,10 @@ function normalizeName(s) {
     .toLowerCase()
     .replace(/[\u200B-\u200D\uFEFF\u00AD]/g, '')
     .replace(/[«»""„"']/g, '')
+    /* v9.19.9: запятая между цифрами → точка (0,25 = 0.25) */
+    .replace(/(\d)\s*,\s*(\d)/g, '$1.$2')
+    /* v9.19.9: пробел перед скобкой убираем (Адреналин 0.25(12) = Адреналин 0.25 (12)) */
+    .replace(/\s+\(/g, '(')
     .replace(/[\u2010-\u2015\u2212]/g, '-')
     .replace(/\s+/g, ' ')
     .trim();
@@ -2797,6 +2801,9 @@ function parseCSV(text, referenceDate) {
        П/ф снимаем даже без пробела перед ним. */
     name = name.replace(/^[ТT]\s+/, '');
     name = name.replace(/\s*п\/ф\s*$/i, '').replace(/\s+полуфабрикат\s*$/i, '');
+    /* v9.19.9: снимаем хвосты «для набора» — они плодят дубли
+       («Чизкейк орео» vs «Чизкейк орео, для набора») */
+    name = name.replace(/[,\s]+для\s+набора\s*$/i, '');
     name = name.trim();
     if (!name) continue;
     if (name.startsWith('#')) continue;
@@ -9039,6 +9046,8 @@ function cmpParseCSV(text) {
        при «Применить в таблицу». */
     name = name.replace(/^[ТT]\s+/, '');
     name = name.replace(/\s*п\/ф\s*$/i, '').replace(/\s+полуфабрикат\s*$/i, '');
+    /* v9.19.9: снимаем хвосты «для набора» */
+    name = name.replace(/[,\s]+для\s+набора\s*$/i, '');
     name = name.trim();
     if (!name) continue;
     if (/^[-–—•·*]/.test(name)) continue;
