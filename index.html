@@ -8151,6 +8151,379 @@ function parseAIReport(rawText) {
   };
 }
 
+/* ═══════════════════════════════════════════
+   v9.20.0 — ВАЛИДАЦИЯ ОТВЕТА ИИ
+   5 проверок на клиенте. Ловят самые частые
+   ошибки модели: расхождение блоков, потерянные
+   фото/накладные, опечатки в датах.
+   Не блокируют применение — только показывают.
+   ═══════════════════════════════════════════ */
+
+/* Считает строки данных в CSV (без заголовка и сервисных #-блоков). */
+function countCsvRows(csvText) {
+  if (!csvText) return 0;
+  const lines = String(csvText).split(/\r?\n/);
+  let count = 0;
+  let headerFound = false;
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t) continue;
+    if (t.startsWith('#')) continue;
+    if (!headerFound) {
+      if (/наимен/i.test(t) && t.includes(';')) headerFound = true;
+      continue;
+    }
+    if (t.includes(';')) count++;
+  }
+  return count;
+}
+
+/* Считает колонки «Получено за …» в шапке CSV. */
+function countCsvDateColumns(csvText) {
+  if (!csvText) return 0;
+  const lines = String(csvText).split(/\r?\n/);
+  let header = '';
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t) continue;
+    if (t.startsWith('#')) continue;
+    if (/наимен/i.test(t)) { header = t; break; }
+  }
+  if (!header) return 0;
+  return (header.match(/Получено\s+за/gi) || []).length;
+}
+
+/* Расстояние Левенштейна (для fuzzy-матча опечаток). */
+function _levenshtein(a, b) {
+  a = String(a || ''); b = String(b || '');
+  if (a === b) return 0;
+  const al = a.length, bl = b.length;
+  if (!al) return bl;
+  if (!bl) return al;
+  let prev = new Array(bl + 1);
+  let cur = new Array(bl + 1);
+  for (let j = 0; j <= bl; j++) prev[j] = j;
+  for (let i = 1; i <= al; i++) {
+    cur[0] = i;
+    for (let j = 1; j <= bl; j++) {
+      const cost = a.charCodeAt(i - 1) === b.charCodeAt(j - 1) ? 0 : 1;
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+    }
+    const tmp = prev; prev = cur; cur = tmp;
+  }
+  return prev[bl];
+}
+
+/* Извлекает [{name, qty}] из #ПОСТРОЧНО (для проверок 8-9). */
+function _postrochnoRows(report) {
+  if (!report || !report.postrochno) return [];
+  return report.postrochno.map(r => ({
+    num: r.num, name: r.name, qty: r.qty, price: r.price, sum: r.sum, ok: r.ok
+  }));
+}
+
+function validateAIResponse(csv1, csv2, report, photoCount) {
+  const csvText = csv1 || '';
+  const issues = [];
+  if (!report || !report.hasBlocks) return { overall: 'ok', issues: [] };
+
+  /* --- 1. Σ #ПОСТРОЧНО vs печатный итог #СВЕРКА --- */
+  try {
+    if (report.postrochno && report.postrochno.length &&
+        report.checks && report.checks.length) {
+      const sumFromRows = report.postrochno.reduce((s, r) => s + (r.sum || 0), 0);
+      const printedCheck = report.checks.find(c => c.printed);
+      if (printedCheck) {
+        const printed = Number(
+          String(printedCheck.printed).replace(/[^\d.,-]/g, '').replace(',', '.')
+        );
+        if (isFinite(printed) && printed > 0) {
+          const diff = Math.abs(sumFromRows - printed);
+          const tol = Math.max(0.5, printed * 0.01);
+          if (diff > tol) {
+            issues.push({
+              level: 'error',
+              code: 'sum-mismatch',
+              title: 'Σ построчной не сходится с печатным итогом',
+              detail: 'Сумма по #ПОСТРОЧНО: ' + sumFromRows.toFixed(2) +
+                      ' ₽. Печатный итог по #СВЕРКА: ' + printed.toFixed(2) +
+                      ' ₽. Разница: ' + diff.toFixed(2) + ' ₽. Модель противоречит сама себе.'
+            });
+          }
+        }
+      }
+    }
+  } catch (e) { console.warn('validate: sum-mismatch', e); }
+
+  /* --- 2. #ПОСТРОЧНО строк > CSV строк --- */
+  try {
+    if (report.postrochno && report.postrochno.length) {
+      const csvRowCount = countCsvRows(csvText);
+      if (csvRowCount > 0 && report.postrochno.length > csvRowCount) {
+        issues.push({
+          level: 'error',
+          code: 'postrochno-more-than-csv',
+          title: 'В #ПОСТРОЧНО больше строк, чем в CSV',
+          detail: 'Построчная: ' + report.postrochno.length +
+                  ' строк. CSV: ' + csvRowCount +
+                  ' строк. Модель перечислила позиции, которых нет в итоговой таблице.'
+        });
+      }
+    }
+  } catch (e) { console.warn('validate: postrochno-more-than-csv', e); }
+
+  /* --- 3. #ИСТОЧНИКИ vs колонки дат в CSV --- */
+  try {
+    const srcBlock = report.blocks && report.blocks['ИСТОЧНИКИ'];
+    if (srcBlock) {
+      const naklCount = (srcBlock.match(/(ТОРГ-?12|Лист\s+заказа|Накладная)/gi) || []).length;
+      const csvDateCols = countCsvDateColumns(csvText);
+      if (naklCount > 0 && csvDateCols > 0 && naklCount > csvDateCols) {
+        issues.push({
+          level: 'error',
+          code: 'sources-more-than-columns',
+          title: 'Накладных в #ИСТОЧНИКИ больше, чем колонок дат в CSV',
+          detail: 'В источниках: ' + naklCount + ' накладных. В CSV: ' +
+                  csvDateCols + ' колонок «Получено за». Одна или несколько потеряны.'
+        });
+      }
+    }
+  } catch (e) { console.warn('validate: sources-more-than-columns', e); }
+
+  /* --- 4. Фото vs #ПРОВЕРКА_ПОЛНОТЫ --- */
+  try {
+    if (photoCount > 0 && report.completeness && report.completeness.received > 0) {
+      const recv = report.completeness.received;
+      if (photoCount > recv) {
+        issues.push({
+          level: 'error',
+          code: 'photos-lost',
+          title: 'Модель обработала меньше фото, чем загружено',
+          detail: 'Загружено файлов: ' + photoCount + '. Модель учла: ' + recv +
+                  '. ' + (photoCount - recv) + ' не попали в ответ.'
+        });
+      }
+    }
+  } catch (e) { console.warn('validate: photos-lost', e); }
+
+  /* --- 5. Даты вне окна ±30 дней --- */
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const minDate = new Date(today); minDate.setDate(minDate.getDate() - 30);
+    const maxDate = new Date(today); maxDate.setDate(maxDate.getDate() + 1);
+    const badDates = [];
+    const text = String(csvText || '');
+    const re = /Получено\s+за\s+(\d{1,2})[.\-\/](\d{1,2})(?:[.\-\/](\d{2,4}))?/gi;
+    const seen = new Set();
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      const day = parseInt(m[1], 10);
+      const month = parseInt(m[2], 10);
+      if (day < 1 || day > 31 || month < 1 || month > 12) continue;
+      let year = m[3] ? parseInt(m[3], 10) : today.getFullYear();
+      if (year < 100) year += 2000;
+      const key = day + '.' + month + '.' + year;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const d = new Date(year, month - 1, day);
+      if (isNaN(d.getTime())) continue;
+      if (d < minDate || d > maxDate) {
+        badDates.push(
+          String(day).padStart(2, '0') + '.' +
+          String(month).padStart(2, '0') +
+          (m[3] ? '.' + year : '')
+        );
+      }
+    }
+    if (badDates.length) {
+      issues.push({
+        level: 'warn',
+        code: 'date-out-of-range',
+        title: 'Даты вне окна ±30 дней',
+        detail: 'Найдены даты: ' + badDates.join(', ') +
+                '. Возможно, опечатка в месяце или годе.'
+      });
+    }
+  } catch (e) { console.warn('validate: date-out-of-range', e); }
+
+  /* --- 6. Клиентский пересчёт Σ vs печатный итог --- */
+  try {
+    const printedCheck = report.checks && report.checks.find(c => c.printed);
+    if (printedCheck && report.postrochno && report.postrochno.length) {
+      const printed = Number(
+        String(printedCheck.printed).replace(/[^\d.,-]/g, '').replace(',', '.')
+      );
+      if (isFinite(printed) && printed > 0 && typeof PRICES === 'object') {
+        /* Пересчитываем по клиентским ценам (PRICES). */
+        let mySum = 0;
+        let priced = 0;
+        let unpriced = 0;
+        for (const r of report.postrochno) {
+          const clientPrice = getPriceFor(r.name);
+          if (clientPrice > 0 && r.qty > 0) {
+            mySum += r.qty * clientPrice;
+            priced++;
+          } else if (r.qty > 0) {
+            unpriced++;
+          }
+        }
+        if (priced > 0 && unpriced === 0) {
+          const diff = Math.abs(mySum - printed);
+          const tol = Math.max(1, printed * 0.02);
+          if (diff > tol) {
+            issues.push({
+              level: 'warn',
+              code: 'client-price-mismatch',
+              title: 'Σ по клиентским ценам ≠ печатный итог',
+              detail: 'Пересчёт по ценам справочника: ' + mySum.toFixed(2) +
+                      ' ₽. Печатный итог: ' + printed.toFixed(2) +
+                      ' ₽. Разница: ' + diff.toFixed(2) +
+                      ' ₽. Возможна ошибка чтения цен или количеств.'
+            });
+          }
+        }
+      }
+    }
+  } catch (e) { console.warn('validate: client-price-mismatch', e); }
+
+  /* --- 7. Fuzzy-справочник: опечатки в названиях --- */
+  try {
+    if (typeof PRODUCTS !== 'undefined' && Array.isArray(PRODUCTS) && PRODUCTS.length) {
+      const csvNames = [];
+      const lines = String(csvText).split(/\r?\n/);
+      let headerFound = false;
+      for (const line of lines) {
+        const t = line.trim();
+        if (!t || t.startsWith('#')) continue;
+        if (!headerFound) { if (/наимен/i.test(t)) headerFound = true; continue; }
+        const firstCol = t.split(';')[0].replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+        if (firstCol && firstCol.length >= 4) csvNames.push(firstCol);
+      }
+      const uniq = [...new Set(csvNames)];
+      const productKeys = PRODUCTS.map(p => ({ name: p.name, key: normalizeName(p.name) }));
+      const suggestions = [];
+      for (const cn of uniq) {
+        const cnKey = normalizeName(cn);
+        /* Уже в справочнике — пропускаем. */
+        if (productKeys.some(pk => pk.key === cnKey)) continue;
+        /* Ищем ближайшее по Левенштейну. */
+        let best = null, bestDist = 999;
+        for (const pk of productKeys) {
+          if (Math.abs(pk.key.length - cnKey.length) > 2) continue;
+          const d = _levenshtein(cnKey, pk.key);
+          if (d < bestDist) { bestDist = d; best = pk.name; }
+        }
+        if (best && bestDist > 0 && bestDist <= 2) {
+          suggestions.push(cn + ' → ' + best);
+        }
+      }
+      if (suggestions.length) {
+        const show = suggestions.slice(0, 5);
+        issues.push({
+          level: 'warn',
+          code: 'fuzzy-catalog',
+          title: 'Возможные опечатки в названиях',
+          detail: show.join(' · ') + (suggestions.length > 5 ? ' …и ещё ' + (suggestions.length - 5) : '')
+        });
+      }
+    }
+  } catch (e) { console.warn('validate: fuzzy-catalog', e); }
+
+  /* --- 8. Выбросы количеств (медиана × 10) --- */
+  try {
+    const rows = _postrochnoRows(report);
+    const qtys = rows.map(r => r.qty).filter(q => q > 0).sort((a, b) => a - b);
+    if (qtys.length >= 5) {
+      const median = qtys[Math.floor(qtys.length / 2)];
+      if (median >= 3) {
+        const outliers = rows.filter(r => r.qty > median * 10 && r.qty >= 20);
+        if (outliers.length) {
+          const show = outliers.slice(0, 3).map(r => '«' + r.name + '» (' + r.qty + ')');
+          issues.push({
+            level: 'warn',
+            code: 'qty-outliers',
+            title: 'Аномально большие количества',
+            detail: 'Медиана: ' + median + '. Выделяются: ' + show.join(', ') +
+                    (outliers.length > 3 ? ' …и ещё ' + (outliers.length - 3) : '') +
+                    '. Возможна опечатка (лишний ноль, слипание с соседней строкой).'
+          });
+        }
+      }
+    }
+  } catch (e) { console.warn('validate: qty-outliers', e); }
+
+  /* --- 9. Возможная путаница цифр (6↔8, 3↔8, 5↔6, 1↔7, 0↔8) --- */
+  try {
+    const rows = _postrochnoRows(report);
+    const suspects = [];
+    for (const r of rows) {
+      if (!r.price || r.price <= 0 || !r.qty || !r.sum) continue;
+      /* Идеальное количество из суммы. */
+      const idealQty = Math.round(r.sum / r.price);
+      if (idealQty === r.qty || idealQty <= 0) continue;
+      /* Разница ровно на единицу-двойку и одна цифра похожа на другую. */
+      const diff = Math.abs(idealQty - r.qty);
+      if (diff > 2) continue;
+      const qStr = String(r.qty);
+      const iStr = String(idealQty);
+      if (qStr.length !== iStr.length) continue;
+      let similarPairs = 0;
+      for (let i = 0; i < qStr.length; i++) {
+        const a = qStr[i], b = iStr[i];
+        if (a === b) continue;
+        const isPair =
+          (a === '6' && b === '8') || (a === '8' && b === '6') ||
+          (a === '3' && b === '8') || (a === '8' && b === '3') ||
+          (a === '5' && b === '6') || (a === '6' && b === '5') ||
+          (a === '1' && b === '7') || (a === '7' && b === '1') ||
+          (a === '0' && b === '8') || (a === '8' && b === '0');
+        if (isPair) similarPairs++;
+        else { similarPairs = -1; break; }
+      }
+      if (similarPairs === 1) {
+        suspects.push(r.name + ': ' + r.qty + ' → возможно ' + idealQty);
+      }
+    }
+    if (suspects.length) {
+      issues.push({
+        level: 'warn',
+        code: 'digit-confusion',
+        title: 'Возможная путаница цифр при чтении',
+        detail: suspects.slice(0, 4).join(' · ') +
+                (suspects.length > 4 ? ' …и ещё ' + (suspects.length - 4) : '')
+      });
+    }
+  } catch (e) { console.warn('validate: digit-confusion', e); }
+
+  /* --- 10. Разное количество строк между прогонами --- */
+  try {
+    if (csv1 && csv2) {
+      const n1 = countCsvRows(csv1);
+      const n2 = countCsvRows(csv2);
+      if (n1 > 0 && n2 > 0 && n1 !== n2) {
+        issues.push({
+          level: 'warn',
+          code: 'run-count-diff',
+          title: 'Прогоны вернули разное количество строк',
+          detail: 'Прогон 1: ' + n1 + ' строк. Прогон 2: ' + n2 +
+                  ' строк. Разница: ' + Math.abs(n1 - n2) +
+                  '. Один из прогонов что-то потерял или добавил.'
+        });
+      }
+    }
+  } catch (e) { console.warn('validate: run-count-diff', e); }
+
+  /* --- Сводный уровень --- */
+  let overall = 'ok';
+  const hasError = issues.some(i => i.level === 'error');
+  const hasWarn = issues.some(i => i.level === 'warn');
+  if (hasError) overall = 'error';
+  else if (hasWarn) overall = 'warn';
+
+  return { overall, issues };
+}
+
 /* Короткая сводка отчёта для индикатора в статусе */
 function summarizeAIReport(report) {
   if (!report || !report.hasBlocks) return null;
@@ -8195,6 +8568,20 @@ function summarizeAIReport(report) {
         text: 'Построчная проверка: ' + bad.length + ' ' +
               (bad.length === 1 ? 'строка не сходится' : 'строк не сходится') +
               ' (К-во × Цена ≠ Сумма)'
+      });
+      hasBlockingIssue = true;
+    }
+  }
+
+  /* v9.20.0: клиентская валидация ответа */
+  if (report.validation && report.validation.issues && report.validation.issues.length) {
+    const errs = report.validation.issues.filter(i => i.level === 'error');
+    if (errs.length) {
+      issues.push({
+        type: 'error',
+        text: errs.length + ' ' +
+              pluralize(errs.length, 'критичная ошибка', 'критичные ошибки', 'критичных ошибок') +
+              ' в ответе ИИ'
       });
       hasBlockingIssue = true;
     }
@@ -8327,6 +8714,15 @@ async function recognizeWithGemini() {
 
     /* v9.18.0/v9.19.1: сохраняем отчёт ИИ и обновляем кнопку */
     _lastAIReport = parseAIReport(primaryCsv);
+    /* v9.20.0: валидация ответа ИИ на клиенте */
+    if (_lastAIReport) {
+      _lastAIReport.validation = validateAIResponse(
+        csv1 || csv2 || '',
+        (csv1 && csv2) ? csv2 : '',
+        _lastAIReport,
+        items.length
+      );
+    }
     persistAIReport(_lastAIReport);
     updateAIReportBtnVisibility();
 
@@ -8582,6 +8978,15 @@ async function recognizeDaily() {
     const chosen = csv1 || csv2;
     const needsCheck = !!(csv1 && csv2 && !bothMatch);
     _lastAIReport = parseAIReport(chosen);
+    /* v9.20.0: валидация ответа ИИ на клиенте */
+     if (_lastAIReport) {
+      _lastAIReport.validation = validateAIResponse(
+        csv1 || csv2 || '',
+        (csv1 && csv2) ? csv2 : '',
+        _lastAIReport,
+        items.length
+      );
+    }
     persistAIReport(_lastAIReport);
     updateAIReportBtnVisibility();
     const idx = _dailyAccum.findIndex(x => x.iso === parsed.iso);
@@ -9166,6 +9571,35 @@ function renderAIReportModal(report) {
   }
 
   let html = '';
+
+  /* ── Секция 0: Проверки ответа (v9.20.0) ── */
+  if (report.validation && report.validation.issues && report.validation.issues.length) {
+    const errs = report.validation.issues.filter(i => i.level === 'error');
+    const warns = report.validation.issues.filter(i => i.level === 'warn');
+    const subParts = [];
+    if (errs.length) subParts.push('<span style="color:var(--red);font-weight:600">' + errs.length + ' критичных</span>');
+    if (warns.length) subParts.push('<span style="color:var(--orange);font-weight:600">' + warns.length + ' замечаний</span>');
+    html +=
+      '<div class="sheet-section">' +
+        '<div class="sheet-section-header">' +
+          '<h2>Проверки ответа</h2>' +
+          '<p class="desc">' + subParts.join(' · ') + '</p>' +
+        '</div>' +
+        '<div class="sheet-section-body">';
+    [...errs, ...warns].forEach(it => {
+      const cls = it.level === 'error' ? 'error' : 'warn';
+      const icon = it.level === 'error' ? '✗' : '⚠';
+      html +=
+        '<div class="ai-issue-row ' + cls + '">' +
+          '<span class="ai-issue-icon">' + icon + '</span>' +
+          '<span class="ai-issue-body">' +
+            '<b>' + escapeHtml(it.title) + '</b><br>' +
+            escapeHtml(it.detail) +
+          '</span>' +
+        '</div>';
+    });
+    html += '</div></div>';
+  }
 
   /* ── Секция 1: Проблемы (если есть) ── */
   if (summary && !summary.ok) {
