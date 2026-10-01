@@ -1241,7 +1241,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
           <span class="sq" style="background:var(--bg-elev-2);color:var(--text-secondary)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
           О приложении
         </span>
-        <span class="lval" id="moreAppVersion">v9.20.1</span>
+        <span class="lval" id="moreAppVersion">v9.20.2</span>
         <span class="chev">›</span>
       </button>
     </div>
@@ -1897,7 +1897,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
   <div class="modal-content">
     <div class="modal-header">
       <h3>О приложении</h3>
-      <p class="hint" id="aboutVersion">French Bakery Аудит · v9.20.1</p>
+      <p class="hint" id="aboutVersion">French Bakery Аудит · v9.20.2</p>
     </div>
     <div class="modal-body">
       <p class="hint" style="margin:0 0 12px">PWA для аудита сроков годности в кондитерской French Bakery.</p>
@@ -1977,7 +1977,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.20.1';
+const APP_VERSION = 'v9.20.2';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -7198,6 +7198,20 @@ ${searchBlock}
   🔴 M ДОЛЖНО РАВНЯТЬСЯ N.
      Если M < N — объясни, какие изображения пропущены и почему.
 
+  🔴 ЗАПРЕЩЕНО ПОМЕЧАТЬ ФОТО КАК «ДУБЛЬ», «ЧЕРНОВИК», «ПОВТОР».
+     Накладные могут быть похожи по составу — это НЕ означает, что
+     они одинаковые. Сравнивай по НОМЕРУ и ДАТЕ:
+       - Если № или дата разные — это РАЗНЫЕ накладные. Обработай ОБЕ.
+       - Если № и дата совпадают полностью — это действительно
+         одно и то же фото. Обработай его ОДИН раз, а в
+         #ПРОВЕРКА_ПОЛНОТЫ напиши явно:
+           «Изображение N — дубль изображения M (тот же документ)».
+
+  🔴 КАЖДАЯ НАЙДЕННАЯ НАКЛАДНАЯ ДОЛЖНА ПОПАСТЬ В #ИСТОЧНИКИ.
+     Если в #ПРОВЕРКА_ПОЛНОТЫ упомянута накладная №X, её №X
+     обязан быть в #ИСТОЧНИКИ, #ПОСТРОЧНО и #СВЕРКА.
+     Пропускать накладные из-за внешнего сходства — запрещено.
+
 🔴 4. #ИСТОЧНИКИ — перечисли все файлы.
 #ИСТОЧНИКИ:
   - Чек продаж (точка/касса) от ДД.ММ
@@ -8063,17 +8077,32 @@ function parseAIReport(rawText) {
   }
 
   /* --- Парсинг #ПРОВЕРКА_ПОЛНОТЫ --- */
+  /* v9.20.1: считаем полноту только по изображениям.
+     Модель может написать «Получено: 15 позиций» — это не фото,
+     такие строки игнорируем. Приоритет:
+       1. Явная формулировка «Получено: N изображений/фото/файлов».
+       2. Подсчёт строк «Изображение N:» / «Фото N:» / «Файл N:». */
   let completeness = null;
   if (blocks['ПРОВЕРКА_ПОЛНОТЫ']) {
     const content = blocks['ПРОВЕРКА_ПОЛНОТЫ'];
-    const recvMatch = content.match(/Получено[:\s]+(\d+)/i);
-    const procMatch = content.match(/обработано[:\s]+(\d+)/i);
+    const recvMatch = content.match(/Получено[:\s]+(\d+)\s*(изображени|фото|файл)/i);
+    const procMatch = content.match(/обработано[:\s]+(\d+)\s*(изображени|фото|файл)/i);
     if (recvMatch) {
       completeness = {
         received: parseInt(recvMatch[1], 10),
         processed: procMatch ? parseInt(procMatch[1], 10) : null,
         raw: content
       };
+    } else {
+      /* Подсчёт строк-заголовков изображений. */
+      const imageLines = content.match(/^[ \t]*(?:Изображение|Фото|Файл)\s+\d+\s*[:\-]/gim);
+      if (imageLines && imageLines.length > 0) {
+        completeness = {
+          received: imageLines.length,
+          processed: imageLines.length,
+          raw: content
+        };
+      }
     }
   }
 
@@ -8578,6 +8607,60 @@ function validateAIResponse(csv1, csv2, report, photoCount) {
       }
     }
   } catch (e) { console.warn('validate: run-count-diff', e); }
+
+  /* --- 11. Модель пометила фото как «дубль/черновик» --- */
+  try {
+    const fpBlock = report.blocks && report.blocks['ПРОВЕРКА_ПОЛНОТЫ'];
+    if (fpBlock) {
+      const dupRe = /(дубл[ья]|черновик|повтор|та\s+же\s+накладная|тот\s+же\s+документ)/gi;
+      const matches = fpBlock.match(dupRe);
+      if (matches && matches.length) {
+        const uniq = [...new Set(matches.map(s => s.toLowerCase().trim()))];
+        issues.push({
+          level: 'warn',
+          code: 'duplicate-marked',
+          title: 'Модель пометила фото как «дубль/черновик»',
+          detail: 'Найдены пометки: ' + uniq.join(', ') +
+                  '. Проверь по номерам и датам — если это разные ' +
+                  'документы, они потеряны из CSV. Если действительно ' +
+                  'один и тот же — всё в порядке.'
+        });
+      }
+    }
+  } catch (e) { console.warn('validate: duplicate-marked', e); }
+
+  /* --- 12. Номера накладных в #ПРОВЕРКА_ПОЛНОТЫ, но не в других блоках --- */
+  try {
+    const fpBlock = report.blocks && report.blocks['ПРОВЕРКА_ПОЛНОТЫ'];
+    const srcBlock = report.blocks && report.blocks['ИСТОЧНИКИ'];
+    if (fpBlock) {
+      /* Собираем номера накладных из полноты. */
+      const reFull = /накладная\s+(?:№\s*)?([0-9]{4,})/gi;
+      const numsFull = new Set();
+      let m;
+      while ((m = reFull.exec(fpBlock)) !== null) {
+        numsFull.add(String(m[1]).trim());
+      }
+      /* Объединяем всё остальное, что модель написала про накладные. */
+      const src = [srcBlock || '',
+                   report.blocks['ПОСТРОЧНО'] || '',
+                   report.blocks['СВЕРКА'] || ''].join(' ');
+      const lost = [];
+      for (const num of numsFull) {
+        if (src.indexOf(num) < 0) lost.push(num);
+      }
+      if (lost.length) {
+        issues.push({
+          level: 'error',
+          code: 'nakl-lost',
+          title: 'Накладная упомянута в #ПРОВЕРКА_ПОЛНОТЫ, но пропущена в данных',
+          detail: 'Номера: ' + lost.map(n => '№' + n).join(', ') +
+                  '. Модель их видела, но не включила в #ИСТОЧНИКИ, ' +
+                  '#ПОСТРОЧНО или #СВЕРКА. Данные потеряны.'
+        });
+      }
+    }
+  } catch (e) { console.warn('validate: nakl-lost', e); }
 
   /* --- Сводный уровень --- */
   let overall = 'ok';
