@@ -5,7 +5,7 @@
 
 'use strict';
 
-const SW_VERSION = 'v87.35';
+const SW_VERSION = 'v87.36';
 const CACHE_SHELL = 'fb-audit-' + SW_VERSION;
 const CACHE_RUNTIME = 'fb-audit-runtime-' + SW_VERSION;
 const CACHE_MAX_ENTRIES = 80;
