@@ -1977,7 +1977,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.21.1';
+const APP_VERSION = 'v9.21.2';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -9197,13 +9197,37 @@ function mergeSeparatedOCRCsv(invoiceCsv, salesCsv, dateLabel) {
   const sal = salesCsv ? cmpParseCSV(salesCsv) : null;
   if (!inv && !sal) throw new Error('Оба OCR-результата пустые.');
 
-  /* v9.21.1:
+  /* v9.21.2:
      КАЖДАЯ ДАТА ПРИХОДА — НЕЗАВИСИМОЕ ЗНАЧЕНИЕ.
      Здесь формируется CSV только для dateLabel, поэтому нельзя
      складывать значения из других колонок «Получено за».
-     Если нужной даты нет, ставим 0 и НЕ подменяем её другой датой. */
+
+     Итоговая строка строится по СПРАВОЧНИКУ активной категории,
+     а OCR только заполняет значения:
+       • есть в накладной + нет в чеке → приход = фактический, продажи = 0;
+       • нет в накладной + есть в чеке → приход = 0, продажи = фактические;
+       • есть и там и там → заполняем оба значения;
+       • нет ни там ни там → и приход, и продажи = 0.
+     FIFO и расчёт сроков здесь не изменяются. */
   const targetDate = String(dateLabel || '').trim();
   const all = new Map();
+
+  /* Сначала создаём все позиции из справочника. Это гарантирует
+     наличие строки даже при полном отсутствии товара в обоих OCR. */
+  const catalogProducts = getCategoryProducts(_activeCategory);
+  const sourceProducts = catalogProducts.length ? catalogProducts : PRODUCTS;
+
+  sourceProducts.forEach(prod => {
+    if (!prod || !prod.name) return;
+    const key = normalizeName(prod.name);
+    if (!key || isIgnored(prod.name)) return;
+    all.set(key, {
+      name: prod.name,
+      incoming: 0,
+      sales: 0,
+      hasTargetDate: false
+    });
+  });
 
   const add = (src, kind) => {
     if (!src) return;
@@ -9214,7 +9238,9 @@ function mergeSeparatedOCRCsv(invoiceCsv, salesCsv, dateLabel) {
       const k = normalizeName(name);
       if (!k) return;
 
-      if (!all.has(k)) all.set(k, { name, incoming: 0, sales: 0, hasTargetDate: false });
+      if (!all.has(k)) {
+        all.set(k, { name, incoming: 0, sales: 0, hasTargetDate: false });
+      }
       const out = all.get(k);
 
       if (kind === 'invoice') {
@@ -9238,7 +9264,7 @@ function mergeSeparatedOCRCsv(invoiceCsv, salesCsv, dateLabel) {
   ];
 
   [...all.values()].sort((a,b) => a.name.localeCompare(b.name, 'ru')).forEach(r => {
-    if (!r.name || (r.incoming === 0 && r.sales === 0 && !r.hasTargetDate)) return;
+    if (!r.name) return;
     const safe = /[;"\n]/.test(r.name) ? '"' + r.name.replace(/"/g, '""') + '"' : r.name;
     const prod = PRODUCTS.find(p => normalizeName(p.name) === normalizeName(r.name));
     const shelf = prod && prod.shelfLife != null ? prod.shelfLife : '';
@@ -9246,7 +9272,6 @@ function mergeSeparatedOCRCsv(invoiceCsv, salesCsv, dateLabel) {
   });
   return lines.join('\n');
 }
-
 function buildSeparatedOCRPrompt(dateLabel, docType) {
   const { list: catalogList } = buildCatalogListForPrompt();
   const isInvoice = docType === 'invoice';
