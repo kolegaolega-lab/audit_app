@@ -9197,7 +9197,14 @@ function mergeSeparatedOCRCsv(invoiceCsv, salesCsv, dateLabel) {
   const sal = salesCsv ? cmpParseCSV(salesCsv) : null;
   if (!inv && !sal) throw new Error('Оба OCR-результата пустые.');
 
+  /* v9.21.1:
+     КАЖДАЯ ДАТА ПРИХОДА — НЕЗАВИСИМОЕ ЗНАЧЕНИЕ.
+     Здесь формируется CSV только для dateLabel, поэтому нельзя
+     складывать значения из других колонок «Получено за».
+     Если нужной даты нет, ставим 0 и НЕ подменяем её другой датой. */
+  const targetDate = String(dateLabel || '').trim();
   const all = new Map();
+
   const add = (src, kind) => {
     if (!src) return;
     src.order.forEach(key => {
@@ -9206,23 +9213,32 @@ function mergeSeparatedOCRCsv(invoiceCsv, salesCsv, dateLabel) {
       const name = row.name;
       const k = normalizeName(name);
       if (!k) return;
-      if (!all.has(k)) all.set(k, { name, incoming: 0, sales: 0 });
+
+      if (!all.has(k)) all.set(k, { name, incoming: 0, sales: 0, hasTargetDate: false });
       const out = all.get(k);
+
       if (kind === 'invoice') {
-        out.incoming += Object.values(row.incoming || {}).reduce((s, v) => s + (Number(v) || 0), 0);
+        const incoming = row.incoming || {};
+        const targetKey = Object.keys(incoming).find(d => String(d) === targetDate);
+        if (targetKey != null) {
+          out.incoming = Number(incoming[targetKey]) || 0;
+          out.hasTargetDate = true;
+        }
       } else {
-        out.sales += Number(row.sales) || 0;
+        out.sales = Number(row.sales) || 0;
       }
     });
   };
+
   add(inv, 'invoice');
   add(sal, 'sales');
 
   const lines = [
-    ['Наименование', 'Продано сегодня', 'Получено за ' + dateLabel, 'Срок годности'].join(';')
+    ['Наименование', 'Продано сегодня', 'Получено за ' + targetDate, 'Срок годности'].join(';')
   ];
+
   [...all.values()].sort((a,b) => a.name.localeCompare(b.name, 'ru')).forEach(r => {
-    if (!r.name || (r.incoming === 0 && r.sales === 0)) return;
+    if (!r.name || (r.incoming === 0 && r.sales === 0 && !r.hasTargetDate)) return;
     const safe = /[;"\n]/.test(r.name) ? '"' + r.name.replace(/"/g, '""') + '"' : r.name;
     const prod = PRODUCTS.find(p => normalizeName(p.name) === normalizeName(r.name));
     const shelf = prod && prod.shelfLife != null ? prod.shelfLife : '';
@@ -9249,7 +9265,8 @@ function buildSeparatedOCRPrompt(dateLabel, docType) {
       'Фото без шапки присоединяй к предыдущей накладной по сквозной нумерации.',
       'Рукописные пометки в ТОРГ-12 игнорируй. В листе заказа рукописное количество вынеси в #РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ.',
       'Не переносить количество между соседними похожими строками.',
-      'В CSV приход ставь только из реально прочитанных документов за ' + dateLabel + '. Продано сегодня = 0.'
+      'В CSV приход ставь только из реально прочитанных документов за ' + dateLabel + '. Продано сегодня = 0.',
+      'КРИТИЧНО: «Получено за ' + dateLabel + '» содержит ТОЛЬКО приход этой даты. Никогда не суммируй в него приходы 01.10, 02.10 и других дат. Приходы разных дат — отдельные независимые значения. Если документа за ' + dateLabel + ' нет или его количество не читается, не подставляй количество из другой даты.'
     ].join('\n') : [
       'Читай только строки товаров чека iiko.',
       'Если строка имеет «К-во × Цена = Сумма», первое число = количество.',
