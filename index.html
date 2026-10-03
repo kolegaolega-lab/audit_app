@@ -8180,6 +8180,20 @@ function parseAIReport(rawText) {
     gaps = { hasGap, noGaps, raw: content };
   }
 
+  /* --- Парсинг #РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ --- */
+  let handwrittenConfirmation = null;
+  if (blocks['РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ']) {
+    const content = String(blocks['РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ'] || '').trim();
+    const cleaned = content
+      .replace(/#\s*[А-ЯЁ_]+\s*:?/g, '')
+      .replace(/[—–\-]+/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+    const isEmpty = !cleaned || /^пусто\.?$/.test(cleaned);
+    handwrittenConfirmation = { isEmpty, raw: content };
+  }
+
   /* --- Парсинг #НЕЧИТАЕМО --- */
   let unreadable = null;
   if (blocks['НЕЧИТАЕМО']) {
@@ -8238,6 +8252,7 @@ function parseAIReport(rawText) {
     completeness,
     gaps,
     unreadable,
+    handwrittenConfirmation,
     postrochno,
     verdict,
     fullRaw: rawText
@@ -8736,6 +8751,58 @@ function validateAIResponse(csv1, csv2, report, photoCount) {
   return { overall, issues };
 }
 
+/* v9.20.6 — БЕЗОПАСНЫЙ ПРОПУСК OCR.
+   Решение о применении результата принимает код, а не текст ИИ.
+   Нечитаемые и рукописные критичные значения блокируют
+   автоматическое применение CSV до проверки аудитора. */
+function getOCRSafetyIssues(csvText, report, photoCount) {
+  const issues = [];
+  if (!csvText || !String(csvText).trim()) {
+    issues.push({ code: 'empty-csv', title: 'Пустой результат OCR' });
+  }
+  if (!report || !report.hasBlocks) {
+    issues.push({
+      code: 'missing-ai-report',
+      title: 'Нет структурированного отчёта OCR',
+      detail: 'Ответ ИИ не содержит обязательных блоков проверки.'
+    });
+    return issues;
+  }
+  if (report.unreadable && !report.unreadable.isEmpty) {
+    issues.push({
+      code: 'unreadable',
+      title: 'Есть нечитаемые значения',
+      detail: report.unreadable.raw
+    });
+  }
+  if (report.handwrittenConfirmation && !report.handwrittenConfirmation.isEmpty) {
+    issues.push({
+      code: 'handwritten-confirmation',
+      title: 'Есть рукописные значения, требующие подтверждения',
+      detail: report.handwrittenConfirmation.raw
+    });
+  }
+  if (report.validation && report.validation.overall === 'error') {
+    issues.push({
+      code: 'validation-error',
+      title: 'Внутренняя проверка OCR обнаружила ошибку',
+      detail: (report.validation.issues || [])
+        .filter(i => i && i.level === 'error')
+        .map(i => i.title + (i.detail ? ': ' + i.detail : ''))
+        .slice(0, 5)
+        .join(' | ')
+    });
+  }
+  return issues;
+}
+
+function formatOCRSafetyMessage(issues) {
+  const titles = (issues || []).filter(Boolean).map(i => i.title).filter(Boolean);
+  if (!titles.length) return '';
+  return 'Автоприменение остановлено: ' + titles.slice(0, 2).join('; ') +
+    (titles.length > 2 ? ' и ещё ' + (titles.length - 2) + '.' : '.');
+}
+
 /* Короткая сводка отчёта для индикатора в статусе */
 function summarizeAIReport(report) {
   if (!report || !report.hasBlocks) return null;
@@ -8930,40 +8997,53 @@ async function recognizeWithGemini() {
 
     _lastGeminiCsvs = { first: csv1 || '', second: csv2 || '' };
 
-    /* v9.18.0/v9.19.1: сохраняем отчёт ИИ и обновляем кнопку */
-    /* v9.20.5: парсим полный текст (с блоками), а не извлечённый CSV. */
-    _lastAIReport = parseAIReport(primaryFull);
-    /* v9.20.0: валидация ответа ИИ на клиенте */
+    /* v9.20.6: безопасная обработка OCR — сначала проверка, потом применение. */
+    const report1 = full1 ? parseAIReport(full1) : null;
+    const report2 = full2 ? parseAIReport(full2) : null;
+    if (report1) report1.validation = validateAIResponse(csv1, csv2, report1, items.length);
+    if (report2) report2.validation = validateAIResponse(csv2, csv1, report2, items.length);
+    _lastAIReport = report1 || report2;
+    const safety1 = getOCRSafetyIssues(csv1, report1, items.length);
+    const safety2 = getOCRSafetyIssues(csv2, report2, items.length);
+    const safetyIssues = [...safety1, ...safety2];
     if (_lastAIReport) {
-      _lastAIReport.validation = validateAIResponse(
-        csv1 || csv2 || '',
-        (csv1 && csv2) ? csv2 : '',
-        _lastAIReport,
-        items.length
-      );
+      _lastAIReport.safety = {
+        blocked: safetyIssues.length > 0,
+        issues: safetyIssues,
+        doubleRun: !!(csv1 && csv2)
+      };
     }
     persistAIReport(_lastAIReport);
     updateAIReportBtnVisibility();
 
     if (csv1 && csv2) {
-      const lines = primaryCsv.split(/\r?\n/).length;
-      setStatus('info', `Получено 2 ответа (${lines} строк). Применяю первый…`);
-      showToast('Применяю CSV первого прогона');
-      await new Promise(r => setTimeout(r, 250));
-      try { await applyCSV(); } catch (e) { console.warn('Auto-apply failed:', e); }
-      await new Promise(r => setTimeout(r, 500));
-      try { closeUnknownModal(); } catch (e) {}
-      try { closeNoCategoryModal(); } catch (e) {}
-      setStatus('ok', `CSV первого прогона применён (${lines} строк). Открываю сверку…`);
-      showToast('Открываю сверку двух CSV');
+      /* Два прогона не применяем автоматически. Сначала оператор
+         видит сравнение и выбирает/исправляет результат. */
+      setStatus(
+        safetyIssues.length ? 'warn' : 'info',
+        safetyIssues.length
+          ? formatOCRSafetyMessage(safetyIssues) + ' Фото сохранены до проверки.'
+          : 'Получено 2 ответа. Сначала проверьте сверку двух распознаваний.'
+      );
+      showToast(safetyIssues.length ? 'OCR требует проверки' : 'Открываю сверку двух CSV');
       setTimeout(() => openCompareModal({ first: csv1, second: csv2 }), 300);
     } else if (csv1) {
+      if (safetyIssues.length) {
+        setStatus('warn', formatOCRSafetyMessage(safetyIssues) + ' CSV и фото сохранены.');
+        showToast('OCR требует проверки');
+        return;
+      }
       setStatus('info', 'Применяю CSV…');
       showToast('Применяю CSV');
       await new Promise(r => setTimeout(r, 250));
       try { await applyCSV(); } catch (e) { console.warn('Auto-apply failed:', e); }
       setStatus('ok', 'CSV применён.');
     } else {
+      if (safetyIssues.length) {
+        setStatus('warn', formatOCRSafetyMessage(safetyIssues) + ' CSV и фото сохранены.');
+        showToast('OCR требует проверки');
+        return;
+      }
       setStatus('warn', 'Применён только CSV второго прогона. ' + err1);
       await new Promise(r => setTimeout(r, 250));
       try { await applyCSV(); } catch (e) { console.warn('Auto-apply failed:', e); }
@@ -9030,8 +9110,12 @@ function dailyRender() {
     info.style.cssText = 'flex:1;min-width:0';
     let posCount = 0;
     try { posCount = (d.csv.split(/\r?\n/).filter(l => l.trim()).length - 1); } catch (e) {}
-    const warnMark = d.needsCheck ? ' <span style="color:var(--orange);font-size:15px">⚠</span>' : '';
-    const warnText = d.needsCheck ? ' · проверьте сверку' : '';
+    const warnMark = d.blocked
+      ? ' <span style="color:var(--orange);font-size:15px">⚠</span>'
+      : (d.needsCheck ? ' <span style="color:var(--orange);font-size:15px">⚠</span>' : '');
+    const warnText = d.blocked
+      ? ' · требуется проверка OCR'
+      : (d.needsCheck ? ' · проверьте сверку' : '');
     info.innerHTML = `<div style="font-weight:600;font-size:14px">Получено за ${escapeHtml(d.label)}${warnMark}</div><div style="font-size:11.5px;color:var(--text-secondary);margin-top:2px">${posCount} строк${warnText}</div>`;
 
     const refresh = document.createElement('button');
@@ -9203,27 +9287,49 @@ async function recognizeDaily() {
     const chosen = csv1 || csv2;
     const chosenFull = full1 || full2;
     const needsCheck = !!(csv1 && csv2 && !bothMatch);
-    /* v9.20.5: парсим полный текст (с блоками), а не извлечённый CSV. */
-    _lastAIReport = parseAIReport(chosenFull);
-    /* v9.20.0: валидация ответа ИИ на клиенте */
-     if (_lastAIReport) {
-      _lastAIReport.validation = validateAIResponse(
-        csv1 || csv2 || '',
-        (csv1 && csv2) ? csv2 : '',
-        _lastAIReport,
-        items.length
-      );
+    /* v9.20.6: безопасная проверка каждого ответа и накопителя по датам. */
+    const report1 = full1 ? parseAIReport(full1) : null;
+    const report2 = full2 ? parseAIReport(full2) : null;
+    if (report1) report1.validation = validateAIResponse(csv1, csv2, report1, items.length);
+    if (report2) report2.validation = validateAIResponse(csv2, csv1, report2, items.length);
+    const chosenReport = report1 || report2;
+    const safety1 = getOCRSafetyIssues(csv1, report1, items.length);
+    const safety2 = getOCRSafetyIssues(csv2, report2, items.length);
+    const safetyIssues = [...safety1, ...safety2];
+    const blockedBySafety = safetyIssues.length > 0;
+    _lastAIReport = chosenReport;
+    if (_lastAIReport) {
+      _lastAIReport.safety = {
+        blocked: blockedBySafety,
+        issues: safetyIssues,
+        doubleRun: !!(csv1 && csv2)
+      };
     }
     persistAIReport(_lastAIReport);
     updateAIReportBtnVisibility();
     const idx = _dailyAccum.findIndex(x => x.iso === parsed.iso);
-    const entry = { iso: parsed.iso, label: parsed.label, csv: chosen, ts: Date.now(), needsCheck: needsCheck, category: _activeCategory };
+    const entry = {
+      iso: parsed.iso,
+      label: parsed.label,
+      csv: chosen,
+      ts: Date.now(),
+      needsCheck: needsCheck || blockedBySafety,
+      blocked: blockedBySafety,
+      safetyIssues: safetyIssues.map(x => ({ code: x.code, title: x.title })),
+      category: _activeCategory
+    };
     if (idx >= 0) _dailyAccum[idx] = entry;
     else _dailyAccum.push(entry);
     saveDailyAccum();
     dailyRender();
 
-    if (csv1 && csv2 && bothMatch) {
+    if (blockedBySafety) {
+      setStatus('warn', `Дата ${parsed.label}: распознавание требует проверки. ${formatOCRSafetyMessage(safetyIssues)} Фото сохранены.`);
+      showToast('Дата требует проверки OCR');
+      _lastGeminiCsvs = { first: csv1, second: csv2 };
+      _dailyEditing = parsed.iso;
+      setTimeout(() => openCompareModal({ first: csv1, second: csv2 }), 400);
+    } else if (csv1 && csv2 && bothMatch) {
       setStatus('ok', `Дата ${parsed.label}: оба прогона совпали. Накоплено. Фото очищены.`);
       try { await clearAllPhotos(); } catch (e) {}
       await renderPhotoQueue();
@@ -9302,6 +9408,16 @@ async function buildDailyCsv() {
     return;
   }
   _dailyAccum.sort((a, b) => a.iso.localeCompare(b.iso));
+
+  const blockedEntries = _dailyAccum.filter(d => d && d.blocked);
+  if (blockedEntries.length) {
+    if (statusEl) {
+      statusEl.className = 'status show err';
+      statusEl.textContent = 'Нельзя собрать итог: есть даты с непроверенным OCR — ' +
+        blockedEntries.map(d => d.label).join(', ') + '.';
+    }
+    return;
+  }
 
   const allNames = new Set();
   const byDate = {};
