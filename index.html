@@ -9381,11 +9381,14 @@ async function recognizeDaily() {
     const salesCsv2 = salesResult.secondary ? salesResult.secondary.csv : '';
 
     const merged1 = mergeSeparatedOCRCsv(invCsv, salesCsv, parsed.label);
-    const merged2 = (invCsv2 || salesCsv2)
-      ? mergeSeparatedOCRCsv(invCsv2 || invCsv, salesCsv2 || salesCsv, parsed.label)
+    /* Второй прогон считается полноценным только если оба независимых
+       документа получили второй результат. Иначе не сравниваем первичный
+       результат с самим собой/смешанным набором данных. */
+    const hasFullSecondRun = !!invCsv2 && !!salesCsv2;
+    const merged2 = hasFullSecondRun
+      ? mergeSeparatedOCRCsv(invCsv2, salesCsv2, parsed.label)
       : '';
-
-    const bothMatch = !!(merged1 && merged2 && merged1 === merged2);
+    const bothMatch = !!(hasFullSecondRun && merged1 && merged2 && merged1 === merged2);
     const chosen = merged1;
     const reports = [
       invResult.primary && parseAIReport(invResult.primary.full),
@@ -9434,7 +9437,7 @@ async function recognizeDaily() {
     dailyRender();
 
     if (blockedBySafety || (!!doubleRun && !bothMatch)) {
-      _lastGeminiCsvs = { first: invCsv || salesCsv, second: invCsv2 || salesCsv2 };
+      _lastGeminiCsvs = { first: merged1, second: merged2 || merged1 };
       _dailyEditing = parsed.iso;
       setStatus('warn', 'OCR разделён: результат требует проверки. Проверьте сверку и нечитаемые значения.');
       setTimeout(() => openCompareModal({ first: merged1, second: merged2 || merged1 }), 400);
