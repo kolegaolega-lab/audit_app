@@ -8420,7 +8420,9 @@ function validateAIResponse(csv1, csv2, report, photoCount) {
           );
           if (!isFinite(printed) || printed <= 0) continue;
           const diff = Math.abs(sumFromRows - printed);
-          const tol = Math.max(0.5, printed * 0.01);
+          /* Денежные значения документа имеют копеечное округление.
+             Не пропускаем ошибки на 0.5 ₽/1%: для OCR это слишком мягко. */
+          const tol = 0.02;
           if (diff > tol) {
             issues.push({
               level: 'error',
@@ -10454,7 +10456,9 @@ function cmpRunCompare() {
     if (printedTotal > 0) {
       const diff1 = sig1.total - printedTotal;
       const diff2 = sig2.total - printedTotal;
-      const tol = 0.5;
+      /* Сверка печатного итога: допускаем максимум 0,02 ₽
+         на округление, а не полрубля. */
+      const tol = 0.02;
       const bothOk = Math.abs(diff1) <= tol && Math.abs(diff2) <= tol;
       let detail = `CSV №1: <b>${sig1.total.toFixed(2)}</b> (Δ${diff1.toFixed(2)}), CSV №2: <b>${sig2.total.toFixed(2)}</b> (Δ${diff2.toFixed(2)}), печатный: <b>${printedTotal.toFixed(2)}</b>.`;
       if (!bothOk) {
