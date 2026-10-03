@@ -9425,9 +9425,12 @@ async function recognizeDaily() {
   const invoiceItems = allItems.filter(x => x.type === 'invoice');
   const salesItems = allItems.filter(x => x.type === 'sales');
   if (!invoiceItems.length && !salesItems.length) {
-    setStatus('info', 'Сначала загрузите фото накладных и/или чека.');
+    setStatus('info', 'Сначала загрузите фото накладных и чека продаж.');
     return;
   }
+  const missingSources = [];
+  if (!invoiceItems.length) missingSources.push('накладные не загружены');
+  if (!salesItems.length) missingSources.push('чек продаж не загружен');
 
   shareBusy = true;
   const btn = $('dailyRecognizeBtn');
@@ -9510,6 +9513,9 @@ async function recognizeDaily() {
     const salesCsv = salesResult.primary ? salesResult.primary.csv : '';
     const salesCsv2 = salesResult.secondary ? salesResult.secondary.csv : '';
 
+    if (!invResult.primary) missingSources.push('накладные не распознаны');
+    if (!salesResult.primary) missingSources.push('чек продаж не распознан');
+
     const merged1 = mergeSeparatedOCRCsv(invCsv, salesCsv, parsed.label);
     /* Второй прогон считается полноценным только если оба независимых
        документа получили второй результат. Иначе не сравниваем первичный
@@ -9573,9 +9579,13 @@ async function recognizeDaily() {
       label: parsed.label,
       csv: chosen,
       ts: Date.now(),
-      needsCheck: blockedBySafety || (!!doubleRun && !bothMatch),
-      blocked: blockedBySafety,
-      safetyIssues: safetyIssues.map(x => ({ code: x.code, title: x.title })),
+      needsCheck: blockedBySafety || missingSources.length > 0 || (!!doubleRun && !bothMatch),
+      blocked: blockedBySafety || missingSources.length > 0,
+      sourceMissing: missingSources.slice(),
+      safetyIssues: [
+        ...safetyIssues.map(x => ({ code: x.code, title: x.title })),
+        ...missingSources.map(x => ({ code: 'SOURCE_MISSING', title: x }))
+      ],
       category: _activeCategory
     };
     const idx = _dailyAccum.findIndex(x => x.iso === parsed.iso);
@@ -9583,10 +9593,12 @@ async function recognizeDaily() {
     saveDailyAccum();
     dailyRender();
 
-    if (blockedBySafety || (!!doubleRun && !bothMatch)) {
+    if (blockedBySafety || missingSources.length > 0 || (!!doubleRun && !bothMatch)) {
       _lastGeminiCsvs = { first: merged1, second: merged2 || merged1 };
       _dailyEditing = parsed.iso;
-      setStatus('warn', 'OCR разделён: результат требует проверки. Проверьте сверку и нечитаемые значения.');
+      setStatus('warn', missingSources.length
+        ? 'Не все источники загружены или распознаны. Результат сохранён, но не применён автоматически.'
+        : 'OCR разделён: результат требует проверки. Проверьте сверку и нечитаемые значения.');
       setTimeout(() => openCompareModal({ first: merged1, second: merged2 || merged1 }), 400);
     } else {
       setStatus('ok', 'Накладные и чек распознаны раздельно и объединены без смешивания данных.');
