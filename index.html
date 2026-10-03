@@ -9390,10 +9390,8 @@ async function recognizeDaily() {
       : '';
     const bothMatch = !!(hasFullSecondRun && merged1 && merged2 && merged1 === merged2);
     const chosen = merged1;
-    const reports = [
-      invResult.primary && parseAIReport(invResult.primary.full),
-      salesResult.primary && parseAIReport(salesResult.primary.full)
-    ].filter(Boolean);
+    const invoiceReport = invResult.primary ? parseAIReport(invResult.primary.full) : null;
+    const salesReport = salesResult.primary ? parseAIReport(salesResult.primary.full) : null;
     const safetyIssues = [];
     [invResult.primary, invResult.secondary, salesResult.primary, salesResult.secondary].forEach(r => {
       if (!r) return;
@@ -9402,21 +9400,40 @@ async function recognizeDaily() {
     });
 
     const blockedBySafety = safetyIssues.length > 0;
-    const chosenReport = reports[0] || null;
-    if (chosenReport) {
-      chosenReport.validation = validateAIResponse(merged1, merged2, chosenReport, allItems.length);
-      chosenReport.safety = {
+    const invoiceValidation = invoiceReport
+      ? validateAIResponse(invCsv, invCsv2, invoiceReport, invoiceItems.length)
+      : { overall: 'ok', issues: [] };
+    const salesValidation = salesReport
+      ? validateAIResponse(salesCsv, salesCsv2, salesReport, salesItems.length)
+      : { overall: 'ok', issues: [] };
+
+    const chosenReport = {
+      hasBlocks: true,
+      separatedOCR: true,
+      invoiceReport,
+      salesReport,
+      invoiceValidation,
+      salesValidation,
+      validation: {
+        overall: (invoiceValidation.overall === 'error' || salesValidation.overall === 'error') ? 'error'
+          : (invoiceValidation.issues.length || salesValidation.issues.length) ? 'warn' : 'ok',
+        issues: [...(invoiceValidation.issues || []), ...(salesValidation.issues || [])]
+      },
+      safety: {
         blocked: blockedBySafety,
         issues: safetyIssues,
         doubleRun: !!doubleRun,
         separatedOCR: true
-      };
-      if (reports[1]) {
-        chosenReport.blocks = Object.assign({}, chosenReport.blocks || {}, {
-          'ЧЕК_OCR': reports[1].fullRaw || ''
-        });
-      }
-    }
+      },
+      invoiceCsv: invCsv,
+      salesCsv: salesCsv,
+      invoicePhotoCount: invoiceItems.length,
+      salesPhotoCount: salesItems.length,
+      fullRaw: [
+        invoiceReport ? '=== НАКЛАДНЫЕ ===\n' + invoiceReport.fullRaw : '',
+        salesReport ? '=== ЧЕК ПРОДАЖ ===\n' + salesReport.fullRaw : ''
+      ].filter(Boolean).join('\n\n')
+    };
     _lastAIReport = chosenReport;
     persistAIReport(_lastAIReport);
     updateAIReportBtnVisibility();
@@ -10000,246 +10017,177 @@ function renderAIReportModal(report) {
   const statusText = $('aiReportStatusText');
   if (!body) return;
 
-  const summary = summarizeAIReport(report);
-  let overall = 'ok';
-  if (summary && !summary.ok) {
-    overall = summary.hasBlockingIssue ? 'err' : 'warn';
-  }
+  /* v9.21.0: отчёт ИИ разделён на два независимых источника:
+     НАКЛАДНЫЕ и ЧЕК ПРОДАЖ. Основной экран больше не маскирует
+     отчёт чека внутри отчёта накладных. */
 
-  /* Полоса статуса */
-  if (statusDot) {
-    statusDot.className = 'ai-status-dot ' + overall;
-  }
+  const inv = report.invoiceReport || null;
+  const sales = report.salesReport || null;
+  const invVal = report.invoiceValidation || { issues: [] };
+  const salesVal = report.salesValidation || { issues: [] };
+
+  const invIssues = [...(invVal.issues || [])];
+  const salesIssues = [...(salesVal.issues || [])];
+  const safety = report.safety || { blocked: false, issues: [] };
+
+  const hasBlocking = safety.blocked ||
+    invIssues.some(x => x.level === 'error') ||
+    salesIssues.some(x => x.level === 'error');
+
+  const hasWarnings = invIssues.some(x => x.level === 'warn') ||
+    salesIssues.some(x => x.level === 'warn');
+
+  const overall = hasBlocking ? 'err' : hasWarnings ? 'warn' : 'ok';
+
+  if (statusDot) statusDot.className = 'ai-status-dot ' + overall;
   if (statusText) {
-    if (overall === 'ok') statusText.textContent = 'Все проверки пройдены';
-    else if (overall === 'err') statusText.textContent = 'Есть критичные проблемы';
-    else statusText.textContent = 'Есть замечания';
+    statusText.textContent = overall === 'ok'
+      ? 'Распознавание проверено'
+      : overall === 'err'
+        ? 'Есть критичные проблемы — данные не применены автоматически'
+        : 'Есть замечания — проверьте результат';
   }
   if (statusBar) {
     statusBar.style.background = overall === 'err' ? 'var(--red-soft)'
       : overall === 'warn' ? 'var(--orange-soft)' : 'var(--green-soft)';
   }
 
+  const csvStats = (csv, photoCount, kind) => {
+    const text = String(csv || '');
+    const lines = text.split(/\r?\n/).filter(x => x.trim() && !x.trim().startsWith('#'));
+    const header = lines.find(x => /наимен/i.test(x) && x.includes(';')) || '';
+    const rows = lines.slice(header ? lines.indexOf(header) + 1 : 0).filter(x => x.includes(';'));
+    const names = new Set();
+    rows.forEach(line => {
+      const f = cmpSplitLine(line, ';');
+      if (f[0] && !/^наимен/i.test(f[0])) names.add(cleanProductName(f[0]));
+    });
+    return { photos: photoCount || 0, rows: rows.length, products: names.size };
+  };
+
+  const invStats = csvStats(report.invoiceCsv || '', report.invoicePhotoCount || 0, 'invoice');
+  const salesStats = csvStats(report.salesCsv || '', report.salesPhotoCount || 0, 'sales');
+
+  /* Старые сохранённые отчёты могли не содержать CSV в объекте отчёта.
+     В таком случае берём минимальные данные из validation/блоков, не выдумывая числа. */
+  const issueRows = (title, issues) => {
+    if (!issues.length) return '<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">' +
+      escapeHtml(title + ': ошибок не обнаружено.') + '</span></div>';
+    return issues.map(it => {
+      const cls = it.level === 'error' ? 'error' : 'warn';
+      return '<div class="ai-issue-row ' + cls + '">' +
+        '<span class="ai-issue-icon">' + (it.level === 'error' ? '✗' : '⚠') + '</span>' +
+        '<span class="ai-issue-body"><b>' + escapeHtml(it.title || 'Замечание') + '</b>' +
+        (it.detail ? '<br>' + escapeHtml(it.detail) : '') + '</span></div>';
+    }).join('');
+  };
+
+  const renderSource = (title, icon, sourceReport, validation, stats, extra) => {
+    if (!sourceReport) {
+      return '<div class="sheet-section">' +
+        '<div class="sheet-section-header"><h2>' + icon + ' ' + title + '</h2>' +
+        '<p class="desc">Материалы этого типа не загружены.</p></div></div>';
+    }
+
+    const unreadable = sourceReport.unreadable && !sourceReport.unreadable.isEmpty;
+    const handwritten = sourceReport.handwrittenConfirmation && !sourceReport.handwrittenConfirmation.isEmpty;
+    const checks = sourceReport.checks || [];
+    const badChecks = checks.filter(x => x.status === 'mismatch');
+    const gaps = sourceReport.gaps && sourceReport.gaps.hasGap;
+
+    let h = '<div class="sheet-section">' +
+      '<div class="sheet-section-header"><h2>' + icon + ' ' + title + '</h2>' +
+      '<p class="desc">Независимое распознавание этого типа документа.</p></div>' +
+      '<div class="sheet-section-body">';
+
+    h += '<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">' +
+      'Загружено фото/файлов: <b>' + stats.photos + '</b> · товарных строк: <b>' + stats.rows + '</b>' +
+      (stats.products !== stats.rows ? ' · уникальных позиций: <b>' + stats.products + '</b>' : '') +
+      '</span></div>';
+
+    if (sourceReport.completeness) {
+      const r = sourceReport.completeness.received;
+      const p = sourceReport.completeness.processed;
+      const ok = p == null || p === r;
+      h += '<div class="ai-issue-row ' + (ok ? 'ok' : 'error') + '">' +
+        '<span class="ai-issue-icon">' + (ok ? '✓' : '✗') + '</span><span class="ai-issue-body">' +
+        'Полнота: получено <b>' + r + '</b>, обработано <b>' + (p == null ? '—' : p) + '</b>' +
+        (ok ? '' : ' — часть материалов не обработана.') + '</span></div>';
+    }
+
+    if (title.indexOf('Накладные') >= 0) {
+      h += '<div class="ai-issue-row ' + (badChecks.length ? 'error' : 'ok') + '">' +
+        '<span class="ai-issue-icon">' + (badChecks.length ? '✗' : '✓') + '</span><span class="ai-issue-body">' +
+        'Сверка сумм накладных: ' + (checks.length ? ('проверено <b>' + checks.length + '</b>, расхождений <b>' + badChecks.length + '</b>') : 'данные о печатных итогах не обнаружены') +
+        '</span></div>';
+      if (gaps) h += '<div class="ai-issue-row warn"><span class="ai-issue-icon">⚠</span><span class="ai-issue-body">Обнаружен возможный разрыв нумерации.</span></div>';
+    } else {
+      h += '<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Для чека количество берётся из позиции <b>«К-во»</b>; сумма продажи не используется как количество.</span></div>';
+    }
+
+    if (unreadable) {
+      h += '<div class="ai-issue-row warn"><span class="ai-issue-icon">⚠</span><span class="ai-issue-body"><b>Есть нечитаемые значения.</b><br>Проверьте их по фотографии.</span></div>';
+    } else {
+      h += '<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Критичных нечитаемых значений не отмечено.</span></div>';
+    }
+
+    if (handwritten) {
+      h += '<div class="ai-issue-row warn"><span class="ai-issue-icon">⚠</span><span class="ai-issue-body"><b>Есть рукописные значения.</b><br>Они требуют подтверждения.</span></div>';
+    }
+
+    h += issueRows('Проверки ответа', validation.issues || []);
+
+    if (extra) h += extra;
+    h += '</div></div>';
+    return h;
+  };
+
   let html = '';
 
-  /* ── Секция 0: Проверки ответа (v9.20.0) ── */
-  if (report.validation && report.validation.issues && report.validation.issues.length) {
-    const errs = report.validation.issues.filter(i => i.level === 'error');
-    const warns = report.validation.issues.filter(i => i.level === 'warn');
-    const subParts = [];
-    if (errs.length) subParts.push('<span style="color:var(--red);font-weight:600">' + errs.length + ' критичных</span>');
-    if (warns.length) subParts.push('<span style="color:var(--orange);font-weight:600">' + warns.length + ' замечаний</span>');
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Проверки ответа</h2>' +
-          '<p class="desc">' + subParts.join(' · ') + '</p>' +
-        '</div>' +
-        '<div class="sheet-section-body">';
-    [...errs, ...warns].forEach(it => {
-      const cls = it.level === 'error' ? 'error' : 'warn';
-      const icon = it.level === 'error' ? '✗' : '⚠';
-      html +=
-        '<div class="ai-issue-row ' + cls + '">' +
-          '<span class="ai-issue-icon">' + icon + '</span>' +
-          '<span class="ai-issue-body">' +
-            '<b>' + escapeHtml(it.title) + '</b><br>' +
-            escapeHtml(it.detail) +
-          '</span>' +
-        '</div>';
-    });
-    html += '</div></div>';
+  /* Верхняя сводка */
+  html += '<div class="sheet-section"><div class="sheet-section-header">' +
+    '<h2>Что распознано</h2><p class="desc">Чек и накладные обработаны независимо друг от друга.</p></div>' +
+    '<div class="sheet-section-body">' +
+    '<div class="ai-issue-row ' + (inv ? 'ok' : 'warn') + '"><span class="ai-issue-icon">' + (inv ? '✓' : '—') + '</span><span class="ai-issue-body"><b>📄 Накладные</b> · ' + (inv ? 'распознаны' : 'не загружены') + '</span></div>' +
+    '<div class="ai-issue-row ' + (sales ? 'ok' : 'warn') + '"><span class="ai-issue-icon">' + (sales ? '✓' : '—') + '</span><span class="ai-issue-body"><b>🧾 Чек продаж</b> · ' + (sales ? 'распознан' : 'не загружен') + '</span></div>' +
+    '<div class="ai-issue-row ' + (overall === 'ok' ? 'ok' : overall === 'err' ? 'error' : 'warn') + '"><span class="ai-issue-icon">' + (overall === 'ok' ? '✓' : overall === 'err' ? '✗' : '⚠') + '</span><span class="ai-issue-body">' +
+    (overall === 'ok' ? 'Критичных проблем распознавания не обнаружено.' : hasBlocking ? 'Есть критичная проблема. Автоматическое применение заблокировано.' : 'Есть замечания, которые стоит проверить.') +
+    '</span></div></div></div>';
+
+  html += renderSource('Накладные', '📄', inv, invVal, invStats, '');
+  html += renderSource('Чек продаж', '🧾', sales, salesVal, salesStats, '');
+
+  /* Отдельная проверка рукописных/нечитаемых значений */
+  if (safety.issues && safety.issues.length) {
+    html += '<div class="sheet-section"><div class="sheet-section-header"><h2>Требует внимания</h2>' +
+      '<p class="desc">Эти проблемы блокируют автоматическое применение результата.</p></div><div class="sheet-section-body">' +
+      safety.issues.map(it => '<div class="ai-issue-row error"><span class="ai-issue-icon">✗</span><span class="ai-issue-body"><b>' +
+        escapeHtml(it.title || 'Проблема') + '</b>' + (it.detail ? '<br>' + escapeHtml(it.detail) : '') +
+        '</span></div>').join('') + '</div></div>';
   }
 
-  /* ── Секция 1: Проблемы (если есть) ── */
-  if (summary && !summary.ok) {
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Замечания</h2>' +
-          '<p class="desc">Что ИИ увидел в этом ответе.</p>' +
-        '</div>' +
-        '<div class="sheet-section-body">';
-    summary.issues.forEach(i => {
-      const cls = i.type === 'error' ? 'error' : 'warn';
-      const icon = i.type === 'error' ? '✗' : '⚠';
-      html +=
-        '<div class="ai-issue-row ' + cls + '">' +
-          '<span class="ai-issue-icon">' + icon + '</span>' +
-          '<span class="ai-issue-body">' + escapeHtml(i.text) + '</span>' +
-        '</div>';
-    });
-    html += '</div></div>';
-  } else {
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Проверки пройдены</h2>' +
-        '</div>' +
-        '<div class="sheet-section-body">' +
-          '<div class="ai-issue-row ok">' +
-            '<span class="ai-issue-icon">✓</span>' +
-            '<span class="ai-issue-body">Полнота фото, сверка сумм, разрывы и нечитаемое — всё чисто.</span>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-  }
+  /* Результат объединения */
+  html += '<div class="sheet-section"><div class="sheet-section-header"><h2>Итог объединения</h2>' +
+    '<p class="desc">Только после независимого OCR данные объединяются для расчёта.</p></div>' +
+    '<div class="sheet-section-body">' +
+    '<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Накладные и чек не использовали данные друг друга при распознавании.</span></div>' +
+    '<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Продажи берутся из чека, приход — из накладных.</span></div>' +
+    '<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Срок годности и расчёт проверки выполняются отдельно от OCR.</span></div>' +
+    '</div></div>';
 
-  /* ── Секция 2: Сверка накладных ── */
-  if (report.checks && report.checks.length) {
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Сверка сумм</h2>' +
-          '<p class="desc">Σ пересчитано vs печатный итог накладной.</p>' +
-        '</div>' +
-        '<div class="sheet-section-body">';
-    report.checks.forEach(c => {
-      const ok = c.status === 'ok';
-      const cls = ok ? 'ok' : 'err';
-      html +=
-        '<div class="ai-nakl-row">' +
-          '<span class="ai-nakl-num">' + escapeHtml(c.num) + '</span>' +
-          '<span class="ai-nakl-date">' + escapeHtml(c.date || '') + '</span>' +
-          '<span class="ai-nakl-diff ' + cls + '">' +
-            (c.sum ? 'Σ ' + escapeHtml(c.sum) : '—') +
-            (c.diff ? '<small>Δ ' + escapeHtml(c.diff) + '</small>' : '') +
-          '</span>' +
-        '</div>';
-    });
-    html += '</div></div>';
-  }
-
-  /* ── Секция 3: Полнота изображений ── */
-  if (report.completeness) {
-    const r = report.completeness.received;
-    const p = report.completeness.processed;
-    const ok = p == null || p === r;
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Полнота изображений</h2>' +
-        '</div>' +
-        '<div class="sheet-section-body">' +
-          '<div class="ai-issue-row ' + (ok ? 'ok' : 'error') + '">' +
-            '<span class="ai-issue-icon">' + (ok ? '✓' : '✗') + '</span>' +
-            '<span class="ai-issue-body">Получено: <b>' + r + '</b> · Обработано: <b>' + (p == null ? '—' : p) + '</b>' +
-            (ok ? '' : ' — возможно, часть фото потеряна.') +
-            '</span>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-  }
-
-  /* ── Секция 4: Разрывы нумерации ── */
-  if (report.gaps) {
-    const hasGap = report.gaps.hasGap;
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Разрывы нумерации</h2>' +
-        '</div>' +
-        '<div class="sheet-section-body">' +
-          '<div class="ai-issue-row ' + (hasGap ? 'warn' : 'ok') + '">' +
-            '<span class="ai-issue-icon">' + (hasGap ? '⚠' : '✓') + '</span>' +
-            '<span class="ai-issue-body">' + (hasGap ? 'Найден разрыв — проверь нумерацию строк.' : 'Разрывов нет.') + '</span>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-  }
-
-  /* ── Секция 5: Нечитаемые ── */
-  if (report.unreadable) {
-    const clean = report.unreadable.isEmpty;
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Нечитаемые ячейки</h2>' +
-        '</div>' +
-        '<div class="sheet-section-body">' +
-          '<div class="ai-issue-row ' + (clean ? 'ok' : 'warn') + '">' +
-            '<span class="ai-issue-icon">' + (clean ? '✓' : '⚠') + '</span>' +
-            '<span class="ai-issue-body">' + (clean ? 'Нечитаемых ячеек нет.' : 'Есть нечитаемое — проверь по фото.') + '</span>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-  }
-
-  /* ── Секция 5a: Сводка (#ПРОВЕРКА) ── */
-  if (report.verdict) {
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Сводка</h2>' +
-          '<p class="desc">Что ИИ насчитал по документам.</p>' +
-        '</div>' +
-        '<div class="sheet-section-body">' +
-          '<pre class="ai-raw">' + escapeHtml(report.verdict) + '</pre>' +
-        '</div>' +
-      '</div>';
-  }
-
-  /* ── Секция 5b: Построчная проверка (#ПОСТРОЧНО) ── */
-  if (report.postrochno && report.postrochno.length) {
-    const rows = report.postrochno.slice().sort((a, b) => {
-      /* Расхождения — сверху */
-      if (a.ok !== b.ok) return a.ok ? 1 : -1;
-      return a.num - b.num;
-    });
-    const badCount = rows.filter(r => !r.ok).length;
-    const subDesc = badCount
-      ? '<span style="color:var(--red);font-weight:600">' + badCount + ' из ' + rows.length + ' не сходится</span>'
-      : 'Все ' + rows.length + ' строк сходятся';
-
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Построчная проверка</h2>' +
-          '<p class="desc">' + subDesc + '</p>' +
-        '</div>' +
-        '<div class="sheet-section-body">';
-
-    rows.forEach(r => {
-      const cls = r.ok ? 'ok' : 'error';
-      const icon = r.ok ? '✓' : '✗';
-      const qtyStr = String(r.qty).replace('.', ',');
-      const priceStr = String(r.price.toFixed(2)).replace('.', ',');
-      const sumStr = String(r.sum.toFixed(2)).replace('.', ',');
-      const expStr = String(r.expected.toFixed(2)).replace('.', ',');
-      const diffStr = String(r.diff.toFixed(2)).replace('.', ',');
-      const detail = r.ok
-        ? '<b>' + escapeHtml(qtyStr) + '</b> × ' + escapeHtml(priceStr) + ' = <b>' + escapeHtml(sumStr) + '</b>'
-        : '<b>' + escapeHtml(qtyStr) + '</b> × ' + escapeHtml(priceStr) + ' = ' + escapeHtml(sumStr) +
-          ' · ожидалось <b style="color:var(--red)">' + escapeHtml(expStr) + '</b> (Δ ' + escapeHtml(diffStr) + ')';
-      html +=
-        '<div class="ai-issue-row ' + cls + '">' +
-          '<span class="ai-issue-icon">' + icon + '</span>' +
-          '<span class="ai-issue-body">' +
-            '<b>' + escapeHtml(String(r.num)) + '. ' + escapeHtml(r.name) + '</b><br>' +
-            detail +
-          '</span>' +
-        '</div>';
-    });
-    html += '</div></div>';
-  }
-
-  /* ── Секция 6: Сырой ответ ИИ ── */
-  if (report.fullRaw) {
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Сырой ответ ИИ</h2>' +
-          '<p class="desc">Полный текст, включая блоки #ИМЯ.</p>' +
-        '</div>' +
-        '<div class="sheet-section-body">' +
-          '<pre class="ai-raw">' + escapeHtml(report.fullRaw) + '</pre>' +
-        '</div>' +
-      '</div>';
+  /* Детали ответа оставляем доступными, но в самом низу. */
+  const rawParts = [
+    inv && inv.fullRaw ? '=== НАКЛАДНЫЕ ===\n' + inv.fullRaw : '',
+    sales && sales.fullRaw ? '=== ЧЕК ПРОДАЖ ===\n' + sales.fullRaw : ''
+  ].filter(Boolean).join('\n\n');
+  if (rawParts) {
+    html += '<div class="sheet-section"><div class="sheet-section-header"><h2>Технический ответ ИИ</h2>' +
+      '<p class="desc">Нужен только для диагностики OCR.</p></div><div class="sheet-section-body">' +
+      '<pre class="ai-raw">' + escapeHtml(rawParts) + '</pre></div></div>';
   }
 
   body.innerHTML = html;
 }
-
 /* ═══════════════════════════════════════════
    UI HELPERS
    ═══════════════════════════════════════════ */
