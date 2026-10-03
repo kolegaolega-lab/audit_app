@@ -9280,6 +9280,8 @@ function dailyRender() {
 function mergeSeparatedOCRCsv(invoiceCsv, salesCsv, dateLabel) {
   const inv = invoiceCsv ? cmpParseCSV(invoiceCsv) : null;
   const sal = salesCsv ? cmpParseCSV(salesCsv) : null;
+  if (invoiceCsv && !inv) throw new Error('Не удалось разобрать строки накладных. Автоматическое применение остановлено.');
+  if (salesCsv && !sal) throw new Error('Не удалось разобрать строки чека продаж. Автоматическое применение остановлено.');
   if (!inv && !sal) throw new Error('Оба OCR-результата пустые.');
 
   /* v9.21.2:
@@ -9295,6 +9297,9 @@ function mergeSeparatedOCRCsv(invoiceCsv, salesCsv, dateLabel) {
        • нет ни там ни там → и приход, и продажи = 0.
      FIFO и расчёт сроков здесь не изменяются. */
   const targetDate = String(dateLabel || '').trim();
+  if (inv && !inv.dateCols.some(dc => dc.key === targetDate)) {
+    throw new Error('В распознанных накладных нет колонки прихода за ' + targetDate + '. Количество другой даты подставлять нельзя.');
+  }
   const all = new Map();
 
   /* Сначала создаём все позиции из справочника. Это гарантирует
