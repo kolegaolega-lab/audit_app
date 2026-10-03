@@ -9192,6 +9192,93 @@ function dailyRender() {
     status.textContent = `В пакете дат: ${_dailyAccum.length}. Даты: ${_dailyAccum.map(d => d.label).join(', ')}.`;
   }
 }
+function mergeSeparatedOCRCsv(invoiceCsv, salesCsv, dateLabel) {
+  const inv = invoiceCsv ? cmpParseCSV(invoiceCsv) : null;
+  const sal = salesCsv ? cmpParseCSV(salesCsv) : null;
+  if (!inv && !sal) throw new Error('Оба OCR-результата пустые.');
+
+  const all = new Map();
+  const add = (src, kind) => {
+    if (!src) return;
+    src.order.forEach(key => {
+      const row = src.rows[key];
+      if (!row) return;
+      const name = row.name;
+      const k = normalizeName(name);
+      if (!k) return;
+      if (!all.has(k)) all.set(k, { name, incoming: 0, sales: 0 });
+      const out = all.get(k);
+      if (kind === 'invoice') {
+        out.incoming += Object.values(row.incoming || {}).reduce((s, v) => s + (Number(v) || 0), 0);
+      } else {
+        out.sales += Number(row.sales) || 0;
+      }
+    });
+  };
+  add(inv, 'invoice');
+  add(sal, 'sales');
+
+  const lines = [
+    ['Наименование', 'Продано сегодня', 'Получено за ' + dateLabel, 'Срок годности'].join(';')
+  ];
+  [...all.values()].sort((a,b) => a.name.localeCompare(b.name, 'ru')).forEach(r => {
+    if (!r.name || (r.incoming === 0 && r.sales === 0)) return;
+    const safe = /[;"\n]/.test(r.name) ? '"' + r.name.replace(/"/g, '""') + '"' : r.name;
+    const prod = PRODUCTS.find(p => normalizeName(p.name) === normalizeName(r.name));
+    const shelf = prod && prod.shelfLife != null ? prod.shelfLife : '';
+    lines.push([safe, r.sales, r.incoming, shelf].join(';'));
+  });
+  return lines.join('\n');
+}
+
+function buildSeparatedOCRPrompt(dateLabel, docType) {
+  const { list: catalogList } = buildCatalogListForPrompt();
+  const isInvoice = docType === 'invoice';
+  return [
+    'ЗАДАЧА: независимое OCR-распознавание только одного типа документов.',
+    isInvoice
+      ? 'Сейчас переданы ТОЛЬКО ФОТО НАКЛАДНЫХ/ЛИСТОВ ЗАКАЗА. ЧЕКА НЕТ. Не придумывай продажи.'
+      : 'Сейчас переданы ТОЛЬКО ФОТО ЧЕКА ПРОДАЖ iiko. НАКЛАДНЫХ НЕТ. Не придумывай приход.',
+    'Дата проверки: ' + dateLabel + '.',
+    '',
+    isInvoice ? [
+      'КРИТИЧНО ДЛЯ ТОРГ-12: фактическое количество = колонка 8 «мест, штук».',
+      'Колонку 7 «в одном месте» НЕ используй.',
+      'Для каждой строки: количество × цена = сумма. Если не сходится — перечитай именно колонку 8.',
+      'Если значение не читается — #НЕЧИТАЕМО, не угадывай.',
+      'Фото без шапки присоединяй к предыдущей накладной по сквозной нумерации.',
+      'Рукописные пометки в ТОРГ-12 игнорируй. В листе заказа рукописное количество вынеси в #РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ.',
+      'Не переносить количество между соседними похожими строками.',
+      'В CSV приход ставь только из реально прочитанных документов за ' + dateLabel + '. Продано сегодня = 0.'
+    ].join('\n') : [
+      'Читай только строки товаров чека iiko.',
+      'Если строка имеет «К-во × Цена = Сумма», первое число = количество.',
+      'Сумма никогда не является количеством. Не вычисляй количество делением суммы на цену.',
+      'Комплименты/товары с нулевой ценой тоже учитывай, если количество указано.',
+      'Не переносить количество между соседними строками.',
+      'При склейке страниц не суммируй один и тот же дубль.',
+      'В CSV приход = 0, продажи = реально прочитанное количество.'
+    ].join('\n'),
+    '',
+    'ФИЛЬТР: включай только позиции из справочника ниже.',
+    'СПРАВОЧНИК:',
+    catalogList,
+    '',
+    'ФОРМАТ CSV В САМОМ КОНЦЕ:',
+    'Наименование;Продано сегодня;Получено за ' + dateLabel + ';Срок годности',
+    isInvoice ? 'Для накладных: продажи всегда 0.' : 'Для чека: приход всегда 0.',
+    'Одна позиция = одна строка. Дубли объединяй.',
+    '',
+    'Перед CSV обязательно дай:',
+    '#ИСТОЧНИКИ:',
+    '#ПРОВЕРКА:',
+    '#НЕЧИТАЕМО:',
+    '#РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ:',
+    'Если проблем нет, пиши «пусто».',
+    'CSV — последним.'
+  ].join('\n');
+}
+
 async function recognizeDaily() {
   if (shareBusy) return;
   const dateInput = $('dailyDate');
@@ -9204,184 +9291,155 @@ async function recognizeDaily() {
   const apiKey = getGeminiKey();
   if (!apiKey) { setStatus('err', 'Введите API-ключ в настройках.'); return; }
 
-  const items = await getPhotos();
-  if (!items.length) { setStatus('info', 'Сначала загрузите фото накладной и чека за эту дату.'); return; }
+  const allItems = await getPhotos();
+  const invoiceItems = allItems.filter(x => x.type === 'invoice');
+  const salesItems = allItems.filter(x => x.type === 'sales');
+  if (!invoiceItems.length && !salesItems.length) {
+    setStatus('info', 'Сначала загрузите фото накладных и/или чека.');
+    return;
+  }
 
   shareBusy = true;
   const btn = $('dailyRecognizeBtn');
   if (btn) btn.classList.add('busy');
-  try {
-    setStatus('info', 'Подготовка файлов…');
-    const fileParts = await buildGeminiFileParts();
-    if (!fileParts.length) throw new Error('Не удалось подготовить файлы.');
 
-    const systemPrompt = buildSystemInstructionForGemini();
-    const userPrompt = buildDailyPrompt(parsed.label);
+  try {
     const model = getGeminiModel();
     const url = `${GEMINI_API}/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
-
-    const body = {
-      systemInstruction: { parts: [{ text: systemPrompt }] },
-      contents: [{ parts: [...fileParts, { text: userPrompt }] }],
-      generationConfig: { temperature: 0, maxOutputTokens: GEMINI_MAX_OUTPUT_TOKENS }
-    };
-
     const doubleRun = $('geminiDoubleRunCheck') && $('geminiDoubleRunCheck').checked;
-    setStatus('info', doubleRun ? 'Отправка 2 запросов…' : 'Отправка запроса…');
 
-    const sendOne = async (label) => {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      if (!res.ok) {
-        let msg = `HTTP ${res.status}`;
-        try {
-          const errJson = await res.json();
-          if (errJson && errJson.error && errJson.error.message) msg = errJson.error.message;
-        } catch (e) {}
-        if (res.status === 429) msg = 'Превышен лимит запросов.';
-        if (res.status === 503 || /high demand|overload/i.test(msg)) msg = 'Сервер перегружен.';
-        throw new Error(label + ': ' + msg);
-      }
-      const data = await res.json();
-      const cand = data && data.candidates && data.candidates[0];
-      if (!cand) throw new Error(label + ': нет кандидатов.');
-      const parts = (cand.content && cand.content.parts) || [];
-      const text = parts.map(p => p.text || '').join('');
-      const csv = extractCsvFromGeminiText(text);
-      if (!csv || !/;/.test(csv)) throw new Error(label + ': ответ не похож на CSV.');
-      /* v9.20.5: возвращаем и CSV, и полный текст. */
-      return { csv, full: text };
-    };
-
-    const sendWithRetry = async (label, maxAttempts) => {
+    const runOCR = async (docType, items, runNo) => {
+      if (!items.length) return null;
+      setStatus('info', (docType === 'invoice' ? 'Накладные' : 'Чек') + ': подготовка ' + items.length + ' файлов…');
+      const fileParts = await buildGeminiFileParts(docType);
+      if (!fileParts.length) throw new Error('Не удалось подготовить файлы: ' + docType);
+      const body = {
+        systemInstruction: { parts: [{ text: buildSystemInstructionForGemini() }] },
+        contents: [{ parts: [...fileParts, { text: buildSeparatedOCRPrompt(parsed.label, docType) }] }],
+        generationConfig: { temperature: 0, maxOutputTokens: GEMINI_MAX_OUTPUT_TOKENS }
+      };
+      const maxAttempts = 3;
       let lastErr = '';
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-          return await sendOne(label + (attempt > 1 ? ' (попытка ' + attempt + ')' : ''));
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+          if (!res.ok) {
+            let msg = 'HTTP ' + res.status;
+            try {
+              const j = await res.json();
+              if (j && j.error && j.error.message) msg = j.error.message;
+            } catch (e) {}
+            if (res.status === 429) msg = 'Превышен лимит запросов.';
+            if (res.status === 503 || /high demand|overload/i.test(msg)) msg = 'Сервер перегружен.';
+            throw new Error(msg);
+          }
+          const data = await res.json();
+          const cand = data && data.candidates && data.candidates[0];
+          if (!cand) throw new Error('Нет кандидата ответа.');
+          const text = ((cand.content && cand.content.parts) || []).map(p => p.text || '').join('');
+          const csv = extractCsvFromGeminiText(text);
+          if (!csv || !/;/.test(csv)) throw new Error('Ответ не похож на CSV.');
+          return { csv, full: text, docType, runNo };
         } catch (e) {
           lastErr = e.message || String(e);
-          const isRetriable = /503|429|overloaded|high demand|перегружен|resource.?exhausted|temporarily|unavailable/i.test(lastErr);
-          if (!isRetriable || attempt === maxAttempts) throw e;
-          const wait = attempt * 3000;
-          setStatus('info', label + ': сервер занят, повтор через ' + Math.round(wait / 1000) + ' с…');
-          await new Promise(r => setTimeout(r, wait));
+          if (!/503|429|overload|high demand|перегружен|resource.?exhausted|temporarily|unavailable/i.test(lastErr) || attempt === maxAttempts) break;
+          await new Promise(r => setTimeout(r, attempt * 3000));
         }
       }
-      throw new Error(lastErr);
+      throw new Error((docType === 'invoice' ? 'Накладные' : 'Чек') + ': ' + lastErr);
     };
 
-    let r1 = null, r2 = null, err1 = '', err2 = '';
-    if (doubleRun) {
-      try { r1 = await sendWithRetry('Прогон 1', 3); }
-      catch (e) { err1 = e.message || String(e); }
-      if (r1) {
-        setStatus('info', 'Прогон 1 готов. Отправка прогона 2…');
-        await new Promise(r => setTimeout(r, 1500));
-        try { r2 = await sendWithRetry('Прогон 2', 3); }
-        catch (e) { err2 = e.message || String(e); }
+    const runOneType = async (docType, items) => {
+      if (!items.length) return { primary: null, secondary: null, errors: [] };
+      let primary = null, secondary = null;
+      const errors = [];
+      try { primary = await runOCR(docType, items, 1); }
+      catch (e) { errors.push(e.message || String(e)); }
+      if (primary && doubleRun) {
+        setStatus('info', (docType === 'invoice' ? 'Накладные' : 'Чек') + ': прогон 1 готов, проверка прогоном 2…');
+        await new Promise(r => setTimeout(r, 800));
+        try { secondary = await runOCR(docType, items, 2); }
+        catch (e) { errors.push(e.message || String(e)); }
       }
-    } else {
-      try { r1 = await sendWithRetry('Прогон 1', 3); }
-      catch (e) { err1 = e.message || String(e); }
+      return { primary, secondary, errors };
+    };
+
+    const invResult = await runOneType('invoice', invoiceItems);
+    const salesResult = await runOneType('sales', salesItems);
+
+    if (!invResult.primary && !salesResult.primary) {
+      throw new Error([...invResult.errors, ...salesResult.errors].join(' | ') || 'OCR не удался.');
     }
 
-    if (!r1 && !r2) throw new Error(err1 || err2 || 'Запрос не удался.');
+    const invCsv = invResult.primary ? invResult.primary.csv : '';
+    const invCsv2 = invResult.secondary ? invResult.secondary.csv : '';
+    const salesCsv = salesResult.primary ? salesResult.primary.csv : '';
+    const salesCsv2 = salesResult.secondary ? salesResult.secondary.csv : '';
 
-    const csv1 = r1 ? r1.csv : '';
-    const csv2 = r2 ? r2.csv : '';
-    const full1 = r1 ? r1.full : '';
-    const full2 = r2 ? r2.full : '';
+    const merged1 = mergeSeparatedOCRCsv(invCsv, salesCsv, parsed.label);
+    const merged2 = (invCsv2 || salesCsv2)
+      ? mergeSeparatedOCRCsv(invCsv2 || invCsv, salesCsv2 || salesCsv, parsed.label)
+      : '';
 
-    let bothMatch = false;
-    if (csv1 && csv2) {
-      try {
-        const d1 = cmpParseCSV(csv1);
-        const d2 = cmpParseCSV(csv2);
-        if (d1 && d2) {
-          const keys1 = Object.keys(d1.rows);
-          const keys2 = Object.keys(d2.rows);
-          if (keys1.length === keys2.length && keys1.length > 0) {
-            bothMatch = keys1.every(k => {
-              const a = d1.rows[k];
-              const b = d2.rows[k];
-              if (!b) return false;
-              if ((a.sales || 0) !== (b.sales || 0)) return false;
-              /* Сравниваем ВСЕ даты из обоих прогонов, а не только первую.
-                 Раньше расхождение по 2-й и следующими датам терялось,
-                 фото удалялись, и ошибка ИИ не всплывала. */
-              const allDates = new Set([
-                ...Object.keys(a.incoming || {}),
-                ...Object.keys(b.incoming || {})
-              ]);
-              for (const dk of allDates) {
-                if ((a.incoming[dk] || 0) !== (b.incoming[dk] || 0)) return false;
-              }
-              return true;
-            });
-          }
-        }
-      } catch (e) { bothMatch = false; }
-    }
+    const bothMatch = !!(merged1 && merged2 && merged1 === merged2);
+    const chosen = merged1;
+    const reports = [
+      invResult.primary && parseAIReport(invResult.primary.full),
+      salesResult.primary && parseAIReport(salesResult.primary.full)
+    ].filter(Boolean);
+    const safetyIssues = [];
+    [invResult.primary, invResult.secondary, salesResult.primary, salesResult.secondary].forEach(r => {
+      if (!r) return;
+      const report = parseAIReport(r.full);
+      safetyIssues.push(...getOCRSafetyIssues(r.csv, report, r.docType === 'invoice' ? invoiceItems.length : salesItems.length));
+    });
 
-    const chosen = csv1 || csv2;
-    const chosenFull = full1 || full2;
-    const needsCheck = !!(csv1 && csv2 && !bothMatch);
-    /* v9.20.6: безопасная проверка каждого ответа и накопителя по датам. */
-    const report1 = full1 ? parseAIReport(full1) : null;
-    const report2 = full2 ? parseAIReport(full2) : null;
-    if (report1) report1.validation = validateAIResponse(csv1, csv2, report1, items.length);
-    if (report2) report2.validation = validateAIResponse(csv2, csv1, report2, items.length);
-    const chosenReport = report1 || report2;
-    const safety1 = getOCRSafetyIssues(csv1, report1, items.length);
-    const safety2 = getOCRSafetyIssues(csv2, report2, items.length);
-    const safetyIssues = [...safety1, ...safety2];
     const blockedBySafety = safetyIssues.length > 0;
-    _lastAIReport = chosenReport;
-    if (_lastAIReport) {
-      _lastAIReport.safety = {
+    const chosenReport = reports[0] || null;
+    if (chosenReport) {
+      chosenReport.validation = validateAIResponse(merged1, merged2, chosenReport, allItems.length);
+      chosenReport.safety = {
         blocked: blockedBySafety,
         issues: safetyIssues,
-        doubleRun: !!(csv1 && csv2)
+        doubleRun: !!doubleRun,
+        separatedOCR: true
       };
+      if (reports[1]) {
+        chosenReport.blocks = Object.assign({}, chosenReport.blocks || {}, {
+          'ЧЕК_OCR': reports[1].fullRaw || ''
+        });
+      }
     }
+    _lastAIReport = chosenReport;
     persistAIReport(_lastAIReport);
     updateAIReportBtnVisibility();
-    const idx = _dailyAccum.findIndex(x => x.iso === parsed.iso);
+
     const entry = {
       iso: parsed.iso,
       label: parsed.label,
       csv: chosen,
       ts: Date.now(),
-      needsCheck: needsCheck || blockedBySafety,
+      needsCheck: blockedBySafety || (!!doubleRun && !bothMatch),
       blocked: blockedBySafety,
       safetyIssues: safetyIssues.map(x => ({ code: x.code, title: x.title })),
       category: _activeCategory
     };
-    if (idx >= 0) _dailyAccum[idx] = entry;
-    else _dailyAccum.push(entry);
+    const idx = _dailyAccum.findIndex(x => x.iso === parsed.iso);
+    if (idx >= 0) _dailyAccum[idx] = entry; else _dailyAccum.push(entry);
     saveDailyAccum();
     dailyRender();
 
-    if (blockedBySafety) {
-      setStatus('warn', `Дата ${parsed.label}: распознавание требует проверки. ${formatOCRSafetyMessage(safetyIssues)} Фото сохранены.`);
-      showToast('Дата требует проверки OCR');
-      _lastGeminiCsvs = { first: csv1, second: csv2 };
+    if (blockedBySafety || (!!doubleRun && !bothMatch)) {
+      _lastGeminiCsvs = { first: invCsv || salesCsv, second: invCsv2 || salesCsv2 };
       _dailyEditing = parsed.iso;
-      setTimeout(() => openCompareModal({ first: csv1, second: csv2 }), 400);
-    } else if (csv1 && csv2 && bothMatch) {
-      setStatus('ok', `Дата ${parsed.label}: оба прогона совпали. Накоплено. Фото очищены.`);
-      try { await clearAllPhotos(); } catch (e) {}
-      await renderPhotoQueue();
-    } else if (csv1 && csv2) {
-      setStatus('warn', `Дата ${parsed.label}: расхождения между прогонами. Разберитесь в сверке.`);
-      _lastGeminiCsvs = { first: csv1, second: csv2 };
-      _dailyEditing = parsed.iso;
-      setTimeout(() => openCompareModal({ first: csv1, second: csv2 }), 400);
+      setStatus('warn', 'OCR разделён: результат требует проверки. Проверьте сверку и нечитаемые значения.');
+      setTimeout(() => openCompareModal({ first: merged1, second: merged2 || merged1 }), 400);
     } else {
-      setStatus('warn', `Дата ${parsed.label} накоплена (только один прогон удался). ${err1 || err2}`);
+      setStatus('ok', 'Накладные и чек распознаны раздельно и объединены без смешивания данных.');
       try { await clearAllPhotos(); } catch (e) {}
       await renderPhotoQueue();
     }
