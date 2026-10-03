@@ -2772,13 +2772,22 @@ function computeFIFO(row) {
    * Это не объединение поставок: каждая дата остаётся отдельной партией.
    */
   const moment = getCheckMoment();
+  /*
+   * В CSV продажи указаны суммой за день, без времени каждой продажи.
+   * Поэтому сегодняшние продажи проверяем относительно начала дня (07:00):
+   * партия, которую списывают сегодня в 22:00, могла обслуживать продажи
+   * в течение этого дня. Остаток же проверяем по фактическому моменту аудита.
+   */
+  const salesCutoff = new Date(moment);
+  salesCutoff.setHours(SHELF_LIFE_START_HOUR, 0, 0, 0);
   const parties = mergeIncomingByDate(row.incoming).map(p => {
     const writeOff = getWriteOffMoment(p.date, shelfLife);
     return {
       date: p.date,
       qty: clampNum(p.qty, 0, MAX_NUM, 0),
       writeOff,
-      expired: !!writeOff && writeOff <= moment
+      expired: !writeOff || writeOff <= moment,
+      expiredForSales: !writeOff || writeOff <= salesCutoff
     };
   });
 
@@ -2789,7 +2798,7 @@ function computeFIFO(row) {
   for (const lot of parties) {
     if (remainingSales <= 0) break;
     const take = Math.min(lot.qty, remainingSales);
-    if (lot.expired) soldExpired += take;
+    if (lot.expiredForSales) soldExpired += take;
     else freshSold += take;
     remainingSales -= take;
   }
