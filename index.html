@@ -9300,6 +9300,9 @@ function mergeSeparatedOCRCsv(invoiceCsv, salesCsv, dateLabel) {
   if (inv && !inv.dateCols.some(dc => dc.key === targetDate)) {
     throw new Error('В распознанных накладных нет колонки прихода за ' + targetDate + '. Количество другой даты подставлять нельзя.');
   }
+  if (sal && !sal.hasSalesColumn) {
+    throw new Error('В распознанном чеке нет колонки «Продано сегодня». Количество продаж не подтверждено.');
+  }
   const all = new Map();
 
   /* Сначала создаём все позиции из справочника. Это гарантирует
@@ -10476,7 +10479,7 @@ function cmpParseCSV(text) {
       order.push(key);
     }
   }
-  return { rows, dateCols, order, count: order.length };
+  return { rows, dateCols, order, count: order.length, hasSalesColumn: idxSales >= 0 };
 }
 function cmpCalcSigmaForDate(csvData, dateKey) {
   let total = 0; let count = 0; const missing = [];
