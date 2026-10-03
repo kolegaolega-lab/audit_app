@@ -9627,7 +9627,6 @@ function rebuildDailyCsvFromTable(iso) {
     const party = (row.incoming || []).find(p => p.date === iso);
     const qty = party ? (party.qty || 0) : 0;
     const sales = row.sales || 0;
-    if (qty === 0 && sales === 0) continue;
     rows.push({ name: row.name, qty, sales, shelfLife: row.shelfLife });
   }
   if (!rows.length) return false;
@@ -9642,11 +9641,14 @@ function rebuildDailyCsvFromTable(iso) {
     lines.push(`${safeName};${r.qty};${r.sales};${r.shelfLife != null ? r.shelfLife : ''}`);
   }
   entry.csv = lines.join('\n');
-  entry.needsCheck = false;
-  /* v9.20.6: ручное исправление/применение из сверки закрывает
-     блокировку OCR для этой даты. */
-  entry.blocked = false;
-  entry.safetyIssues = [];
+  /* Ручная правка снимает OCR-предупреждения, но не может заменить
+     отсутствующий источник: без накладной/чека ноль не подтверждён. */
+  const stillMissingSource = Array.isArray(entry.sourceMissing) && entry.sourceMissing.length > 0;
+  entry.needsCheck = stillMissingSource;
+  entry.blocked = stillMissingSource;
+  entry.safetyIssues = stillMissingSource
+    ? entry.sourceMissing.map(title => ({ code: 'SOURCE_MISSING', title }))
+    : [];
   entry.ts = Date.now();
   saveDailyAccum();
   return true;
@@ -9675,11 +9677,11 @@ async function buildDailyCsv() {
   }
   _dailyAccum.sort((a, b) => a.iso.localeCompare(b.iso));
 
-  const blockedEntries = _dailyAccum.filter(d => d && d.blocked);
+  const blockedEntries = _dailyAccum.filter(d => d && (d.blocked || d.needsCheck));
   if (blockedEntries.length) {
     if (statusEl) {
       statusEl.className = 'status show err';
-      statusEl.textContent = 'Нельзя собрать итог: есть даты с непроверенным OCR — ' +
+      statusEl.textContent = 'Нельзя собрать итог: есть даты с непроверенным OCR или неполными источниками — ' +
         blockedEntries.map(d => d.label).join(', ') + '.';
     }
     return;
