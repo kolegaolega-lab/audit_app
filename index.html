@@ -2672,13 +2672,27 @@ function deletePrice(name) {
    ═══════════════════════════════════════════ */
 function getCheckMoment() { return new Date(); }
 function getWriteOffMoment(partyDate, shelfLife) {
-  const [y, m, day] = partyDate.split('-').map(Number);
+  /*
+   * ЕДИНСТВЕННОЕ ПРАВИЛО СРОКА ГОДНОСТИ:
+   * каждая поставка начинается в 07:00 даты прихода;
+   * списание происходит в 22:00 последнего допустимого дня.
+   *
+   * Поэтому:
+   * 24 ч  -> день прихода 22:00
+   * 36 ч  -> следующий день 22:00
+   * 48 ч  -> следующий день 22:00
+   * 72 ч  -> +2 дня 22:00
+   * и т.д.
+   *
+   * Важно: это бизнес-правило, а не математическое добавление часов
+   * к 07:00. Не заменять его на partyDate + shelfLife часов.
+   */
+  const [y, m, day] = String(partyDate || '').split('-').map(Number);
   const check = new Date(y, m - 1, day);
   if (check.getFullYear() !== y || check.getMonth() !== m - 1 || check.getDate() !== day) return null;
-  check.setHours(SHELF_LIFE_START_HOUR, 0, 0, 0);
-  const h = clampNum(shelfLife, 1, 10000, 72);
-  if (h <= 24) { check.setHours(WRITE_OFF_HOUR, 0, 0, 0); return check; }
-  const days = Math.ceil(h / 24) - 1;
+  const h = clampNum(shelfLife, 1, 10000, null);
+  if (h == null) return null;
+  const days = Math.max(0, Math.ceil(h / 24) - 1);
   check.setDate(check.getDate() + days);
   check.setHours(WRITE_OFF_HOUR, 0, 0, 0);
   return check;
@@ -2741,22 +2755,86 @@ function computeFIFO(row) {
   if (row.salesOnly) return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null, isSalesOnly: true };
   if (row.shelfLife === 0 || row.shelfLife == null) return emptyResult();
   if (row.stock == null) return emptyResult();
+
   const stock = clampNum(row.stock, 0, MAX_NUM, 0);
   const sales = clampNum(row.sales, 0, MAX_NUM, 0);
-  const shelfLife = clampNum(row.shelfLife, 1, 10000, 72);
+  const shelfLife = clampNum(row.shelfLife, 1, 10000, null);
+  if (shelfLife == null) return emptyResult();
+
+  /*
+   * Детерминированный FIFO:
+   * 1) все партии сортируются от старой к новой;
+   * 2) сегодняшние продажи списываются сначала со старых партий;
+   * 3) текущий остаток распределяется по оставшимся партиям тем же FIFO;
+   * 4) партия считается свежей только если её момент списания строго
+   *    позже момента проверки. В 22:00 партия уже списывается.
+   *
+   * Это не объединение поставок: каждая дата остаётся отдельной партией.
+   */
   const moment = getCheckMoment();
-  const parties = mergeIncomingByDate(row.incoming);
-  let freshIncoming = 0;
-  for (const p of parties) {
+  const parties = mergeIncomingByDate(row.incoming).map(p => {
     const writeOff = getWriteOffMoment(p.date, shelfLife);
-    if (writeOff && writeOff > moment) freshIncoming += p.qty;
+    return {
+      date: p.date,
+      qty: clampNum(p.qty, 0, MAX_NUM, 0),
+      writeOff,
+      expired: !!writeOff && writeOff <= moment
+    };
+  });
+
+  let remainingSales = sales;
+  let soldExpired = 0;
+  let freshSold = 0;
+
+  for (const lot of parties) {
+    if (remainingSales <= 0) break;
+    const take = Math.min(lot.qty, remainingSales);
+    if (lot.expired) soldExpired += take;
+    else freshSold += take;
+    remainingSales -= take;
   }
-  const freshOnShelf = Math.min(stock, freshIncoming);
-  const expiredOnShelf = Math.max(0, stock - freshIncoming);
-  const freshLeft = Math.max(0, freshIncoming - freshOnShelf);
-  const freshSold = Math.min(sales, freshLeft);
-  const expiredSold = Math.max(0, sales - freshSold);
-  return { soldExpired: expiredSold, expiredOnShelf, freshOnShelf, freshSold };
+
+  /*
+   * Если продаж больше всех известных партий, остаток продаж не может
+   * быть автоматически привязан к свежему приходу. Он считается
+   * просроченной/необеспеченной продажей для текущей проверки.
+   */
+  if (remainingSales > 0) soldExpired += remainingSales;
+
+  const remainingLots = parties.map(l => ({ ...l }));
+  let remainingStock = stock;
+  let freshOnShelf = 0;
+  let expiredOnShelf = 0;
+
+  /*
+   * Продажи уже забрали количество из партий. Повторно распределяем
+   * только остаток каждой партии.
+   */
+  let salesToAllocate = sales;
+  for (const lot of remainingLots) {
+    if (salesToAllocate <= 0) break;
+    const take = Math.min(lot.qty, salesToAllocate);
+    lot.qty -= take;
+    salesToAllocate -= take;
+  }
+
+  for (const lot of remainingLots) {
+    if (remainingStock <= 0) break;
+    const take = Math.min(lot.qty, remainingStock);
+    if (lot.expired) expiredOnShelf += take;
+    else freshOnShelf += take;
+    remainingStock -= take;
+  }
+
+  /*
+   * Остаток, который нельзя обеспечить известными поставками, также
+   * требует внимания. Для совместимости с текущим UI относим его к
+   * просроченному остатку: приложение не должно показывать его как
+   * свежий товар.
+   */
+  if (remainingStock > 0) expiredOnShelf += remainingStock;
+
+  return { soldExpired, expiredOnShelf, freshOnShelf, freshSold };
 }
 function emptyResult() { return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null }; }
 function getRowStatus(calc, row) {
@@ -9121,8 +9199,15 @@ function dailyParseDateInput(str) {
   const day = parseInt(m[1], 10);
   const month = parseInt(m[2], 10);
   if (day < 1 || day > 31 || month < 1 || month > 12) return null;
-  let year = m[3] ? parseInt(m[3], 10) : new Date().getFullYear();
-  if (year < 100) year += 2000;
+  let year = m[3] ? parseInt(m[3], 10) : null;
+  if (year != null && year < 100) year += 2000;
+  const isoRef = new Date();
+  if (year == null) {
+    const refM = isoRef.getMonth() + 1;
+    year = isoRef.getFullYear();
+    if (month - refM > 6) year -= 1;
+    else if (refM - month > 6) year += 1;
+  }
   const d = new Date(year, month - 1, day);
   if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
   const iso = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -9215,7 +9300,10 @@ function mergeSeparatedOCRCsv(invoiceCsv, salesCsv, dateLabel) {
   /* Сначала создаём все позиции из справочника. Это гарантирует
      наличие строки даже при полном отсутствии товара в обоих OCR. */
   const catalogProducts = getCategoryProducts(_activeCategory);
-  const sourceProducts = catalogProducts.length ? catalogProducts : PRODUCTS;
+  if (!catalogProducts.length) {
+    throw new Error('Не удалось определить активную категорию справочника.');
+  }
+  const sourceProducts = catalogProducts;
 
   sourceProducts.forEach(prod => {
     if (!prod || !prod.name) return;
