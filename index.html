@@ -9401,6 +9401,10 @@ function rebuildDailyCsvFromTable(iso) {
   }
   entry.csv = lines.join('\n');
   entry.needsCheck = false;
+  /* v9.20.6: ручное исправление/применение из сверки закрывает
+     блокировку OCR для этой даты. */
+  entry.blocked = false;
+  entry.safetyIssues = [];
   entry.ts = Date.now();
   saveDailyAccum();
   return true;
