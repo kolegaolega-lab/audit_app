@@ -8172,6 +8172,21 @@ async function buildGeminiFileParts(filterType) {
   }
   return parts;
 }
+async function findExactDuplicatePhotoFiles(items) {
+  if (!Array.isArray(items) || items.length < 2) return [];
+  if (typeof crypto === 'undefined' || !crypto.subtle) return [];
+  const seen = new Map(), duplicates = [];
+  for (const item of items) {
+    if (!item || !item.blob || typeof item.blob.arrayBuffer !== 'function') continue;
+    const digest = await crypto.subtle.digest('SHA-256', await item.blob.arrayBuffer());
+    const hash = Array.from(new Uint8Array(digest)).map(x => x.toString(16).padStart(2, '0')).join('');
+    const key = String(item.type || '') + ':' + hash;
+    if (seen.has(key)) duplicates.push({ first: seen.get(key), duplicate: item });
+    else seen.set(key, item);
+  }
+  return duplicates;
+}
+
 function extractCsvFromGeminiText(text) {
   let csv = String(text || '').trim();
   csv = csv.replace(/^```[a-zA-Z]*\s*\n?/, '').replace(/\n?```\s*$/, '').trim();
@@ -8483,7 +8498,7 @@ function _groupPostrochnoByNakl(rows) {
   return groups;
 }
 
-function validateAIResponse(csv1, csv2, report, photoCount) {
+function validateAIResponse(csv1, csv2, report, photoCount, requireLineItems = false) {
   const csvText = csv1 || '';
   const issues = [];
   if (!report || !report.hasBlocks) return { overall: 'ok', issues: [] };
@@ -8875,6 +8890,35 @@ function validateAIResponse(csv1, csv2, report, photoCount) {
       }
     }
   } catch (e) { console.warn('validate: nakl-lost', e); }
+
+  /* --- 13. Построчные количества накладной должны совпасть с CSV --- */
+  try {
+    if (requireLineItems && (!report.postrochno || !report.postrochno.length)) {
+      issues.push({ level: 'error', code: 'line-items-missing', title: 'Нет полного построчного перечня накладной', detail: 'Не получен #ПОСТРОЧНО с количеством, ценой и суммой по каждой товарной строке.' });
+    } else if (requireLineItems && report.postrochno && report.postrochno.length) {
+      const parsed = cmpParseCSV(csvText);
+      if (!parsed) {
+        issues.push({ level: 'error', code: 'line-items-csv-invalid', title: 'Не удалось сверить построчные количества с CSV' });
+      } else {
+        const lineTotals = new Map();
+        report.postrochno.forEach(r => {
+          const key = normalizeName(applyAliases(cleanProductName(r.name)));
+          if (key) lineTotals.set(key, (lineTotals.get(key) || 0) + Number(r.qty || 0));
+        });
+        for (const key of parsed.order) {
+          const row = parsed.rows[key];
+          const csvQty = parsed.dateCols.reduce((sum, dc) => sum + Number((row.incoming || {})[dc.key] || 0), 0);
+          if (csvQty <= 0) continue;
+          const lineQty = lineTotals.get(key) || 0;
+          if (lineQty !== csvQty) issues.push({
+            level: 'error', code: 'line-quantity-mismatch',
+            title: 'Количество в CSV не совпадает с построчным OCR: ' + row.name,
+            detail: 'CSV: ' + csvQty + ' шт.; по строкам накладной: ' + lineQty + ' шт.'
+          });
+        }
+      }
+    }
+  } catch (e) { console.warn('validate: line-quantity-mismatch', e); }
 
   /* --- Сводный уровень --- */
   let overall = 'ok';
@@ -9441,7 +9485,7 @@ function buildSeparatedOCRPrompt(dateLabel, docType) {
     '#ИСТОЧНИКИ:',
     '#ПРОВЕРКА:',
     '#ПРОВЕРКА_ПОЛНОТЫ:',
-    'Укажи точное число загруженных приложением файлов и сколько реально просмотрено: «Получено: N изображений; Обработано: N изображений». Не считай страницы PDF отдельными файлами.',
+    'Укажи точное число загруженных приложением файлов и сколько реально просмотрено: «Получено: N изображений; Обработано: N изображений». Не считай страницы PDF отдельными файлами. Сверь все фото по номерам документов, датам, номерам строк и содержимому. Повторное фото, повтор страницы или перекрывающийся фрагмент не считай вторым документом и не суммируй повторно; перечисли обнаруженные повторы здесь.',
     '#СОМНИТЕЛЬНЫЕ_СТРОКИ:',
     'Перечисли все строки, где название или количество не читается однозначно, есть варианты прочтения или сомнение в цифре. Не выдумывай процент уверенности. Если сомнений нет — напиши «пусто».',
     '#НЕЧИТАЕМО:',
@@ -9471,6 +9515,20 @@ async function recognizeDaily() {
     setStatus('info', 'Сначала загрузите фото накладных и чека продаж.');
     return;
   }
+  try {
+    const duplicateFiles = [
+      ...(await findExactDuplicatePhotoFiles(invoiceItems)),
+      ...(await findExactDuplicatePhotoFiles(salesItems))
+    ];
+    if (duplicateFiles.length) {
+      const names = duplicateFiles.slice(0, 3).map(x =>
+        (x.duplicate.name || 'файл') + ' повторяет ' + (x.first.name || 'предыдущий файл')
+      );
+      setStatus('err', 'Обнаружены одинаковые загруженные файлы: ' + names.join('; ') +
+        '. Удалите повторные фото и запустите распознавание снова.');
+      return;
+    }
+  } catch (e) { console.warn('Exact duplicate photo check unavailable:', e); }
   const missingSources = [];
   if (!invoiceItems.length) missingSources.push('накладные не загружены');
   if (!salesItems.length) missingSources.push('чек продаж не загружен');
@@ -9580,7 +9638,7 @@ async function recognizeDaily() {
 
     const blockedBySafety = safetyIssues.length > 0;
     const invoiceValidation = invoiceReport
-      ? validateAIResponse(invCsv, invCsv2, invoiceReport, invoiceItems.length)
+      ? validateAIResponse(invCsv, invCsv2, invoiceReport, invoiceItems.length, true)
       : { overall: 'ok', issues: [] };
     const salesValidation = salesReport
       ? validateAIResponse(salesCsv, salesCsv2, salesReport, salesItems.length)
