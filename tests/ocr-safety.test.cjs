@@ -34,7 +34,7 @@ test('identical OCR product rows are treated as duplicate, not added', () => {
   const c = makeContext();
   const parsed = c.cmpParseCSV('Наименование;Продано сегодня;Получено за 04.10\\nКруассан;0;2\\nКруассан;0;2');
   assert.equal(parsed.count, 1);
-  assert.equal(parsed.rows.kруассан.incoming['04.10'], 2);
+  assert.equal(parsed.rows['круассан'].incoming['04.10'], 2);
 });
 
 test('conflicting duplicate product quantities stop OCR merge', () => {
