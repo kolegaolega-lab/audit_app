@@ -19,4 +19,4 @@ jobs:
         with:
           node-version: 20
       - name: Run FIFO tests
-        run: node --test tests/fifo.test.cjs
+        run: node --test tests/fifo.test.cjs tests/ocr-safety.test.cjs
