@@ -2753,8 +2753,7 @@ function mergeIncomingByDate(incoming) {
 function computeFIFO(row) {
   if (!row || typeof row !== 'object') return emptyResult();
   if (row.salesOnly) return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null, isSalesOnly: true };
-  if (row.shelfLife === 0 || row.shelfLife == null) return emptyResult();
-  if (row.stock == null) return emptyResult();
+  if (row.shelfLife === 0 || row.shelfLife == null || row.stock == null) return emptyResult();
 
   const stock = clampNum(row.stock, 0, MAX_NUM, 0);
   const sales = clampNum(row.sales, 0, MAX_NUM, 0);
@@ -2762,21 +2761,24 @@ function computeFIFO(row) {
   if (shelfLife == null) return emptyResult();
 
   /*
-   * Детерминированный FIFO:
-   * 1) все партии сортируются от старой к новой;
-   * 2) сегодняшние продажи списываются сначала со старых партий;
-   * 3) текущий остаток распределяется по оставшимся партиям тем же FIFO;
-   * 4) партия считается свежей только если её момент списания строго
-   *    позже момента проверки. В 22:00 партия уже списывается.
+   * Аудиторская модель распределения:
+   * 1) Сначала подтверждаем фактический остаток на витрине свежими партиями.
+   *    Для остатка резервируем самые новые ещё годные партии.
+   * 2) Если остаток больше свежего прихода, недостающая часть помечается
+   *    как просроченная/неподтверждённая на витрине.
+   * 3) После резерва остатка продажи распределяются по оставшимся партиям
+   *    FIFO (от старых к новым).
+   * 4) Продажи без оставшегося годного прихода относятся к просроченным/
+   *    неподтверждённым продажам.
    *
-   * Это не объединение поставок: каждая дата остаётся отдельной партией.
+   * Это позволяет отдельно показать просрочку на витрине и просрочку
+   * в продажах, не используя одну партию дважды.
    */
   const moment = getCheckMoment();
   /*
-   * В CSV продажи указаны суммой за день, без времени каждой продажи.
-   * Поэтому сегодняшние продажи проверяем относительно начала дня (07:00):
-   * партия, которую списывают сегодня в 22:00, могла обслуживать продажи
-   * в течение этого дня. Остаток же проверяем по фактическому моменту аудита.
+   * Продажи в iiko представлены дневной суммой без времени транзакций.
+   * Партия, списываемая сегодня в 22:00, доступна для покрытия сегодняшних
+   * продаж. Фактический остаток проверяется на момент аудита.
    */
   const salesCutoff = new Date(moment);
   salesCutoff.setHours(SHELF_LIFE_START_HOUR, 0, 0, 0);
@@ -2785,63 +2787,54 @@ function computeFIFO(row) {
     return {
       date: p.date,
       qty: clampNum(p.qty, 0, MAX_NUM, 0),
-      writeOff,
       expired: !writeOff || writeOff <= moment,
       expiredForSales: !writeOff || writeOff <= salesCutoff
     };
   });
 
-  let remainingSales = sales;
-  let soldExpired = 0;
-  let freshSold = 0;
-
-  for (const lot of parties) {
-    if (remainingSales <= 0) break;
-    const take = Math.min(lot.qty, remainingSales);
-    if (lot.expiredForSales) soldExpired += take;
-    else freshSold += take;
-    remainingSales -= take;
-  }
-
-  /*
-   * Если продаж больше всех известных партий, остаток продаж не может
-   * быть автоматически привязан к свежему приходу. Он считается
-   * просроченной/необеспеченной продажей для текущей проверки.
-   */
-  if (remainingSales > 0) soldExpired += remainingSales;
-
-  const remainingLots = parties.map(l => ({ ...l }));
   let remainingStock = stock;
   let freshOnShelf = 0;
   let expiredOnShelf = 0;
+  const remainingLots = parties.map(l => ({ ...l }));
 
-  /*
-   * Продажи уже забрали количество из партий. Повторно распределяем
-   * только остаток каждой партии.
-   */
-  let salesToAllocate = sales;
-  for (const lot of remainingLots) {
-    if (salesToAllocate <= 0) break;
-    const take = Math.min(lot.qty, salesToAllocate);
-    lot.qty -= take;
-    salesToAllocate -= take;
-  }
-
-  for (const lot of remainingLots) {
-    if (remainingStock <= 0) break;
+  // Сначала резервируем остаток из самых новых свежих партий.
+  for (let i = remainingLots.length - 1; i >= 0 && remainingStock > 0; i--) {
+    const lot = remainingLots[i];
+    if (lot.expired || lot.qty <= 0) continue;
     const take = Math.min(lot.qty, remainingStock);
-    if (lot.expired) expiredOnShelf += take;
-    else freshOnShelf += take;
+    lot.qty -= take;
     remainingStock -= take;
+    freshOnShelf += take;
   }
 
-  /*
-   * Остаток, который нельзя обеспечить известными поставками, также
-   * требует внимания. Для совместимости с текущим UI относим его к
-   * просроченному остатку: приложение не должно показывать его как
-   * свежий товар.
-   */
+  // Если свежих партий не хватило, остаток витрины — просроченный.
+  if (remainingStock > 0) {
+    for (let i = 0; i < remainingLots.length && remainingStock > 0; i++) {
+      const lot = remainingLots[i];
+      if (!lot.expired || lot.qty <= 0) continue;
+      const take = Math.min(lot.qty, remainingStock);
+      lot.qty -= take;
+      remainingStock -= take;
+      expiredOnShelf += take;
+    }
+  }
   if (remainingStock > 0) expiredOnShelf += remainingStock;
+
+  // После резервирования витрины распределяем продажи по FIFO.
+  let remainingSales = sales;
+  let soldExpired = 0;
+  let freshSold = 0;
+  for (const lot of remainingLots) {
+    if (remainingSales <= 0) break;
+    if (lot.qty <= 0) continue;
+    const take = Math.min(lot.qty, remainingSales);
+    if (lot.expiredForSales) soldExpired += take;
+    else freshSold += take;
+    lot.qty -= take;
+    remainingSales -= take;
+  }
+  // Продажи без подтверждённого остатка поставок также требуют проверки.
+  if (remainingSales > 0) soldExpired += remainingSales;
 
   return { soldExpired, expiredOnShelf, freshOnShelf, freshSold };
 }
