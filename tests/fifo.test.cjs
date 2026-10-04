@@ -12,7 +12,7 @@ function extractFunction(source, name) {
   const marker = `function ${name}(`;
   const start = source.indexOf(marker);
   assert.notEqual(start, -1, `Missing production function: ${name}`);
-  const endMarker = name === 'computeFIFO' ? '\\nfunction emptyResult()' : null;
+  const endMarker = name === 'computeFIFO' ? '\\nfunction getRowStatus(' : null;
   const end = endMarker ? source.indexOf(endMarker, start) : -1;
   assert.notEqual(end, -1, `Could not find end of production function: ${name}`);
   return source.slice(start, end);
