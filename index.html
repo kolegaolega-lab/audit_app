@@ -3020,17 +3020,21 @@ function parseCSV(text, referenceDate) {
       }
       continue;
     }
-    /* Данные разные — суммируем (реальные разные источники). */
-    existing.sales = (existing.sales || 0) + (r.sales || 0);
-    existing._originalSales = existing.sales;
+    /* Разные значения одной позиции неоднозначны: не суммируем повторы
+       разных фото автоматически, а требуем ручной сверки. */
+    const dates = new Set([...(existing.incoming || []).map(x => x.date), ...(r.incoming || []).map(x => x.date)]);
+    const conflicts = [...dates].filter(date => {
+      const a = (existing.incoming || []).find(x => x.date === date);
+      const b = (r.incoming || []).find(x => x.date === date);
+      return a && b && Number(a.qty || 0) !== Number(b.qty || 0);
+    });
+    if (conflicts.length || Number(existing.sales || 0) !== Number(r.sales || 0)) {
+      throw new Error('Конфликт повторных строк товара «' + r.name + '». Значения отличаются. Проверьте исходные фото; автоматическое суммирование запрещено.');
+    }
     for (const p of r.incoming || []) {
-      const ep = (existing.incoming || []).find(x => x.date === p.date);
-      if (ep) ep.qty = (ep.qty || 0) + (p.qty || 0);
-      else existing.incoming.push({ date: p.date, qty: p.qty || 0 });
+      if (!(existing.incoming || []).some(x => x.date === p.date)) existing.incoming.push({ date: p.date, qty: p.qty || 0 });
     }
-    if ((!existing.shelfLife || existing.shelfLife === 0) && r.shelfLife) {
-      existing.shelfLife = r.shelfLife;
-    }
+    if ((!existing.shelfLife || existing.shelfLife === 0) && r.shelfLife) existing.shelfLife = r.shelfLife;
   }
   const dedupedRows = [...dedupMap.values()];
 
@@ -8579,17 +8583,18 @@ function validateAIResponse(csv1, csv2, report, photoCount) {
 
   /* --- 4. Фото vs #ПРОВЕРКА_ПОЛНОТЫ --- */
   try {
-    if (photoCount > 0 && report.completeness && report.completeness.received > 0) {
-      const recv = report.completeness.received;
-      if (photoCount > recv) {
-        issues.push({
-          level: 'error',
-          code: 'photos-lost',
-          title: 'Модель обработала меньше фото, чем загружено',
-          detail: 'Загружено файлов: ' + photoCount + '. Модель учла: ' + recv +
-                  '. ' + (photoCount - recv) + ' не попали в ответ.'
-        });
-      }
+    if (photoCount > 0 && (!report.completeness ||
+        report.completeness.received !== photoCount ||
+        report.completeness.processed !== photoCount)) {
+      issues.push({
+        level: 'error',
+        code: 'photos-lost',
+        title: 'Нет точного подтверждения обработки всех фото',
+        detail: 'Загружено: ' + photoCount + '; получено: ' +
+          (report.completeness ? report.completeness.received : 'не указано') +
+          '; обработано: ' + (report.completeness && report.completeness.processed != null
+            ? report.completeness.processed : 'не указано') + '.'
+      });
     }
   } catch (e) { console.warn('validate: photos-lost', e); }
 
@@ -8912,15 +8917,30 @@ function getOCRSafetyIssues(csvText, report, photoCount) {
       detail: report.handwrittenConfirmation.raw
     });
   }
-  if (report.validation && report.validation.overall === 'error') {
+  if (!report.completeness || report.completeness.received !== photoCount ||
+      report.completeness.processed !== photoCount) {
     issues.push({
-      code: 'validation-error',
-      title: 'Внутренняя проверка OCR обнаружила ошибку',
-      detail: (report.validation.issues || [])
-        .filter(i => i && i.level === 'error')
-        .map(i => i.title + (i.detail ? ': ' + i.detail : ''))
-        .slice(0, 5)
-        .join(' | ')
+      code: 'completeness-mismatch',
+      title: 'Не подтверждена обработка всех фотографий',
+      detail: 'В приложении файлов: ' + photoCount + '; ИИ указал получено: ' +
+        (report.completeness ? report.completeness.received : 'не указано') +
+        '; обработано: ' + (report.completeness && report.completeness.processed != null
+          ? report.completeness.processed : 'не указано') + '.'
+    });
+  }
+  if (!report.blocks || !report.blocks['СОМНИТЕЛЬНЫЕ_СТРОКИ']) {
+    issues.push({ code: 'review-block-missing', title: 'Нет блока проверки сомнительных строк OCR' });
+  } else {
+    const uncertain = String(report.blocks['СОМНИТЕЛЬНЫЕ_СТРОКИ'] || '').trim().toLowerCase();
+    if (uncertain && !/^(пусто|нет|отсутствуют)[.! ]*$/.test(uncertain)) {
+      issues.push({ code: 'uncertain-rows', title: 'Есть сомнительные строки — требуется ручная сверка', detail: report.blocks['СОМНИТЕЛЬНЫЕ_СТРОКИ'] });
+    }
+  }
+  if (report.validation && report.validation.issues && report.validation.issues.length) {
+    issues.push({
+      code: 'validation-review',
+      title: 'Проверки OCR требуют ручной сверки',
+      detail: report.validation.issues.slice(0, 6).map(i => i.title + (i.detail ? ': ' + i.detail : '')).join(' | ')
     });
   }
   return issues;
@@ -9420,8 +9440,13 @@ function buildSeparatedOCRPrompt(dateLabel, docType) {
     'Перед CSV обязательно дай:',
     '#ИСТОЧНИКИ:',
     '#ПРОВЕРКА:',
+    '#ПРОВЕРКА_ПОЛНОТЫ:',
+    'Укажи точное число загруженных приложением файлов и сколько реально просмотрено: «Получено: N изображений; Обработано: N изображений». Не считай страницы PDF отдельными файлами.',
+    '#СОМНИТЕЛЬНЫЕ_СТРОКИ:',
+    'Перечисли все строки, где название или количество не читается однозначно, есть варианты прочтения или сомнение в цифре. Не выдумывай процент уверенности. Если сомнений нет — напиши «пусто».',
     '#НЕЧИТАЕМО:',
     '#РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ:',
+    'Для накладной перечисли каждую товарную строку в #ПОСТРОЧНО: № | название | количество × цена = сумма. Не пропускай строки. Сверяй количество с изображением.',
     'Если проблем нет, пиши «пусто».',
     'CSV — последним.'
   ].join('\n');
@@ -10477,11 +10502,17 @@ function cmpParseCSV(text) {
         .join('|');
       const sameIncoming = sig(existing.incoming) === sig(rec.incoming);
       if (sameSales && sameIncoming) {
-        /* Полный дубликат — ничего не делаем. */
+        /* Точный дубль: пропускаем. */
       } else {
-        existing.sales = (existing.sales || 0) + (rec.sales || 0);
+        const conflicts = Object.keys(rec.incoming).filter(dk =>
+          Object.prototype.hasOwnProperty.call(existing.incoming, dk) &&
+          Number(existing.incoming[dk] || 0) !== Number(rec.incoming[dk] || 0)
+        );
+        if (conflicts.length || Number(existing.sales || 0) !== Number(rec.sales || 0)) {
+          throw new Error('Повторная строка «' + rec.name + '» содержит разные количества. Нельзя определить, это повтор фото или отдельная поставка. Требуется ручная сверка исходных изображений.');
+        }
         for (const dk of Object.keys(rec.incoming)) {
-          existing.incoming[dk] = (existing.incoming[dk] || 0) + (rec.incoming[dk] || 0);
+          if (!Object.prototype.hasOwnProperty.call(existing.incoming, dk)) existing.incoming[dk] = rec.incoming[dk];
         }
       }
     } else {
