@@ -20,7 +20,7 @@ function makeContext() {
     cleanProductName(x) { return String(x || '').trim(); },
     isServiceLine() { return false; },
     applyAliases(x) { return x; },
-    normalizeName(x) { return String(x || '').toLowerCase().replace(/\\s+/g, ' ').trim(); },
+    normalizeName(x) { return String(x || '').toLowerCase().replace(/\s+/g, ' ').trim(); },
     isIgnored() { return false; },
     console
   };
@@ -32,7 +32,7 @@ function makeContext() {
 
 test('identical OCR product rows are treated as duplicate, not added', () => {
   const c = makeContext();
-  const parsed = c.cmpParseCSV('Наименование;Продано сегодня;Получено за 04.10\\nКруассан;0;2\\nКруассан;0;2');
+  const parsed = c.cmpParseCSV('Наименование;Продано сегодня;Получено за 04.10\nКруассан;0;2\nКруассан;0;2');
   assert.equal(parsed.count, 1);
   assert.equal(parsed.rows['круассан'].incoming['04.10'], 2);
 });
@@ -40,7 +40,7 @@ test('identical OCR product rows are treated as duplicate, not added', () => {
 test('conflicting duplicate product quantities stop OCR merge', () => {
   const c = makeContext();
   assert.throws(
-    () => c.cmpParseCSV('Наименование;Продано сегодня;Получено за 04.10\\nКруассан;0;2\\nКруассан;0;3'),
+    () => c.cmpParseCSV('Наименование;Продано сегодня;Получено за 04.10\nКруассан;0;2\nКруассан;0;3'),
     /разные количества|ручную сверку/i
   );
 });
@@ -48,9 +48,9 @@ test('conflicting duplicate product quantities stop OCR merge', () => {
 test('OCR safety blocks when processed image count is missing or incomplete', () => {
   const c = makeContext();
   const base = { hasBlocks: true, blocks: { 'СОМНИТЕЛЬНЫЕ_СТРОКИ': 'пусто' }, unreadable: { isEmpty: true }, handwrittenConfirmation: { isEmpty: true } };
-  assert.ok(c.getOCRSafetyIssues('Наименование;Продано сегодня\\nКруассан;1', base, 2).some(x => x.code === 'completeness-mismatch'));
+  assert.ok(c.getOCRSafetyIssues('Наименование;Продано сегодня\nКруассан;1', base, 2).some(x => x.code === 'completeness-mismatch'));
   base.completeness = { received: 2, processed: 1 };
-  assert.ok(c.getOCRSafetyIssues('Наименование;Продано сегодня\\nКруассан;1', base, 2).some(x => x.code === 'completeness-mismatch'));
+  assert.ok(c.getOCRSafetyIssues('Наименование;Продано сегодня\nКруассан;1', base, 2).some(x => x.code === 'completeness-mismatch'));
 });
 
 test('OCR safety blocks when uncertainty block is absent or non-empty', () => {
