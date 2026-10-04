@@ -70,7 +70,7 @@ test('any client-side validation finding blocks automatic OCR application', () =
 
 test('invoice CSV quantity must match sum of all OCR line quantities', () => {
   const c = makeContext();
-  const csv = 'Наименование;Получено за 04.10;Продано сегодня\\nКруассан;3;0';
+  const csv = 'Наименование;Получено за 04.10;Продано сегодня\nКруассан;3;0';
   const report = {
     hasBlocks: true,
     postrochno: [{ num: 1, name: 'Круассан', qty: 2, price: 100, sum: 200, ok: true }],
@@ -82,6 +82,6 @@ test('invoice CSV quantity must match sum of all OCR line quantities', () => {
 
 test('invoice OCR without a complete line-by-line list is an error', () => {
   const c = makeContext();
-  const result = c.validateAIResponse('Наименование;Получено за 04.10\\nКруассан;2', '', { hasBlocks: true, checks: [] }, 1, true);
+  const result = c.validateAIResponse('Наименование;Получено за 04.10\nКруассан;2', '', { hasBlocks: true, checks: [] }, 1, true);
   assert.ok(result.issues.some(x => x.code === 'line-items-missing'));
 });
