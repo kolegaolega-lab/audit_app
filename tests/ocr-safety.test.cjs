@@ -26,6 +26,7 @@ function makeContext() {
   };
   vm.createContext(context);
   vm.runInContext(extract('function cmpParseCSV(text) {', 'function cmpCalcSigmaForDate'), context);
+  vm.runInContext(extract('function countCsvRows(csvText) {', 'function getOCRSafetyIssues(csvText, report, photoCount) {'), context);
   vm.runInContext(extract('function getOCRSafetyIssues(csvText, report, photoCount) {', 'function formatOCRSafetyMessage'), context);
   return context;
 }
@@ -65,4 +66,22 @@ test('any client-side validation finding blocks automatic OCR application', () =
   const c = makeContext();
   const base = { hasBlocks: true, completeness: { received: 1, processed: 1 }, blocks: { 'СОМНИТЕЛЬНЫЕ_СТРОКИ': 'пусто' }, unreadable: { isEmpty: true }, handwrittenConfirmation: { isEmpty: true }, validation: { overall: 'warn', issues: [{ level: 'warn', title: 'Возможная опечатка' }] } };
   assert.ok(c.getOCRSafetyIssues('ok', base, 1).some(x => x.code === 'validation-review'));
+});
+
+test('invoice CSV quantity must match sum of all OCR line quantities', () => {
+  const c = makeContext();
+  const csv = 'Наименование;Получено за 04.10;Продано сегодня\\nКруассан;3;0';
+  const report = {
+    hasBlocks: true,
+    postrochno: [{ num: 1, name: 'Круассан', qty: 2, price: 100, sum: 200, ok: true }],
+    checks: [], blocks: {}
+  };
+  const result = c.validateAIResponse(csv, '', report, 1, true);
+  assert.ok(result.issues.some(x => x.code === 'line-quantity-mismatch'));
+});
+
+test('invoice OCR without a complete line-by-line list is an error', () => {
+  const c = makeContext();
+  const result = c.validateAIResponse('Наименование;Получено за 04.10\\nКруассан;2', '', { hasBlocks: true, checks: [] }, 1, true);
+  assert.ok(result.issues.some(x => x.code === 'line-items-missing'));
 });
