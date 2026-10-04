@@ -5604,7 +5604,11 @@ function updateCardResults() {
     if (!res) return;
     const exp = calc.expiredOnShelf;
     const sxp = calc.soldExpired;
+    const freshStock = calc.freshOnShelf;
+    const freshSales = calc.freshSold;
     res.innerHTML = `
+      <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
+      <span>Продано свежих: <span class="rv">${freshSales === null ? '—' : freshSales}</span></span>
       <span>Просрочено на витрине: <span class="rv ${exp === null ? 'zero' : (exp > 0 ? 'positive' : '')}">${exp === null ? '—' : exp}</span></span>
       <span>Продано просроченным: <span class="rv ${sxp === null ? 'zero' : (sxp > 0 ? 'positive' : '')}">${sxp === null ? '—' : sxp}</span></span>
     `;
@@ -5619,7 +5623,11 @@ function refreshCardRow(row, card) {
   if (res) {
     const exp = calc.expiredOnShelf;
     const sxp = calc.soldExpired;
+    const freshStock = calc.freshOnShelf;
+    const freshSales = calc.freshSold;
     res.innerHTML = `
+      <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
+      <span>Продано свежих: <span class="rv">${freshSales === null ? '—' : freshSales}</span></span>
       <span>Просрочено на витрине: <span class="rv ${exp === null ? 'zero' : (exp > 0 ? 'positive' : '')}">${exp === null ? '—' : exp}</span></span>
       <span>Продано просроченным: <span class="rv ${sxp === null ? 'zero' : (sxp > 0 ? 'positive' : '')}">${sxp === null ? '—' : sxp}</span></span>
     `;
