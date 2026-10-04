@@ -12,25 +12,10 @@ function extractFunction(source, name) {
   const marker = `function ${name}(`;
   const start = source.indexOf(marker);
   assert.notEqual(start, -1, `Missing production function: ${name}`);
-  const brace = source.indexOf('{', start);
-  let depth = 0, quote = null, escaped = false, lineComment = false, blockComment = false;
-  for (let i = brace; i < source.length; i++) {
-    const c = source[i], n = source[i + 1];
-    if (lineComment) { if (c === '\\n') lineComment = false; continue; }
-    if (blockComment) { if (c === '*' && n === '/') { blockComment = false; i++; } continue; }
-    if (quote) {
-      if (escaped) escaped = false;
-      else if (c === '\\\\') escaped = true;
-      else if (c === quote) quote = null;
-      continue;
-    }
-    if (c === '/' && n === '/') { lineComment = true; i++; continue; }
-    if (c === '/' && n === '*') { blockComment = true; i++; continue; }
-    if (c === '"' || c === "'" || c === '`') { quote = c; continue; }
-    if (c === '{') depth++;
-    if (c === '}' && --depth === 0) return source.slice(start, i + 1);
-  }
-  throw new Error(`Unclosed function: ${name}`);
+  const endMarker = name === 'computeFIFO' ? '\\nfunction emptyResult()' : null;
+  const end = endMarker ? source.indexOf(endMarker, start) : -1;
+  assert.notEqual(end, -1, `Could not find end of production function: ${name}`);
+  return source.slice(start, end);
 }
 
 const productionFunction = extractFunction(html, 'computeFIFO');
