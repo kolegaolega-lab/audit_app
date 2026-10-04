@@ -9586,6 +9586,16 @@ async function recognizeDaily() {
       ? validateAIResponse(salesCsv, salesCsv2, salesReport, salesItems.length)
       : { overall: 'ok', issues: [] };
 
+    /* Все замечания клиентской валидации требуют подтверждения человеком,
+       включая предупреждения о возможной потере/добавлении строк. */
+    [invoiceValidation, salesValidation].forEach((v, index) => {
+      (v.issues || []).forEach(issue => safetyIssues.push({
+        code: 'validation-' + (index === 0 ? 'invoice-' : 'sales-') + (issue.code || 'review'),
+        title: issue.title || 'Проверка OCR требует внимания',
+        detail: issue.detail || ''
+      }));
+    });
+
     const chosenReport = {
       hasBlocks: true,
       separatedOCR: true,
