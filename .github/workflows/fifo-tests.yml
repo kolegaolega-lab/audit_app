@@ -1,0 +1,22 @@
+name: FIFO regression tests
+
+on:
+  push:
+    branches:
+      - feature/ocr-reliability
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  fifo-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run FIFO tests
+        run: node --test tests/fifo.test.cjs
