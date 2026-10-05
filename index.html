@@ -1956,7 +1956,6 @@ const MAX_PHOTOS = 200;
 const MAX_NAME = 100;
 const MAX_SHELF_HOURS = 720;
 const MAX_SHELF_DAYS = 30;
-const WRITE_OFF_HOUR = 22;
 const SHELF_LIFE_START_HOUR = 7;
 const BTN_LOCK_MS = 300;
 const TIME_UPDATE_MS = 30 * 1000;
@@ -2675,12 +2674,21 @@ function getWriteOffMoment(partyDate, shelfLife) {
   const [y, m, day] = partyDate.split('-').map(Number);
   const check = new Date(y, m - 1, day);
   if (check.getFullYear() !== y || check.getMonth() !== m - 1 || check.getDate() !== day) return null;
+
+  /*
+   * Срок начинается с открытия точки в 07:00.
+   * Прибавляем ровно shelfLife часов — без округления до суток
+   * и без искусственного часа 22:00.
+   *
+   * Примеры:
+   * 12 ч → тот же день 19:00
+   * 24 ч → следующий день 07:00
+   * 36 ч → следующий день 19:00
+   * 48 ч → через два дня 07:00
+   */
   check.setHours(SHELF_LIFE_START_HOUR, 0, 0, 0);
   const h = clampNum(shelfLife, 1, 10000, 72);
-  if (h <= 24) { check.setHours(WRITE_OFF_HOUR, 0, 0, 0); return check; }
-  const days = Math.ceil(h / 24) - 1;
-  check.setDate(check.getDate() + days);
-  check.setHours(WRITE_OFF_HOUR, 0, 0, 0);
+  check.setTime(check.getTime() + h * 60 * 60 * 1000);
   return check;
 }
 function parseDateRu(str, referenceDate) {
