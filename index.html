@@ -2676,19 +2676,29 @@ function getWriteOffMoment(partyDate, shelfLife) {
   if (check.getFullYear() !== y || check.getMonth() !== m - 1 || check.getDate() !== day) return null;
 
   /*
-   * Срок начинается с открытия точки в 07:00.
-   * Прибавляем ровно shelfLife часов — без округления до суток
-   * и без искусственного часа 22:00.
+   * Правило списания:
+   * срок начинается с открытия точки в 07:00.
    *
-   * Примеры:
-   * 12 ч → тот же день 19:00
-   * 24 ч → следующий день 07:00
-   * 36 ч → следующий день 19:00
-   * 48 ч → через два дня 07:00
+   * Для обычного срока момент списания = 07:00 + срок в часах.
+   * Но если расчёт попадает ровно на 07:00, товар должен быть списан
+   * накануне в 22:00.
+   *
+   * Поэтому:
+   * 24 ч → 06.10 22:00 (получено 06.10)
+   * 48 ч → 07.10 22:00
+   * 72 ч → 08.10 22:00
+   * 96 ч → 09.10 22:00
+   * 36 ч → 07.10 19:00
    */
-  check.setHours(SHELF_LIFE_START_HOUR, 0, 0, 0);
   const h = clampNum(shelfLife, 1, 10000, 72);
+  check.setHours(SHELF_LIFE_START_HOUR, 0, 0, 0);
   check.setTime(check.getTime() + h * 60 * 60 * 1000);
+
+  if (check.getHours() === SHELF_LIFE_START_HOUR && check.getMinutes() === 0) {
+    check.setDate(check.getDate() - 1);
+    check.setHours(WRITE_OFF_HOUR, 0, 0, 0);
+  }
+
   return check;
 }
 function parseDateRu(str, referenceDate) {
