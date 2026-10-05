@@ -1977,7 +1977,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.20.5';
+const APP_VERSION = 'v9.21.0';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -2738,25 +2738,105 @@ function mergeIncomingByDate(incoming) {
 }
 function computeFIFO(row) {
   if (!row || typeof row !== 'object') return emptyResult();
-  if (row.salesOnly) return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null, isSalesOnly: true };
+  if (row.salesOnly) {
+    return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null, isSalesOnly: true };
+  }
   if (row.shelfLife === 0 || row.shelfLife == null) return emptyResult();
   if (row.stock == null) return emptyResult();
+
   const stock = clampNum(row.stock, 0, MAX_NUM, 0);
   const sales = clampNum(row.sales, 0, MAX_NUM, 0);
   const shelfLife = clampNum(row.shelfLife, 1, 10000, 72);
   const moment = getCheckMoment();
-  const parties = mergeIncomingByDate(row.incoming);
-  let freshIncoming = 0;
-  for (const p of parties) {
-    const writeOff = getWriteOffMoment(p.date, shelfLife);
-    if (writeOff && writeOff > moment) freshIncoming += p.qty;
+
+  /*
+   * FIFO по партиям.
+   *
+   * Важно: срок годности относится к каждой партии отдельно. Поэтому
+   * нельзя сначала суммировать все «свежие» приходы, а потом делить
+   * общий остаток/продажи. Сначала строим партии с моментом списания,
+   * затем продажи списываем со старых партий, и только после этого
+   * раскладываем оставшийся товар на витрине по статусу.
+   *
+   * Партия с более ранней датой всегда списывается первой. Если дата
+   * одинаковая, mergeIncomingByDate уже объединил её в одну партию.
+   */
+  const parties = mergeIncomingByDate(row.incoming)
+    .map(p => {
+      const writeOff = getWriteOffMoment(p.date, shelfLife);
+      return {
+        date: p.date,
+        qty: clampNum(p.qty, 0, MAX_NUM, 0),
+        writeOff
+      };
+    })
+    .filter(p => p.qty > 0 && p.writeOff);
+
+  if (!parties.length) {
+    return {
+      soldExpired: sales,
+      expiredOnShelf: stock,
+      freshOnShelf: 0,
+      freshSold: 0
+    };
   }
-  const freshOnShelf = Math.min(stock, freshIncoming);
-  const expiredOnShelf = Math.max(0, stock - freshIncoming);
-  const freshLeft = Math.max(0, freshIncoming - freshOnShelf);
-  const freshSold = Math.min(sales, freshLeft);
-  const expiredSold = Math.max(0, sales - freshSold);
-  return { soldExpired: expiredSold, expiredOnShelf, freshOnShelf, freshSold };
+
+  let salesLeft = sales;
+  let stockLeft = stock;
+  let freshSold = 0;
+  let soldExpired = 0;
+  let freshOnShelf = 0;
+  let expiredOnShelf = 0;
+
+  /*
+   * Шаг 1. FIFO-списание продаж.
+   * Старые партии уходят первыми. Статус партии определяется в момент
+   * проверки, а не по дате самой продажи: если партия уже просрочена
+   * к моменту аудита, продажа из неё считается просроченной.
+   */
+  for (const party of parties) {
+    if (salesLeft <= 0) break;
+    const sold = Math.min(party.qty, salesLeft);
+    if (sold <= 0) continue;
+
+    if (party.writeOff > moment) freshSold += sold;
+    else soldExpired += sold;
+
+    party.qty -= sold;
+    salesLeft -= sold;
+  }
+
+  /*
+   * Если продаж больше, чем было получено в известных накладных,
+   * не приписываем неизвестную часть к свежему товару. Это отдельный
+   * дефицит источников, который безопаснее считать просроченной частью
+   * для контроля, чем скрывать проблему.
+   */
+  if (salesLeft > 0) soldExpired += salesLeft;
+
+  /*
+   * Шаг 2. Остаток после FIFO-продаж.
+   * Опять идём от старых партий к новым и распределяем фактический
+   * остаток по свежему/просроченному.
+   */
+  for (const party of parties) {
+    if (stockLeft <= 0) break;
+    const onShelf = Math.min(party.qty, stockLeft);
+    if (onShelf <= 0) continue;
+
+    if (party.writeOff > moment) freshOnShelf += onShelf;
+    else expiredOnShelf += onShelf;
+
+    stockLeft -= onShelf;
+  }
+
+  /*
+   * Если фактический остаток больше всех известных приходов, избыток
+   * нельзя назвать свежим: источник партии отсутствует.
+   */
+  if (stockLeft > 0) expiredOnShelf += stockLeft;
+
+  return { soldExpired, expiredOnShelf, freshOnShelf, freshSold };
 }
 function emptyResult() { return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null }; }
 function getRowStatus(calc, row) {
