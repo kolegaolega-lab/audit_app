@@ -8553,6 +8553,36 @@ function validateAIResponse(csv1, csv2, report, photoCount, requireLineItems = f
     }
   } catch (e) { console.warn('validate: sum-mismatch', e); }
 
+  /* --- 1b. Дубликаты позиций в исходном CSV --- */
+  try {
+    const lines = String(csvText || '').split(/\r?\n/);
+    const names = new Map();
+    let headerFound = false;
+    for (const line of lines) {
+      const t = line.trim();
+      if (!t || t.startsWith('#')) continue;
+      if (!headerFound) {
+        if (/наимен/i.test(t) && t.includes(';')) headerFound = true;
+        continue;
+      }
+      const first = t.split(';')[0].replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+      const key = normalizeName(cleanProductName(first));
+      if (!key) continue;
+      names.set(key, (names.get(key) || 0) + 1);
+    }
+    const duplicateNames = [...names.entries()].filter(([, n]) => n > 1).map(([key, n]) => key + ' ×' + n);
+    if (duplicateNames.length) {
+      issues.push({
+        level: 'error',
+        code: 'duplicate-csv-rows',
+        title: 'В CSV есть дубли позиций',
+        detail: duplicateNames.slice(0, 8).join(', ') +
+          (duplicateNames.length > 8 ? ' …и ещё ' + (duplicateNames.length - 8) : '') +
+          '. Одинаковые позиции нельзя автоматически складывать.'
+      });
+    }
+  } catch (e) { console.warn('validate: duplicate-csv-rows', e); }
+
   /* --- 2. #ПОСТРОЧНО vs CSV (с учётом повторов между накладными) --- */
   try {
     if (report.postrochno && report.postrochno.length) {
@@ -9200,6 +9230,28 @@ async function recognizeWithGemini() {
     const safety1 = getOCRSafetyIssues(csv1, report1, items.length);
     const safety2 = getOCRSafetyIssues(csv2, report2, items.length);
     const safetyIssues = [...safety1, ...safety2];
+    /* v9.22.0: точные дубли файлов блокируют OCR до удаления.
+       Одинаковое изображение нельзя считать второй страницей документа. */
+    try {
+      const exactDups = await findExactDuplicatePhotoFiles(items);
+      if (exactDups.length) {
+        const labels = exactDups.slice(0, 5).map(d =>
+          '«' + (d.duplicate.name || 'файл') + '» дублирует «' + (d.first.name || 'файл') + '»'
+        );
+        safetyIssues.push({
+          code: 'duplicate-files',
+          title: 'Обнаружены полностью одинаковые фотографии',
+          detail: labels.join('; ') + (exactDups.length > 5 ? ' …и ещё ' + (exactDups.length - 5) : '') +
+            '. Удалите дубли и запустите распознавание снова.'
+        });
+      }
+    } catch (e) {
+      safetyIssues.push({
+        code: 'duplicate-check-failed',
+        title: 'Не удалось проверить фотографии на дубли',
+        detail: 'Для безопасного OCR повторите распознавание после проверки файлов.'
+      });
+    }
     if (_lastAIReport) {
       _lastAIReport.safety = {
         blocked: safetyIssues.length > 0,
