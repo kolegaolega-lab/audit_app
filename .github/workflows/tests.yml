@@ -15,3 +15,4 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:all
       - run: npm run test:inventory
+      - run: node --test tests/tools/function-inventory.mjs
