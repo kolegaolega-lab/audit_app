@@ -7,16 +7,32 @@ const html=(fs.readFileSync(new URL('../../index.html',import.meta.url),'utf8').
 function extract(name){
   const re=new RegExp('function\\s+'+name+'\\s*\\([^)]*\\)\\s*\\{','m');
   const m=re.exec(html); assert.ok(m,'Function not found: '+name);
-  let i=m.index+m[0].length,depth=1,quote=null,esc=false;
+  let i=m.index+m[0].length,depth=1,state='code',quote='',esc=false;
   for(;i<html.length&&depth;i++){
-    const ch=html[i];
-    if(quote){if(esc)esc=false;else if(ch==='\\')esc=true;else if(ch===quote)quote=null;continue;}
-    if(ch==='"'||ch==="'"){quote=ch;continue;}
+    const ch=html[i],nx=html[i+1];
+    if(state==='line'){if(ch==='\\n')state='code';continue;}
+    if(state==='block'){if(ch==='*'&&nx==='/'){state='code';i++;}continue;}
+    if(state==='string'){
+      if(esc){esc=false;continue;}
+      if(ch==='\\\\'){esc=true;continue;}
+      if(ch===quote){state='code';}
+      continue;
+    }
+    if(state==='template'){
+      if(esc){esc=false;continue;}
+      if(ch==='\\\\'){esc=true;continue;}
+      if(ch==='`')state='code';
+      continue;
+    }
+    if(ch==='/'&&nx==='/'){state='line';i++;continue;}
+    if(ch==='/'&&nx==='*'){state='block';i++;continue;}
+    if(ch==="'"||ch==='\"'){state='string';quote=ch;continue;}
+    if(ch==='`'){state='template';continue;}
     if(ch==='{')depth++; else if(ch==='}')depth--;
   }
+  assert.equal(depth,0,'Unbalanced function: '+name);
   return html.slice(m.index,i);
 }
-
 function load(...names){
   const src=names.map(extract).join('\n')+'\n';
   const box={};
