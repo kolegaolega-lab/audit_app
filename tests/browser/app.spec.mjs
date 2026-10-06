@@ -91,3 +91,44 @@ test('agreed 22:00 shelf-life cutoff and FIFO', async ({page}) => {
   expect(exact36).toBe('2026-10-07T19:00');
   expect(result.fifo).toEqual({soldExpired:0,expiredOnShelf:1,freshOnShelf:2,freshSold:0});
 });
+
+test('multi-page invoice continuation inherits date and handwritten quantity is blocked by OCR safety', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const payload = {
+      schema_version:'1.0',
+      document_type:'combined',
+      check_date:'2026-10-06',
+      source:{photo_count:2,processed_photo_count:2,duplicate_photo_count:0},
+      invoices:[
+        {number:'217246',date:'2026-10-06',continuation:false,last_line_number:33,items:[
+          {line:33,name:'Пончик с фисташкой',quantity:2,quantity_status:'confirmed'}
+        ]},
+        {number:'217246',date:null,continuation:true,last_line_number:36,items:[
+          {line:34,name:'Круассан',quantity:3,quantity_status:'handwritten'},
+          {line:35,name:'Эклер',quantity:1,quantity_status:'confirmed'}
+        ]}
+      ],
+      sales:[],
+      review:{unreadable:[],handwritten_confirmation:['строка 34'],uncertain_rows:[],notes:[]}
+    };
+    const json = JSON.stringify(payload);
+    const parsed = window.parseJSON(json, new Date('2026-10-06T10:00:00'));
+    const safety = window.getOCRSafetyIssues(json, {hasBlocks:true,json:payload}, 2);
+    return {
+      rows: parsed.rows.map(r => ({
+        name:r.name,
+        incoming:r.incoming.map(x => ({date:x.date,qty:x.qty}))
+      })),
+      safetyCodes: safety.map(x => x.code)
+    };
+  });
+  expect(result.rows).toEqual([
+    {name:'Пончик с фисташкой',incoming:[{date:'2026-10-06',qty:2}]},
+    {name:'Круассан',incoming:[{date:'2026-10-06',qty:3}]},
+    {name:'Эклер',incoming:[{date:'2026-10-06',qty:1}]}
+  ]);
+  expect(result.safetyCodes).toContain('handwritten-confirmation');
+  expect(result.safetyCodes).toContain('quantity-status-review');
+});
