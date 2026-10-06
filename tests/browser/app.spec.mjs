@@ -132,3 +132,25 @@ test('multi-page invoice continuation inherits date and handwritten quantity is 
   expect(result.safetyCodes).toContain('handwritten-confirmation');
   expect(result.safetyCodes).toContain('quantity-status-review');
 });
+
+test('product cards do not render duplicate incoming summary', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const head = document.createElement('div');
+    head.className = 'card-head';
+    const name = document.createElement('div');
+    name.className = 'card-name';
+    name.textContent = 'Пончик с фисташкой';
+    head.appendChild(name);
+    card.appendChild(head);
+    document.body.appendChild(card);
+    return {
+      incomingSummaryCount: document.querySelectorAll('.card-incoming').length,
+      dateCellLabels: [...document.querySelectorAll('.card-cell .lbl')].map(x => x.textContent)
+    };
+  });
+  expect(result.incomingSummaryCount).toBe(0);
+});
