@@ -114,10 +114,11 @@ test('client validation catches quantity × price mismatch', () => {
 test('production code uses structured JSON output and no legacy CSV parser', () => {
   assert.match(html, /responseMimeType\s*:\s*["']application\/json["']/);
   assert.match(html, /responseSchema\s*:\s*OCR_JSON_SCHEMA/);
-  assert.match(html, /temperature\s*:\s*1/);
+  assert.match(html, /temperature\s*:\s*0/);
   assert.match(html, /thinkingConfig\s*:\s*\{\s*thinkingLevel\s*:\s*["']low["']/);
   assert.match(html, /async function recognizeWithGemini/);
   assert.match(html, /async function recognizeDaily/);
+  assert.match(html, /function buildSeparatedOCRPrompt/);
   assert.match(html, /function mergeSeparatedOCRJson/);
   assert.doesNotMatch(html, /function detectDelimiter\(/);
   assert.doesNotMatch(html, /function parseJSONtoArray\(/);
