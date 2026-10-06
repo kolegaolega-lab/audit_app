@@ -27,5 +27,7 @@ test('agreed 22:00 shelf-life cutoff and FIFO', async ({page}) => {
   expect(result[48]).toBe('2026-10-07T22:00');
   expect(result[72]).toBe('2026-10-08T22:00');
   expect(result[96]).toBe('2026-10-09T22:00');
+  const exact36=await page.evaluate(() => window.getWriteOffMoment('2026-10-06',36).toISOString().slice(0,16));
+  expect(exact36).toBe('2026-10-07T19:00');
   expect(result.fifo).toEqual({soldExpired:0,expiredOnShelf:1,freshOnShelf:2,freshSold:0});
 });
