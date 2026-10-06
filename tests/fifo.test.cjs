@@ -48,6 +48,17 @@ test('36h expires next day at 19:00', () => {
   assert.equal(d.getHours(), 19);
 });
 
+test('60h expires two days later at 19:00', () => {
+  const d = expiry('2026-10-03', 60);
+  assert.equal(d.getDate(), 5);
+  assert.equal(d.getHours(), 19);
+});
+
+test('24h boundary is 22:00, not next morning', () => {
+  const d = expiry('2026-10-03', 24);
+  assert.equal(d.toISOString().slice(0, 16), '2026-10-03T22:00');
+});
+
 test('48h expires next day at 22:00', () => {
   const d = expiry('2026-10-03', 48);
   assert.equal(d.getDate(), 4);
