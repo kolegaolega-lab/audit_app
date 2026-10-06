@@ -18,5 +18,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Check index.html syntax
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const html = fs.readFileSync('index.html','utf8');
+          const script = html.slice(html.indexOf('<script>') + 8, html.lastIndexOf('</script>'));
+          fs.writeFileSync('/tmp/audit_app.js', script);
+          NODE
+          node --check /tmp/audit_app.js
       - name: Run regression tests
         run: node --test tests/fifo.test.cjs tests/ocr-safety.test.cjs
