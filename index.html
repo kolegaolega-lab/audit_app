@@ -9707,7 +9707,7 @@ async function recognizeDaily() {
       safetyIssues.push(...getOCRSafetyIssues(r.csv, report, r.docType === 'invoice' ? invoiceItems.length : salesItems.length));
     });
 
-    const blockedBySafety = safetyIssues.length > 0;
+    let blockedBySafety = safetyIssues.length > 0;
     const invoiceValidation = invoiceReport
       ? validateAIResponse(invCsv, invCsv2, invoiceReport, invoiceItems.length, true)
       : { overall: 'ok', issues: [] };
@@ -9724,6 +9724,9 @@ async function recognizeDaily() {
         detail: issue.detail || ''
       }));
     });
+
+    /* Любая ошибка/предупреждение клиентской валидации блокирует автоприменение. */
+    blockedBySafety = safetyIssues.length > 0;
 
     const chosenReport = {
       hasBlocks: true,
