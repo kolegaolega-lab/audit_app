@@ -2512,7 +2512,20 @@ function deletePrice(name) {
 /* ═══════════════════════════════════════════
    FIFO / СРОКИ
    ═══════════════════════════════════════════ */
-function getCheckMoment() { return new Date(); }
+function getCheckMoment(referenceDate) {
+  const now = new Date();
+  const s = String(referenceDate || '').trim();
+  const m = s.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
+  if (!m) return now;
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  if (d.getFullYear() !== Number(m[1]) || d.getMonth() !== Number(m[2]) - 1 || d.getDate() !== Number(m[3])) {
+    return now;
+  }
+  // JSON содержит дату аудита, но не время. Сохраняем фактическое время проверки,
+  // заменяя только календарную дату на check_date из JSON.
+  d.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+  return d;
+}
 function getWriteOffMoment(partyDate, shelfLife) {
   const [y, m, day] = partyDate.split('-').map(Number);
   const check = new Date(y, m - 1, day);
@@ -2583,7 +2596,7 @@ function computeFIFO(row) {
   const stock = clampNum(row.stock, 0, MAX_NUM, 0);
   const sales = clampNum(row.sales, 0, MAX_NUM, 0);
   const shelfLife = clampNum(row.shelfLife, 1, 10000, 72);
-  const moment = getCheckMoment();
+  const moment = getCheckMoment(row._checkDate);
 
   const parties = mergeIncomingByDate(row.incoming)
     .map(p => {
@@ -6043,8 +6056,10 @@ async function applyJSON() {
     const text = jsonInput.value.trim();
     if (!text) throw new Error('Поле пустое.');
     if (text.length > MAX_JSON_BYTES) throw new Error('JSON слишком большой (макс. 2 МБ).');
-    const reference = getCheckMoment();
-    const { rows, truncated } = parseJSON(text, reference);
+    const reference = new Date();
+    const { rows, truncated, json } = parseJSON(text, reference);
+    const checkDate = String(json?.check_date || '').trim();
+    rows.forEach(r => { r._checkDate = checkDate; });
     if (!rows.length) throw new Error('Не удалось распознать строки.');
     if (myToken !== resetToken) return;
 
