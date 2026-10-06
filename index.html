@@ -2532,11 +2532,9 @@ function getWriteOffMoment(partyDate, shelfLife) {
   if (check.getFullYear() !== y || check.getMonth() !== m - 1 || check.getDate() !== day) return null;
   const h = clampNum(shelfLife, 1, 10000, 72);
   check.setHours(SHELF_LIFE_START_HOUR, 0, 0, 0);
+  // Срок считается непрерывно от 07:00 даты прихода.
+  // Например: 24 ч от 06.10 07:00 = 07.10 07:00.
   check.setTime(check.getTime() + h * 60 * 60 * 1000);
-  if (check.getHours() === SHELF_LIFE_START_HOUR && check.getMinutes() === 0) {
-    check.setDate(check.getDate() - 1);
-    check.setHours(WRITE_OFF_HOUR, 0, 0, 0);
-  }
   return check;
 }
 function parseDateRu(str, referenceDate) {
