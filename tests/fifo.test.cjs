@@ -30,7 +30,7 @@ vm.createContext(context);
 vm.runInContext(extractFunction(html, 'getWriteOffMoment', 'function parseDateRu('), context);
 vm.runInContext(extractFunction(html, 'computeFIFO', 'function emptyResult('), context);
 
-const computeFIFO = context.computeFIFO;
+const computeFIFO = (...args) => JSON.parse(JSON.stringify(context.computeFIFO(...args)));
 const expiry = (date, hours) => context.getWriteOffMoment(date, hours);
 const row = (shelfLife, incoming, stock, sales) => ({ shelfLife, incoming, stock, sales });
 
