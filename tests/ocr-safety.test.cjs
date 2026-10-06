@@ -112,6 +112,54 @@ test('client validation catches quantity × price mismatch', () => {
   assert.ok(result.issues.some(x => x.code === 'line-quantity-mismatch'));
 });
 
+test('OCR prompt enforces column 8 piece count and never derives quantity from money', () => {
+  const prompt = context.buildSeparatedOCRPrompt('2026-10-06', 'invoice');
+  assert.match(prompt, /колонка 8/);
+  assert.match(prompt, /мест, штук/);
+  assert.match(prompt, /Не вычисляй quantity через цену или сумму/);
+  assert.match(prompt, /Дубликаты фото не суммировать/);
+});
+
+test('OCR validation catches duplicate rows inside one invoice', () => {
+  const json = validJson({
+    invoices: [{
+      number: '123', date: '2026-10-06', continuation: false,
+      last_line_number: 2, printed_total: null,
+      items: [
+        { line: 1, name: 'Товар', quantity: 2, quantity_status: 'confirmed', price: 10, amount: 20 },
+        { line: 2, name: 'Товар', quantity: 3, quantity_status: 'confirmed', price: 10, amount: 30 }
+      ]
+    }]
+  });
+  const result = context.validateAIResponse(json, '', reportFor(json), 2);
+  assert.ok(result.issues.some(x => x.code === 'duplicate-row'));
+});
+
+test('OCR validation catches suspicious quantity patterns', () => {
+  const quantities = [2,2,2,2,2,2,2,2,2,25];
+  const json = validJson({
+    invoices: [{
+      number: '123', date: '2026-10-06', continuation: false,
+      last_line_number: quantities.length, printed_total: null,
+      items: quantities.map((q, i) => ({
+        line: i + 1, name: 'Товар ' + (i + 1), quantity: q,
+        quantity_status: 'confirmed', price: 10, amount: q * 10
+      }))
+    }]
+  });
+  const result = context.validateAIResponse(json, '', reportFor(json), 2);
+  assert.ok(result.issues.some(x => x.code === 'qty-outlier'));
+  assert.ok(result.issues.some(x => x.code === 'qty-stuck'));
+});
+
+test('OCR safety accepts duplicate photos only when processing count still matches', () => {
+  const json = validJson({
+    source: { photo_count: 3, processed_photo_count: 3, duplicate_photo_count: 1 }
+  });
+  const issues = context.getOCRSafetyIssues(json, reportFor(json), 3);
+  assert.equal(issues.some(x => x.code === 'completeness-mismatch'), false);
+});
+
 test('production code uses structured JSON output and no legacy CSV parser', () => {
   assert.match(html, /responseMimeType\s*:\s*["']application\/json["']/);
   assert.match(html, /responseSchema\s*:\s*OCR_JSON_SCHEMA/);
