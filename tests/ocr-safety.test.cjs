@@ -17,8 +17,8 @@ function extract(start, end) {
 
 const context = {};
 vm.createContext(context);
-vm.runInContext(extract('function getOCRSafetyIssues(', 'function validateAIResponse'), context);
-vm.runInContext(extract('function validateAIResponse(', 'function buildSystemInstructionForGemini'), context);
+vm.runInContext(extract('function getOCRSafetyIssues(', 'function buildPrompt'), context);
+vm.runInContext(extract('function validateAIResponse(', 'function getOCRSafetyIssues'), context);
 
 function validJson(overrides = {}) {
   return JSON.stringify({
