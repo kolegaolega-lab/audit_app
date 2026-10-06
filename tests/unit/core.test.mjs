@@ -12,7 +12,7 @@ function extract(name){
   return html.slice(m.index,m.index+m[0].length+next);
 }
 function load(...names){
-  const src="const MAX_NUM=100000; const SHELF_LIFE_START_HOUR=7; const WRITE_OFF_HOUR=22; const OriginalDate=Date; function TestDate(...a){ return a.length?new OriginalDate(...a):new OriginalDate('2026-10-06T10:00:00'); } TestDate.prototype=OriginalDate.prototype; TestDate.now=()=>OriginalDate.parse('2026-10-06T10:00:00'); TestDate.parse=OriginalDate.parse; TestDate.UTC=OriginalDate.UTC; const Date=TestDate;\n"+names.map(extract).join('\n')+'\n';
+  const src="const MAX_NUM=100000; const SHELF_LIFE_START_HOUR=7; const WRITE_OFF_HOUR=22; const OriginalDate=globalThis.Date; function TestDate(...a){ return a.length?new OriginalDate(...a):new OriginalDate('2026-10-06T10:00:00'); } TestDate.prototype=OriginalDate.prototype; TestDate.now=()=>OriginalDate.parse('2026-10-06T10:00:00'); TestDate.parse=OriginalDate.parse; TestDate.UTC=OriginalDate.UTC; const Date=TestDate;\n"+names.map(extract).join('\n')+'\n';
   const box={};
   const storage={getItem:()=>null,setItem:()=>{},removeItem:()=>{},clear:()=>{},key:()=>null,length:0};
   const dollar=()=>null;
