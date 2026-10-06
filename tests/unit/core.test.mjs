@@ -7,7 +7,7 @@ const html=(fs.readFileSync(new URL('../../index.html',import.meta.url),'utf8').
 function extract(name){
   const startRe=new RegExp('function\\s+'+name+'\\s*\\([^)]*\\)\\s*\\{','m');
   const m=startRe.exec(html); assert.ok(m,'Function not found: '+name);
-  const next=html.slice(m.index+m[0].length).search(/\\nfunction\\s+[A-Za-z_$][\\w$]*\\s*\\(/);
+  const next=html.slice(m.index+m[0].length).search(/\nfunction\s+[A-Za-z_$][\w$]*\s*\(/);
   if(next<0) return html.slice(m.index);
   return html.slice(m.index,m.index+m[0].length+next);
 }
