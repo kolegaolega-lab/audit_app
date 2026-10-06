@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-const html=fs.readFileSync(new URL('../../index.html',import.meta.url),'utf8');
+const html=fs.readFileSync(new URL('../../index.html',import.meta.url),'utf8').replace(/<script[^>]*>|<\/script>/gi,'');
 
 function extract(name){
   const re=new RegExp('function\\s+'+name+'\\s*\\([^)]*\\)\\s*\\{','m');
