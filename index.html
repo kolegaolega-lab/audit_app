@@ -1977,7 +1977,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.22.0';
+const APP_VERSION = 'v9.23.0';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -2876,55 +2876,11 @@ function getCardStatus(calc, row) {
 }
 
 /* ═══════════════════════════════════════════
-   JSON PARSER
+   JSON OCR PARSER
    ═══════════════════════════════════════════ */
-function detectDelimiter(firstLine) {
-  let semi = 0, comma = 0, inQ = false;
-  for (let i = 0; i < firstLine.length; i++) {
-    const ch = firstLine[i];
-    if (ch === '"') { if (inQ && firstLine[i + 1] === '"') { i++; continue; } inQ = !inQ; }
-    else if (!inQ) { if (ch === ';') semi++; else if (ch === ',') comma++; }
-  }
-  return semi >= comma ? ';' : ',';
-}
-function parseJSONtoArray(text, delimiter) {
-  const rows = [];
-  let row = [], field = '', inQ = false, i = 0;
-  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-  while (i < text.length) {
-    const ch = text[i];
-    if (inQ) {
-      if (ch === '"') {
-        if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
-        inQ = false; i++; continue;
-      }
-      field += ch; i++; continue;
-    }
-    if (ch === '"') { inQ = true; i++; continue; }
-    if (ch === delimiter) { row.push(field); field = ''; i++; continue; }
-    if (ch === '\r') { i++; continue; }
-    if (ch === '\n') { row.push(field); field = ''; rows.push(row); row = []; i++; continue; }
-    field += ch; i++;
-  }
-  if (field.length > 0 || row.length > 0) { row.push(field); rows.push(row); }
-  return rows.filter(r => r.length > 1 || (r.length === 1 && r[0].trim() !== ''));
-}
-function parseNum(v) {
-  if (v === '' || v == null) return '';
-  let s = String(v).trim().replace(/[^\d.,\-]/g, '');
-  if (!s) return '';
-  const commas = (s.match(/,/g) || []).length;
-  const dots = (s.match(/\./g) || []).length;
-  if (commas > 1) s = s.replace(/,/g, '');
-  else if (dots > 1) s = s.replace(/\./g, '');
-  else if (commas === 1 && dots === 1) {
-    if (s.lastIndexOf(',') > s.lastIndexOf('.')) s = s.replace(/\./g, '').replace(',', '.');
-    else s = s.replace(/,/g, '');
-  } else if (commas === 1) s = s.replace(',', '.');
-  const n = Number(s);
-  if (!isFinite(n)) return '';
-  return Math.min(MAX_NUM, Math.max(0, Math.round(n)));
-}
+
+
+
 function parseShelfLife(str) {
   if (str == null || str === '') return null;
   const s = String(str).toLowerCase().trim();
@@ -2939,26 +2895,7 @@ function parseShelfLife(str) {
   if (n === 0) return 0;
   return clampNum(n, 1, 10000, null);
 }
-function stripServiceSections(rawText) {
-  const lines = String(rawText || '').split(/\r?\n/);
-  const out = [];
-  let serviceMode = false;
-  let inCheck = false;
-  for (const line of lines) {
-    const t = line.trim();
-    if (t === '#ЧЕК_ПОЛНЫЙ:') { inCheck = true; serviceMode = false; continue; }
-    if (t.startsWith('#ЧЕК_ИТОГО:')) { inCheck = false; serviceMode = false; continue; }
-    if (inCheck) continue;
-    if (t.startsWith('#')) { serviceMode = true; continue; }
-    if (serviceMode) {
-      /* v9.21.1: если встретили строку заголовка JSON — выходим из сервисного режима. */
-      if (/наимен/i.test(t) && t.includes(';')) { serviceMode = false; out.push(line); }
-      continue;
-    }
-    out.push(line);
-  }
-  return out.join('\n');
-}
+
 function parseJSON(text,referenceDate){let d;try{d=typeof text==="string"?JSON.parse(text):text}catch(e){throw Error("JSON имеет неверный формат.")}if(!d||typeof d!=="object"||Array.isArray(d))throw Error("JSON должен быть объектом.");const rows={};const add=n=>{const c=cleanProductName(n);if(!c||isServiceLine(c)||isIgnored(c))return null;const a=applyAliases(c),k=normalizeName(a),p=PRODUCTS.find(x=>normalizeName(x.name)===k);if(p&&_activeCategory&&p.category&&p.category!==_activeCategory)return null;if(!rows[k])rows[k]={name:a,stock:null,sales:0,_originalSales:0,shelfLife:p?p.shelfLife:null,category:p?(p.category||null):null,incoming:[],salesOnly:false};return rows[k]};(d.invoices||[]).forEach(inv=>{const date=String(inv.date||d.check_date||"");(inv.items||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed")row.incoming.push({date,qty:clampNum(it.quantity,0,MAX_NUM,0)})})});(d.sales||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed")row.sales+=clampNum(it.quantity,0,MAX_NUM,0)});Object.values(rows).forEach(r=>r.incoming=mergeIncomingByDate(r.incoming));return{rows:Object.values(rows),truncated:false,json:d}}
 function sortRowsAlphabetically(rows) {
   return [...rows].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' }));
