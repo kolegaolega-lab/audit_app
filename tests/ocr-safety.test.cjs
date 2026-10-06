@@ -72,7 +72,7 @@ test('production source contains required OCR safety controls', () => {
     'line-quantity-mismatch',
     'line-items-missing',
     'completeness-mismatch',
-    'Не использовать рукописное количество автоматически'
+    'handwrittenConfirmation'
   ]) {
     assert.ok(html.includes(marker), 'missing OCR safety marker: ' + marker);
   }
