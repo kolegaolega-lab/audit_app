@@ -19,7 +19,7 @@ function load(...names){
   const src=names.map(extract).join('\n')+'\n';
   const box={}; new Function('box',src+names.map(n=>'box.'+n+'='+n).join(';'))(box); return box;
 }
-const f=load('clampNum','isValidDate','safeDate','onlyDigits','hoursToDays','daysToHours','normalizeName','cleanProductName','isServiceLine','normalizeForSearch','naturalCompare','parseDateRu','inferIsoFromDdmm','mergeIncomingByDate','getWriteOffMoment','emptyResult','computeFIFO','parseShelfLife');
+const f=load('clampNum','isValidDate','safeDate','onlyDigits','hoursToDays','daysToHours','normalizeName','cleanProductName','isServiceLine','normalizeForSearch','naturalCompare','parseDateRu','inferIsoFromDdmm','mergeIncomingByDate','getCheckMoment','getWriteOffMoment','emptyResult','computeFIFO','parseShelfLife');
 
 test('numeric and date primitives',()=>{assert.equal(f.clampNum(12.5,0,10,0),10);assert.equal(f.clampNum('x',0,10,7),7);assert.equal(f.safeDate(2026,10,6).getDate(),6);assert.equal(f.isValidDate(new Date(2026,9,6)),true);assert.equal(f.onlyDigits('a1-2b'),'12');});
 test('shelf-life conversion',()=>{assert.equal(f.hoursToDays(48),2);assert.equal(f.daysToHours(3),72);assert.equal(f.parseShelfLife('48 ч'),48);assert.equal(f.parseShelfLife('2 дня'),48);});
