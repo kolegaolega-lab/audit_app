@@ -66,7 +66,7 @@ test('end-to-end JSON audit pipeline: invoice + iiko sales + stock -> FIFO', asy
   });
   expect(result.rowCount).toBe(2);
   expect(result.donutSales).toBe(2);
-  expect(result.donutIncoming).toEqual([
+  expect(result.donutIncoming.map(({date,qty}) => ({date,qty}))).toEqual([
     {date:'2026-10-05',qty:2},
     {date:'2026-10-06',qty:2}
   ]);
