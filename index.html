@@ -1863,7 +1863,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.24.2';
+const APP_VERSION = 'v9.24.3';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -2530,18 +2530,35 @@ function getWriteOffMoment(partyDate, shelfLife) {
   const [y, m, day] = partyDate.split('-').map(Number);
   const check = new Date(y, m - 1, day);
   if (check.getFullYear() !== y || check.getMonth() !== m - 1 || check.getDate() !== day) return null;
+
   const h = clampNum(shelfLife, 1, 10000, 72);
   check.setHours(SHELF_LIFE_START_HOUR, 0, 0, 0);
-  // Срок считается от 07:00 даты прихода, но кофейня закрывается в 22:00.
-  // Поэтому граница срока всегда приходится на 22:00 НАКАНУНЕ
-  // календарной даты окончания срока:
-  // 24 ч -> день прихода 22:00
-  // 48 ч -> следующий день 22:00
-  // 72 ч -> через 2 дня 22:00
-  // 96 ч -> через 3 дня 22:00
-  const daysOffset = Math.max(0, Math.ceil(h / 24) - 1);
-  check.setDate(check.getDate() + daysOffset);
-  check.setHours(22, 0, 0, 0);
+
+  /*
+   * Срок отсчитывается от открытия точки в 07:00.
+   *
+   * Для кратных 24 ч граница переносится на 22:00 последнего рабочего
+   * дня, чтобы товар не мог быть продан утром следующей смены:
+   *   24 ч -> день прихода 22:00
+   *   48 ч -> следующий день 22:00
+   *   72 ч -> через 2 дня 22:00
+   *   96 ч -> через 3 дня 22:00
+   *
+   * Для некратных 24 ч сохраняем точный момент истечения:
+   *   36 ч -> следующий день 19:00 (07:00 + 36 ч)
+   *   60 ч -> через 2 дня 19:00
+   *
+   * Важно: не использовать общий ceil(h / 24) — он ошибочно округляет
+   * 36 ч до 22:00 следующего дня.
+   */
+  if (h % 24 === 0) {
+    const daysOffset = Math.max(0, (h / 24) - 1);
+    check.setDate(check.getDate() + daysOffset);
+    check.setHours(WRITE_OFF_HOUR, 0, 0, 0);
+  } else {
+    check.setTime(check.getTime() + h * 60 * 60 * 1000);
+  }
+
   return check;
 }
 function parseDateRu(str, referenceDate) {
