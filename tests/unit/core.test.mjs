@@ -5,37 +5,11 @@ import fs from 'node:fs';
 const html=(fs.readFileSync(new URL('../../index.html',import.meta.url),'utf8').match(/<script[^>]*>[\s\S]*?<\/script>/gi)||[]).map(s=>s.replace(/^<script[^>]*>|<\/script>$/gi,'')).join('\n');
 
 function extract(name){
-  const re=new RegExp('function\\s+'+name+'\\s*\\([^)]*\\)\\s*\\{','m');
-  const m=re.exec(html); assert.ok(m,'Function not found: '+name);
-  let i=m.index+m[0].length,depth=1,state='code',quote='',esc=false;
-  for(;i<html.length&&depth;i++){
-    const ch=html[i],nx=html[i+1];
-    if(state==='line'){if(ch==='\\n')state='code';continue;}
-    if(state==='block'){if(ch==='*'&&nx==='/'){state='code';i++;}continue;}
-    if(state==='regex'){
-      if(esc){esc=false;continue;} if(ch==='\\\\'){esc=true;continue;}
-      if(ch==='/'){state='code';} continue;
-    }
-    if(state==='string'){
-      if(esc){esc=false;continue;} if(ch==='\\\\'){esc=true;continue;}
-      if(ch===quote)state='code'; continue;
-    }
-    if(state==='template'){
-      if(esc){esc=false;continue;} if(ch==='\\\\'){esc=true;continue;}
-      if(ch==='`')state='code'; continue;
-    }
-    if(ch==='/'&&nx==='/'){state='line';i++;continue;}
-    if(ch==='/'&&nx==='*'){state='block';i++;continue;}
-    if(ch==='/'&&nx!=='/'&&nx!=='*'){
-      let p=i-1; while(p>=0&&/\\s/.test(html[p]))p--;
-      if(p<0||'([{:;,=!?&|'.includes(html[p])){state='regex';continue;}
-    }
-    if(ch==="'"||ch==='\"'){state='string';quote=ch;continue;}
-    if(ch==='`'){state='template';continue;}
-    if(ch==='{')depth++; else if(ch==='}')depth--;
-  }
-  assert.equal(depth,0,'Unbalanced function: '+name);
-  return html.slice(m.index,i);
+  const startRe=new RegExp('function\\s+'+name+'\\s*\\([^)]*\\)\\s*\\{','m');
+  const m=startRe.exec(html); assert.ok(m,'Function not found: '+name);
+  const next=html.slice(m.index+m[0].length).search(/\\nfunction\\s+[A-Za-z_$][\\w$]*\\s*\\(/);
+  if(next<0) return html.slice(m.index);
+  return html.slice(m.index,m.index+m[0].length+next);
 }
 function load(...names){
   const src=names.map(extract).join('\n')+'\n';
