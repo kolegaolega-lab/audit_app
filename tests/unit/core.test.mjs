@@ -12,7 +12,7 @@ function extract(name){
   return html.slice(m.index,m.index+m[0].length+next);
 }
 function load(...names){
-  const src="const MAX_NUM=100000; const SHELF_LIFE_START_HOUR=7; const WRITE_OFF_HOUR=22;\\n"+names.map(extract).join('\\n')+'\\n';
+  const src="const MAX_NUM=100000; const SHELF_LIFE_START_HOUR=7; const WRITE_OFF_HOUR=22;\n"+names.map(extract).join('\n')+'\n';
   const box={};
   const storage={getItem:()=>null,setItem:()=>{},removeItem:()=>{},clear:()=>{},key:()=>null,length:0};
   const dollar=()=>null;
