@@ -17,6 +17,7 @@ function extract(start, end) {
 
 const context = {};
 vm.createContext(context);
+vm.runInContext(extract('function normalizeName(', 'function cleanProductName'), context);
 vm.runInContext(extract('function getOCRSafetyIssues(', 'function formatOCRSafetyMessage'), context);
 vm.runInContext(extract('function validateAIResponse(', 'function getOCRSafetyIssues'), context);
 
