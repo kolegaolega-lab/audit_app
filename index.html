@@ -1241,7 +1241,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
           <span class="sq" style="background:var(--bg-elev-2);color:var(--text-secondary)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
           О приложении
         </span>
-        <span class="lval" id="moreAppVersion">v9.20.5</span>
+        <span class="lval" id="moreAppVersion">v9.21.1</span>
         <span class="chev">›</span>
       </button>
     </div>
@@ -1897,7 +1897,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
   <div class="modal-content">
     <div class="modal-header">
       <h3>О приложении</h3>
-      <p class="hint" id="aboutVersion">French Bakery Аудит · v9.20.5</p>
+      <p class="hint" id="aboutVersion">French Bakery Аудит · v9.21.1</p>
     </div>
     <div class="modal-body">
       <p class="hint" style="margin:0 0 12px">PWA для аудита сроков годности в кондитерской French Bakery.</p>
@@ -1977,7 +1977,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.21.0';
+const APP_VERSION = 'v9.22.0';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -2951,7 +2951,7 @@ function stripServiceSections(rawText) {
     if (inCheck) continue;
     if (t.startsWith('#')) { serviceMode = true; continue; }
     if (serviceMode) {
-      /* v9.20.5: если встретили строку заголовка CSV — выходим из сервисного режима. */
+      /* v9.21.1: если встретили строку заголовка CSV — выходим из сервисного режима. */
       if (/наимен/i.test(t) && t.includes(';')) { serviceMode = false; out.push(line); }
       continue;
     }
@@ -2970,7 +2970,11 @@ function parseCSV(text, referenceDate) {
   const maxCols = Math.min(matrix[0].length, 100);
   const header = matrix[0].slice(0, maxCols).map(h => safeStr(h, 100));
   const idxName = header.findIndex(h => /наимен|позиц|товар/i.test(h));
-  const idxSales = header.findIndex(h => /продано|продажи|к-во|кол-во|количество/i.test(h));
+  /* v9.20.7: предпочитаем точную колонку «Продано сегодня».
+     Нельзя случайно взять «Количество»/«К-во» из другого поля. */
+  let idxSales = header.findIndex(h => /продано\s+сегодня/i.test(h));
+  if (idxSales < 0) idxSales = header.findIndex(h => /\bпродано\b|продажи/i.test(h));
+  if (idxSales < 0) idxSales = header.findIndex(h => /к-во|кол-во|количество/i.test(h));
   const idxShelf = header.findIndex(h => /срок/i.test(h));
   const dateCols = [];
   header.forEach((h, i) => {
@@ -3035,17 +3039,21 @@ function parseCSV(text, referenceDate) {
       }
       continue;
     }
-    /* Данные разные — суммируем (реальные разные источники). */
-    existing.sales = (existing.sales || 0) + (r.sales || 0);
-    existing._originalSales = existing.sales;
+    /* Разные значения одной позиции неоднозначны: не суммируем повторы
+       разных фото автоматически, а требуем ручной сверки. */
+    const dates = new Set([...(existing.incoming || []).map(x => x.date), ...(r.incoming || []).map(x => x.date)]);
+    const conflicts = [...dates].filter(date => {
+      const a = (existing.incoming || []).find(x => x.date === date);
+      const b = (r.incoming || []).find(x => x.date === date);
+      return a && b && Number(a.qty || 0) !== Number(b.qty || 0);
+    });
+    if (conflicts.length || Number(existing.sales || 0) !== Number(r.sales || 0)) {
+      throw new Error('Конфликт повторных строк товара «' + r.name + '». Значения отличаются. Проверьте исходные фото; автоматическое суммирование запрещено.');
+    }
     for (const p of r.incoming || []) {
-      const ep = (existing.incoming || []).find(x => x.date === p.date);
-      if (ep) ep.qty = (ep.qty || 0) + (p.qty || 0);
-      else existing.incoming.push({ date: p.date, qty: p.qty || 0 });
+      if (!(existing.incoming || []).some(x => x.date === p.date)) existing.incoming.push({ date: p.date, qty: p.qty || 0 });
     }
-    if ((!existing.shelfLife || existing.shelfLife === 0) && r.shelfLife) {
-      existing.shelfLife = r.shelfLife;
-    }
+    if ((!existing.shelfLife || existing.shelfLife === 0) && r.shelfLife) existing.shelfLife = r.shelfLife;
   }
   const dedupedRows = [...dedupMap.values()];
 
@@ -5619,7 +5627,11 @@ function updateCardResults() {
     if (!res) return;
     const exp = calc.expiredOnShelf;
     const sxp = calc.soldExpired;
+    const freshStock = calc.freshOnShelf;
+    const freshSales = calc.freshSold;
     res.innerHTML = `
+      <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
+      <span>Продано свежих: <span class="rv">${freshSales === null ? '—' : freshSales}</span></span>
       <span>Просрочено на витрине: <span class="rv ${exp === null ? 'zero' : (exp > 0 ? 'positive' : '')}">${exp === null ? '—' : exp}</span></span>
       <span>Продано просроченным: <span class="rv ${sxp === null ? 'zero' : (sxp > 0 ? 'positive' : '')}">${sxp === null ? '—' : sxp}</span></span>
     `;
@@ -5634,7 +5646,11 @@ function refreshCardRow(row, card) {
   if (res) {
     const exp = calc.expiredOnShelf;
     const sxp = calc.soldExpired;
+    const freshStock = calc.freshOnShelf;
+    const freshSales = calc.freshSold;
     res.innerHTML = `
+      <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
+      <span>Продано свежих: <span class="rv">${freshSales === null ? '—' : freshSales}</span></span>
       <span>Просрочено на витрине: <span class="rv ${exp === null ? 'zero' : (exp > 0 ? 'positive' : '')}">${exp === null ? '—' : exp}</span></span>
       <span>Продано просроченным: <span class="rv ${sxp === null ? 'zero' : (sxp > 0 ? 'positive' : '')}">${sxp === null ? '—' : sxp}</span></span>
     `;
@@ -6821,8 +6837,13 @@ ${searchBlock}
 Не вычисляй К-во делением Суммы на Цену.
 
 🔴 ПРОВЕРКА КАЖДОЙ СТРОКИ:
-   К-во (к.8) × Цена (к.11) = Сумма без НДС (к.12).
-   Если не сходится — перечитай колонку 8 глазами. Не подгоняй.
+   К-во (к.8) × Цена (к.11) должно совпадать с Суммой без НДС (к.12).
+   Допускается только небольшое округление документа: разница до 0,02 ₽
+   сама по себе НЕ означает ошибку в колонке 8.
+   Пример: 3 × 57,38 = 172,14, а в документе может стоять 172,13
+   из-за округления. В таком случае К-во = 3 не менять на другое число.
+   Если расхождение больше 0,02 ₽ — перечитай колонку 8 и цену.
+   Не подгоняй количество делением суммы на цену.
 
 🔴 ДЛЯ СВЕРКИ ИСПОЛЬЗУЙ КОЛОНКУ 12 «Сумма без учёта НДС».
    НЕ колонку 15 (с НДС) — там другая арифметика.
@@ -6832,12 +6853,17 @@ ${searchBlock}
 
 Если цифра нечитаема — не выдумывай. Пиши #НЕЧИТАЕМО.
 
-🔴 РУКОПИСНЫЕ ПОМЕТКИ В НАКЛАДНОЙ — ИГНОРИРУЙ ПОЛНОСТЬЮ.
-   Любые рукописные записи (√, +N, -N, зачёркнутое, цифры сбоку
-   от колонки) НЕ читай и НЕ применяй. Берёшь ТОЛЬКО печатное
-   число из колонки 8. Даже если рукописное число крупнее и
-   выглядит «главнее» — берёшь печатное.
-   В #НЕЧИТАЕМО пометку НЕ пиши — просто игнорируй молча.
+🔴 РУКОПИСНЫЕ ПОМЕТКИ В ТОРГ-12 — НЕ ПРИМЕНЯЙ АВТОМАТИЧЕСКИ.
+   Печатное значение колонки 8 распознавай отдельно.
+   Любое рукописное количество, исправление, зачёркивание или
+   пометку рядом с количеством фиксируй как требующее подтверждения.
+   Не заменяй печатное число рукописным и не складывай их.
+   Для такой строки укажи в #РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ:
+   номер документа, номер строки, печатное значение, предполагаемое
+   рукописное значение (если читается) и причину сомнения.
+   Если рукописный фрагмент неразборчив — так и укажи.
+   До подтверждения аудитора используй статус «требует проверки»,
+   а не выдавай спорное количество как достоверное.
 
 ═══════════════════════════════════════════
 ЧТЕНИЕ ЛИСТА ЗАКАЗА
@@ -6865,37 +6891,19 @@ ${searchBlock}
 Цен и сумм в листе заказа НЕТ → арифметикой не проверить.
 Читай колонку 5 ГЛАЗАМИ, внимательно каждую строку.
 
-🔴 РУКОПИСНЫЕ ПОМЕТКИ В ЛИСТЕ ЗАКАЗА — ЧИТАЙ И ПРИМЕНЯЙ.
-   Кладовщик при приёмке сверяет бумагу с фактом и вписывает
-   разницу от руки. Это ФАКТИЧЕСКОЕ количество, а не заметка.
-
-   1. ГАЛОЧКА ✓ — отметка «проверено». ИГНОРИРУЙ.
-
-   2. ЧИСЛО СО ЗНАКОМ (+N или -N) рядом с печатным —
-      это расхождение с фактом.
-      ИТОГ = печатное + пометка.
-
-      Пример: Булочка с маком — печатное 2, пометка +2 → итог 4
-      Пример: Зерновой 450 гр — печатное 1, пометка +1 → итог 2
-      Пример: Чизкейк Чёрная смородина — печатное 2, +2 → итог 4
-      Пример: Салат с куриной грудкой — печатное 3, -1 → итог 2
-
-   3. ЗАЧЁРКНУТО печатное + ВПИСАНО от руки новое —
-      исправление бумажного количества.
-      Сначала взять новое число, потом применить пометку ±N, если есть.
-
-      Пример: печатное 1 зачёркнуто, вписано 3, пометка -1 → итог 2.
-
-   4. ВСЁ ЗАЧЁРКНУТО (каракули, отменённое исправление) —
-      взять печатное число. Молча, без пометок в #НЕЧИТАЕМО.
-
-   5. КАРАКУЛИ, загогулины без смысла — игнорируй МОЛЧА.
-
-🔴 ПОРЯДОК ДЛЯ КАЖДОЙ СТРОКИ:
-   шаг 1: взять печатное число из колонки 5
-   шаг 2: если зачёркнуто и вписано новое — взять новое
-   шаг 3: если есть ±N — прибавить или вычесть
-   шаг 4: результат — в CSV
+🔴 РУКОПИСНЫЕ ПОМЕТКИ В ЛИСТЕ ЗАКАЗА — ТОЛЬКО ЧЕРЕЗ ПОДТВЕРЖДЕНИЕ.
+   Печатное значение колонки 5 распознавай отдельно.
+   Галочки ✓ можно игнорировать как отметку проверки.
+   Любое рукописное количество, знак +N/-N, исправление,
+   зачёркивание с новым числом или дописанная от руки позиция
+   должны попасть в #РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ.
+   Не вычисляй итог «печатное + пометка» самостоятельно и не
+   включай неподтверждённую рукописную позицию в достоверный приход.
+   Для каждой записи укажи документ, строку/место на странице,
+   печатное значение, рукописный фрагмент и предполагаемое значение.
+   Аудитор подтверждает итог вручную; до этого строка имеет статус
+   «требует проверки» и не должна незаметно попадать в расчёт.
+   Неразборчивые фрагменты отмечай отдельно, не подставляй 0.
 
 🔴 СТРОКИ ВНИЗУ ТАБЛИЦЫ.
    Иногда под таблицей от руки дописаны позиции
@@ -6964,12 +6972,21 @@ ${searchBlock}
      — Для продажи        → ЧИТАЙ (основные позиции)
      — Итого ...          → ИГНОРИРУЙ (итоговые строки)
 
-🔴 ФОРМАТ СТРОКИ:
+🔴 ФОРМАТ СТРОКИ — НЕ ПУТАЙ КОЛИЧЕСТВО И СУММУ:
    Формат А: Код | Наименование | К-во | Сумма
    Формат Б: Код | Наименование | К-во × Цена | Сумма
-   
-   В формате Б бери ПЕРВОЕ число из «К-во × Цена».
-   Пример: «2x171» → К-во = 2.
+
+   В формате Б:
+   • первое число в «К-во × Цена» = ПРОДАНО;
+   • второе число = цена за единицу;
+   • отдельное последнее число после разделителя = СУММА.
+   Пример: «2x171» → Продано = 2, Цена = 171.
+   Пример: «2 × 171 | 342» → Продано = 2, Сумма = 342.
+
+🔴 НЕ ВЫЧИСЛЯЙ ПРОДАЖИ:
+   НЕЛЬЗЯ брать сумму как количество.
+   НЕЛЬЗЯ получать количество делением Суммы на Цену.
+   Если количество неотличимо от суммы или строка повреждена — #НЕЧИТАЕМО.
 
 🔴 СКЛЕЙКА ПЕРЕНЕСЁННЫХ НАЗВАНИЙ.
    Название часто ломается на 2 строки:
@@ -7003,6 +7020,14 @@ ${searchBlock}
 🔴 ДУБЛИ ПРИ СКЛЕЙКЕ ФОТО — НЕ СУММИРУЙ.
    Если чек на 2 фото и позиция встречается на обоих —
    это ОДНА позиция. Складывать нельзя.
+
+🔴 ЦЕЛОСТНОСТЬ ФОТО ЧЕКА:
+   Если край чека физически обрезан на фото и продолжение документа
+   явно уходит за границу изображения, НЕ считай распознанный список
+   полным. Обязательно укажи это в #НЕЧИТАЕМО как «фото чека обрезано
+   снизу/сверху» и НЕ делай вид, что итог документа распознан полностью.
+   Все видимые строки до места обрезки можно распознать, но такой
+   результат требует дозагрузки продолжения перед окончательным применением.
 
 ═══════════════════════════════════════════
 РЯДЫ ПОХОЖИХ НАЗВАНИЙ — ОСОБЫЙ РЕЖИМ ЧТЕНИЯ
@@ -7123,9 +7148,12 @@ ${searchBlock}
    Данные за 28.09 и 29.09 — РАЗНЫЕ числа в РАЗНЫХ колонках.
    Нельзя взять одну дату и записать туда всё.
 
-🔴 ЕСЛИ КАКАЯ-ТО НАКЛАДНАЯ НЕ РАСПОЗНАНА — ВСЁ РАВНО
-   ОСТАВЬ ЕЁ КОЛОНКУ в шапке. Значения по строкам будут 0.
-   Отметь её в #НЕЧИТАЕМО.
+🔴 ЕСЛИ КАКАЯ-ТО НАКЛАДНАЯ НЕ РАСПОЗНАНА:
+   - если дата/номер/строки документа читаются частично — не угадывай отсутствующие значения;
+   - зафиксируй проблему в #НЕЧИТАЕМО;
+   - не объявляй документ полностью обработанным;
+   - CSV может содержать 0 только там, где по изображению подтверждено отсутствие позиции.
+   Нечитаемое значение НЕ равно нулю и должно блокировать автоприменение.
 
 Пример (пакет: накладные за 27.09, 28.09, 29.09):
   Наименование;Продано сегодня;Получено за 29.09;Получено за 28.09;Получено за 27.09;Срок годности
@@ -7328,6 +7356,11 @@ ${searchBlock}
   В чеке: K позиций
   В CSV: R строк
 
+🔴 #РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ — отдельный обязательный блок.
+   Если рукописных изменений нет — укажи «пусто».
+   Если они есть — перечисли каждую спорную строку, не скрывая её
+   в обычном CSV. Не выдавай неподтверждённое значение как факт.
+
 🔴 6. #НЕЧИТАЕМО — что не удалось прочитать.
 #НЕЧИТАЕМО:
   - «Салат Цезарь», накладная №X, колонка 8 — нечитаемо
@@ -7504,37 +7537,19 @@ ${searchBlock}
 Цены и суммы в листе заказа НЕТ → арифметикой не проверить.
 Читай колонку 5 ГЛАЗАМИ, внимательно каждую строку.
 
-🔴 РУКОПИСНЫЕ ПОМЕТКИ В ЛИСТЕ ЗАКАЗА — ЧИТАЙ И ПРИМЕНЯЙ.
-   Кладовщик при приёмке сверяет бумагу с фактом и вписывает
-   разницу от руки. Это ФАКТИЧЕСКОЕ количество, а не заметка.
-
-   1. ГАЛОЧКА ✓ — отметка «проверено». ИГНОРИРУЙ.
-
-   2. ЧИСЛО СО ЗНАКОМ (+N или -N) рядом с печатным —
-      это расхождение с фактом.
-      ИТОГ = печатное + пометка.
-
-      Пример: Булочка с маком — печатное 2, пометка +2 → итог 4
-      Пример: Зерновой 450 гр — печатное 1, пометка +1 → итог 2
-      Пример: Чизкейк Чёрная смородина — печатное 2, +2 → итог 4
-      Пример: Салат с куриной грудкой — печатное 3, -1 → итог 2
-
-   3. ЗАЧЁРКНУТО печатное + ВПИСАНО от руки новое —
-      исправление бумажного количества.
-      Сначала взять новое число, потом применить пометку ±N, если есть.
-
-      Пример: печатное 1 зачёркнуто, вписано 3, пометка -1 → итог 2.
-
-   4. ВСЁ ЗАЧЁРКНУТО (каракули, отменённое исправление) —
-      взять печатное число. Молча, без пометок в #НЕЧИТАЕМО.
-
-   5. КАРАКУЛИ, загогулины без смысла — игнорируй МОЛЧА.
-
-🔴 ПОРЯДОК ДЛЯ КАЖДОЙ СТРОКИ:
-   шаг 1: взять печатное число из колонки 5
-   шаг 2: если зачёркнуто и вписано новое — взять новое
-   шаг 3: если есть ±N — прибавить или вычесть
-   шаг 4: результат — в CSV
+🔴 РУКОПИСНЫЕ ПОМЕТКИ В ЛИСТЕ ЗАКАЗА — ТОЛЬКО ЧЕРЕЗ ПОДТВЕРЖДЕНИЕ.
+   Печатное значение колонки 5 распознавай отдельно.
+   Галочки ✓ можно игнорировать как отметку проверки.
+   Любое рукописное количество, знак +N/-N, исправление,
+   зачёркивание с новым числом или дописанная от руки позиция
+   должны попасть в #РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ.
+   Не вычисляй итог «печатное + пометка» самостоятельно и не
+   включай неподтверждённую рукописную позицию в достоверный приход.
+   Для каждой записи укажи документ, строку/место на странице,
+   печатное значение, рукописный фрагмент и предполагаемое значение.
+   Аудитор подтверждает итог вручную; до этого строка имеет статус
+   «требует проверки» и не должна незаметно попадать в расчёт.
+   Неразборчивые фрагменты отмечай отдельно, не подставляй 0.
 
 🔴 СТРОКИ ВНИЗУ ТАБЛИЦЫ.
    Иногда под таблицей от руки дописаны позиции
@@ -7837,11 +7852,19 @@ function buildSystemInstructionForGemini() {
     '   Запрещено «выравнивать» числа по соседям. Если получилось 15, 9, 15, 10 — так и пиши.',
     '   Если сомневаешься в цифре — перечитай именно эту строку, не подставляй соседнюю.',
     '',
-    '3. ОДНА ПОЗИЦИЯ = ОДНА СТРОКА В CSV.',
+    '3. ЧЕК iiko — КОЛИЧЕСТВО ПРОДАЖ. Рассматривай чек как отдельный документ и не переноси цифры из накладной в чек. Если в строке есть «К-во × Цена | Сумма», первое число — количество, второе — цена, последнее — сумма. Количество должно быть целым числом позиции. Никогда не бери сумму как количество и не вычисляй количество делением суммы на цену. Если строка переносится на следующую строку, число относится только к той товарной строке, к которой оно визуально привязано.',
+    '   Если строка имеет вид «К-во × Цена | Сумма», первое число в паре — КОЛИЧЕСТВО,',
+    '   второе — цена за единицу. Последнее число — СУММА и никогда не является количеством.',
+    '   НЕЛЬЗЯ получать количество делением суммы на цену и нельзя брать сумму как количество.',
+    '   Если формат строки не позволяет надёжно отличить количество от суммы — #НЕЧИТАЕМО.',
+    '   Для перенесённого на следующую строку названия не используй число из соседней строки.',
+    '',
+    '4. ОДНА ПОЗИЦИЯ = ОДНА СТРОКА В CSV.',
     '   Если позиция и в накладной, и в чеке — одна строка с обоими значениями.',
     '   Дубли запрещены. Перед выдачей CSV проверь: нет ли двух строк с одинаковым названием.',
     '',
-    'НЕ ВЫДУМЫВАЙ цифры. Если не читается — пиши в #НЕЧИТАЕМО, а не 0.',
+    'НЕ ВЫДУМЫВАЙ цифры. Если критичное значение не читается или неоднозначно — обязательно укажи конкретную строку/ячейку в #НЕЧИТАЕМО и не выдавай догадку как факт. Для рукописного количества обязательно используй #РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ. Автоприменение такого результата будет заблокировано.',
+    'Если край документа обрезан и нельзя увидеть продолжение, обязательно укажи это в #НЕЧИТАЕМО; не объявляй документ полностью прочитанным.',
     'Не переставляй количества между строками.'
   ].join('\n');
 }
@@ -8123,11 +8146,14 @@ async function compressImageForGemini(blob, maxSide, quality) {
     return null;
   }
 }
-async function buildGeminiFileParts() {
-  const items = (await getPhotos()).sort((a, b) => {
-    const cmp = naturalCompare(a.name, b.name);
-    return cmp !== 0 ? cmp : a.id - b.id;
-  });
+async function buildGeminiFileParts(filterType) {
+  const allItems = await getPhotos();
+  const items = allItems
+    .filter(item => !filterType || item.type === filterType)
+    .sort((a, b) => {
+      const cmp = naturalCompare(a.name, b.name);
+      return cmp !== 0 ? cmp : a.id - b.id;
+    });
   const parts = [];
   let totalB64 = 0;
   let imgIndex = 0;
@@ -8147,7 +8173,7 @@ async function buildGeminiFileParts() {
         if (totalB64 > GEMINI_MAX_B64_BYTES) {
           throw new Error(`Суммарный размер файлов превышает лимит. Уменьшите количество фото.`);
         }
-        parts.push({ text: `--- Изображение ${imgIndex} ---` });
+        parts.push({ text: `--- ${item.type === 'sales' ? 'ЧЕК ПРОДАЖ' : 'НАКЛАДНАЯ'} · изображение ${imgIndex} · файл: ${item.name} ---` });
         parts.push({ inline_data: { mime_type: mime, data: b64 } });
       }
     } else if (kind === 'application/pdf') {
@@ -8158,18 +8184,33 @@ async function buildGeminiFileParts() {
         if (totalB64 > GEMINI_MAX_B64_BYTES) {
           throw new Error(`Суммарный размер файлов превышает лимит.`);
         }
-        parts.push({ text: `--- Документ ${imgIndex} ---` });
+        parts.push({ text: `--- ${item.type === 'sales' ? 'ЧЕК ПРОДАЖ' : 'НАКЛАДНАЯ'} · документ ${imgIndex} · файл: ${item.name} ---` });
         parts.push({ inline_data: { mime_type: 'application/pdf', data: raw } });
       }
     }
   }
   return parts;
 }
+async function findExactDuplicatePhotoFiles(items) {
+  if (!Array.isArray(items) || items.length < 2) return [];
+  if (typeof crypto === 'undefined' || !crypto.subtle) return [];
+  const seen = new Map(), duplicates = [];
+  for (const item of items) {
+    if (!item || !item.blob || typeof item.blob.arrayBuffer !== 'function') continue;
+    const digest = await crypto.subtle.digest('SHA-256', await item.blob.arrayBuffer());
+    const hash = Array.from(new Uint8Array(digest)).map(x => x.toString(16).padStart(2, '0')).join('');
+    const key = String(item.type || '') + ':' + hash;
+    if (seen.has(key)) duplicates.push({ first: seen.get(key), duplicate: item });
+    else seen.set(key, item);
+  }
+  return duplicates;
+}
+
 function extractCsvFromGeminiText(text) {
   let csv = String(text || '').trim();
   csv = csv.replace(/^```[a-zA-Z]*\s*\n?/, '').replace(/\n?```\s*$/, '').trim();
   const lines = csv.split(/\r?\n/);
-  /* v9.20.5: CSV — от строки заголовка до первой строки, начинающейся с #. */
+  /* v9.21.1: CSV — от строки заголовка до первой строки, начинающейся с #. */
   let headerIdx = -1;
   for (let i = 0; i < lines.length; i++) {
     if (/наимен/i.test(lines[i]) && lines[i].includes(';')) {
@@ -8305,6 +8346,20 @@ function parseAIReport(rawText) {
     gaps = { hasGap, noGaps, raw: content };
   }
 
+  /* --- Парсинг #РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ --- */
+  let handwrittenConfirmation = null;
+  if (blocks['РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ']) {
+    const content = String(blocks['РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ'] || '').trim();
+    const cleaned = content
+      .replace(/#\s*[А-ЯЁ_]+\s*:?/g, '')
+      .replace(/[—–\-]+/g, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+    const isEmpty = !cleaned || /^пусто\.?$/.test(cleaned);
+    handwrittenConfirmation = { isEmpty, raw: content };
+  }
+
   /* --- Парсинг #НЕЧИТАЕМО --- */
   let unreadable = null;
   if (blocks['НЕЧИТАЕМО']) {
@@ -8363,6 +8418,7 @@ function parseAIReport(rawText) {
     completeness,
     gaps,
     unreadable,
+    handwrittenConfirmation,
     postrochno,
     verdict,
     fullRaw: rawText
@@ -8461,7 +8517,7 @@ function _groupPostrochnoByNakl(rows) {
   return groups;
 }
 
-function validateAIResponse(csv1, csv2, report, photoCount) {
+function validateAIResponse(csv1, csv2, report, photoCount, requireLineItems = false) {
   const csvText = csv1 || '';
   const issues = [];
   if (!report || !report.hasBlocks) return { overall: 'ok', issues: [] };
@@ -8496,7 +8552,9 @@ function validateAIResponse(csv1, csv2, report, photoCount) {
           );
           if (!isFinite(printed) || printed <= 0) continue;
           const diff = Math.abs(sumFromRows - printed);
-          const tol = Math.max(0.5, printed * 0.01);
+          /* Денежные значения документа имеют копеечное округление.
+             Не пропускаем ошибки на 0.5 ₽/1%: для OCR это слишком мягко. */
+          const tol = 0.02;
           if (diff > tol) {
             issues.push({
               level: 'error',
@@ -8513,6 +8571,36 @@ function validateAIResponse(csv1, csv2, report, photoCount) {
       }
     }
   } catch (e) { console.warn('validate: sum-mismatch', e); }
+
+  /* --- 1b. Дубликаты позиций в исходном CSV --- */
+  try {
+    const lines = String(csvText || '').split(/\r?\n/);
+    const names = new Map();
+    let headerFound = false;
+    for (const line of lines) {
+      const t = line.trim();
+      if (!t || t.startsWith('#')) continue;
+      if (!headerFound) {
+        if (/наимен/i.test(t) && t.includes(';')) headerFound = true;
+        continue;
+      }
+      const first = t.split(';')[0].replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+      const key = normalizeName(cleanProductName(first));
+      if (!key) continue;
+      names.set(key, (names.get(key) || 0) + 1);
+    }
+    const duplicateNames = [...names.entries()].filter(([, n]) => n > 1).map(([key, n]) => key + ' ×' + n);
+    if (duplicateNames.length) {
+      issues.push({
+        level: 'error',
+        code: 'duplicate-csv-rows',
+        title: 'В CSV есть дубли позиций',
+        detail: duplicateNames.slice(0, 8).join(', ') +
+          (duplicateNames.length > 8 ? ' …и ещё ' + (duplicateNames.length - 8) : '') +
+          '. Одинаковые позиции нельзя автоматически складывать.'
+      });
+    }
+  } catch (e) { console.warn('validate: duplicate-csv-rows', e); }
 
   /* --- 2. #ПОСТРОЧНО vs CSV (с учётом повторов между накладными) --- */
   try {
@@ -8559,17 +8647,18 @@ function validateAIResponse(csv1, csv2, report, photoCount) {
 
   /* --- 4. Фото vs #ПРОВЕРКА_ПОЛНОТЫ --- */
   try {
-    if (photoCount > 0 && report.completeness && report.completeness.received > 0) {
-      const recv = report.completeness.received;
-      if (photoCount > recv) {
-        issues.push({
-          level: 'error',
-          code: 'photos-lost',
-          title: 'Модель обработала меньше фото, чем загружено',
-          detail: 'Загружено файлов: ' + photoCount + '. Модель учла: ' + recv +
-                  '. ' + (photoCount - recv) + ' не попали в ответ.'
-        });
-      }
+    if (photoCount > 0 && (!report.completeness ||
+        report.completeness.received !== photoCount ||
+        report.completeness.processed !== photoCount)) {
+      issues.push({
+        level: 'error',
+        code: 'photos-lost',
+        title: 'Нет точного подтверждения обработки всех фото',
+        detail: 'Загружено: ' + photoCount + '; получено: ' +
+          (report.completeness ? report.completeness.received : 'не указано') +
+          '; обработано: ' + (report.completeness && report.completeness.processed != null
+            ? report.completeness.processed : 'не указано') + '.'
+      });
     }
   } catch (e) { console.warn('validate: photos-lost', e); }
 
@@ -8851,6 +8940,35 @@ function validateAIResponse(csv1, csv2, report, photoCount) {
     }
   } catch (e) { console.warn('validate: nakl-lost', e); }
 
+  /* --- 13. Построчные количества накладной должны совпасть с CSV --- */
+  try {
+    if (requireLineItems && (!report.postrochno || !report.postrochno.length)) {
+      issues.push({ level: 'error', code: 'line-items-missing', title: 'Нет полного построчного перечня накладной', detail: 'Не получен #ПОСТРОЧНО с количеством, ценой и суммой по каждой товарной строке.' });
+    } else if (requireLineItems && report.postrochno && report.postrochno.length) {
+      const parsed = cmpParseCSV(csvText);
+      if (!parsed) {
+        issues.push({ level: 'error', code: 'line-items-csv-invalid', title: 'Не удалось сверить построчные количества с CSV' });
+      } else {
+        const lineTotals = new Map();
+        report.postrochno.forEach(r => {
+          const key = normalizeName(applyAliases(cleanProductName(r.name)));
+          if (key) lineTotals.set(key, (lineTotals.get(key) || 0) + Number(r.qty || 0));
+        });
+        for (const key of parsed.order) {
+          const row = parsed.rows[key];
+          const csvQty = parsed.dateCols.reduce((sum, dc) => sum + Number((row.incoming || {})[dc.key] || 0), 0);
+          if (csvQty <= 0) continue;
+          const lineQty = lineTotals.get(key) || 0;
+          if (lineQty !== csvQty) issues.push({
+            level: 'error', code: 'line-quantity-mismatch',
+            title: 'Количество в CSV не совпадает с построчным OCR: ' + row.name,
+            detail: 'CSV: ' + csvQty + ' шт.; по строкам накладной: ' + lineQty + ' шт.'
+          });
+        }
+      }
+    }
+  } catch (e) { console.warn('validate: line-quantity-mismatch', e); }
+
   /* --- Сводный уровень --- */
   let overall = 'ok';
   const hasError = issues.some(i => i.level === 'error');
@@ -8859,6 +8977,73 @@ function validateAIResponse(csv1, csv2, report, photoCount) {
   else if (hasWarn) overall = 'warn';
 
   return { overall, issues };
+}
+
+/* v9.20.6 — БЕЗОПАСНЫЙ ПРОПУСК OCR.
+   Решение о применении результата принимает код, а не текст ИИ.
+   Нечитаемые и рукописные критичные значения блокируют
+   автоматическое применение CSV до проверки аудитора. */
+function getOCRSafetyIssues(csvText, report, photoCount) {
+  const issues = [];
+  if (!csvText || !String(csvText).trim()) {
+    issues.push({ code: 'empty-csv', title: 'Пустой результат OCR' });
+  }
+  if (!report || !report.hasBlocks) {
+    issues.push({
+      code: 'missing-ai-report',
+      title: 'Нет структурированного отчёта OCR',
+      detail: 'Ответ ИИ не содержит обязательных блоков проверки.'
+    });
+    return issues;
+  }
+  if (report.unreadable && !report.unreadable.isEmpty) {
+    issues.push({
+      code: 'unreadable',
+      title: 'Есть нечитаемые значения',
+      detail: report.unreadable.raw
+    });
+  }
+  if (report.handwrittenConfirmation && !report.handwrittenConfirmation.isEmpty) {
+    issues.push({
+      code: 'handwritten-confirmation',
+      title: 'Есть рукописные значения, требующие подтверждения',
+      detail: report.handwrittenConfirmation.raw
+    });
+  }
+  if (!report.completeness || report.completeness.received !== photoCount ||
+      report.completeness.processed !== photoCount) {
+    issues.push({
+      code: 'completeness-mismatch',
+      title: 'Не подтверждена обработка всех фотографий',
+      detail: 'В приложении файлов: ' + photoCount + '; ИИ указал получено: ' +
+        (report.completeness ? report.completeness.received : 'не указано') +
+        '; обработано: ' + (report.completeness && report.completeness.processed != null
+          ? report.completeness.processed : 'не указано') + '.'
+    });
+  }
+  if (!report.blocks || !report.blocks['СОМНИТЕЛЬНЫЕ_СТРОКИ']) {
+    issues.push({ code: 'review-block-missing', title: 'Нет блока проверки сомнительных строк OCR' });
+  } else {
+    const uncertain = String(report.blocks['СОМНИТЕЛЬНЫЕ_СТРОКИ'] || '').trim().toLowerCase();
+    if (uncertain && !/^(пусто|нет|отсутствуют)[.! ]*$/.test(uncertain)) {
+      issues.push({ code: 'uncertain-rows', title: 'Есть сомнительные строки — требуется ручная сверка', detail: report.blocks['СОМНИТЕЛЬНЫЕ_СТРОКИ'] });
+    }
+  }
+  if (report.validation && report.validation.issues && report.validation.issues.length) {
+    issues.push({
+      code: 'validation-review',
+      title: 'Проверки OCR требуют ручной сверки',
+      detail: report.validation.issues.slice(0, 6).map(i => i.title + (i.detail ? ': ' + i.detail : '')).join(' | ')
+    });
+  }
+  return issues;
+}
+
+function formatOCRSafetyMessage(issues) {
+  const titles = (issues || []).filter(Boolean).map(i => i.title).filter(Boolean);
+  if (!titles.length) return '';
+  return 'Автоприменение остановлено: ' + titles.slice(0, 2).join('; ') +
+    (titles.length > 2 ? ' и ещё ' + (titles.length - 2) + '.' : '.');
 }
 
 /* Короткая сводка отчёта для индикатора в статусе */
@@ -9001,7 +9186,7 @@ async function recognizeWithGemini() {
       if (!text) throw new Error(label + ': пустой ответ.');
       const csv = extractCsvFromGeminiText(text);
       if (!csv || !/;/.test(csv)) throw new Error(label + ': ответ не похож на CSV.');
-      /* v9.20.5: возвращаем и CSV, и полный текст. */
+      /* v9.21.1: возвращаем и CSV, и полный текст. */
       return { csv, full: text };
     };
 
@@ -9055,40 +9240,75 @@ async function recognizeWithGemini() {
 
     _lastGeminiCsvs = { first: csv1 || '', second: csv2 || '' };
 
-    /* v9.18.0/v9.19.1: сохраняем отчёт ИИ и обновляем кнопку */
-    /* v9.20.5: парсим полный текст (с блоками), а не извлечённый CSV. */
-    _lastAIReport = parseAIReport(primaryFull);
-    /* v9.20.0: валидация ответа ИИ на клиенте */
+    /* v9.20.6: безопасная обработка OCR — сначала проверка, потом применение. */
+    const report1 = full1 ? parseAIReport(full1) : null;
+    const report2 = full2 ? parseAIReport(full2) : null;
+    if (report1) report1.validation = validateAIResponse(csv1, csv2, report1, items.length);
+    if (report2) report2.validation = validateAIResponse(csv2, csv1, report2, items.length);
+    _lastAIReport = report1 || report2;
+    const safety1 = getOCRSafetyIssues(csv1, report1, items.length);
+    const safety2 = getOCRSafetyIssues(csv2, report2, items.length);
+    const safetyIssues = [...safety1, ...safety2];
+    /* v9.22.0: точные дубли файлов блокируют OCR до удаления.
+       Одинаковое изображение нельзя считать второй страницей документа. */
+    try {
+      const exactDups = await findExactDuplicatePhotoFiles(items);
+      if (exactDups.length) {
+        const labels = exactDups.slice(0, 5).map(d =>
+          '«' + (d.duplicate.name || 'файл') + '» дублирует «' + (d.first.name || 'файл') + '»'
+        );
+        safetyIssues.push({
+          code: 'duplicate-files',
+          title: 'Обнаружены полностью одинаковые фотографии',
+          detail: labels.join('; ') + (exactDups.length > 5 ? ' …и ещё ' + (exactDups.length - 5) : '') +
+            '. Удалите дубли и запустите распознавание снова.'
+        });
+      }
+    } catch (e) {
+      safetyIssues.push({
+        code: 'duplicate-check-failed',
+        title: 'Не удалось проверить фотографии на дубли',
+        detail: 'Для безопасного OCR повторите распознавание после проверки файлов.'
+      });
+    }
     if (_lastAIReport) {
-      _lastAIReport.validation = validateAIResponse(
-        csv1 || csv2 || '',
-        (csv1 && csv2) ? csv2 : '',
-        _lastAIReport,
-        items.length
-      );
+      _lastAIReport.safety = {
+        blocked: safetyIssues.length > 0,
+        issues: safetyIssues,
+        doubleRun: !!(csv1 && csv2)
+      };
     }
     persistAIReport(_lastAIReport);
     updateAIReportBtnVisibility();
 
     if (csv1 && csv2) {
-      const lines = primaryCsv.split(/\r?\n/).length;
-      setStatus('info', `Получено 2 ответа (${lines} строк). Применяю первый…`);
-      showToast('Применяю CSV первого прогона');
-      await new Promise(r => setTimeout(r, 250));
-      try { await applyCSV(); } catch (e) { console.warn('Auto-apply failed:', e); }
-      await new Promise(r => setTimeout(r, 500));
-      try { closeUnknownModal(); } catch (e) {}
-      try { closeNoCategoryModal(); } catch (e) {}
-      setStatus('ok', `CSV первого прогона применён (${lines} строк). Открываю сверку…`);
-      showToast('Открываю сверку двух CSV');
+      /* Два прогона не применяем автоматически. Сначала оператор
+         видит сравнение и выбирает/исправляет результат. */
+      setStatus(
+        safetyIssues.length ? 'warn' : 'info',
+        safetyIssues.length
+          ? formatOCRSafetyMessage(safetyIssues) + ' Фото сохранены до проверки.'
+          : 'Получено 2 ответа. Сначала проверьте сверку двух распознаваний.'
+      );
+      showToast(safetyIssues.length ? 'OCR требует проверки' : 'Открываю сверку двух CSV');
       setTimeout(() => openCompareModal({ first: csv1, second: csv2 }), 300);
     } else if (csv1) {
+      if (safetyIssues.length) {
+        setStatus('warn', formatOCRSafetyMessage(safetyIssues) + ' CSV и фото сохранены.');
+        showToast('OCR требует проверки');
+        return;
+      }
       setStatus('info', 'Применяю CSV…');
       showToast('Применяю CSV');
       await new Promise(r => setTimeout(r, 250));
       try { await applyCSV(); } catch (e) { console.warn('Auto-apply failed:', e); }
       setStatus('ok', 'CSV применён.');
     } else {
+      if (safetyIssues.length) {
+        setStatus('warn', formatOCRSafetyMessage(safetyIssues) + ' CSV и фото сохранены.');
+        showToast('OCR требует проверки');
+        return;
+      }
       setStatus('warn', 'Применён только CSV второго прогона. ' + err1);
       await new Promise(r => setTimeout(r, 250));
       try { await applyCSV(); } catch (e) { console.warn('Auto-apply failed:', e); }
@@ -9124,8 +9344,15 @@ function dailyParseDateInput(str) {
   const day = parseInt(m[1], 10);
   const month = parseInt(m[2], 10);
   if (day < 1 || day > 31 || month < 1 || month > 12) return null;
-  let year = m[3] ? parseInt(m[3], 10) : new Date().getFullYear();
-  if (year < 100) year += 2000;
+  let year = m[3] ? parseInt(m[3], 10) : null;
+  if (year != null && year < 100) year += 2000;
+  const isoRef = new Date();
+  if (year == null) {
+    const refM = isoRef.getMonth() + 1;
+    year = isoRef.getFullYear();
+    if (month - refM > 6) year -= 1;
+    else if (refM - month > 6) year += 1;
+  }
   const d = new Date(year, month - 1, day);
   if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
   const iso = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -9155,8 +9382,12 @@ function dailyRender() {
     info.style.cssText = 'flex:1;min-width:0';
     let posCount = 0;
     try { posCount = (d.csv.split(/\r?\n/).filter(l => l.trim()).length - 1); } catch (e) {}
-    const warnMark = d.needsCheck ? ' <span style="color:var(--orange);font-size:15px">⚠</span>' : '';
-    const warnText = d.needsCheck ? ' · проверьте сверку' : '';
+    const warnMark = d.blocked
+      ? ' <span style="color:var(--orange);font-size:15px">⚠</span>'
+      : (d.needsCheck ? ' <span style="color:var(--orange);font-size:15px">⚠</span>' : '');
+    const warnText = d.blocked
+      ? ' · требуется проверка OCR'
+      : (d.needsCheck ? ' · проверьте сверку' : '');
     info.innerHTML = `<div style="font-weight:600;font-size:14px">Получено за ${escapeHtml(d.label)}${warnMark}</div><div style="font-size:11.5px;color:var(--text-secondary);margin-top:2px">${posCount} строк${warnText}</div>`;
 
     const refresh = document.createElement('button');
@@ -9191,6 +9422,151 @@ function dailyRender() {
     status.textContent = `В пакете дат: ${_dailyAccum.length}. Даты: ${_dailyAccum.map(d => d.label).join(', ')}.`;
   }
 }
+function mergeSeparatedOCRCsv(invoiceCsv, salesCsv, dateLabel) {
+  const inv = invoiceCsv ? cmpParseCSV(invoiceCsv) : null;
+  const sal = salesCsv ? cmpParseCSV(salesCsv) : null;
+  if (invoiceCsv && !inv) throw new Error('Не удалось разобрать строки накладных. Автоматическое применение остановлено.');
+  if (salesCsv && !sal) throw new Error('Не удалось разобрать строки чека продаж. Автоматическое применение остановлено.');
+  if (!inv && !sal) throw new Error('Оба OCR-результата пустые.');
+
+  /* v9.21.2:
+     КАЖДАЯ ДАТА ПРИХОДА — НЕЗАВИСИМОЕ ЗНАЧЕНИЕ.
+     Здесь формируется CSV только для dateLabel, поэтому нельзя
+     складывать значения из других колонок «Получено за».
+
+     Итоговая строка строится по СПРАВОЧНИКУ активной категории,
+     а OCR только заполняет значения:
+       • есть в накладной + нет в чеке → приход = фактический, продажи = 0;
+       • нет в накладной + есть в чеке → приход = 0, продажи = фактические;
+       • есть и там и там → заполняем оба значения;
+       • нет ни там ни там → и приход, и продажи = 0.
+     FIFO и расчёт сроков здесь не изменяются. */
+  const targetDate = String(dateLabel || '').trim();
+  if (inv && !inv.dateCols.some(dc => dc.key === targetDate)) {
+    throw new Error('В распознанных накладных нет колонки прихода за ' + targetDate + '. Количество другой даты подставлять нельзя.');
+  }
+  if (sal && !sal.hasSalesColumn) {
+    throw new Error('В распознанном чеке нет колонки «Продано сегодня». Количество продаж не подтверждено.');
+  }
+  const all = new Map();
+
+  /* Сначала создаём все позиции из справочника. Это гарантирует
+     наличие строки даже при полном отсутствии товара в обоих OCR. */
+  const catalogProducts = getCategoryProducts(_activeCategory);
+  if (!catalogProducts.length) {
+    throw new Error('Не удалось определить активную категорию справочника.');
+  }
+  const sourceProducts = catalogProducts;
+
+  sourceProducts.forEach(prod => {
+    if (!prod || !prod.name) return;
+    const key = normalizeName(prod.name);
+    if (!key || isIgnored(prod.name)) return;
+    all.set(key, {
+      name: prod.name,
+      incoming: 0,
+      sales: 0,
+      hasTargetDate: false
+    });
+  });
+
+  const add = (src, kind) => {
+    if (!src) return;
+    src.order.forEach(key => {
+      const row = src.rows[key];
+      if (!row) return;
+      const name = row.name;
+      const k = normalizeName(name);
+      if (!k) return;
+
+      if (!all.has(k)) {
+        all.set(k, { name, incoming: 0, sales: 0, hasTargetDate: false });
+      }
+      const out = all.get(k);
+
+      if (kind === 'invoice') {
+        const incoming = row.incoming || {};
+        const targetKey = Object.keys(incoming).find(d => String(d) === targetDate);
+        if (targetKey != null) {
+          out.incoming = Number(incoming[targetKey]) || 0;
+          out.hasTargetDate = true;
+        }
+      } else {
+        out.sales = Number(row.sales) || 0;
+      }
+    });
+  };
+
+  add(inv, 'invoice');
+  add(sal, 'sales');
+
+  const lines = [
+    ['Наименование', 'Продано сегодня', 'Получено за ' + targetDate, 'Срок годности'].join(';')
+  ];
+
+  [...all.values()].sort((a,b) => a.name.localeCompare(b.name, 'ru')).forEach(r => {
+    if (!r.name) return;
+    const safe = /[;"\n]/.test(r.name) ? '"' + r.name.replace(/"/g, '""') + '"' : r.name;
+    const prod = PRODUCTS.find(p => normalizeName(p.name) === normalizeName(r.name));
+    const shelf = prod && prod.shelfLife != null ? prod.shelfLife : '';
+    lines.push([safe, r.sales, r.incoming, shelf].join(';'));
+  });
+  return lines.join('\n');
+}
+function buildSeparatedOCRPrompt(dateLabel, docType) {
+  const { list: catalogList } = buildCatalogListForPrompt();
+  const isInvoice = docType === 'invoice';
+  return [
+    'ЗАДАЧА: независимое OCR-распознавание только одного типа документов.',
+    isInvoice
+      ? 'Сейчас переданы ТОЛЬКО ФОТО НАКЛАДНЫХ/ЛИСТОВ ЗАКАЗА. ЧЕКА НЕТ. Не придумывай продажи.'
+      : 'Сейчас переданы ТОЛЬКО ФОТО ЧЕКА ПРОДАЖ iiko. НАКЛАДНЫХ НЕТ. Не придумывай приход.',
+    'Дата проверки: ' + dateLabel + '.',
+    '',
+    isInvoice ? [
+      'КРИТИЧНО ДЛЯ ТОРГ-12: фактическое количество = колонка 8 «мест, штук».',
+      'Колонку 7 «в одном месте» НЕ используй.',
+      'Для каждой строки: количество × цена = сумма. Если не сходится — перечитай именно колонку 8.',
+      'Если значение не читается — #НЕЧИТАЕМО, не угадывай.',
+      'Фото без шапки присоединяй к предыдущей накладной по сквозной нумерации.',
+      'Рукописные пометки в ТОРГ-12 игнорируй. В листе заказа рукописное количество вынеси в #РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ.',
+      'Не переносить количество между соседними похожими строками.',
+      'В CSV приход ставь только из реально прочитанных документов за ' + dateLabel + '. Продано сегодня = 0.',
+      'КРИТИЧНО: «Получено за ' + dateLabel + '» содержит ТОЛЬКО приход этой даты. Никогда не суммируй в него приходы 01.10, 02.10 и других дат. Приходы разных дат — отдельные независимые значения. Если документа за ' + dateLabel + ' нет или его количество не читается, не подставляй количество из другой даты.'
+    ].join('\n') : [
+      'Читай только строки товаров чека iiko.',
+      'Если строка имеет «К-во × Цена = Сумма», первое число = количество.',
+      'Сумма никогда не является количеством. Не вычисляй количество делением суммы на цену.',
+      'Комплименты/товары с нулевой ценой тоже учитывай, если количество указано.',
+      'Не переносить количество между соседними строками.',
+      'При склейке страниц не суммируй один и тот же дубль.',
+      'В CSV приход = 0, продажи = реально прочитанное количество.'
+    ].join('\n'),
+    '',
+    'ФИЛЬТР: включай только позиции из справочника ниже.',
+    'СПРАВОЧНИК:',
+    catalogList,
+    '',
+    'ФОРМАТ CSV В САМОМ КОНЦЕ:',
+    'Наименование;Продано сегодня;Получено за ' + dateLabel + ';Срок годности',
+    isInvoice ? 'Для накладных: продажи всегда 0.' : 'Для чека: приход всегда 0.',
+    'Одна позиция = одна строка. Дубли объединяй.',
+    '',
+    'Перед CSV обязательно дай:',
+    '#ИСТОЧНИКИ:',
+    '#ПРОВЕРКА:',
+    '#ПРОВЕРКА_ПОЛНОТЫ:',
+    'Укажи точное число загруженных приложением файлов и сколько реально просмотрено: «Получено: N изображений; Обработано: N изображений». Не считай страницы PDF отдельными файлами. Сверь все фото по номерам документов, датам, номерам строк и содержимому. Повторное фото, повтор страницы или перекрывающийся фрагмент не считай вторым документом и не суммируй повторно; перечисли обнаруженные повторы здесь.',
+    '#СОМНИТЕЛЬНЫЕ_СТРОКИ:',
+    'Перечисли все строки, где название или количество не читается однозначно, есть варианты прочтения или сомнение в цифре. Не выдумывай процент уверенности. Если сомнений нет — напиши «пусто».',
+    '#НЕЧИТАЕМО:',
+    '#РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ:',
+    'Для накладной перечисли каждую товарную строку в #ПОСТРОЧНО: № | название | количество × цена = сумма. Не пропускай строки. Сверяй количество с изображением.',
+    'Если проблем нет, пиши «пусто».',
+    'CSV — последним.'
+  ].join('\n');
+}
+
 async function recognizeDaily() {
   if (shareBusy) return;
   const dateInput = $('dailyDate');
@@ -9203,162 +9579,211 @@ async function recognizeDaily() {
   const apiKey = getGeminiKey();
   if (!apiKey) { setStatus('err', 'Введите API-ключ в настройках.'); return; }
 
-  const items = await getPhotos();
-  if (!items.length) { setStatus('info', 'Сначала загрузите фото накладной и чека за эту дату.'); return; }
+  const allItems = await getPhotos();
+  const invoiceItems = allItems.filter(x => x.type === 'invoice');
+  const salesItems = allItems.filter(x => x.type === 'sales');
+  if (!invoiceItems.length && !salesItems.length) {
+    setStatus('info', 'Сначала загрузите фото накладных и чека продаж.');
+    return;
+  }
+  try {
+    const duplicateFiles = [
+      ...(await findExactDuplicatePhotoFiles(invoiceItems)),
+      ...(await findExactDuplicatePhotoFiles(salesItems))
+    ];
+    if (duplicateFiles.length) {
+      const names = duplicateFiles.slice(0, 3).map(x =>
+        (x.duplicate.name || 'файл') + ' повторяет ' + (x.first.name || 'предыдущий файл')
+      );
+      setStatus('err', 'Обнаружены одинаковые загруженные файлы: ' + names.join('; ') +
+        '. Удалите повторные фото и запустите распознавание снова.');
+      return;
+    }
+  } catch (e) { console.warn('Exact duplicate photo check unavailable:', e); }
+  const missingSources = [];
+  if (!invoiceItems.length) missingSources.push('накладные не загружены');
+  if (!salesItems.length) missingSources.push('чек продаж не загружен');
 
   shareBusy = true;
   const btn = $('dailyRecognizeBtn');
   if (btn) btn.classList.add('busy');
-  try {
-    setStatus('info', 'Подготовка файлов…');
-    const fileParts = await buildGeminiFileParts();
-    if (!fileParts.length) throw new Error('Не удалось подготовить файлы.');
 
-    const systemPrompt = buildSystemInstructionForGemini();
-    const userPrompt = buildDailyPrompt(parsed.label);
+  try {
     const model = getGeminiModel();
     const url = `${GEMINI_API}/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
-
-    const body = {
-      systemInstruction: { parts: [{ text: systemPrompt }] },
-      contents: [{ parts: [...fileParts, { text: userPrompt }] }],
-      generationConfig: { temperature: 0, maxOutputTokens: GEMINI_MAX_OUTPUT_TOKENS }
-    };
-
     const doubleRun = $('geminiDoubleRunCheck') && $('geminiDoubleRunCheck').checked;
-    setStatus('info', doubleRun ? 'Отправка 2 запросов…' : 'Отправка запроса…');
 
-    const sendOne = async (label) => {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      if (!res.ok) {
-        let msg = `HTTP ${res.status}`;
-        try {
-          const errJson = await res.json();
-          if (errJson && errJson.error && errJson.error.message) msg = errJson.error.message;
-        } catch (e) {}
-        if (res.status === 429) msg = 'Превышен лимит запросов.';
-        if (res.status === 503 || /high demand|overload/i.test(msg)) msg = 'Сервер перегружен.';
-        throw new Error(label + ': ' + msg);
-      }
-      const data = await res.json();
-      const cand = data && data.candidates && data.candidates[0];
-      if (!cand) throw new Error(label + ': нет кандидатов.');
-      const parts = (cand.content && cand.content.parts) || [];
-      const text = parts.map(p => p.text || '').join('');
-      const csv = extractCsvFromGeminiText(text);
-      if (!csv || !/;/.test(csv)) throw new Error(label + ': ответ не похож на CSV.');
-      /* v9.20.5: возвращаем и CSV, и полный текст. */
-      return { csv, full: text };
-    };
-
-    const sendWithRetry = async (label, maxAttempts) => {
+    const runOCR = async (docType, items, runNo) => {
+      if (!items.length) return null;
+      setStatus('info', (docType === 'invoice' ? 'Накладные' : 'Чек') + ': подготовка ' + items.length + ' файлов…');
+      const fileParts = await buildGeminiFileParts(docType);
+      if (!fileParts.length) throw new Error('Не удалось подготовить файлы: ' + docType);
+      const body = {
+        systemInstruction: { parts: [{ text: buildSystemInstructionForGemini() }] },
+        contents: [{ parts: [...fileParts, { text: buildSeparatedOCRPrompt(parsed.label, docType) }] }],
+        generationConfig: { temperature: 0, maxOutputTokens: GEMINI_MAX_OUTPUT_TOKENS }
+      };
+      const maxAttempts = 3;
       let lastErr = '';
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-          return await sendOne(label + (attempt > 1 ? ' (попытка ' + attempt + ')' : ''));
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+          if (!res.ok) {
+            let msg = 'HTTP ' + res.status;
+            try {
+              const j = await res.json();
+              if (j && j.error && j.error.message) msg = j.error.message;
+            } catch (e) {}
+            if (res.status === 429) msg = 'Превышен лимит запросов.';
+            if (res.status === 503 || /high demand|overload/i.test(msg)) msg = 'Сервер перегружен.';
+            throw new Error(msg);
+          }
+          const data = await res.json();
+          const cand = data && data.candidates && data.candidates[0];
+          if (!cand) throw new Error('Нет кандидата ответа.');
+          const text = ((cand.content && cand.content.parts) || []).map(p => p.text || '').join('');
+          const csv = extractCsvFromGeminiText(text);
+          if (!csv || !/;/.test(csv)) throw new Error('Ответ не похож на CSV.');
+          return { csv, full: text, docType, runNo };
         } catch (e) {
           lastErr = e.message || String(e);
-          const isRetriable = /503|429|overloaded|high demand|перегружен|resource.?exhausted|temporarily|unavailable/i.test(lastErr);
-          if (!isRetriable || attempt === maxAttempts) throw e;
-          const wait = attempt * 3000;
-          setStatus('info', label + ': сервер занят, повтор через ' + Math.round(wait / 1000) + ' с…');
-          await new Promise(r => setTimeout(r, wait));
+          if (!/503|429|overload|high demand|перегружен|resource.?exhausted|temporarily|unavailable/i.test(lastErr) || attempt === maxAttempts) break;
+          await new Promise(r => setTimeout(r, attempt * 3000));
         }
       }
-      throw new Error(lastErr);
+      throw new Error((docType === 'invoice' ? 'Накладные' : 'Чек') + ': ' + lastErr);
     };
 
-    let r1 = null, r2 = null, err1 = '', err2 = '';
-    if (doubleRun) {
-      try { r1 = await sendWithRetry('Прогон 1', 3); }
-      catch (e) { err1 = e.message || String(e); }
-      if (r1) {
-        setStatus('info', 'Прогон 1 готов. Отправка прогона 2…');
-        await new Promise(r => setTimeout(r, 1500));
-        try { r2 = await sendWithRetry('Прогон 2', 3); }
-        catch (e) { err2 = e.message || String(e); }
+    const runOneType = async (docType, items) => {
+      if (!items.length) return { primary: null, secondary: null, errors: [] };
+      let primary = null, secondary = null;
+      const errors = [];
+      try { primary = await runOCR(docType, items, 1); }
+      catch (e) { errors.push(e.message || String(e)); }
+      if (primary && doubleRun) {
+        setStatus('info', (docType === 'invoice' ? 'Накладные' : 'Чек') + ': прогон 1 готов, проверка прогоном 2…');
+        await new Promise(r => setTimeout(r, 800));
+        try { secondary = await runOCR(docType, items, 2); }
+        catch (e) { errors.push(e.message || String(e)); }
       }
-    } else {
-      try { r1 = await sendWithRetry('Прогон 1', 3); }
-      catch (e) { err1 = e.message || String(e); }
+      return { primary, secondary, errors };
+    };
+
+    const invResult = await runOneType('invoice', invoiceItems);
+    const salesResult = await runOneType('sales', salesItems);
+
+    if (!invResult.primary && !salesResult.primary) {
+      throw new Error([...invResult.errors, ...salesResult.errors].join(' | ') || 'OCR не удался.');
     }
 
-    if (!r1 && !r2) throw new Error(err1 || err2 || 'Запрос не удался.');
+    const invCsv = invResult.primary ? invResult.primary.csv : '';
+    const invCsv2 = invResult.secondary ? invResult.secondary.csv : '';
+    const salesCsv = salesResult.primary ? salesResult.primary.csv : '';
+    const salesCsv2 = salesResult.secondary ? salesResult.secondary.csv : '';
 
-    const csv1 = r1 ? r1.csv : '';
-    const csv2 = r2 ? r2.csv : '';
-    const full1 = r1 ? r1.full : '';
-    const full2 = r2 ? r2.full : '';
+    if (!invResult.primary) missingSources.push('накладные не распознаны');
+    if (!salesResult.primary) missingSources.push('чек продаж не распознан');
 
-    let bothMatch = false;
-    if (csv1 && csv2) {
-      try {
-        const d1 = cmpParseCSV(csv1);
-        const d2 = cmpParseCSV(csv2);
-        if (d1 && d2) {
-          const keys1 = Object.keys(d1.rows);
-          const keys2 = Object.keys(d2.rows);
-          if (keys1.length === keys2.length && keys1.length > 0) {
-            bothMatch = keys1.every(k => {
-              const a = d1.rows[k];
-              const b = d2.rows[k];
-              if (!b) return false;
-              if ((a.sales || 0) !== (b.sales || 0)) return false;
-              /* Сравниваем ВСЕ даты из обоих прогонов, а не только первую.
-                 Раньше расхождение по 2-й и следующими датам терялось,
-                 фото удалялись, и ошибка ИИ не всплывала. */
-              const allDates = new Set([
-                ...Object.keys(a.incoming || {}),
-                ...Object.keys(b.incoming || {})
-              ]);
-              for (const dk of allDates) {
-                if ((a.incoming[dk] || 0) !== (b.incoming[dk] || 0)) return false;
-              }
-              return true;
-            });
-          }
-        }
-      } catch (e) { bothMatch = false; }
-    }
+    const merged1 = mergeSeparatedOCRCsv(invCsv, salesCsv, parsed.label);
+    /* Второй прогон считается полноценным только если оба независимых
+       документа получили второй результат. Иначе не сравниваем первичный
+       результат с самим собой/смешанным набором данных. */
+    const hasFullSecondRun = !!invCsv2 && !!salesCsv2;
+    const merged2 = hasFullSecondRun
+      ? mergeSeparatedOCRCsv(invCsv2, salesCsv2, parsed.label)
+      : '';
+    const bothMatch = !!(hasFullSecondRun && merged1 && merged2 && merged1 === merged2);
+    const chosen = merged1;
+    const invoiceReport = invResult.primary ? parseAIReport(invResult.primary.full) : null;
+    const salesReport = salesResult.primary ? parseAIReport(salesResult.primary.full) : null;
+    const safetyIssues = [];
+    [invResult.primary, invResult.secondary, salesResult.primary, salesResult.secondary].forEach(r => {
+      if (!r) return;
+      const report = parseAIReport(r.full);
+      safetyIssues.push(...getOCRSafetyIssues(r.csv, report, r.docType === 'invoice' ? invoiceItems.length : salesItems.length));
+    });
 
-    const chosen = csv1 || csv2;
-    const chosenFull = full1 || full2;
-    const needsCheck = !!(csv1 && csv2 && !bothMatch);
-    /* v9.20.5: парсим полный текст (с блоками), а не извлечённый CSV. */
-    _lastAIReport = parseAIReport(chosenFull);
-    /* v9.20.0: валидация ответа ИИ на клиенте */
-     if (_lastAIReport) {
-      _lastAIReport.validation = validateAIResponse(
-        csv1 || csv2 || '',
-        (csv1 && csv2) ? csv2 : '',
-        _lastAIReport,
-        items.length
-      );
-    }
+    const blockedBySafety = safetyIssues.length > 0;
+    const invoiceValidation = invoiceReport
+      ? validateAIResponse(invCsv, invCsv2, invoiceReport, invoiceItems.length, true)
+      : { overall: 'ok', issues: [] };
+    const salesValidation = salesReport
+      ? validateAIResponse(salesCsv, salesCsv2, salesReport, salesItems.length)
+      : { overall: 'ok', issues: [] };
+
+    /* Все замечания клиентской валидации требуют подтверждения человеком,
+       включая предупреждения о возможной потере/добавлении строк. */
+    [invoiceValidation, salesValidation].forEach((v, index) => {
+      (v.issues || []).forEach(issue => safetyIssues.push({
+        code: 'validation-' + (index === 0 ? 'invoice-' : 'sales-') + (issue.code || 'review'),
+        title: issue.title || 'Проверка OCR требует внимания',
+        detail: issue.detail || ''
+      }));
+    });
+
+    const chosenReport = {
+      hasBlocks: true,
+      separatedOCR: true,
+      invoiceReport,
+      salesReport,
+      invoiceValidation,
+      salesValidation,
+      validation: {
+        overall: (invoiceValidation.overall === 'error' || salesValidation.overall === 'error') ? 'error'
+          : (invoiceValidation.issues.length || salesValidation.issues.length) ? 'warn' : 'ok',
+        issues: [...(invoiceValidation.issues || []), ...(salesValidation.issues || [])]
+      },
+      safety: {
+        blocked: blockedBySafety,
+        issues: safetyIssues,
+        doubleRun: !!doubleRun,
+        separatedOCR: true
+      },
+      invoiceCsv: invCsv,
+      salesCsv: salesCsv,
+      invoicePhotoCount: invoiceItems.length,
+      salesPhotoCount: salesItems.length,
+      fullRaw: [
+        invoiceReport ? '=== НАКЛАДНЫЕ ===\n' + invoiceReport.fullRaw : '',
+        salesReport ? '=== ЧЕК ПРОДАЖ ===\n' + salesReport.fullRaw : ''
+      ].filter(Boolean).join('\n\n')
+    };
+    _lastAIReport = chosenReport;
     persistAIReport(_lastAIReport);
     updateAIReportBtnVisibility();
+
+    const entry = {
+      iso: parsed.iso,
+      label: parsed.label,
+      csv: chosen,
+      ts: Date.now(),
+      needsCheck: blockedBySafety || missingSources.length > 0 || (!!doubleRun && !bothMatch),
+      blocked: blockedBySafety || missingSources.length > 0,
+      sourceMissing: missingSources.slice(),
+      safetyIssues: [
+        ...safetyIssues.map(x => ({ code: x.code, title: x.title })),
+        ...missingSources.map(x => ({ code: 'SOURCE_MISSING', title: x }))
+      ],
+      category: _activeCategory
+    };
     const idx = _dailyAccum.findIndex(x => x.iso === parsed.iso);
-    const entry = { iso: parsed.iso, label: parsed.label, csv: chosen, ts: Date.now(), needsCheck: needsCheck, category: _activeCategory };
-    if (idx >= 0) _dailyAccum[idx] = entry;
-    else _dailyAccum.push(entry);
+    if (idx >= 0) _dailyAccum[idx] = entry; else _dailyAccum.push(entry);
     saveDailyAccum();
     dailyRender();
 
-    if (csv1 && csv2 && bothMatch) {
-      setStatus('ok', `Дата ${parsed.label}: оба прогона совпали. Накоплено. Фото очищены.`);
-      try { await clearAllPhotos(); } catch (e) {}
-      await renderPhotoQueue();
-    } else if (csv1 && csv2) {
-      setStatus('warn', `Дата ${parsed.label}: расхождения между прогонами. Разберитесь в сверке.`);
-      _lastGeminiCsvs = { first: csv1, second: csv2 };
+    if (blockedBySafety || missingSources.length > 0 || (!!doubleRun && !bothMatch)) {
+      _lastGeminiCsvs = { first: merged1, second: merged2 || merged1 };
       _dailyEditing = parsed.iso;
-      setTimeout(() => openCompareModal({ first: csv1, second: csv2 }), 400);
+      setStatus('warn', missingSources.length
+        ? 'Не все источники загружены или распознаны. Результат сохранён, но не применён автоматически.'
+        : 'OCR разделён: результат требует проверки. Проверьте сверку и нечитаемые значения.');
+      setTimeout(() => openCompareModal({ first: merged1, second: merged2 || merged1 }), 400);
     } else {
-      setStatus('warn', `Дата ${parsed.label} накоплена (только один прогон удался). ${err1 || err2}`);
+      setStatus('ok', 'Накладные и чек распознаны раздельно и объединены без смешивания данных.');
       try { await clearAllPhotos(); } catch (e) {}
       await renderPhotoQueue();
     }
@@ -9384,7 +9809,6 @@ function rebuildDailyCsvFromTable(iso) {
     const party = (row.incoming || []).find(p => p.date === iso);
     const qty = party ? (party.qty || 0) : 0;
     const sales = row.sales || 0;
-    if (qty === 0 && sales === 0) continue;
     rows.push({ name: row.name, qty, sales, shelfLife: row.shelfLife });
   }
   if (!rows.length) return false;
@@ -9399,7 +9823,14 @@ function rebuildDailyCsvFromTable(iso) {
     lines.push(`${safeName};${r.qty};${r.sales};${r.shelfLife != null ? r.shelfLife : ''}`);
   }
   entry.csv = lines.join('\n');
-  entry.needsCheck = false;
+  /* Ручная правка снимает OCR-предупреждения, но не может заменить
+     отсутствующий источник: без накладной/чека ноль не подтверждён. */
+  const stillMissingSource = Array.isArray(entry.sourceMissing) && entry.sourceMissing.length > 0;
+  entry.needsCheck = stillMissingSource;
+  entry.blocked = stillMissingSource;
+  entry.safetyIssues = stillMissingSource
+    ? entry.sourceMissing.map(title => ({ code: 'SOURCE_MISSING', title }))
+    : [];
   entry.ts = Date.now();
   saveDailyAccum();
   return true;
@@ -9427,6 +9858,16 @@ async function buildDailyCsv() {
     return;
   }
   _dailyAccum.sort((a, b) => a.iso.localeCompare(b.iso));
+
+  const blockedEntries = _dailyAccum.filter(d => d && (d.blocked || d.needsCheck));
+  if (blockedEntries.length) {
+    if (statusEl) {
+      statusEl.className = 'status show err';
+      statusEl.textContent = 'Нельзя собрать итог: есть даты с непроверенным OCR или неполными источниками — ' +
+        blockedEntries.map(d => d.label).join(', ') + '.';
+    }
+    return;
+  }
 
   const allNames = new Set();
   const byDate = {};
@@ -9902,246 +10343,177 @@ function renderAIReportModal(report) {
   const statusText = $('aiReportStatusText');
   if (!body) return;
 
-  const summary = summarizeAIReport(report);
-  let overall = 'ok';
-  if (summary && !summary.ok) {
-    overall = summary.hasBlockingIssue ? 'err' : 'warn';
-  }
+  /* v9.21.1: отчёт ИИ разделён на два независимых источника:
+     НАКЛАДНЫЕ и ЧЕК ПРОДАЖ. Основной экран больше не маскирует
+     отчёт чека внутри отчёта накладных. */
 
-  /* Полоса статуса */
-  if (statusDot) {
-    statusDot.className = 'ai-status-dot ' + overall;
-  }
+  const inv = report.invoiceReport || null;
+  const sales = report.salesReport || null;
+  const invVal = report.invoiceValidation || { issues: [] };
+  const salesVal = report.salesValidation || { issues: [] };
+
+  const invIssues = [...(invVal.issues || [])];
+  const salesIssues = [...(salesVal.issues || [])];
+  const safety = report.safety || { blocked: false, issues: [] };
+
+  const hasBlocking = safety.blocked ||
+    invIssues.some(x => x.level === 'error') ||
+    salesIssues.some(x => x.level === 'error');
+
+  const hasWarnings = invIssues.some(x => x.level === 'warn') ||
+    salesIssues.some(x => x.level === 'warn');
+
+  const overall = hasBlocking ? 'err' : hasWarnings ? 'warn' : 'ok';
+
+  if (statusDot) statusDot.className = 'ai-status-dot ' + overall;
   if (statusText) {
-    if (overall === 'ok') statusText.textContent = 'Все проверки пройдены';
-    else if (overall === 'err') statusText.textContent = 'Есть критичные проблемы';
-    else statusText.textContent = 'Есть замечания';
+    statusText.textContent = overall === 'ok'
+      ? 'Распознавание проверено'
+      : overall === 'err'
+        ? 'Есть критичные проблемы — данные не применены автоматически'
+        : 'Есть замечания — проверьте результат';
   }
   if (statusBar) {
     statusBar.style.background = overall === 'err' ? 'var(--red-soft)'
       : overall === 'warn' ? 'var(--orange-soft)' : 'var(--green-soft)';
   }
 
+  const csvStats = (csv, photoCount, kind) => {
+    const text = String(csv || '');
+    const lines = text.split(/\r?\n/).filter(x => x.trim() && !x.trim().startsWith('#'));
+    const header = lines.find(x => /наимен/i.test(x) && x.includes(';')) || '';
+    const rows = lines.slice(header ? lines.indexOf(header) + 1 : 0).filter(x => x.includes(';'));
+    const names = new Set();
+    rows.forEach(line => {
+      const f = cmpSplitLine(line, ';');
+      if (f[0] && !/^наимен/i.test(f[0])) names.add(cleanProductName(f[0]));
+    });
+    return { photos: photoCount || 0, rows: rows.length, products: names.size };
+  };
+
+  const invStats = csvStats(report.invoiceCsv || '', report.invoicePhotoCount || 0, 'invoice');
+  const salesStats = csvStats(report.salesCsv || '', report.salesPhotoCount || 0, 'sales');
+
+  /* Старые сохранённые отчёты могли не содержать CSV в объекте отчёта.
+     В таком случае берём минимальные данные из validation/блоков, не выдумывая числа. */
+  const issueRows = (title, issues) => {
+    if (!issues.length) return '<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">' +
+      escapeHtml(title + ': ошибок не обнаружено.') + '</span></div>';
+    return issues.map(it => {
+      const cls = it.level === 'error' ? 'error' : 'warn';
+      return '<div class="ai-issue-row ' + cls + '">' +
+        '<span class="ai-issue-icon">' + (it.level === 'error' ? '✗' : '⚠') + '</span>' +
+        '<span class="ai-issue-body"><b>' + escapeHtml(it.title || 'Замечание') + '</b>' +
+        (it.detail ? '<br>' + escapeHtml(it.detail) : '') + '</span></div>';
+    }).join('');
+  };
+
+  const renderSource = (title, icon, sourceReport, validation, stats, extra) => {
+    if (!sourceReport) {
+      return '<div class="sheet-section">' +
+        '<div class="sheet-section-header"><h2>' + icon + ' ' + title + '</h2>' +
+        '<p class="desc">Материалы этого типа не загружены.</p></div></div>';
+    }
+
+    const unreadable = sourceReport.unreadable && !sourceReport.unreadable.isEmpty;
+    const handwritten = sourceReport.handwrittenConfirmation && !sourceReport.handwrittenConfirmation.isEmpty;
+    const checks = sourceReport.checks || [];
+    const badChecks = checks.filter(x => x.status === 'mismatch');
+    const gaps = sourceReport.gaps && sourceReport.gaps.hasGap;
+
+    let h = '<div class="sheet-section">' +
+      '<div class="sheet-section-header"><h2>' + icon + ' ' + title + '</h2>' +
+      '<p class="desc">Независимое распознавание этого типа документа.</p></div>' +
+      '<div class="sheet-section-body">';
+
+    h += '<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">' +
+      'Загружено фото/файлов: <b>' + stats.photos + '</b> · товарных строк: <b>' + stats.rows + '</b>' +
+      (stats.products !== stats.rows ? ' · уникальных позиций: <b>' + stats.products + '</b>' : '') +
+      '</span></div>';
+
+    if (sourceReport.completeness) {
+      const r = sourceReport.completeness.received;
+      const p = sourceReport.completeness.processed;
+      const ok = p == null || p === r;
+      h += '<div class="ai-issue-row ' + (ok ? 'ok' : 'error') + '">' +
+        '<span class="ai-issue-icon">' + (ok ? '✓' : '✗') + '</span><span class="ai-issue-body">' +
+        'Полнота: получено <b>' + r + '</b>, обработано <b>' + (p == null ? '—' : p) + '</b>' +
+        (ok ? '' : ' — часть материалов не обработана.') + '</span></div>';
+    }
+
+    if (title.indexOf('Накладные') >= 0) {
+      h += '<div class="ai-issue-row ' + (badChecks.length ? 'error' : 'ok') + '">' +
+        '<span class="ai-issue-icon">' + (badChecks.length ? '✗' : '✓') + '</span><span class="ai-issue-body">' +
+        'Сверка сумм накладных: ' + (checks.length ? ('проверено <b>' + checks.length + '</b>, расхождений <b>' + badChecks.length + '</b>') : 'данные о печатных итогах не обнаружены') +
+        '</span></div>';
+      if (gaps) h += '<div class="ai-issue-row warn"><span class="ai-issue-icon">⚠</span><span class="ai-issue-body">Обнаружен возможный разрыв нумерации.</span></div>';
+    } else {
+      h += '<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Для чека количество берётся из позиции <b>«К-во»</b>; сумма продажи не используется как количество.</span></div>';
+    }
+
+    if (unreadable) {
+      h += '<div class="ai-issue-row warn"><span class="ai-issue-icon">⚠</span><span class="ai-issue-body"><b>Есть нечитаемые значения.</b><br>Проверьте их по фотографии.</span></div>';
+    } else {
+      h += '<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Критичных нечитаемых значений не отмечено.</span></div>';
+    }
+
+    if (handwritten) {
+      h += '<div class="ai-issue-row warn"><span class="ai-issue-icon">⚠</span><span class="ai-issue-body"><b>Есть рукописные значения.</b><br>Они требуют подтверждения.</span></div>';
+    }
+
+    h += issueRows('Проверки ответа', validation.issues || []);
+
+    if (extra) h += extra;
+    h += '</div></div>';
+    return h;
+  };
+
   let html = '';
 
-  /* ── Секция 0: Проверки ответа (v9.20.0) ── */
-  if (report.validation && report.validation.issues && report.validation.issues.length) {
-    const errs = report.validation.issues.filter(i => i.level === 'error');
-    const warns = report.validation.issues.filter(i => i.level === 'warn');
-    const subParts = [];
-    if (errs.length) subParts.push('<span style="color:var(--red);font-weight:600">' + errs.length + ' критичных</span>');
-    if (warns.length) subParts.push('<span style="color:var(--orange);font-weight:600">' + warns.length + ' замечаний</span>');
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Проверки ответа</h2>' +
-          '<p class="desc">' + subParts.join(' · ') + '</p>' +
-        '</div>' +
-        '<div class="sheet-section-body">';
-    [...errs, ...warns].forEach(it => {
-      const cls = it.level === 'error' ? 'error' : 'warn';
-      const icon = it.level === 'error' ? '✗' : '⚠';
-      html +=
-        '<div class="ai-issue-row ' + cls + '">' +
-          '<span class="ai-issue-icon">' + icon + '</span>' +
-          '<span class="ai-issue-body">' +
-            '<b>' + escapeHtml(it.title) + '</b><br>' +
-            escapeHtml(it.detail) +
-          '</span>' +
-        '</div>';
-    });
-    html += '</div></div>';
+  /* Верхняя сводка */
+  html += '<div class="sheet-section"><div class="sheet-section-header">' +
+    '<h2>Что распознано</h2><p class="desc">Чек и накладные обработаны независимо друг от друга.</p></div>' +
+    '<div class="sheet-section-body">' +
+    '<div class="ai-issue-row ' + (inv ? 'ok' : 'warn') + '"><span class="ai-issue-icon">' + (inv ? '✓' : '—') + '</span><span class="ai-issue-body"><b>📄 Накладные</b> · ' + (inv ? 'распознаны' : 'не загружены') + '</span></div>' +
+    '<div class="ai-issue-row ' + (sales ? 'ok' : 'warn') + '"><span class="ai-issue-icon">' + (sales ? '✓' : '—') + '</span><span class="ai-issue-body"><b>🧾 Чек продаж</b> · ' + (sales ? 'распознан' : 'не загружен') + '</span></div>' +
+    '<div class="ai-issue-row ' + (overall === 'ok' ? 'ok' : overall === 'err' ? 'error' : 'warn') + '"><span class="ai-issue-icon">' + (overall === 'ok' ? '✓' : overall === 'err' ? '✗' : '⚠') + '</span><span class="ai-issue-body">' +
+    (overall === 'ok' ? 'Критичных проблем распознавания не обнаружено.' : hasBlocking ? 'Есть критичная проблема. Автоматическое применение заблокировано.' : 'Есть замечания, которые стоит проверить.') +
+    '</span></div></div></div>';
+
+  html += renderSource('Накладные', '📄', inv, invVal, invStats, '');
+  html += renderSource('Чек продаж', '🧾', sales, salesVal, salesStats, '');
+
+  /* Отдельная проверка рукописных/нечитаемых значений */
+  if (safety.issues && safety.issues.length) {
+    html += '<div class="sheet-section"><div class="sheet-section-header"><h2>Требует внимания</h2>' +
+      '<p class="desc">Эти проблемы блокируют автоматическое применение результата.</p></div><div class="sheet-section-body">' +
+      safety.issues.map(it => '<div class="ai-issue-row error"><span class="ai-issue-icon">✗</span><span class="ai-issue-body"><b>' +
+        escapeHtml(it.title || 'Проблема') + '</b>' + (it.detail ? '<br>' + escapeHtml(it.detail) : '') +
+        '</span></div>').join('') + '</div></div>';
   }
 
-  /* ── Секция 1: Проблемы (если есть) ── */
-  if (summary && !summary.ok) {
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Замечания</h2>' +
-          '<p class="desc">Что ИИ увидел в этом ответе.</p>' +
-        '</div>' +
-        '<div class="sheet-section-body">';
-    summary.issues.forEach(i => {
-      const cls = i.type === 'error' ? 'error' : 'warn';
-      const icon = i.type === 'error' ? '✗' : '⚠';
-      html +=
-        '<div class="ai-issue-row ' + cls + '">' +
-          '<span class="ai-issue-icon">' + icon + '</span>' +
-          '<span class="ai-issue-body">' + escapeHtml(i.text) + '</span>' +
-        '</div>';
-    });
-    html += '</div></div>';
-  } else {
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Проверки пройдены</h2>' +
-        '</div>' +
-        '<div class="sheet-section-body">' +
-          '<div class="ai-issue-row ok">' +
-            '<span class="ai-issue-icon">✓</span>' +
-            '<span class="ai-issue-body">Полнота фото, сверка сумм, разрывы и нечитаемое — всё чисто.</span>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-  }
+  /* Результат объединения */
+  html += '<div class="sheet-section"><div class="sheet-section-header"><h2>Итог объединения</h2>' +
+    '<p class="desc">Только после независимого OCR данные объединяются для расчёта.</p></div>' +
+    '<div class="sheet-section-body">' +
+    '<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Накладные и чек не использовали данные друг друга при распознавании.</span></div>' +
+    '<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Продажи берутся из чека, приход — из накладных.</span></div>' +
+    '<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Срок годности и расчёт проверки выполняются отдельно от OCR.</span></div>' +
+    '</div></div>';
 
-  /* ── Секция 2: Сверка накладных ── */
-  if (report.checks && report.checks.length) {
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Сверка сумм</h2>' +
-          '<p class="desc">Σ пересчитано vs печатный итог накладной.</p>' +
-        '</div>' +
-        '<div class="sheet-section-body">';
-    report.checks.forEach(c => {
-      const ok = c.status === 'ok';
-      const cls = ok ? 'ok' : 'err';
-      html +=
-        '<div class="ai-nakl-row">' +
-          '<span class="ai-nakl-num">' + escapeHtml(c.num) + '</span>' +
-          '<span class="ai-nakl-date">' + escapeHtml(c.date || '') + '</span>' +
-          '<span class="ai-nakl-diff ' + cls + '">' +
-            (c.sum ? 'Σ ' + escapeHtml(c.sum) : '—') +
-            (c.diff ? '<small>Δ ' + escapeHtml(c.diff) + '</small>' : '') +
-          '</span>' +
-        '</div>';
-    });
-    html += '</div></div>';
-  }
-
-  /* ── Секция 3: Полнота изображений ── */
-  if (report.completeness) {
-    const r = report.completeness.received;
-    const p = report.completeness.processed;
-    const ok = p == null || p === r;
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Полнота изображений</h2>' +
-        '</div>' +
-        '<div class="sheet-section-body">' +
-          '<div class="ai-issue-row ' + (ok ? 'ok' : 'error') + '">' +
-            '<span class="ai-issue-icon">' + (ok ? '✓' : '✗') + '</span>' +
-            '<span class="ai-issue-body">Получено: <b>' + r + '</b> · Обработано: <b>' + (p == null ? '—' : p) + '</b>' +
-            (ok ? '' : ' — возможно, часть фото потеряна.') +
-            '</span>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-  }
-
-  /* ── Секция 4: Разрывы нумерации ── */
-  if (report.gaps) {
-    const hasGap = report.gaps.hasGap;
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Разрывы нумерации</h2>' +
-        '</div>' +
-        '<div class="sheet-section-body">' +
-          '<div class="ai-issue-row ' + (hasGap ? 'warn' : 'ok') + '">' +
-            '<span class="ai-issue-icon">' + (hasGap ? '⚠' : '✓') + '</span>' +
-            '<span class="ai-issue-body">' + (hasGap ? 'Найден разрыв — проверь нумерацию строк.' : 'Разрывов нет.') + '</span>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-  }
-
-  /* ── Секция 5: Нечитаемые ── */
-  if (report.unreadable) {
-    const clean = report.unreadable.isEmpty;
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Нечитаемые ячейки</h2>' +
-        '</div>' +
-        '<div class="sheet-section-body">' +
-          '<div class="ai-issue-row ' + (clean ? 'ok' : 'warn') + '">' +
-            '<span class="ai-issue-icon">' + (clean ? '✓' : '⚠') + '</span>' +
-            '<span class="ai-issue-body">' + (clean ? 'Нечитаемых ячеек нет.' : 'Есть нечитаемое — проверь по фото.') + '</span>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-  }
-
-  /* ── Секция 5a: Сводка (#ПРОВЕРКА) ── */
-  if (report.verdict) {
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Сводка</h2>' +
-          '<p class="desc">Что ИИ насчитал по документам.</p>' +
-        '</div>' +
-        '<div class="sheet-section-body">' +
-          '<pre class="ai-raw">' + escapeHtml(report.verdict) + '</pre>' +
-        '</div>' +
-      '</div>';
-  }
-
-  /* ── Секция 5b: Построчная проверка (#ПОСТРОЧНО) ── */
-  if (report.postrochno && report.postrochno.length) {
-    const rows = report.postrochno.slice().sort((a, b) => {
-      /* Расхождения — сверху */
-      if (a.ok !== b.ok) return a.ok ? 1 : -1;
-      return a.num - b.num;
-    });
-    const badCount = rows.filter(r => !r.ok).length;
-    const subDesc = badCount
-      ? '<span style="color:var(--red);font-weight:600">' + badCount + ' из ' + rows.length + ' не сходится</span>'
-      : 'Все ' + rows.length + ' строк сходятся';
-
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Построчная проверка</h2>' +
-          '<p class="desc">' + subDesc + '</p>' +
-        '</div>' +
-        '<div class="sheet-section-body">';
-
-    rows.forEach(r => {
-      const cls = r.ok ? 'ok' : 'error';
-      const icon = r.ok ? '✓' : '✗';
-      const qtyStr = String(r.qty).replace('.', ',');
-      const priceStr = String(r.price.toFixed(2)).replace('.', ',');
-      const sumStr = String(r.sum.toFixed(2)).replace('.', ',');
-      const expStr = String(r.expected.toFixed(2)).replace('.', ',');
-      const diffStr = String(r.diff.toFixed(2)).replace('.', ',');
-      const detail = r.ok
-        ? '<b>' + escapeHtml(qtyStr) + '</b> × ' + escapeHtml(priceStr) + ' = <b>' + escapeHtml(sumStr) + '</b>'
-        : '<b>' + escapeHtml(qtyStr) + '</b> × ' + escapeHtml(priceStr) + ' = ' + escapeHtml(sumStr) +
-          ' · ожидалось <b style="color:var(--red)">' + escapeHtml(expStr) + '</b> (Δ ' + escapeHtml(diffStr) + ')';
-      html +=
-        '<div class="ai-issue-row ' + cls + '">' +
-          '<span class="ai-issue-icon">' + icon + '</span>' +
-          '<span class="ai-issue-body">' +
-            '<b>' + escapeHtml(String(r.num)) + '. ' + escapeHtml(r.name) + '</b><br>' +
-            detail +
-          '</span>' +
-        '</div>';
-    });
-    html += '</div></div>';
-  }
-
-  /* ── Секция 6: Сырой ответ ИИ ── */
-  if (report.fullRaw) {
-    html +=
-      '<div class="sheet-section">' +
-        '<div class="sheet-section-header">' +
-          '<h2>Сырой ответ ИИ</h2>' +
-          '<p class="desc">Полный текст, включая блоки #ИМЯ.</p>' +
-        '</div>' +
-        '<div class="sheet-section-body">' +
-          '<pre class="ai-raw">' + escapeHtml(report.fullRaw) + '</pre>' +
-        '</div>' +
-      '</div>';
+  /* Детали ответа оставляем доступными, но в самом низу. */
+  const rawParts = [
+    inv && inv.fullRaw ? '=== НАКЛАДНЫЕ ===\n' + inv.fullRaw : '',
+    sales && sales.fullRaw ? '=== ЧЕК ПРОДАЖ ===\n' + sales.fullRaw : ''
+  ].filter(Boolean).join('\n\n');
+  if (rawParts) {
+    html += '<div class="sheet-section"><div class="sheet-section-header"><h2>Технический ответ ИИ</h2>' +
+      '<p class="desc">Нужен только для диагностики OCR.</p></div><div class="sheet-section-body">' +
+      '<pre class="ai-raw">' + escapeHtml(rawParts) + '</pre></div></div>';
   }
 
   body.innerHTML = html;
 }
-
 /* ═══════════════════════════════════════════
    UI HELPERS
    ═══════════════════════════════════════════ */
@@ -10269,11 +10641,17 @@ function cmpParseCSV(text) {
         .join('|');
       const sameIncoming = sig(existing.incoming) === sig(rec.incoming);
       if (sameSales && sameIncoming) {
-        /* Полный дубликат — ничего не делаем. */
+        /* Точный дубль: пропускаем. */
       } else {
-        existing.sales = (existing.sales || 0) + (rec.sales || 0);
+        const conflicts = Object.keys(rec.incoming).filter(dk =>
+          Object.prototype.hasOwnProperty.call(existing.incoming, dk) &&
+          Number(existing.incoming[dk] || 0) !== Number(rec.incoming[dk] || 0)
+        );
+        if (conflicts.length || Number(existing.sales || 0) !== Number(rec.sales || 0)) {
+          throw new Error('Повторная строка «' + rec.name + '» содержит разные количества. Нельзя определить, это повтор фото или отдельная поставка. Требуется ручная сверка исходных изображений.');
+        }
         for (const dk of Object.keys(rec.incoming)) {
-          existing.incoming[dk] = (existing.incoming[dk] || 0) + (rec.incoming[dk] || 0);
+          if (!Object.prototype.hasOwnProperty.call(existing.incoming, dk)) existing.incoming[dk] = rec.incoming[dk];
         }
       }
     } else {
@@ -10281,7 +10659,7 @@ function cmpParseCSV(text) {
       order.push(key);
     }
   }
-  return { rows, dateCols, order, count: order.length };
+  return { rows, dateCols, order, count: order.length, hasSalesColumn: idxSales >= 0 };
 }
 function cmpCalcSigmaForDate(csvData, dateKey) {
   let total = 0; let count = 0; const missing = [];
@@ -10425,7 +10803,9 @@ function cmpRunCompare() {
     if (printedTotal > 0) {
       const diff1 = sig1.total - printedTotal;
       const diff2 = sig2.total - printedTotal;
-      const tol = 0.5;
+      /* Сверка печатного итога: допускаем максимум 0,02 ₽
+         на округление, а не полрубля. */
+      const tol = 0.02;
       const bothOk = Math.abs(diff1) <= tol && Math.abs(diff2) <= tol;
       let detail = `CSV №1: <b>${sig1.total.toFixed(2)}</b> (Δ${diff1.toFixed(2)}), CSV №2: <b>${sig2.total.toFixed(2)}</b> (Δ${diff2.toFixed(2)}), печатный: <b>${printedTotal.toFixed(2)}</b>.`;
       if (!bothOk) {
