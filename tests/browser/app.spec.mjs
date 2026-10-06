@@ -15,6 +15,15 @@ test('core functions are exposed', async ({page}) => {
   for (const name of names) expect(await page.evaluate(n=>typeof window[n],name)).toBe('function');
 });
 
+test('all production function declarations are exposed', async ({page}) => {
+  const source=await (await import('node:fs/promises')).readFile(path.join(root,'index.html'),'utf8');
+  const names=[...source.matchAll(/(?:async\\s+)?function\\s+([A-Za-z_$][\\w$]*)\\s*\\(/g)].map(m=>m[1]);
+  const unique=[...new Set(names)];
+  expect(unique.length).toBeGreaterThanOrEqual(300);
+  const missing=await page.evaluate(list => list.filter(n => typeof window[n] !== 'function'), unique);
+  expect(missing, 'Missing global functions: '+missing.join(', ')).toEqual([]);
+});
+
 test('agreed 22:00 shelf-life cutoff and FIFO', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result=await page.evaluate(() => {
