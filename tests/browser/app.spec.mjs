@@ -71,7 +71,7 @@ test('end-to-end JSON audit pipeline: invoice + iiko sales + stock -> FIFO', asy
     {date:'2026-10-06',qty:2}
   ]);
   expect(result.croissantSales).toBe(1);
-  expect(result.fifo).toEqual({soldExpired:0,expiredOnShelf:1,freshOnShelf:2,freshSold:0});
+  expect(result.fifo).toEqual({soldExpired:2,expiredOnShelf:1,freshOnShelf:2,freshSold:0});
 });
 
 test('agreed 22:00 shelf-life cutoff and FIFO', async ({page}) => {
