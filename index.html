@@ -213,6 +213,15 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .card-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
 .card-name{flex:1 1 auto;min-width:0;font-size:14px;font-weight:600;line-height:1.3;word-break:break-word}
 .card-shelf{flex:0 0 auto;font-size:11px;color:var(--text-secondary);padding-top:2px}
+.card-incoming{margin:-2px 0 10px;padding:8px 9px;border-radius:10px;background:var(--bg-input);border:1px solid var(--separator);display:flex;align-items:flex-start;gap:7px;overflow-x:auto;scrollbar-width:none}
+.card-incoming::-webkit-scrollbar{display:none}
+.card-incoming .ci-title{flex:0 0 auto;font-size:9px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em;padding-top:4px}
+.card-incoming .ci-list{display:flex;gap:5px;flex-wrap:wrap}
+.card-incoming .ci-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:999px;background:var(--bg-card);border:1px solid var(--separator);font-size:11px;color:var(--text-secondary);white-space:nowrap}
+.card-incoming .ci-chip b{color:var(--text);font-weight:700}
+.card-incoming .ci-empty{font-size:11px;color:var(--text-tertiary);padding-top:3px}
+.card-result-source{padding-bottom:7px;margin-bottom:6px;border-bottom:1px solid var(--separator);font-size:11px;color:var(--text-tertiary)}
+.card-result-source b{color:var(--text-secondary);font-weight:600}
 .card-row{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;-ms-overflow-style:none;padding-bottom:2px}
 .card-row::-webkit-scrollbar{display:none;height:0}
 .card-cell{flex:0 0 auto;display:flex;flex-direction:column;gap:4px;width:62px}
@@ -1129,7 +1138,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
         <button id="loadJsonFileBtn" class="secondary">Из файла</button>
       </div>
       <input id="jsonFileInput" type="file" accept=".json,text/json" hidden>
-      <textarea id="jsonInput" maxlength="2000000" placeholder="Наименование;Получено за 17.09;Получено за 18.09;Продано сегодня;Срок годности" style="margin-top:10px"></textarea>
+      <textarea id="jsonInput" maxlength="2000000" placeholder="JSON: накладные с датами приходов + продажи iiko" style="margin-top:10px"></textarea>
       <div id="jsonCounter" class="counter"></div>
       <button id="applyJsonBtn" class="success block" style="margin-top:10px">Применить</button>
       <button id="openCompareBtn" class="secondary block" style="margin-top:8px">Сверка</button>
@@ -1251,7 +1260,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
   <div class="section" data-tab="check" id="resultSection">
     <div class="section-header">
       <h2>Шаг 4 · Остатки и результат</h2>
-      <p id="summary" class="desc">Загрузите JSON и введите фактический остаток.</p>
+      <p id="summary" class="desc">Введите фактический остаток. Даты всех приходов видны внутри каждой позиции.</p>
     </div>
 
     <div id="finishCheckWrap" style="display:none;padding:12px 12px 0">
@@ -1977,7 +1986,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.23.1';
+const APP_VERSION = 'v9.23.2';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -2899,6 +2908,19 @@ function parseShelfLife(str) {
 function parseJSON(text,referenceDate){let d;try{d=typeof text==="string"?JSON.parse(text):text}catch(e){throw Error("JSON имеет неверный формат.")}if(!d||typeof d!=="object"||Array.isArray(d))throw Error("JSON должен быть объектом.");const rows={};const add=n=>{const c=cleanProductName(n);if(!c||isServiceLine(c)||isIgnored(c))return null;const a=applyAliases(c),k=normalizeName(a),p=PRODUCTS.find(x=>normalizeName(x.name)===k);if(p&&_activeCategory&&p.category&&p.category!==_activeCategory)return null;if(!rows[k])rows[k]={name:a,stock:null,sales:0,_originalSales:0,shelfLife:p?p.shelfLife:null,category:p?(p.category||null):null,incoming:[],salesOnly:false};return rows[k]};(d.invoices||[]).forEach(inv=>{const date=String(inv.date||d.check_date||"");(inv.items||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed")row.incoming.push({date,qty:clampNum(it.quantity,0,MAX_NUM,0)})})});(d.sales||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed")row.sales+=clampNum(it.quantity,0,MAX_NUM,0)});Object.values(rows).forEach(r=>r.incoming=mergeIncomingByDate(r.incoming));return{rows:Object.values(rows),truncated:false,json:d}}
 function sortRowsAlphabetically(rows) {
   return [...rows].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' }));
+}
+
+/* v9.23.2: единое отображение дат и количеств прихода. */
+function getIncomingSummary(row) {
+  const list = (row && Array.isArray(row.incoming) ? row.incoming : [])
+    .filter(p => p && p.date && Number(p.qty) > 0)
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  if (!list.length) return { list: [], text: "нет приходов", html: "<span class=\"ci-empty\">нет приходов</span>" };
+  return {
+    list,
+    text: list.map(p => fmtDateRuShort(p.date) + " — " + p.qty + " шт.").join(" · "),
+    html: list.map(p => "<span class=\"ci-chip\">" + escapeHtml(fmtDateRuShort(p.date)) + " · <b>" + escapeHtml(p.qty) + "</b> шт.</span>").join("")
+  };
 }
 
 /* ═══════════════════════════════════════════
@@ -5390,6 +5412,12 @@ function renderCards() {
     head.appendChild(shelfEl);
     card.appendChild(head);
 
+    const incoming = getIncomingSummary(row);
+    const incomingEl = document.createElement("div");
+    incomingEl.className = "card-incoming";
+    incomingEl.innerHTML = "<span class=\"ci-title\">Приходы</span><span class=\"ci-list\">" + incoming.html + "</span>";
+    card.appendChild(incomingEl);
+
     const scroll = document.createElement('div');
     scroll.className = 'card-row';
 
@@ -5466,7 +5494,9 @@ function updateCardResults() {
     const sxp = calc.soldExpired;
     const freshStock = calc.freshOnShelf;
     const freshSales = calc.freshSold;
+    const incoming = getIncomingSummary(row);
     res.innerHTML = `
+      <div class="card-result-source">Приходы: <b>${escapeHtml(incoming.text)}</b></div>
       <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
       <span>Продано свежих: <span class="rv">${freshSales === null ? '—' : freshSales}</span></span>
       <span>Просрочено на витрине: <span class="rv ${exp === null ? 'zero' : (exp > 0 ? 'positive' : '')}">${exp === null ? '—' : exp}</span></span>
@@ -5485,7 +5515,9 @@ function refreshCardRow(row, card) {
     const sxp = calc.soldExpired;
     const freshStock = calc.freshOnShelf;
     const freshSales = calc.freshSold;
+    const incoming = getIncomingSummary(row);
     res.innerHTML = `
+      <div class="card-result-source">Приходы: <b>${escapeHtml(incoming.text)}</b></div>
       <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
       <span>Продано свежих: <span class="rv">${freshSales === null ? '—' : freshSales}</span></span>
       <span>Просрочено на витрине: <span class="rv ${exp === null ? 'zero' : (exp > 0 ? 'positive' : '')}">${exp === null ? '—' : exp}</span></span>
@@ -6603,7 +6635,7 @@ ${intro}
   return { list, block };
 }
 
-function buildPrompt(){const x=buildCatalogListForPrompt();return["Распознай материалы аудита и верни один JSON по JSON Schema.","Дата проверки: "+getTodayStr()+".",x.block,"Накладные дают приход, чек iiko — продажи. Не смешивай источники.","Одна накладная может занимать несколько фото; продолжение без шапки присоединяй по сквозной нумерации.","source.photo_count и processed_photo_count должны точно соответствовать числу реально обработанных файлов; одинаковое фото не считать дважды.","Для накладной: number/date/continuation/last_line_number/printed_total и все строки line/name/quantity/quantity_status/price/amount.","quantity = только колонка 8 «мест, штук». Колонку 7 не использовать. amount = колонка 12 «Сумма без учета НДС».","printed_total = только общий итог накладной по колонке 12, если документ явно показывает общий итог. Если «Итого» напечатан отдельно на каждой странице продолжения, не подставляй его в printed_total; оставь null и укажи постраничные итоги в review.notes.","Для чека: name/quantity/quantity_status; сумма продажи НЕ является quantity.","Ничего не выдумывай. Нечитаемое = quantity:null + соответствующий review. Справочник:",x.list,"JSON — единственный формат. Без CSV, markdown и поясняющего текста."].join("\n")}
+function buildPrompt(){const x=buildCatalogListForPrompt();return["Распознай материалы аудита и верни один JSON по JSON Schema.","Дата проверки: "+getTodayStr()+".",x.block,"Накладные дают приход, чек iiko — продажи. Не смешивай источники.","Одна накладная может занимать несколько фото; продолжение без шапки присоединяй по сквозной нумерации.","source.photo_count и processed_photo_count должны точно соответствовать числу реально обработанных файлов; одинаковое фото не считать дважды.","Для накладной: number/date/continuation/last_line_number и все строки line/name/quantity/quantity_status.","quantity = только колонка 8 «мест, штук». Колонку 7 не использовать. Денежные поля, цены, суммы, НДС и итоги НЕ нужны и НЕ должны попадать в JSON или использоваться в FIFO.","Не вычисляй quantity через цену или сумму.","Для чека: name/quantity/quantity_status; сумма продажи НЕ является quantity.","Ничего не выдумывай. Нечитаемое = quantity:null + соответствующий review. Справочник:",x.list,"JSON — единственный формат. Без CSV, markdown и поясняющего текста."].join("\n")}
 
 function buildSeparatedOCRPrompt(checkDate,type){
   const iso=String(checkDate||getTodayStr());
@@ -6624,12 +6656,12 @@ function buildSeparatedOCRPrompt(checkDate,type){
       "Если накладная занимает несколько фотографий/страниц, объединяй их в один объект invoices. Для единого объекта continuation=true, если эта накладная имеет продолжение на следующей фотографии/странице; для одностраничной накладной continuation=false. Если на продолжении нет даты и номера, унаследуй date и number от первой страницы.",
       "В каждой строке quantity = только колонка 8 «Количество (масса), мест, штук». Колонку 7 «в одном месте» НЕ использовать.",
       "Бери печатное количество из колонки 8. Синие/чёрные галочки, подчёркивания и другие рукописные пометки не являются количеством.",
-      "amount = колонка 12 «Сумма без учета НДС». price = колонка 11.",
-      "Проверяй quantity × price ≈ amount, но не вычисляй quantity делением суммы на цену.",
-      "printed_total заполняй только если на фото явно показан общий итог ВСЕЙ накладной и он относится к колонке 12. Если «Итого» указан отдельно на страницах, не считай страничный итог общим printed_total; поставь null и опиши страничные итоги в review.notes.",
+      "Цена, сумма, НДС и другие денежные показатели НЕ нужны, НЕ включай их в JSON и никогда не используй их как количество.",
+      "Не вычисляй quantity через цену или сумму.",
+      "Не включай printed_total: общий итог не нужен для аудита.",
       "last_line_number = максимальный номер строки этой накладной.",
       "Если строка нечитабельна, не заменяй её похожей цифрой или нулём.",
-      "Верни invoices с number/date/continuation/last_line_number/printed_total/items и пустой sales[].",
+      "Верни invoices с number/date/continuation/last_line_number/items и пустой sales[].",
       "JSON без CSV, markdown и текста вне JSON.",
       "Справочник:",list
     ]).join("\n");
@@ -6691,7 +6723,7 @@ function buildSystemInstructionForGemini(){return["Ты OCR-ассистент F
 /* ═══════════════════════════════════════════
    GEMINI — настройки
    ═══════════════════════════════════════════ */
-const OCR_JSON_SCHEMA={type:"object",properties:{schema_version:{type:"string"},document_type:{type:"string",enum:["combined","invoice","sales"]},check_date:{type:"string"},source:{type:"object",properties:{photo_count:{type:"integer"},processed_photo_count:{type:"integer"},duplicate_photo_count:{type:"integer"}},required:["photo_count","processed_photo_count","duplicate_photo_count"]},invoices:{type:"array",items:{type:"object",properties:{number:{type:"string"},date:{type:"string"},continuation:{type:"boolean"},last_line_number:{type:"integer",nullable:true},printed_total:{type:"number",nullable:true},items:{type:"array",items:{type:"object",properties:{line:{type:"integer",nullable:true},name:{type:"string"},quantity:{type:"integer",nullable:true},quantity_status:{type:"string",enum:["confirmed","uncertain","unreadable","handwritten"]},price:{type:"number",nullable:true},amount:{type:"number",nullable:true}},required:["line","name","quantity","quantity_status","price","amount"]}}},required:["number","date","continuation","last_line_number","printed_total","items"]}},sales:{type:"array",items:{type:"object",properties:{name:{type:"string"},quantity:{type:"integer",nullable:true},quantity_status:{type:"string",enum:["confirmed","uncertain","unreadable","handwritten"]}},required:["name","quantity","quantity_status"]}},review:{type:"object",properties:{unreadable:{type:"array",items:{type:"string"}},handwritten_confirmation:{type:"array",items:{type:"string"}},uncertain_rows:{type:"array",items:{type:"string"}},notes:{type:"array",items:{type:"string"}}},required:["unreadable","handwritten_confirmation","uncertain_rows","notes"]}},required:["schema_version","document_type","check_date","source","invoices","sales","review"]};
+const OCR_JSON_SCHEMA={type:"object",properties:{schema_version:{type:"string"},document_type:{type:"string",enum:["combined","invoice","sales"]},check_date:{type:"string"},source:{type:"object",properties:{photo_count:{type:"integer"},processed_photo_count:{type:"integer"},duplicate_photo_count:{type:"integer"}},required:["photo_count","processed_photo_count","duplicate_photo_count"]},invoices:{type:"array",items:{type:"object",properties:{number:{type:"string"},date:{type:"string"},continuation:{type:"boolean"},last_line_number:{type:"integer",nullable:true},items:{type:"array",items:{type:"object",properties:{line:{type:"integer",nullable:true},name:{type:"string"},quantity:{type:"integer",nullable:true},quantity_status:{type:"string",enum:["confirmed","uncertain","unreadable","handwritten"]}},required:["line","name","quantity","quantity_status"]}}},required:["number","date","continuation","last_line_number","items"]}},sales:{type:"array",items:{type:"object",properties:{name:{type:"string"},quantity:{type:"integer",nullable:true},quantity_status:{type:"string",enum:["confirmed","uncertain","unreadable","handwritten"]}},required:["name","quantity","quantity_status"]}},review:{type:"object",properties:{unreadable:{type:"array",items:{type:"string"}},handwritten_confirmation:{type:"array",items:{type:"string"}},uncertain_rows:{type:"array",items:{type:"string"}},notes:{type:"array",items:{type:"string"}}},required:["unreadable","handwritten_confirmation","uncertain_rows","notes"]}},required:["schema_version","document_type","check_date","source","invoices","sales","review"]};
 function getGeminiJSONConfig(runNo=1){return{thinkingConfig:{thinkingLevel:"low"},responseMimeType:"application/json",responseSchema:OCR_JSON_SCHEMA,maxOutputTokens:GEMINI_MAX_OUTPUT_TOKENS};}
 function getGeminiKey() {
   try { return localStorage.getItem(GEMINI_KEY) || ''; } catch (e) { return ''; }
