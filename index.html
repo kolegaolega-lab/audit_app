@@ -6686,6 +6686,582 @@ function dailyParseDateInput(str) {
 }
 function dailyRender(){const list=$("dailyList"),status=$("dailyStatus"),actions=$("dailyActions");if(!list)return;if(!_dailyAccum.length){list.innerHTML='<div class="hint">Пока ничего не накоплено.</div>';if(actions)actions.style.display="none";if(status){status.className="status";status.textContent=""}return}_dailyAccum.sort((a,b)=>b.iso.localeCompare(a.iso));list.innerHTML="";_dailyAccum.forEach(d=>{const row=document.createElement("div");row.style.cssText="display:flex;align-items:center;gap:6px;padding:10px;border:1px solid var(--separator);border-radius:9px;background:var(--bg-input);margin-bottom:6px";const info=document.createElement("div");info.style.cssText="flex:1;min-width:0";let n=0;try{const j=JSON.parse(d.json);n=(j.invoices||[]).reduce((z,x)=>z+(x.items||[]).length,0)+(j.sales||[]).length}catch(e){}const mark=d.blocked||d.needsCheck?' <span style="color:var(--orange);font-size:15px">⚠</span>':"";const wt=d.blocked?" · требуется проверка OCR":(d.needsCheck?" · проверьте сверку":"");info.innerHTML=`<div style="font-weight:600;font-size:14px">Получено за ${escapeHtml(d.label)}${mark}</div><div style="font-size:11.5px;color:var(--text-secondary);margin-top:2px">${n} позиций${wt}</div>`;const refresh=document.createElement("button");refresh.className="secondary";refresh.textContent="↻";refresh.title="Обновить из таблицы";refresh.style.cssText="flex:0 0 auto;min-height:34px;padding:6px 10px;font-size:14px";refresh.onclick=()=>{const ok=rebuildDailyJsonFromTable(d.iso);if(ok){dailyRender();showToast(`Дата ${d.label} обновлена из таблицы`)}else showToast("Не удалось обновить")};const del=document.createElement("button");del.className="secondary";del.textContent="Удалить";del.style.cssText="flex:0 0 auto;min-height:34px;padding:6px 12px;font-size:12.5px";del.onclick=()=>{_dailyAccum=_dailyAccum.filter(x=>x.iso!==d.iso);saveDailyAccum();dailyRender()};row.append(info,refresh,del);list.appendChild(row)});if(actions)actions.style.display="block";if(status){status.className="status show info";status.textContent=`В пакете дат: ${_dailyAccum.length}. Даты: ${_dailyAccum.map(d=>d.label).join(", ")}.`}}
 
+function buildSystemInstructionForGemini(){return["Ты OCR-ассистент French Bakery.","Ответ ВСЕГДА только JSON по JSON Schema. Никакого CSV, markdown и текста вне JSON.","Количество ТОРГ-12 = только колонка 8 «мест, штук», не колонка 7.","Проверяй quantity × price = amount, но не вычисляй количество делением суммы на цену.","Нечитаемое не угадывай: quantity=null и status=unreadable/uncertain.","Рукописное количество помечай handwritten и добавляй в review.handwritten_confirmation.","В чеке quantity = только реально проданное количество; сумма не является количеством.","Каждую строку читай отдельно. Продолжение накладной без шапки присоединяй по нумерации. Дубликаты фото не суммируй."].join("\n")}
+
+/* ═══════════════════════════════════════════
+   GEMINI — настройки
+   ═══════════════════════════════════════════ */
+const OCR_JSON_SCHEMA={type:"object",properties:{schema_version:{type:"string"},document_type:{type:"string",enum:["combined","invoice","sales"]},check_date:{type:"string"},source:{type:"object",properties:{photo_count:{type:"integer"},processed_photo_count:{type:"integer"},duplicate_photo_count:{type:"integer"}},required:["photo_count","processed_photo_count","duplicate_photo_count"]},invoices:{type:"array",items:{type:"object",properties:{number:{type:"string"},date:{type:"string"},continuation:{type:"boolean"},last_line_number:{type:["integer","null"]},printed_total:{type:["number","null"]},items:{type:"array",items:{type:"object",properties:{line:{type:["integer","null"]},name:{type:"string"},quantity:{type:["integer","null"]},quantity_status:{type:"string",enum:["confirmed","uncertain","unreadable","handwritten"]},price:{type:["number","null"]},amount:{type:["number","null"]}},required:["line","name","quantity","quantity_status","price","amount"]}}},required:["number","date","continuation","last_line_number","printed_total","items"]}},sales:{type:"array",items:{type:"object",properties:{name:{type:"string"},quantity:{type:["integer","null"]},quantity_status:{type:"string",enum:["confirmed","uncertain","unreadable","handwritten"]}},required:["name","quantity","quantity_status"]}},review:{type:"object",properties:{unreadable:{type:"array",items:{type:"string"}},handwritten_confirmation:{type:"array",items:{type:"string"}},uncertain_rows:{type:"array",items:{type:"string"}},notes:{type:"array",items:{type:"string"}}},required:["unreadable","handwritten_confirmation","uncertain_rows","notes"]}},required:["schema_version","document_type","check_date","source","invoices","sales","review"]};
+function getGeminiJSONConfig(runNo=1){return{temperature:0,thinkingConfig:{thinkingLevel:"low"},responseMimeType:"application/json",responseSchema:OCR_JSON_SCHEMA,maxOutputTokens:GEMINI_MAX_OUTPUT_TOKENS};}
+function getGeminiKey() {
+  try { return localStorage.getItem(GEMINI_KEY) || ''; } catch (e) { return ''; }
+}
+function setGeminiKey(v) {
+  try { localStorage.setItem(GEMINI_KEY, String(v || '').trim()); } catch (e) {}
+}
+function getGeminiModel() {
+  try {
+    const v = localStorage.getItem(GEMINI_MODEL_KEY);
+    if (v) return v;
+  } catch (e) {}
+  return GEMINI_MODEL_DEFAULT;
+}
+function setGeminiModel(v) {
+  if (!v || typeof v !== 'string') return;
+  try { localStorage.setItem(GEMINI_MODEL_KEY, v); } catch (e) {}
+}
+
+/* ═══════════════════════════════════════════
+   GEMINI — динамический список моделей
+   ═══════════════════════════════════════════ */
+function getGeminiTestImage() {
+  if (_geminiTestImageCache) return _geminiTestImageCache;
+  const canvas = document.createElement('canvas');
+  canvas.width = 64; canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 64, 64);
+  ctx.fillStyle = '#000000';
+  ctx.font = 'bold 32px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('T', 32, 32);
+  const dataUrl = canvas.toDataURL('image/png');
+  _geminiTestImageCache = dataUrl.split(',')[1];
+  return _geminiTestImageCache;
+}
+function loadModelsCache() {
+  try {
+    const raw = localStorage.getItem(GEMINI_MODELS_CACHE_KEY);
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    if (!d || !Array.isArray(d.models) || !d.ts) return null;
+    if (Date.now() - d.ts > GEMINI_MODELS_CACHE_TTL) return null;
+    return d.models;
+  } catch (e) { return null; }
+}
+function saveModelsCache(models) {
+  try { localStorage.setItem(GEMINI_MODELS_CACHE_KEY, JSON.stringify({ ts: Date.now(), models })); } catch (e) {}
+}
+function clearModelsCache() {
+  try { localStorage.removeItem(GEMINI_MODELS_CACHE_KEY); } catch (e) {}
+}
+function getCachedModelsAge() {
+  try {
+    const raw = localStorage.getItem(GEMINI_MODELS_CACHE_KEY);
+    if (!raw) return Infinity;
+    const d = JSON.parse(raw);
+    if (!d || !d.ts) return Infinity;
+    return Date.now() - d.ts;
+  } catch (e) { return Infinity; }
+}
+function prettyModelName(id) {
+  const hasPro = /pro/.test(id);
+  const hasLite = /lite/.test(id);
+  const hasFlash = /flash/.test(id);
+  const preview = /preview/.test(id);
+  let base = 'Модель';
+  if (hasFlash && hasLite) base = 'Flash Lite';
+  else if (hasFlash) base = 'Flash';
+  else if (hasPro) base = 'Pro';
+  let suffix = preview ? ' (preview)' : '';
+  return base + suffix + ' — ' + id;
+}
+async function testGeminiModel(apiKey, id) {
+  const url = `${GEMINI_API}/${id}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const body = {
+    contents: [{ parts: [
+      { text: 'ok' },
+      { inline_data: { mime_type: 'image/png', data: getGeminiTestImage() } }
+    ]}],
+    generationConfig: { maxOutputTokens: 3, temperature: 0 }
+  };
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return !!(data && data.candidates && data.candidates.length);
+    }
+    let msg = '';
+    try {
+      const errJson = await res.json();
+      if (errJson && errJson.error && errJson.error.message) msg = errJson.error.message;
+    } catch (e) {}
+    if (res.status === 404) return false;
+    if (res.status === 429 || res.status === 503 || res.status === 500) return true;
+    if (res.status === 400) {
+      if (/api key|permission|quota|billing/i.test(msg)) return false;
+      if (/not found|not supported|does not support/i.test(msg)) return false;
+      return true;
+    }
+    if (res.status === 401 || res.status === 403) return false;
+    return false;
+  } catch (e) {
+    return true;
+  }
+}
+async function discoverGeminiModels(apiKey, onProgress) {
+  const listRes = await fetch(`${GEMINI_API}?key=${encodeURIComponent(apiKey)}`);
+  if (!listRes.ok) throw new Error('Не удалось получить список моделей');
+  const listData = await listRes.json();
+  const all = (listData.models || [])
+    .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.indexOf('generateContent') >= 0)
+    .map(m => ({ id: String(m.name || '').replace('models/', ''), displayName: m.displayName || '' }))
+    .filter(m => /^gemini-/.test(m.id))
+    .filter(m => !/tts|image|nano|robotics|computer-use|research|lyria|antigravity|omni|transcribe|clip|embedding|aqa|vision|translate/i.test(m.id));
+
+  const groups = { flashLite: [], flash: [], pro: [] };
+  all.forEach(m => {
+    if (/flash-lite/.test(m.id)) groups.flashLite.push(m);
+    else if (/pro/.test(m.id)) groups.pro.push(m);
+    else if (/flash/.test(m.id)) groups.flash.push(m);
+  });
+  Object.keys(groups).forEach(k => groups[k].sort((a, b) => b.id.localeCompare(a.id)));
+
+  const toTest = [];
+  ['flashLite', 'flash', 'pro'].forEach(k => {
+    const stable = groups[k].filter(m => !/preview/.test(m.id));
+    const preview = groups[k].filter(m => /preview/.test(m.id));
+    if (stable.length) toTest.push(stable[0]);
+    else if (preview.length) toTest.push(preview[0]);
+  });
+
+  const working = [];
+  for (let i = 0; i < toTest.length; i++) {
+    const m = toTest[i];
+    if (onProgress) onProgress(i + 1, toTest.length, m.id);
+    const ok = await testGeminiModel(apiKey, m.id);
+    if (ok) working.push(m);
+    if (i < toTest.length - 1) await new Promise(r => setTimeout(r, 800));
+  }
+  if (!working.length) throw new Error('Ни одна модель не ответила');
+  return working;
+}
+function fillModelSelect(models) {
+  const sel = $('geminiModelSelect');
+  if (!sel) return;
+  const current = sel.value || getGeminiModel();
+  sel.innerHTML = '';
+  models.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = prettyModelName(m.id);
+    sel.appendChild(opt);
+  });
+  const hasCurrent = models.some(m => m.id === current);
+  sel.value = hasCurrent ? current : models[0].id;
+  setGeminiModel(sel.value);
+}
+async function refreshModelSelect(force) {
+  const sel = $('geminiModelSelect');
+  const statusEl = $('shareStatus');
+  const setStatus = (cls, text) => { if (statusEl) { statusEl.className = 'status show ' + cls; statusEl.textContent = text; } };
+  const apiKey = getGeminiKey();
+  if (!apiKey) {
+    fillModelSelect([{ id: GEMINI_MODEL_DEFAULT, displayName: '' }]);
+    return;
+  }
+  if (!force) {
+    const cached = loadModelsCache();
+    if (cached && cached.length) { fillModelSelect(cached); return; }
+  } else {
+    clearModelsCache();
+  }
+  if (sel) sel.innerHTML = '<option value="">Обновление списка моделей…</option>';
+  try {
+    const working = await discoverGeminiModels(apiKey, (i, n, id) => {
+      if (sel) sel.innerHTML = `<option value="">Проверка моделей (${i}/${n}): ${id}…</option>`;
+    });
+    saveModelsCache(working);
+    fillModelSelect(working);
+    setStatus('ok', `Найдено рабочих моделей: ${working.length}`);
+  } catch (e) {
+    fillModelSelect([{ id: GEMINI_MODEL_DEFAULT, displayName: '' }]);
+    setStatus('warn', 'Не удалось обновить список моделей. Использую ' + GEMINI_MODEL_DEFAULT);
+  }
+}
+function scheduleModelsRefreshOncePerDay() {
+  if (_modelsRefreshScheduled) return;
+  _modelsRefreshScheduled = true;
+  const age = getCachedModelsAge();
+  if (age < GEMINI_MODELS_CACHE_TTL) return;
+  setTimeout(() => {
+    if (document.visibilityState === 'hidden') return;
+    _silentRefreshModels();
+  }, 60 * 1000);
+}
+async function _silentRefreshModels() {
+  const apiKey = getGeminiKey();
+  if (!apiKey) return;
+  try {
+    const working = await discoverGeminiModels(apiKey, null);
+    saveModelsCache(working);
+    const sel = $('geminiModelSelect');
+    const current = (sel && sel.value) || getGeminiModel();
+    fillModelSelect(working);
+    if (sel && working.some(m => m.id === current)) {
+      sel.value = current;
+      setGeminiModel(current);
+    }
+  } catch (e) {
+    console.warn('Silent model refresh failed:', e && e.message);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   GEMINI — утилиты
+   ═══════════════════════════════════════════ */
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const s = String(r.result || '');
+      const idx = s.indexOf(',');
+      resolve(idx >= 0 ? s.slice(idx + 1) : '');
+    };
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(blob);
+  });
+}
+async function compressImageForGemini(blob, maxSide, quality) {
+  if (!blob.type || !blob.type.startsWith('image/')) return null;
+  try {
+    const canvas = document.createElement('canvas');
+    let w = 0, h = 0;
+    if (typeof createImageBitmap === 'function') {
+      const bitmap = await createImageBitmap(blob);
+      const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+      w = Math.max(1, Math.round(bitmap.width * scale));
+      h = Math.max(1, Math.round(bitmap.height * scale));
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(bitmap, 0, 0, w, h);
+      if (bitmap.close) bitmap.close();
+    } else {
+      await new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(blob);
+        const el = new Image();
+        el.onload = () => {
+          const scale = Math.min(1, maxSide / Math.max(el.width, el.height));
+          w = Math.max(1, Math.round(el.width * scale));
+          h = Math.max(1, Math.round(el.height * scale));
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(el, 0, 0, w, h);
+          URL.revokeObjectURL(url);
+          resolve();
+        };
+        el.onerror = () => { URL.revokeObjectURL(url); reject(new Error('image load failed')); };
+        el.src = url;
+      });
+    }
+    const dataUrl = canvas.toDataURL('image/jpeg', quality);
+    const idx = dataUrl.indexOf(',');
+    return idx >= 0 ? dataUrl.slice(idx + 1) : null;
+  } catch (e) {
+    console.warn('compressImageForGemini:', e);
+    return null;
+  }
+}
+async function buildGeminiFileParts(filterType) {
+  const allItems = await getPhotos();
+  const items = allItems
+    .filter(item => !filterType || item.type === filterType)
+    .sort((a, b) => {
+      const cmp = naturalCompare(a.name, b.name);
+      return cmp !== 0 ? cmp : a.id - b.id;
+    });
+  const parts = [];
+  let totalB64 = 0;
+  let imgIndex = 0;
+
+  for (const item of items) {
+    const kind = (item.kind || (item.blob && item.blob.type) || '').toLowerCase();
+    if (kind.startsWith('image/')) {
+      imgIndex++;
+      let b64 = await compressImageForGemini(item.blob, GEMINI_IMG_MAX_SIDE, GEMINI_IMG_QUALITY);
+      let mime = 'image/jpeg';
+      if (!b64) {
+        b64 = await blobToBase64(item.blob);
+        mime = kind;
+      }
+      if (b64) {
+        totalB64 += b64.length;
+        if (totalB64 > GEMINI_MAX_B64_BYTES) {
+          throw new Error(`Суммарный размер файлов превышает лимит. Уменьшите количество фото.`);
+        }
+        parts.push({ text: `--- ${item.type === 'sales' ? 'ЧЕК ПРОДАЖ' : 'НАКЛАДНАЯ'} · изображение ${imgIndex} · файл: ${item.name} ---` });
+        parts.push({ inline_data: { mime_type: mime, data: b64 } });
+      }
+    } else if (kind === 'application/pdf') {
+      imgIndex++;
+      const raw = await blobToBase64(item.blob);
+      if (raw) {
+        totalB64 += raw.length;
+        if (totalB64 > GEMINI_MAX_B64_BYTES) {
+          throw new Error(`Суммарный размер файлов превышает лимит.`);
+        }
+        parts.push({ text: `--- ${item.type === 'sales' ? 'ЧЕК ПРОДАЖ' : 'НАКЛАДНАЯ'} · документ ${imgIndex} · файл: ${item.name} ---` });
+        parts.push({ inline_data: { mime_type: 'application/pdf', data: raw } });
+      }
+    }
+  }
+  return parts;
+}
+async function findExactDuplicatePhotoFiles(items) {
+  if (!Array.isArray(items) || items.length < 2) return [];
+  if (typeof crypto === 'undefined' || !crypto.subtle) return [];
+  const seen = new Map(), duplicates = [];
+  for (const item of items) {
+    if (!item || !item.blob || typeof item.blob.arrayBuffer !== 'function') continue;
+    const digest = await crypto.subtle.digest('SHA-256', await item.blob.arrayBuffer());
+    const hash = Array.from(new Uint8Array(digest)).map(x => x.toString(16).padStart(2, '0')).join('');
+    const key = String(item.type || '') + ':' + hash;
+    if (seen.has(key)) duplicates.push({ first: seen.get(key), duplicate: item });
+    else seen.set(key, item);
+  }
+  return duplicates;
+}
+
+function extractJsonFromGeminiText(text){try{const o=JSON.parse(String(text||"").trim());return o&&typeof o==="object"&&!Array.isArray(o)?JSON.stringify(o):""}catch(e){return""}}
+
+/* ═══════════════════════════════════════════
+   v9.18.0 — ПАРСЕР ОТЧЁТА ИИ
+   Разбивает ответ на блоки по #ИМЯ: и вытаскивает
+   ключевые данные для постпроверок.
+   ═══════════════════════════════════════════ */
+function parseAIReport(raw){let d;try{d=typeof raw==="string"?JSON.parse(raw):raw}catch(e){return null}if(!d||typeof d!=="object")return null;const rv=d.review||{},un=Array.isArray(rv.unreadable)?rv.unreadable:[],hw=Array.isArray(rv.handwritten_confirmation)?rv.handwritten_confirmation:[],uq=Array.isArray(rv.uncertain_rows)?rv.uncertain_rows:[],inv=Array.isArray(d.invoices)?d.invoices:[];const postrochno=[];inv.forEach(x=>(x.items||[]).forEach(i=>{const q=Number(i.quantity),p=Number(i.price),a=Number(i.amount);postrochno.push({nakl:x.number||"",date:x.date||"",line:i.line,name:i.name||"",qty:q||0,price:p||0,sum:a||0,ok:Number.isFinite(q)&&Number.isFinite(p)&&Number.isFinite(a)&&Math.abs(q*p-a)<=.02})}));const checks=inv.map(x=>{const total=(x.items||[]).reduce((z,i)=>z+(Number(i.amount)||0),0),p=x.printed_total==null?"":String(x.printed_total);return{num:x.number||"",date:x.date||"",sum:total.toFixed(2),printed:p,diff:p===""?"":(total-Number(x.printed_total)).toFixed(2),status:p===""?"unknown":Math.abs(total-Number(x.printed_total))<=.02?"ok":"mismatch"}});return{hasBlocks:true,json:d,blocks:{"ИСТОЧНИКИ":"JSON","СОМНИТЕЛЬНЫЕ_СТРОКИ":uq.length?uq.join(" | "):"пусто","НЕЧИТАЕМО":un.length?un.join(" | "):"пусто","РУКОПИСНОЕ_ПОДТВЕРЖДЕНИЕ":hw.length?hw.join(" | "):"пусто"},checks,completeness:{received:Number(d.source?.photo_count)||0,processed:Number(d.source?.processed_photo_count)||0},unreadable:{isEmpty:!un.length,raw:un.join(" | ")},handwrittenConfirmation:{isEmpty:!hw.length,raw:hw.join(" | ")},postrochno,gaps:{hasGap:false},fullRaw:JSON.stringify(d)}}
+
+/* ═══════════════════════════════════════════
+   v9.20.0 — ВАЛИДАЦИЯ ОТВЕТА ИИ
+   5 проверок на клиенте. Ловят самые частые
+   ошибки модели: расхождение блоков, потерянные
+   фото/накладные, опечатки в датах.
+   Не блокируют применение — только показывают.
+   ═══════════════════════════════════════════ */
+
+/* Считает строки данных в JSON (без заголовка и сервисных #-блоков). */
+function countJsonRows(jsonText) {
+  if (!jsonText) return 0;
+  const lines = String(jsonText).split(/\r?\n/);
+  let count = 0;
+  let headerFound = false;
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t) continue;
+    if (t.startsWith('#')) continue;
+    if (!headerFound) {
+      if (/наимен/i.test(t) && t.includes(';')) headerFound = true;
+      continue;
+    }
+    if (t.includes(';')) count++;
+  }
+  return count;
+}
+
+/* Считает колонки «Получено за …» в шапке JSON. */
+function countJsonDateColumns(jsonText) {
+  if (!jsonText) return 0;
+  const lines = String(jsonText).split(/\r?\n/);
+  let header = '';
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t) continue;
+    if (t.startsWith('#')) continue;
+    if (/наимен/i.test(t)) { header = t; break; }
+  }
+  if (!header) return 0;
+  return (header.match(/Получено\s+за/gi) || []).length;
+}
+
+/* Расстояние Левенштейна (для fuzzy-матча опечаток). */
+function _levenshtein(a, b) {
+  a = String(a || ''); b = String(b || '');
+  if (a === b) return 0;
+  const al = a.length, bl = b.length;
+  if (!al) return bl;
+  if (!bl) return al;
+  let prev = new Array(bl + 1);
+  let cur = new Array(bl + 1);
+  for (let j = 0; j <= bl; j++) prev[j] = j;
+  for (let i = 1; i <= al; i++) {
+    cur[0] = i;
+    for (let j = 1; j <= bl; j++) {
+      const cost = a.charCodeAt(i - 1) === b.charCodeAt(j - 1) ? 0 : 1;
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+    }
+    const tmp = prev; prev = cur; cur = tmp;
+  }
+  return prev[bl];
+}
+
+/* Извлекает [{name, qty}] из #ПОСТРОЧНО (для проверок 8-9). */
+function _postrochnoRows(report) {
+  if (!report || !report.postrochno) return [];
+  return report.postrochno.map(r => ({
+    num: r.num, name: r.name, qty: r.qty, price: r.price, sum: r.sum, ok: r.ok
+  }));
+}
+
+/* v9.20.1: разбить #ПОСТРОЧНО на группы по накладным.
+   Признак границы — номер строки уменьшился (обычно сброс в 1).
+   Модель часто пишет несколько накладных в одном блоке #ПОСТРОЧНО
+   без разделителя, и нужно это распознать. */
+function _groupPostrochnoByNakl(rows) {
+  if (!rows || !rows.length) return [];
+  const groups = [];
+  let cur = [];
+  let prevNum = 0;
+  for (const r of rows) {
+    if (cur.length && r.num <= prevNum) {
+      groups.push(cur);
+      cur = [];
+    }
+    cur.push(r);
+    prevNum = r.num;
+  }
+  if (cur.length) groups.push(cur);
+  return groups;
+}
+
+function validateAIResponse(j1,j2,report,count){const issues=[];let d;try{d=JSON.parse(String(j1||""))}catch(e){}if(!d||!report)return{overall:"error",issues:[{level:"error",code:"invalid-json",title:"JSON OCR не прошёл разбор"}]};if(Number(d.source?.photo_count)!==Number(count))issues.push({level:"error",code:"photo-count-mismatch",title:"Количество фото в JSON не совпадает"});(d.invoices||[]).forEach(inv=>(inv.items||[]).forEach(i=>{if(i.quantity_status==="confirmed"&&i.quantity!=null&&i.price!=null&&i.amount!=null&&Math.abs(i.quantity*i.price-i.amount)>.02)issues.push({level:"error",code:"line-quantity-mismatch",title:"Количество × цена не сходится",detail:i.name});if(i.quantity_status!=="confirmed")issues.push({level:"warn",code:"quantity-review",title:"Количество требует подтверждения",detail:i.name})}));(d.sales||[]).forEach(i=>{if(i.quantity_status!=="confirmed")issues.push({level:"warn",code:"sales-quantity-review",title:"Количество продаж требует подтверждения",detail:i.name})});return{overall:issues.some(x=>x.level==="error")?"error":issues.length?"warn":"ok",issues}}
+
+/* v9.20.6 — БЕЗОПАСНЫЙ ПРОПУСК OCR.
+   Решение о применении результата принимает код, а не текст ИИ.
+   Нечитаемые и рукописные критичные значения блокируют
+   автоматическое применение JSON до проверки аудитора. */
+function getOCRSafetyIssues(text,report,count){const out=[];let d;try{d=JSON.parse(String(text||""))}catch(e){}if(!d||typeof d!=="object"){out.push({code:"empty-json",title:"Пустой или некорректный JSON от OCR"});return out}if(!report||!report.hasBlocks){out.push({code:"missing-ai-report",title:"Нет структурированного отчёта OCR"});return out}if(Number(d.source?.photo_count)!==Number(count)||Number(d.source?.processed_photo_count)!==Number(count))out.push({code:"completeness-mismatch",title:"Не подтверждена обработка всех фотографий"});const r=d.review||{};if((r.unreadable||[]).length)out.push({code:"unreadable",title:"Есть нечитаемые значения"});if((r.handwritten_confirmation||[]).length)out.push({code:"handwritten-confirmation",title:"Есть рукописные значения, требующие подтверждения"});if((r.uncertain_rows||[]).length)out.push({code:"uncertain-rows",title:"Есть сомнительные строки — требуется ручная сверка"});const bad=[...(d.invoices||[]).flatMap(x=>x.items||[]),...(d.sales||[])].filter(x=>x.quantity_status!=="confirmed");if(bad.length)out.push({code:"quantity-status-review",title:"Есть количества без статуса confirmed"});return out}
+
+function formatOCRSafetyMessage(issues) {
+  const titles = (issues || []).filter(Boolean).map(i => i.title).filter(Boolean);
+  if (!titles.length) return '';
+  return 'Автоприменение остановлено: ' + titles.slice(0, 2).join('; ') +
+    (titles.length > 2 ? ' и ещё ' + (titles.length - 2) + '.' : '.');
+}
+
+/* Короткая сводка отчёта для индикатора в статусе */
+function summarizeAIReport(report) {
+  if (!report || !report.hasBlocks) return null;
+  const issues = [];
+  let hasBlockingIssue = false;
+
+  /* Сверка */
+  if (report.checks && report.checks.length) {
+    const bad = report.checks.filter(c => c.status === 'mismatch');
+    if (bad.length) {
+      issues.push({ type: 'error', text: 'Расхождение в сверке: ' + bad.map(c => c.num).join(', ') });
+      hasBlockingIssue = true;
+    }
+  }
+
+  /* Полнота */
+  if (report.completeness) {
+    const r = report.completeness.received;
+    const p = report.completeness.processed;
+    if (p != null && p < r) {
+      issues.push({ type: 'error', text: `Обработано ${p} из ${r} изображений` });
+      hasBlockingIssue = true;
+    }
+  }
+
+  /* Разрывы */
+  if (report.gaps && report.gaps.hasGap) {
+    issues.push({ type: 'warn', text: 'Возможен разрыв в нумерации строк' });
+  }
+
+  /* Нечитаемое */
+  if (report.unreadable && !report.unreadable.isEmpty) {
+    issues.push({ type: 'warn', text: 'Есть нечитаемые ячейки' });
+  }
+
+  /* Построчная проверка */
+  if (report.postrochno && report.postrochno.length) {
+    const bad = report.postrochno.filter(r => !r.ok);
+    if (bad.length) {
+      issues.push({
+        type: 'error',
+        text: 'Построчная проверка: ' + bad.length + ' ' +
+              (bad.length === 1 ? 'строка не сходится' : 'строк не сходится') +
+              ' (К-во × Цена ≠ Сумма)'
+      });
+      hasBlockingIssue = true;
+    }
+  }
+
+  /* v9.20.0: клиентская валидация ответа */
+  if (report.validation && report.validation.issues && report.validation.issues.length) {
+    const errs = report.validation.issues.filter(i => i.level === 'error');
+    if (errs.length) {
+      issues.push({
+        type: 'error',
+        text: errs.length + ' ' +
+              pluralize(errs.length, 'критичная ошибка', 'критичные ошибки', 'критичных ошибок') +
+              ' в ответе ИИ'
+      });
+      hasBlockingIssue = true;
+    }
+  }
+
+  if (!issues.length) {
+    return { ok: true, hasBlockingIssue: false, issues: [], text: 'Отчёт ИИ: проверки пройдены' };
+  }
+  return {
+    ok: false,
+    hasBlockingIssue,
+    issues,
+    text: 'Отчёт ИИ: ' + issues.map(i => i.text).join(' · ')
+  };
+}
+
+/* ═══════════════════════════════════════════
+   GEMINI — распознаватель «Всё сразу»
+   ═══════════════════════════════════════════ */
+async function recognizeWithGemini(){if(shareBusy)return;const st=$("shareStatus"),set=(c,t)=>{if(st){st.className="status show "+c;st.textContent=t}};const key=getGeminiKey();if(!key){set("err","Введите API-ключ в настройках.");return}if(!isValidCategory(_activeCategory)){set("err","Сначала выберите категорию.");return}const items=await getPhotos();if(!items.length){set("info","Сначала загрузите материалы.");return}shareBusy=true;try{const parts=await buildGeminiFileParts(),model=getGeminiModel(),url=`${GEMINI_API}/${model}:generateContent?key=${encodeURIComponent(key)}`,two=$("geminiDoubleRunCheck")?.checked;const run=async(n)=>{const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({systemInstruction:{parts:[{text:buildSystemInstructionForGemini()}]},contents:[{parts:[...parts,{text:buildPrompt()}]}],generationConfig:getGeminiJSONConfig(n)})});if(!res.ok)throw Error("Gemini HTTP "+res.status);const d=await res.json(),raw=(d?.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join(""),j=extractJsonFromGeminiText(raw);if(!j)throw Error("Gemini вернул невалидный JSON.");return j};let a=await run(1),b="";if(two){await new Promise(r=>setTimeout(r,800));b=await run(2)}$("jsonInput").value=a;autoResizeTextarea();updateJsonCounter();_lastGeminiJsons={first:a,second:b};const p1=parseAIReport(a),p2=b?parseAIReport(b):null,s=[...getOCRSafetyIssues(a,p1,items.length),...(b?getOCRSafetyIssues(b,p2,items.length):[])];if(p1)p1.validation=validateAIResponse(a,b,p1,items.length);if(p2)p2.validation=validateAIResponse(b,a,p2,items.length);_lastAIReport=p1||p2;if(_lastAIReport){_lastAIReport.safety={blocked:s.length>0,issues:s,doubleRun:!!b};persistAIReport(_lastAIReport);updateAIReportBtnVisibility()}if(b){set(s.length?"warn":"info",s.length?formatOCRSafetyMessage(s):"Получены два JSON-ответа. Открываю сверку.");setTimeout(()=>openCompareModal({first:a,second:b}),300)}else if(s.length)set("warn",formatOCRSafetyMessage(s)+" JSON сохранён.");else{set("info","Применяю JSON…");await applyJSON();set("ok","JSON применён.")}}catch(e){set("err","Ошибка: "+(e.message||e))}finally{shareBusy=false}}
+
+/* ═══════════════════════════════════════════
+   ЗАГРУЗКА ПО ДАТАМ
+   ═══════════════════════════════════════════ */
+function loadDailyAccum() {
+  try {
+    const raw = localStorage.getItem(DAILY_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr.filter(x => x && typeof x.label === 'string' && typeof x.iso === 'string' && typeof x.json === 'string');
+  } catch (e) { return []; }
+}
+function saveDailyAccum() {
+  try { localStorage.setItem(DAILY_KEY, JSON.stringify(_dailyAccum)); } catch (e) {}
+}
+function dailyParseDateInput(str) {
+  const s = String(str || '').trim();
+  if (!s) return null;
+  let m = s.match(/^(\d{1,2})[.\-\/](\d{1,2})(?:[.\-\/](\d{2,4}))?$/);
+  if (!m) return null;
+  const day = parseInt(m[1], 10);
+  const month = parseInt(m[2], 10);
+  if (day < 1 || day > 31 || month < 1 || month > 12) return null;
+  let year = m[3] ? parseInt(m[3], 10) : null;
+  if (year != null && year < 100) year += 2000;
+  const isoRef = new Date();
+  if (year == null) {
+    const refM = isoRef.getMonth() + 1;
+    year = isoRef.getFullYear();
+    if (month - refM > 6) year -= 1;
+    else if (refM - month > 6) year += 1;
+  }
+  const d = new Date(year, month - 1, day);
+  if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
+  const iso = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const label = `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}`;
+  return { iso, label };
+}
+function dailyRender(){const list=$("dailyList"),status=$("dailyStatus"),actions=$("dailyActions");if(!list)return;if(!_dailyAccum.length){list.innerHTML='<div class="hint">Пока ничего не накоплено.</div>';if(actions)actions.style.display="none";if(status){status.className="status";status.textContent=""}return}_dailyAccum.sort((a,b)=>b.iso.localeCompare(a.iso));list.innerHTML="";_dailyAccum.forEach(d=>{const row=document.createElement("div");row.style.cssText="display:flex;align-items:center;gap:6px;padding:10px;border:1px solid var(--separator);border-radius:9px;background:var(--bg-input);margin-bottom:6px";const info=document.createElement("div");info.style.cssText="flex:1;min-width:0";let n=0;try{const j=JSON.parse(d.json);n=(j.invoices||[]).reduce((z,x)=>z+(x.items||[]).length,0)+(j.sales||[]).length}catch(e){}const mark=d.blocked||d.needsCheck?' <span style="color:var(--orange);font-size:15px">⚠</span>':"";const wt=d.blocked?" · требуется проверка OCR":(d.needsCheck?" · проверьте сверку":"");info.innerHTML=`<div style="font-weight:600;font-size:14px">Получено за ${escapeHtml(d.label)}${mark}</div><div style="font-size:11.5px;color:var(--text-secondary);margin-top:2px">${n} позиций${wt}</div>`;const refresh=document.createElement("button");refresh.className="secondary";refresh.textContent="↻";refresh.title="Обновить из таблицы";refresh.style.cssText="flex:0 0 auto;min-height:34px;padding:6px 10px;font-size:14px";refresh.onclick=()=>{const ok=rebuildDailyJsonFromTable(d.iso);if(ok){dailyRender();showToast(`Дата ${d.label} обновлена из таблицы`)}else showToast("Не удалось обновить")};const del=document.createElement("button");del.className="secondary";del.textContent="Удалить";del.style.cssText="flex:0 0 auto;min-height:34px;padding:6px 12px;font-size:12.5px";del.onclick=()=>{_dailyAccum=_dailyAccum.filter(x=>x.iso!==d.iso);saveDailyAccum();dailyRender()};row.append(info,refresh,del);list.appendChild(row)});if(actions)actions.style.display="block";if(status){status.className="status show info";status.textContent=`В пакете дат: ${_dailyAccum.length}. Даты: ${_dailyAccum.map(d=>d.label).join(", ")}.`}}
+
 const OCR_JSON_SCHEMA={type:"object",properties:{schema_version:{type:"string"},document_type:{type:"string",enum:["combined","invoice","sales"]},check_date:{type:"string"},source:{type:"object",properties:{photo_count:{type:"integer"},processed_photo_count:{type:"integer"},duplicate_photo_count:{type:"integer"}},required:["photo_count","processed_photo_count","duplicate_photo_count"]},invoices:{type:"array",items:{type:"object",properties:{number:{type:"string"},date:{type:"string"},continuation:{type:"boolean"},last_line_number:{type:["integer","null"]},printed_total:{type:["number","null"]},items:{type:"array",items:{type:"object",properties:{line:{type:["integer","null"]},name:{type:"string"},quantity:{type:["integer","null"]},quantity_status:{type:"string",enum:["confirmed","uncertain","unreadable","handwritten"]},price:{type:["number","null"]},amount:{type:["number","null"]}},required:["line","name","quantity","quantity_status","price","amount"]}}},required:["number","date","continuation","last_line_number","printed_total","items"]}},sales:{type:"array",items:{type:"object",properties:{name:{type:"string"},quantity:{type:["integer","null"]},quantity_status:{type:"string",enum:["confirmed","uncertain","unreadable","handwritten"]}},required:["name","quantity","quantity_status"]}},review:{type:"object",properties:{unreadable:{type:"array",items:{type:"string"}},handwritten_confirmation:{type:"array",items:{type:"string"}},uncertain_rows:{type:"array",items:{type:"string"}},notes:{type:"array",items:{type:"string"}}},required:["unreadable","handwritten_confirmation","uncertain_rows","notes"]}},required:["schema_version","document_type","check_date","source","invoices","sales","review"]};
 function getGeminiJSONConfig(runNo=1){return{temperature:0,thinkingConfig:{thinkingLevel:"low"},responseMimeType:"application/json",responseSchema:OCR_JSON_SCHEMA,maxOutputTokens:GEMINI_MAX_OUTPUT_TOKENS};}
 function getGeminiKey() {
