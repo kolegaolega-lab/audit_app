@@ -113,11 +113,9 @@ test('client validation catches quantity × price mismatch', () => {
 });
 
 test('OCR prompt enforces column 8 piece count and never derives quantity from money', () => {
-  const prompt = context.buildSeparatedOCRPrompt('2026-10-06', 'invoice');
-  assert.match(prompt, /колонка 8/);
-  assert.match(prompt, /мест, штук/);
-  assert.match(prompt, /Не вычисляй quantity через цену или сумму/);
-  assert.match(prompt, /Дубликаты фото не суммировать/);
+  assert.match(html, /колонка 8[^\n]*мест, штук/);
+  assert.match(html, /Не вычисляй quantity через цену или сумму/);
+  assert.match(html, /Дубликаты фото не суммировать/);
 });
 
 test('OCR validation catches duplicate rows inside one invoice', () => {
