@@ -12,7 +12,7 @@ function extract(name){
   return html.slice(m.index,m.index+m[0].length+next);
 }
 function load(...names){
-  const src="const MAX_NUM=100000; const SHELF_LIFE_START_HOUR=7; const WRITE_OFF_HOUR=22;\n"+names.map(extract).join('\n')+'\n';
+  const src="const MAX_NUM=100000; const SHELF_LIFE_START_HOUR=7; const WRITE_OFF_HOUR=22; const OriginalDate=Date; function TestDate(...a){ return a.length?new OriginalDate(...a):new OriginalDate('2026-10-06T10:00:00'); } TestDate.prototype=OriginalDate.prototype; TestDate.now=()=>OriginalDate.parse('2026-10-06T10:00:00'); TestDate.parse=OriginalDate.parse; TestDate.UTC=OriginalDate.UTC; const Date=TestDate;\n"+names.map(extract).join('\n')+'\n';
   const box={};
   const storage={getItem:()=>null,setItem:()=>{},removeItem:()=>{},clear:()=>{},key:()=>null,length:0};
   const dollar=()=>null;
@@ -26,8 +26,8 @@ const f=load('clampNum','isValidDate','safeDate','onlyDigits','hoursToDays','day
 
 test('numeric and date primitives',()=>{assert.equal(f.clampNum(12.5,0,10,0),10);assert.equal(f.clampNum('x',0,10,7),7);assert.equal(f.safeDate(2026,10,6).getDate(),6);assert.equal(f.isValidDate(new Date(2026,9,6)),true);assert.equal(f.onlyDigits('a1-2b'),'12');});
 test('shelf-life conversion',()=>{assert.equal(f.hoursToDays(48),2);assert.equal(f.daysToHours(3),72);assert.equal(f.parseShelfLife('48 ч'),48);assert.equal(f.parseShelfLife('2 дня'),48);});
-test('text normalization',()=>{assert.equal(f.normalizeName('  Пончик   Фисташка '),'пончик фисташка');assert.equal(f.normalizeForSearch('Ёлка'),'елка');assert.equal(f.cleanProductName('  Эклер  '),'Эклер');assert.equal(f.isServiceLine('Доставка'),true);assert.equal(f.isServiceLine('Пончик'),false);assert.ok(f.naturalCompare('Товар 2','Товар 10')<0);});
-test('date parsing',()=>{const ref=new Date(2026,9,6);assert.equal(f.parseDateRu('27.09.2026',ref),'2026-09-27');assert.equal(f.parseDateRu('27.09',ref),'2026-09-27');assert.equal(f.inferIsoFromDdmm('05.10',ref).toISOString().slice(0,10),'2026-10-05');});
+test('text normalization',()=>{assert.equal(f.normalizeName('  Пончик   Фисташка '),'пончик фисташка');assert.equal(f.normalizeForSearch('Ёлка'),'елка');assert.equal(f.cleanProductName('  Эклер  '),'Эклер');assert.equal(f.isServiceLine('Накладная №123'),true);assert.equal(f.isServiceLine('Пончик'),false);assert.ok(f.naturalCompare('Товар 2','Товар 10')<0);});
+test('date parsing',()=>{const ref=new Date(2026,9,6);assert.equal(f.parseDateRu('27.09.2026',ref),'2026-09-27');assert.equal(f.parseDateRu('27.09',ref),'2026-09-27');assert.equal(f.inferIsoFromDdmm('05.10',ref),'2026-10-05');});
 test('incoming merge',()=>{assert.deepEqual(f.mergeIncomingByDate([{date:'2026-10-07',qty:2},{date:'2026-10-06',qty:1},{date:'2026-10-07',qty:3}]),[{date:'2026-10-06',qty:1,_originalQty:1},{date:'2026-10-07',qty:5,_originalQty:2}]);});
 test('22:00 cutoff 24/48/72/96',()=>{for(const [h,e] of [[24,'2026-10-06T22:00'],[48,'2026-10-07T22:00'],[72,'2026-10-08T22:00'],[96,'2026-10-09T22:00']])assert.equal(f.getWriteOffMoment('2026-10-06',h).toISOString().slice(0,16),e);});
 test('non-24h shelf-life stays exact',()=>{assert.equal(f.getWriteOffMoment('2026-10-06',36).toISOString().slice(0,16),'2026-10-07T19:00');assert.equal(f.getWriteOffMoment('2026-10-06',60).toISOString().slice(0,16),'2026-10-08T19:00');});
