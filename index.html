@@ -957,7 +957,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
   <div class="section" data-tab="check" id="recognizeSection">
     <div class="section-header">
       <h2>Шаг 2 · Распознавание</h2>
-      <p class="desc">Отправьте фото в ИИ — он вернёт JSON с приходами и продажами.</p>
+      <p class="desc">Отправьте фото в ИИ — он распознает приходы и продажи.</p>
     </div>
     <div class="section-body">
 
@@ -989,7 +989,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 <div id="ocrProgress" class="ocr-progress" aria-live="polite" aria-busy="true"><div class="ocr-progress-top"><span class="ocr-spinner" aria-hidden="true"></span><div><div id="ocrProgressTitle" class="ocr-progress-title">Распознавание запущено…</div><div id="ocrProgressDetail" class="ocr-progress-detail">Подготавливаю фотографии</div></div></div><div class="ocr-progress-bar"><div id="ocrProgressFill" class="ocr-progress-fill"></div></div><div id="ocrProgressTime" class="ocr-progress-time">Прошло 0 сек.</div></div>
       <div id="allModeBlock" style="display:none">
         <button id="recognizeGeminiBtn" class="success block">Распознать все</button>
-        <p class="hint" style="margin-top:10px">Все загруженные фото уйдут одним запросом. Результат сразу попадёт в таблицу, и откроется <b>Сверка</b>.</p>
+        <p class="hint" style="margin-top:10px">Все загруженные фото уйдут одним запросом. Результат сразу попадёт в таблицу, и откроется <b>Сравнение</b>.</p>
       </div>
 
       <div style="height:1px;background:var(--separator);margin:16px 0"></div>
@@ -1019,9 +1019,9 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
           <div>
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:13px">
               <input type="checkbox" id="geminiDoubleRunCheck" style="width:18px;height:18px;min-height:auto;padding:0;margin:0;accent-color:var(--accent)">
-              <span>Двойной прогон (сравнение двух ответов)</span>
+              <span>Повторная проверка (сравнение двух результатов)</span>
             </label>
-            <p class="hint" style="margin:6px 0 0;font-size:11.5px">Включите для сверки. Расход — 2 запроса на дату.</p>
+            <p class="hint" style="margin:6px 0 0;font-size:11.5px">Включите, чтобы сравнить два результата распознавания. Для каждой даты потребуется 2 проверки.</p>
           </div>
           <p class="hint" style="margin:0">Ключ хранится только в вашем браузере.
             Получить: <b>aistudio.google.com</b> → Get API key.</p>
@@ -1034,8 +1034,8 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 
   <div class="section" data-tab="check" id="importSection">
     <div class="section-header">
-      <h2>Шаг 3 · Импорт JSON</h2>
-      <p class="desc">Вставьте JSON, который вернул ИИ, или загрузите файл.</p>
+      <h2>Шаг 3 · Загрузка результата</h2>
+      <p class="desc">Вставьте результат распознавания, который вернул ИИ, или загрузите файл.</p>
     </div>
     <div class="section-body">
       <div class="row">
@@ -1043,7 +1043,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
         <button id="loadJsonFileBtn" class="secondary">Из файла</button>
       </div>
       <input id="jsonFileInput" type="file" accept=".json,text/json" hidden>
-      <textarea id="jsonInput" maxlength="2000000" placeholder="JSON: накладные с датами приходов + продажи iiko" style="margin-top:10px"></textarea>
+      <textarea id="jsonInput" maxlength="2000000" placeholder="Накладные с датами приходов + продажи iiko" style="margin-top:10px"></textarea>
       <div id="jsonCounter" class="counter"></div>
       <button id="applyJsonBtn" class="success block" style="margin-top:10px">Применить</button>
       <button id="openCompareBtn" class="secondary block" style="margin-top:8px">Сверка</button>
@@ -1543,8 +1543,8 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 <div id="compareModal" class="modal hidden">
   <div class="modal-content" id="compareModalContent">
     <div class="modal-header">
-      <h3>Сверка двух JSON</h3>
-      <p class="hint">Совпавшие — доверяем, расхождения — проверяем.</p>
+      <h3>Сравнение двух результатов</h3>
+      <p class="hint">Совпавшие данные можно использовать, расхождения нужно проверить.</p>
     </div>
 
     <div class="cmp-scroll">
@@ -1552,15 +1552,15 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       <div class="cmp-section">
         <div class="cmp-section-header">
           <div>
-            <h2>JSON для сравнения</h2>
-            <p class="desc">Вставьте два ответа ИИ из разных чатов.</p>
+            <h2>Данные для сравнения</h2>
+            <p class="desc">Вставьте два результата распознавания для сравнения.</p>
           </div>
           <button type="button" class="cmp-clear-btn" id="cmpClearBtn">Очистить</button>
         </div>
         <div class="cmp-section-body">
-          <label>Прогон 1</label>
+          <label>Первый результат</label>
           <textarea id="cmpJson1" class="cmp-textarea"></textarea>
-          <label>Прогон 2</label>
+          <label>Второй результат</label>
           <textarea id="cmpJson2" class="cmp-textarea"></textarea>
         </div>
       </div>
@@ -7148,7 +7148,7 @@ function validateAIResponse(j1, j2, report, count) {
     if (c1 !== c2) {
       issues.push({ level: 'warn', code: 'row-count-diff',
         title: 'Прогоны дали разное число строк',
-        detail: 'Прогон 1: ' + c1 + ', прогон 2: ' + c2 });
+        detail: 'Первый результат: ' + c1 + ', прогон 2: ' + c2 });
     }
   }
 
@@ -7311,14 +7311,14 @@ function getOCRSafetyIssues(text,report,count){
   } else if (unconfirmed.length) {
     out.push({
       code:"quantity-status-review",
-      title:"Есть количества без статуса confirmed",
+      title:"Есть количества, которые нужно проверить",
       detail:"Проверьте: " + statusDetails.join("; ") + "."
     });
   }
   if ((r.handwritten_confirmation||[]).length) {
     out.push({
       code:"handwritten-confirmation",
-      title:"Есть рукописные значения, требующие подтверждения",
+      title:"Есть значения, которые нужно проверить вручную",
       detail:"Указано в review: " + r.handwritten_confirmation.slice(0, 8).join("; ") + (r.handwritten_confirmation.length > 8 ? " и ещё " + (r.handwritten_confirmation.length - 8) + "." : ".")
     });
   }
@@ -8162,7 +8162,7 @@ function renderAIReportModal(report) {
     h.push('<div class="sheet-section">');
     h.push('<div class="sheet-section-header">');
     h.push('<h2>' + s.icon + ' ' + escapeHtml(s.title) + '</h2>');
-    h.push('<p class="desc">Независимое распознавание этого типа документа.</p>');
+    h.push('<p class="desc">Отдельное распознавание этого типа документа.</p>');
     h.push('</div>');
     h.push('<div class="sheet-section-body">');
 
@@ -8240,11 +8240,11 @@ function renderAIReportModal(report) {
   const docSummary = sections.map(s => {
     const hasJson = !!s.json && s.json.length > 2;
     return '<div class="ai-issue-row ' + (hasJson ? 'ok' : 'warn') + '"><span class="ai-issue-icon">' + (hasJson ? '✓' : '—') + '</span><span class="ai-issue-body">' +
-      '<b>' + s.icon + ' ' + escapeHtml(s.title) + '</b> · ' + (hasJson ? 'распознано' : 'не загружено') + '</span></div>';
+      '<b>' + s.icon + ' ' + escapeHtml(s.title) + '</b> · ' + (hasJson ? 'готово' : 'нет результата') + '</span></div>';
   }).join('');
 
   html += '<div class="sheet-section"><div class="sheet-section-header">' +
-    '<h2>Что распознано</h2><p class="desc">Документы обрабатываются независимо друг от друга.</p></div>' +
+    '<h2>Что готово</h2><p class="desc">Каждый документ проверяется отдельно.</p></div>' +
     '<div class="sheet-section-body">' +
     docSummary +
     '<div class="ai-issue-row ' + (overall === 'ok' ? 'ok' : overall === 'err' ? 'error' : 'warn') + '">' +
@@ -8589,8 +8589,8 @@ function cmpRunCompare() {
     checks.push({
       ok: false,
       code: 'check-date-mismatch',
-      title: 'Дата проверки отличается между прогонами',
-      detail: 'Прогон 1: <b>' + escapeHtml(checkDate1) + '</b> · Прогон 2: <b>' + escapeHtml(checkDate2) + '</b>. Для одного и того же набора фото дата должна совпадать; перед применением проверьте дату аудита.'
+      title: 'Дата проверки отличается',
+      detail: 'Первый результат: <b>' + escapeHtml(checkDate1) + '</b> · Второй результат: <b>' + escapeHtml(checkDate2) + '</b>. Для одних и тех же фотографий дата должна совпадать. Проверьте дату аудита перед использованием результата.'
     });
   }
   // Сверка — это отдельный путь к применению OCR-данных, поэтому она
@@ -8613,8 +8613,8 @@ function cmpRunCompare() {
       return [{ code:'comparison-safety-error', title:label + ': ошибка safety-проверки', detail:String(e?.message || e || 'Неизвестная ошибка') }];
     }
   };
-  cmpSafety.push(...buildCmpSafety(t1, d1full, 'Прогон 1', t2));
-  cmpSafety.push(...buildCmpSafety(t2, d2full, 'Прогон 2', t1));
+  cmpSafety.push(...buildCmpSafety(t1, d1full, 'Первый результат', t2));
+  cmpSafety.push(...buildCmpSafety(t2, d2full, 'Второй результат', t1));
   cmpSafety.forEach(issue => checks.push({
     ok: false,
     title: issue.title,
@@ -8668,7 +8668,7 @@ function cmpRunCompare() {
 
   const catalogSet = new Set(PRODUCTS.map(p => normalizeName(p.name)));
   const notFoundByRun = new Map();
-  [[d1full, 'Прогон 1'], [d2full, 'Прогон 2']].forEach(([data, label]) => {
+  [[d1full, 'Первый результат'], [d2full, 'Второй результат']].forEach(([data, label]) => {
     for (const key of Object.keys(data.rows)) {
       const row = data.rows[key];
       const allValues = Object.values(row.incoming);
@@ -8687,7 +8687,7 @@ function cmpRunCompare() {
   const notFound = [...notFoundByRun.values()];
   checks.push({
     ok: notFound.length === 0,
-    title: 'Целостность справочника',
+    title: 'Проверка справочника',
     detail: notFound.length === 0
       ? 'Все позиции обоих JSON есть в справочнике.'
       : 'Не найдены: ' + notFound.map(x => '<b>' + escapeHtml(x.name) + '</b> (' + x.runs.join(', ') + ')').join(', ')
@@ -8787,8 +8787,8 @@ function cmpRenderEditCard(row) {
   }
 
   const subTitle = isSales
-    ? `Продажи · Прогон 1 дал ${va} · Прогон 2 дал ${vb}`
-    : `Дата ${label} · Прогон 1 дал ${va} · Прогон 2 дал ${vb}`;
+    ? `Продажи · Первый результат дал ${va} · Второй результат дал ${vb}`
+    : `Дата ${label} · Первый результат дал ${va} · Второй результат дал ${vb}`;
 
   const card = document.createElement('div');
   card.className = 'cmp-edit-card';
@@ -8798,14 +8798,14 @@ function cmpRenderEditCard(row) {
     <button type="button" class="cmp-edit-choice${selA}" data-v="${escapeHtml(va)}">
       <span class="cmp-edit-radio"></span>
       <span class="cmp-edit-choice-body">
-        <span class="cmp-edit-choice-label">Прогон 1</span>
+        <span class="cmp-edit-choice-label">Первый результат</span>
         <span class="cmp-edit-choice-value">${escapeHtml(va)}</span>
       </span>
     </button>
     <button type="button" class="cmp-edit-choice${selB}" data-v="${escapeHtml(vb)}">
       <span class="cmp-edit-radio"></span>
       <span class="cmp-edit-choice-body">
-        <span class="cmp-edit-choice-label">Прогон 2</span>
+        <span class="cmp-edit-choice-label">Второй результат</span>
         <span class="cmp-edit-choice-value">${escapeHtml(vb)}</span>
       </span>
     </button>
@@ -8871,9 +8871,9 @@ function cmpRenderResults() {
     stats.innerHTML =
       (comparisonValid
         ? '<span class="big">' + okCount + ' из ' + total + ' совпало</span>'
-        : '<span class="big" style="color:var(--red)">Сверка невалидна</span>' +
-          '<div class="cmp-detail" style="margin:4px 0 8px">Результаты ниже показаны только для диагностики. Применение заблокировано.</div>' +
-          '<div class="cmp-detail">Диагностически: ' + okCount + ' из ' + total + ' совпало</div>') +
+        : '<span class="big" style="color:var(--red)">Сравнение нельзя использовать</span>' +
+          '<div class="cmp-detail" style="margin:4px 0 8px">Результаты ниже показаны только для проверки. Использование этих данных заблокировано.</div>' +
+          '<div class="cmp-detail">Для справки: ' + okCount + ' из ' + total + ' совпало</div>') +
       '<div class="row"><span>✓ Совпало</span><b class="green">' + okCount + '</b></div>' +
       '<div class="row"><span>⚠ Расхождения</span><b class="orange">' + warnCount + '</b></div>' +
       '<div class="row"><span>✗ Только в одном</span><b class="red">' + errCount + '</b></div>';
@@ -8946,7 +8946,7 @@ function cmpRenderResults() {
 function cmpApplyMatched() {
   if (!_cmpData) return;
   if (_cmpData.comparisonValid === false) {
-    showToast('Применение заблокировано: сверка невалидна. Проверьте дату и критичные ошибки OCR.');
+    showToast('Использование заблокировано. Проверьте дату и ошибки распознавания.');
     return;
   }
   const hasEdits = r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null);
