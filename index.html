@@ -10257,6 +10257,34 @@ function closeCompareModal() {
   _cmpEditKind = null;
   _cmpAppliedForDaily = false;
 }
+/* v9.21.0: нормализация названий только для межпрогонной сверки.
+   Исходные данные CSV не изменяются. */
+function cmpCanonicalName(name) {
+  let s = cleanProductName(name);
+  s = normalizeName(s);
+  return s
+    .replace(/жаренными/g, 'жареными')
+    .replace(/жаренныи/g, 'жареный')
+    .replace(/\bмалина\b/g, 'малиной')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+function cmpTokenSimilarity(a, b) {
+  const stop = new Set(['с','со','и','на','для','гр','г','шт','печенье','десерт']);
+  const ta = new Set(cmpCanonicalName(a).split(/\s+/).filter(x => x && !stop.has(x)));
+  const tb = new Set(cmpCanonicalName(b).split(/\s+/).filter(x => x && !stop.has(x)));
+  if (!ta.size || !tb.size) return 0;
+  let inter = 0;
+  ta.forEach(x => { if (tb.has(x)) inter++; });
+  return inter / Math.max(ta.size, tb.size);
+}
+function cmpDisplayReason(row) {
+  if (row.matchType === 'fuzzy') return 'Название нормализовано';
+  if (!row.a || !row.b) return row.a ? 'Есть только в распознавании №1' : 'Есть только в распознавании №2';
+  if (row.status === 'warn') return 'Количество отличается';
+  return '';
+}
+
 function cmpRunCompare() {
   const t1 = $('cmpCsv1') ? $('cmpCsv1').value : '';
   const t2 = $('cmpCsv2') ? $('cmpCsv2').value : '';
