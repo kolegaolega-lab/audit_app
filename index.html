@@ -6993,16 +6993,22 @@ function validateAIResponse(j1, j2, report, count) {
      Продолжение многостраничной накладной может физически не содержать дату.
      Если у той же накладной уже есть дата на первой странице, наследуем её
      для проверки и не считаем это ошибкой OCR. */
+  const toIsoDate = value => {
+    const parsed = parseDateRu(String(value || ''), new Date());
+    if (!parsed || isNaN(parsed.getTime())) return '';
+    return [parsed.getFullYear(), String(parsed.getMonth() + 1).padStart(2, '0'), String(parsed.getDate()).padStart(2, '0')].join('-');
+  };
   const knownInvoiceDates = new Map();
   (d.invoices || []).forEach(inv => {
     const num = String(inv?.number || '').trim();
-    const ds = String(inv?.date || '').trim();
-    if (num && /^\d{4}-\d{2}-\d{2}$/.test(ds) && !inv?.continuation) knownInvoiceDates.set(num, ds);
+    const ds = toIsoDate(inv?.date);
+    if (num && ds && !inv?.continuation) knownInvoiceDates.set(num, ds);
   });
   (d.invoices || []).forEach(inv => {
     const ds = String(inv?.date || '').trim();
+    const normalizedDate = toIsoDate(ds);
     const num = String(inv?.number || '').trim();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(ds)) return;
+    if (normalizedDate) return;
     if (inv?.continuation && num && knownInvoiceDates.has(num)) return;
     issues.push({ level: 'error', code: inv?.continuation ? 'continuation-date-unresolved' : 'invoice-date-missing',
       title: inv?.continuation ? 'Не удалось определить дату продолжения накладной' : 'Не удалось определить дату накладной',
@@ -7011,11 +7017,12 @@ function validateAIResponse(j1, j2, report, count) {
 
   /* 10. Даты накладных: ±30 дней */
   const checkDateStr = String(d.check_date || '');
-  const checkDate = /^\d{4}-\d{2}-\d{2}$/.test(checkDateStr) ? new Date(checkDateStr + 'T12:00:00') : null;
+  const checkDateIso = toIsoDate(checkDateStr);
+  const checkDate = checkDateIso ? new Date(checkDateIso + 'T12:00:00') : null;
   if (checkDate && !isNaN(checkDate.getTime())) {
     (d.invoices || []).forEach(inv => {
-      const ds = String(inv.date || '');
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(ds)) return;
+      const ds = toIsoDate(inv.date);
+      if (!ds) return;
       const dd = new Date(ds + 'T12:00:00');
       if (isNaN(dd.getTime())) return;
       const days = Math.abs((checkDate - dd) / 86400000);
@@ -7054,7 +7061,8 @@ function validateAIResponse(j1, j2, report, count) {
     let fuzzyTimedOut = false;
     const checkName = (name) => {
       if (fuzzyTimedOut) return;
-      const n = normalizeName(name || '');
+      const cleanedName = cleanProductName(name || '');
+      const n = normalizeName(cleanedName);
       if (!n || exactNames.has(n)) return;
       const cands = catalogByLen.get(n.length) || [];
       for (const c of cands) {
