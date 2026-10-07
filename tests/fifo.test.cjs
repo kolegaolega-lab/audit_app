@@ -24,7 +24,14 @@ const context = {
     return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
   },
   emptyResult: () => ({ soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null }),
-  mergeIncomingByDate: rows => [...(rows || [])].sort((a, b) => String(a.date).localeCompare(String(b.date)))
+  mergeIncomingByDate: rows => [...(rows || [])].sort((a, b) => String(a.date).localeCompare(String(b.date))),
+  parseDateRu(value, referenceDate) {
+    const m = String(value || '').match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
+    if (!m) return '';
+    const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    if (d.getFullYear() !== Number(m[1]) || d.getMonth() !== Number(m[2]) - 1 || d.getDate() !== Number(m[3])) return '';
+    return d;
+  }
 };
 vm.createContext(context);
 vm.runInContext(extractFunction(html, 'getWriteOffMoment', 'function parseDateRu('), context);
