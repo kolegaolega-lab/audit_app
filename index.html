@@ -5454,10 +5454,10 @@ function renderNoCategoryModal() {
 }
 function assignNoCategory(name, cat) {
   if (!isValidCategory(cat)) return;
-  const key = normalizeName(name);
+  const key = cmpCanonicalName(name);
   const p = PRODUCTS.find(x => cmpCanonicalName(x.name) === key);
   if (p) { p.category = cat; saveCatalog(); }
-  noCategoryRows = noCategoryRows.filter(r => normalizeName(r.name) !== key);
+  noCategoryRows = noCategoryRows.filter(r => cmpCanonicalName(r.name) !== key);
   updateNoCategoryBanner();
   showToast(`«${name}» → ${CATEGORY_LABELS[cat]}`);
   if (!noCategoryRows.length) closeModal('noCategoryModal');
@@ -6134,8 +6134,8 @@ async function applyJSON() {
     for (const r of rows) {
       const aliased = applyAliases(r.name);
       if (aliased !== r.name) r.name = aliased;
-      const key = normalizeName(r.name);
-      const p = PRODUCTS.find(x => normalizeName(x.name) === key);
+      const key = cmpCanonicalName(r.name);
+      const p = PRODUCTS.find(x => cmpCanonicalName(x.name) === key);
       if (p) {
         r.shelfLife = p.shelfLife;
         r.category = p.category || null;
@@ -8976,12 +8976,12 @@ function cmpApplyMatched() {
     const incoming = { ...(r.a ? r.a.incoming : {}) };
     if (r.edits && r.edits.incoming) Object.assign(incoming, r.edits.incoming);
     const sales = (r.edits && r.edits.sales != null) ? r.edits.sales : (r.a ? r.a.sales : 0);
-    byKey.set(normalizeName(r.name), { incoming, sales });
+    byKey.set(cmpCanonicalName(r.name), { incoming, sales });
   });
   let applied = 0;
   const _refDate = new Date();
   tableRows.forEach(row => {
-    const key = normalizeName(row.name);
+    const key = cmpCanonicalName(row.name);
     const match = byKey.get(key);
     if (!match) return;
     Object.keys(match.incoming).forEach(dk => {
@@ -9008,14 +9008,14 @@ function cmpApplyMatched() {
     _needsCheckNames.add(key);
   });
 
-  const tableKeys = new Set(tableRows.map(r => normalizeName(r.name)));
-  const unknownKeys = new Set(unknownRows.map(r => normalizeName(r.name)));
+  const tableKeys = new Set(tableRows.map(r => cmpCanonicalName(r.name)));
+  const unknownKeys = new Set(unknownRows.map(r => cmpCanonicalName(r.name)));
   const newUnknown = [];
   _cmpData.rows.forEach(r => {
-    const key = normalizeName(r.name);
+    const key = cmpCanonicalName(r.name);
     if (tableKeys.has(key)) return;
     if (unknownKeys.has(key)) return;
-    if (PRODUCTS.some(p => normalizeName(p.name) === key)) return;
+    if (PRODUCTS.some(p => cmpCanonicalName(p.name) === key)) return;
     if (isIgnored(r.name)) return;
     const incoming = { ...(r.a ? r.a.incoming : {}) };
     if (r.edits && r.edits.incoming) Object.assign(incoming, r.edits.incoming);
