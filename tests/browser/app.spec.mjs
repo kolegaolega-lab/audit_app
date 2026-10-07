@@ -341,3 +341,45 @@ test('point management rejects duplicate numbers and keeps active point valid', 
 });
 
 // Regression suite: branch-level audit fixes are verified together in CI.
+
+
+test('comparison normalizes ISO and Russian invoice dates and renders results', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const payload = (date) => JSON.stringify({
+    schema_version:'1.0',
+    document_type:'combined',
+    check_date:'2026-10-06',
+    source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
+    invoices:[{
+      number:'INV-1',date,continuation:false,last_line_number:1,
+      items:[{line:1,name:'Пончик с фисташкой',quantity:2,quantity_status:'confirmed'}]
+    }],
+    sales:[{name:'Пончик с фисташкой',quantity:1,quantity_status:'confirmed'}],
+    review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+  });
+  const result = await page.evaluate(({a,b}) => {
+    const p1 = window.cmpParseJSON(a, false);
+    const p2 = window.cmpParseJSON(b, false);
+    const t1 = document.querySelector('#cmpJson1');
+    const t2 = document.querySelector('#cmpJson2');
+    if (t1) t1.value = a;
+    if (t2) t2.value = b;
+    window.cmpRunCompare();
+    return {
+      p1Date: p1?.dateCols?.[0]?.key,
+      p2Date: p2?.dateCols?.[0]?.key,
+      p1Qty: p1?.rows?.['пончик с фисташкой']?.incoming?.['06.10'],
+      p2Qty: p2?.rows?.['пончик с фисташкой']?.incoming?.['06.10'],
+      stats: document.querySelector('#cmpStats')?.textContent || '',
+      resultsVisible: document.querySelector('#cmpResultsSection')?.style.display,
+      checksVisible: document.querySelector('#cmpChecksSection')?.style.display
+    };
+  }, {a:payload('2026-10-06'), b:payload('06.10.2026')});
+  expect(result.p1Date).toBe('06.10');
+  expect(result.p2Date).toBe('06.10');
+  expect(result.p1Qty).toBe(2);
+  expect(result.p2Qty).toBe(2);
+  expect(result.stats).toContain('1 из 1 совпало');
+  expect(result.resultsVisible).toBe('block');
+  expect(result.checksVisible).toBe('block');
+});
