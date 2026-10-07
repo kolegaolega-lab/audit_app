@@ -133,6 +133,20 @@ test('multi-page invoice continuation inherits date and handwritten quantity is 
   expect(result.safetyCodes).toContain('quantity-status-review');
 });
 
+test('OCR validation accepts undated continuation when parent invoice has date', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const payload={schema_version:'1.0',document_type:'combined',check_date:'2026-10-07',source:{photo_count:2,processed_photo_count:2,duplicate_photo_count:0},invoices:[
+      {number:'221511',date:'2026-10-01',continuation:false,last_line_number:11,items:[]},
+      {number:'221511',date:'',continuation:true,last_line_number:29,items:[]}
+    ],sales:[],review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}};
+    const report={hasBlocks:true,validation:{issues:[]}};
+    const issues=getOCRSafetyIssues(JSON.stringify(payload),report,2);
+    return issues.map(x=>x.code);
+  });
+  expect(result).not.toContain('invoice-date-review');
+});
+
 test('OCR safety blocks missing invoice line 29 across continuation pages', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
