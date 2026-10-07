@@ -297,17 +297,18 @@ test('OCR safety consolidates non-confirmed quantities into one actionable issue
   assert.match(issues.find(x => x.code === 'quantity-status-review').detail, /Ром баба/);
 });
 
-test('double-run comparison checks differing check dates and both-run catalog integrity', () => {
-  assert.match(html, /Дата проверки отличается/);
+test('double-run comparison ignores audit check_date and compares invoice data', () => {
+  assert.match(html, /Дата аудита \(check_date\) не участвует в сравнении двух результатов/);
+  assert.doesNotMatch(html, /const checkDateMismatch/);
+  assert.doesNotMatch(html, /Дата проверки отличается/);
   assert.match(html, /\[d1full, 'Первый результат'\], \[d2full, 'Второй результат'\]/);
   assert.match(html, /Все позиции обоих JSON есть в справочнике/);
   assert.match(html, /Первый результат.*Второй результат/);
 });
 
-test('double-run comparison marks mismatched check dates as invalid and blocks Apply', () => {
-  assert.match(html, /const checkDateMismatch = !!\(checkDate1 && checkDate2 && checkDate1 !== checkDate2\)/);
-  assert.match(html, /comparisonValid: !checkDateMismatch && cmpSafety\.length === 0/);
-  assert.match(html, /Результаты ниже показаны только для проверки\. Использование этих данных заблокировано/);
+test('double-run comparison remains valid when only audit check_date differs', () => {
+  assert.match(html, /comparisonValid: cmpSafety\.length === 0/);
+  assert.doesNotMatch(html, /comparisonValid: !checkDateMismatch/);
   assert.match(html, /const comparisonBlocked = _cmpData\.comparisonValid === false/);
   assert.match(html, /!safetyBlocked && !comparisonBlocked/);
   assert.match(html, /Использование заблокировано\. Проверьте дату и ошибки распознавания/);
