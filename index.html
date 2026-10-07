@@ -5316,7 +5316,7 @@ function renderUnknownModal() {
 
     row.addEventListener('click', e => {
       if (e.target.closest('input')) return;
-      const key = normalizeName(r.name);
+      const key = cmpCanonicalName(r.name);
       if (unknownSelected.has(key)) { unknownSelected.delete(key); row.classList.remove('selected'); cb.classList.remove('checked'); }
       else { unknownSelected.add(key); row.classList.add('selected'); cb.classList.add('checked'); }
       if (selectedEl) selectedEl.textContent = String(unknownSelected.size);
@@ -5455,7 +5455,7 @@ function renderNoCategoryModal() {
 function assignNoCategory(name, cat) {
   if (!isValidCategory(cat)) return;
   const key = normalizeName(name);
-  const p = PRODUCTS.find(x => normalizeName(x.name) === key);
+  const p = PRODUCTS.find(x => cmpCanonicalName(x.name) === key);
   if (p) { p.category = cat; saveCatalog(); }
   noCategoryRows = noCategoryRows.filter(r => normalizeName(r.name) !== key);
   updateNoCategoryBanner();
@@ -5672,7 +5672,7 @@ function renderCatalogList() {
     if (_catalogSelectMode) {
       row.addEventListener('click', e => {
         if (e.target.closest('input') || e.target.closest('button')) return;
-        const key = normalizeName(p.name);
+        const key = cmpCanonicalName(p.name);
         if (_catalogSelected.has(key)) _catalogSelected.delete(key);
         else _catalogSelected.add(key);
         row.classList.toggle('selected', _catalogSelected.has(key));
@@ -6152,12 +6152,12 @@ async function applyJSON() {
     if (myToken !== resetToken) return;
 
     const otherRows = tableRows.filter(r => r.category !== _activeCategory);
-    const alreadyKeys = new Set(inCategory.map(r => normalizeName(r.name)));
+    const alreadyKeys = new Set(inCategory.map(r => cmpCanonicalName(r.name)));
     const catProducts = getCategoryProducts(_activeCategory);
     for (const p of catProducts) {
       const key = normalizeName(p.name);
       if (alreadyKeys.has(key)) continue;
-      if (otherRows.some(r => normalizeName(r.name) === key && r.category === _activeCategory)) continue;
+      if (otherRows.some(r => cmpCanonicalName(r.name) === key && r.category === _activeCategory)) continue;
       inCategory.push({
         name: p.name, stock: null, sales: 0, _originalSales: 0,
         shelfLife: p.shelfLife, category: _activeCategory, incoming: [], salesOnly: false
@@ -8404,7 +8404,7 @@ function cmpParseJSON(text, applyCategory = true){
     const a = applyAliases(c), k = cmpCanonicalName(a);
     if (!_cmpProductIndexCache) {
       const map = new Map();
-      PRODUCTS.forEach(x => { const nk = normalizeName(x.name); if (nk && !map.has(nk)) map.set(nk, x); });
+      PRODUCTS.forEach(x => { const nk = cmpCanonicalName(x.name); if (nk && !map.has(nk)) map.set(nk, x); });
       _cmpProductIndexCache = map;
     }
     const p = _cmpProductIndexCache.get(k);
@@ -8680,7 +8680,7 @@ function cmpRunCompare() {
     }
   });
 
-  const catalogSet = new Set(PRODUCTS.map(p => normalizeName(p.name)));
+  const catalogSet = new Set(PRODUCTS.map(p => cmpCanonicalName(p.name)));
   const notFoundByRun = new Map();
   [[d1full, 'Первый результат'], [d2full, 'Второй результат']].forEach(([data, label]) => {
     for (const key of Object.keys(data.rows)) {
@@ -8688,7 +8688,7 @@ function cmpRunCompare() {
       const allValues = Object.values(row.incoming);
       const totalQty = allValues.reduce((a, b) => a + b, 0);
       if (totalQty === 0 && (row.sales || 0) === 0) continue;
-      const normalized = normalizeName(row.name);
+      const normalized = cmpCanonicalName(row.name);
       if (!catalogSet.has(normalized)) {
         const prev = notFoundByRun.get(normalized);
         notFoundByRun.set(normalized, {
