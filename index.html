@@ -2615,7 +2615,7 @@ function computeFIFO(row) {
   const moment = getCheckMoment(row._checkDate);
 
   const toDayKey = value => {
-    if (value instanceof Date && !isNaN(value.getTime())) {
+    if (value && typeof value.getTime === 'function' && !isNaN(value.getTime())) {
       return [value.getFullYear(), String(value.getMonth() + 1).padStart(2, '0'), String(value.getDate()).padStart(2, '0')].join('-');
     }
     const s = String(value || '').trim();
