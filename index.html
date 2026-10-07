@@ -8951,7 +8951,7 @@ function cmpRefreshSafetyGate() {
   // После выбора значения пересчитываем статус строки.
   (_cmpData.rows || []).forEach(row => {
     if (!row) return;
-    const nameMismatch = row.a && row.b && String(row.a.name || '') !== String(row.b.name || '');
+    const nameMismatch = row.a && row.b && String(row.a.name || '') !== String(row.b.name || '') && !row.edits?.nameAccepted;
     let unresolvedValue = false;
     (row.dates || []).forEach(dk => {
       const aVal = row.a ? (row.a.incoming?.[dk] || 0) : null;
@@ -9064,6 +9064,9 @@ function cmpRenderEditCard(row) {
       <label>Своё</label>
       <input type="text" inputmode="numeric" placeholder="—" value="${showCustom ? escapeHtml(customVal) : ''}">
     </div>
+    ${row.a && row.b && String(row.a.name || '') !== String(row.b.name || '') && !row.edits?.nameAccepted
+      ? '<button type="button" class="cmp-name-confirm">Это одно и то же название</button>'
+      : ''}
     <div class="cmp-edit-actions">
       <button type="button" class="cancel">Отмена</button>
       <button type="button" class="save">Сохранить</button>
@@ -9100,6 +9103,13 @@ function cmpRenderEditCard(row) {
       setTimeout(() => { try { customInput.select(); } catch (e) {} }, 50);
     });
   }
+  const nameConfirmBtn = card.querySelector('.cmp-name-confirm');
+  if (nameConfirmBtn) nameConfirmBtn.addEventListener('click', () => {
+    if (!row.edits) row.edits = { incoming: {}, sales: null };
+    row.edits.nameAccepted = true;
+    _cmpEditKey = null; _cmpEditDk = null; _cmpEditKind = null;
+    cmpRefreshSafetyGate();
+  });
   const cancelBtn = card.querySelector('.cancel');
   if (cancelBtn) cancelBtn.addEventListener('click', () => cmpCloseEdit());
   const saveBtn = card.querySelector('.save');
