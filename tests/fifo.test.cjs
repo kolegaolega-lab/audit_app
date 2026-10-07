@@ -140,3 +140,28 @@ test('future receipt is ignored even when it has a larger quantity than stock', 
     freshOnShelf:0, expiredOnShelf:1, freshSold:0, soldExpired:1
   });
 });
+
+
+test('regression: OCR merge must preserve all invoice dates needed by FIFO', () => {
+  assert.match(html, /invoices: normalizedInvoices,/);
+  assert.doesNotMatch(html, /invoices:\s*normalizedInvoices\.filter\(x\s*=>\s*String\(x\.date\s*\|\|\s*''\)\s*===\s*iso\)/);
+});
+
+test('regression: missing invoice date must never fall back to audit date', () => {
+  assert.match(html, /else\{date=""\}/);
+  assert.doesNotMatch(html, /const fallback=String\(d\.check_date/);
+});
+
+test('regression: unresolved continuation date must remain unresolved', () => {
+  assert.match(html, /copy\.date = \(number && invoiceDates\[number\]\) \|\| lastInvoiceDate \|\| ""/);
+  assert.doesNotMatch(html, /copy\.date = \(number && invoiceDates\[number\]\) \|\| lastInvoiceDate \|\| iso/);
+});
+
+test('regression: missing invoice dates are blocking OCR safety issues', () => {
+  assert.match(html, /code:"invoice-date-review"/);
+  assert.match(html, /code: inv\.continuation \? 'continuation-date-unresolved' : 'invoice-date-missing'/);
+});
+
+test('regression: UI missing-receipt guard requires a valid dated positive receipt', () => {
+  assert.match(html, /!row\.incoming\.some\(p => p && \/\^\\d\{4\}-\\d\{2\}-\\d\{2\}\$\/.test/);
+});
