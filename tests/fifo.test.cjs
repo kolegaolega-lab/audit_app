@@ -26,7 +26,7 @@ const context = {
   emptyResult: () => ({ soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null }),
   mergeIncomingByDate: rows => [...(rows || [])].sort((a, b) => String(a.date).localeCompare(String(b.date))),
   parseDateRu(value, referenceDate) {
-    const m = String(value || '').match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
+    const m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
     return m ? m[0] : '';
   }
 };
