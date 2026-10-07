@@ -6092,6 +6092,12 @@ async function applyJSON() {
     const text = jsonInput.value.trim();
     if (!text) throw new Error('Поле пустое.');
     if (text.length > MAX_JSON_BYTES) throw new Error('JSON слишком большой (макс. 2 МБ).');
+    let safetyData;
+    try { safetyData = JSON.parse(text); } catch (e) { throw new Error('JSON имеет неверный формат.'); }
+    const safetyReport = { hasBlocks: true, validation: { issues: [] } };
+    const safetyCount = Number(safetyData?.source?.photo_count);
+    const safetyIssues = getOCRSafetyIssues(text, safetyReport, Number.isFinite(safetyCount) ? safetyCount : -1);
+    if (safetyIssues.length) throw new Error(formatOCRSafetyMessage(safetyIssues));
     const reference = new Date();
     const { rows, truncated, json } = parseJSON(text, reference);
     const checkDate = String(json?.check_date || '').trim();
