@@ -5151,8 +5151,9 @@ function updateCardResults() {
     const freshStock = calc.freshOnShelf;
     const freshSales = calc.freshSold;
     const incoming = getIncomingSummary(row);
+    const noIncoming = !row.salesOnly && row.stock != null && (!Array.isArray(row.incoming) || row.incoming.length === 0);
     res.innerHTML = `
-      <div class="card-result-source">Приходы: <b>${escapeHtml(incoming.text)}</b></div>
+      <div class="card-result-source">Приходы: <b>${escapeHtml(noIncoming ? "нет — просрочка, проверить с персоналом" : incoming.text)}</b></div>
       <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
       <span>Продано свежих: <span class="rv">${freshSales === null ? '—' : freshSales}</span></span>
       <span>Просрочено на витрине: <span class="rv ${exp === null ? 'zero' : (exp > 0 ? 'positive' : '')}">${exp === null ? '—' : exp}</span></span>
@@ -7476,7 +7477,7 @@ function renderReport() {
   if (!body) return;
 
   if (_reportView === null) {
-    let totalFreshOnShelf = 0, totalExpiredOnShelf = 0, totalSoldExpired = 0;
+    let totalFreshOnShelf = 0, totalExpiredOnShelf = 0, totalSoldExpired = 0, totalNoIncoming = 0;
     let totalPositions = 0, totalProblems = 0;
     tableRows.forEach(r => {
       const c = computeFIFO(r);
@@ -7484,6 +7485,7 @@ function renderReport() {
       if (c.freshOnShelf != null) totalFreshOnShelf += c.freshOnShelf;
       if (c.expiredOnShelf != null) totalExpiredOnShelf += c.expiredOnShelf;
       if (c.soldExpired != null) totalSoldExpired += c.soldExpired;
+      if (!r.salesOnly && r.stock != null && (!Array.isArray(r.incoming) || r.incoming.length === 0) && (r.stock > 0 || r.sales > 0)) totalNoIncoming++;
       if ((c.soldExpired || 0) > 0 || (c.expiredOnShelf || 0) > 0) totalProblems++;
     });
 
@@ -7513,6 +7515,7 @@ function renderReport() {
             '<div class="row"><span>Свежих на витрине</span><b>' + totalFreshOnShelf + '</b></div>' +
             '<div class="row"><span>Просрочено на витрине</span><b>' + totalExpiredOnShelf + '</b></div>' +
             '<div class="row"><span>Продано просрочкой</span><b' + (totalSoldExpired > 0 ? ' class="red"' : '') + '>' + totalSoldExpired + '</b></div>' +
+            (totalNoIncoming ? '<div class="row"><span>Нет прихода · проверить с персоналом</span><b class="red">' + totalNoIncoming + '</b></div>' : '') +
           '</div>' +
         '</div>' +
       '</div>';
