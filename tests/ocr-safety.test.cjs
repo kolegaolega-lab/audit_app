@@ -118,6 +118,13 @@ test('OCR prompt enforces column 8 piece count and never derives quantity from m
   assert.match(html, /Дубликаты фото не суммировать/);
 });
 
+test('OCR prompt keeps the full document and applies category only after OCR', () => {
+  assert.match(html, /OCR обязан распознать все товарные позиции документа/);
+  assert.match(html, /распознай ВЕСЬ раздел продаж/);
+  assert.match(html, /Если товарной позиции НЕТ в справочнике — всё равно включи её в JSON/);
+  assert.doesNotMatch(html, /В JSON включай ТОЛЬКО те позиции, которые есть в списке ниже/);
+});
+
 test('OCR validation catches duplicate rows inside one invoice', () => {
   const json = validJson({
     invoices: [{
