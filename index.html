@@ -8565,7 +8565,7 @@ function cmpRunCompare() {
     const details = [];
     let status = 'ok';
     if (!a || !b) {
-      status = 'err';
+      status = 'warn';
       details.push('Позиция есть только в ' + (a ? 'результате 1' : 'результате 2'));
     } else {
       if (String(a.name || '') !== String(b.name || '')) {
@@ -8573,7 +8573,7 @@ function cmpRunCompare() {
       }
       for (const dk of dates) {
         if ((a.incoming[dk] || 0) !== (b.incoming[dk] || 0)) {
-          status = 'warn';
+          status = 'err';
           details.push('Приход отличается — ' + (dateLabels[dk] || dk) + ': ' + (a.incoming[dk] || 0) + ' ↔ ' + (b.incoming[dk] || 0));
         }
         if (a.incomingStatus?.[dk] && b.incomingStatus?.[dk]) {
@@ -8585,7 +8585,7 @@ function cmpRunCompare() {
         }
       }
       if (a.sales !== b.sales) {
-        status = 'warn';
+        status = 'err';
         details.push('Продажи отличаются: ' + a.sales + ' ↔ ' + b.sales);
       }
       if (a.salesStatus !== 'confirmed' || b.salesStatus !== 'confirmed') {
@@ -8646,9 +8646,24 @@ function cmpRunCompare() {
       return [{ code:'comparison-safety-error', title:label + ': ошибка safety-проверки', detail:String(e?.message || e || 'Неизвестная ошибка') }];
     }
   };
-  cmpSafety.push(...buildCmpSafety(t1, d1full, 'Первый результат', t2));
-  cmpSafety.push(...buildCmpSafety(t2, d2full, 'Второй результат', t1));
-  cmpSafety.forEach(issue => checks.push({
+  const rawCmpSafety = [
+    ...buildCmpSafety(t1, d1full, 'Первый результат', t2),
+    ...buildCmpSafety(t2, d2full, 'Второй результат', t1)
+  ];
+  const quantityIssues = rawCmpSafety.filter(x => x?.code === 'quantity-status-review' || x?.code === 'handwritten-confirmation');
+  const otherSafetyIssues = rawCmpSafety.filter(x => x?.code !== 'quantity-status-review' && x?.code !== 'handwritten-confirmation');
+
+  if (quantityIssues.length) {
+    checks.push({
+      ok: false,
+      title: 'Нужно подтвердить количество',
+      detail: 'В распознавании есть количества, записанные от руки. Откройте отмеченные строки ниже, выберите правильное значение и сохраните.',
+      _safetyCode: 'quantity-status-review',
+      _safetyLabel: 'Нужно подтвердить количество',
+      _originalDetail: 'В распознавании есть количества, записанные от руки. Откройте отмеченные строки ниже, выберите правильное значение и сохраните.'
+    });
+  }
+  otherSafetyIssues.forEach(issue => checks.push({
     ok: false,
     title: issue.title,
     detail: issue.detail || 'Нужно исправить отмеченную проблему.',
@@ -8770,8 +8785,16 @@ function cmpRunCompare() {
   _cmpData = {
     rows, dateLabels, okCount, warnCount, errCount,
     json1: d1, json2: d2, json1Full: d1full, json2Full: d2full,
-    checks, safetyIssues: cmpSafety,
-    comparisonValid: cmpSafety.length === 0
+    checks,
+    safetyIssues: [
+      ...(quantityIssues.length ? [{
+        code: 'quantity-status-review',
+        title: 'Нужно подтвердить количество',
+        detail: 'В распознавании есть количества, записанные от руки. Откройте отмеченные строки ниже, выберите правильное значение и сохраните.'
+      }] : []),
+      ...otherSafetyIssues
+    ],
+    comparisonValid: quantityIssues.length === 0 && otherSafetyIssues.length === 0
   };
   cmpRenderChecks(checks);
   cmpRenderResults();
@@ -8990,13 +9013,13 @@ function cmpRenderResults() {
     const comparisonValid = _cmpData.comparisonValid !== false;
     stats.innerHTML =
       (comparisonValid
-        ? '<span class="big">' + okCount + ' из ' + total + ' совпало</span>'
+        ? '<span class="big">' + okCount + ' из ' + total + ' позиций сопоставлено</span>'
         : '<span class="big" style="color:var(--red)">Пока нельзя использовать результат</span>' +
-          '<div class="cmp-detail" style="margin:4px 0 8px">Ниже показаны отличия и места, где нужно подтвердить количество. Нажмите на значение строки, выберите правильный вариант и сохраните.</div>' +
-          '<div class="cmp-detail">Для справки: ' + okCount + ' из ' + total + ' совпало</div>') +
+          '<div class="cmp-detail" style="margin:4px 0 8px">Есть данные, которые нужно проверить перед применением. Нажмите на строку или число, выберите правильное значение и сохраните.</div>' +
+          '<div class="cmp-detail">Для справки: ' + okCount + ' из ' + total + ' позиций совпало.</div>') +
       '<div class="row"><span>✓ Совпадает</span><b class="green">' + okCount + '</b></div>' +
-      '<div class="row"><span>⚠ Отличия</span><b class="orange">' + warnCount + '</b></div>' +
-      '<div class="row"><span>✗ Есть только в одном результате</span><b class="red">' + errCount + '</b></div>';
+      '<div class="row"><span>⚠ Требует проверки</span><b class="orange">' + warnCount + '</b></div>' +
+      '<div class="row"><span>✗ Количественные расхождения</span><b class="red">' + errCount + '</b></div>';
   }
   if (!out) return;
   if (!rows.length) { out.innerHTML = '<div class="cmp-empty">Оба результата пусты.</div>'; return; }
@@ -9060,7 +9083,7 @@ function cmpRenderResults() {
   const comparisonBlocked = _cmpData.comparisonValid === false;
   if (applyBtn) {
     applyBtn.style.display = (!safetyBlocked && !comparisonBlocked && (okCount || hasEdits)) ? 'block' : 'none';
-    if (comparisonBlocked) applyBtn.title = 'Сначала исправьте отмеченные ошибки';
+    if (comparisonBlocked) applyBtn.title = 'Сначала проверьте количественные расхождения и подтвердите количества, записанные от руки';
   }
 }
 function cmpApplyMatched() {
