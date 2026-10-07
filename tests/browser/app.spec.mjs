@@ -385,6 +385,30 @@ test('comparison normalizes ISO and Russian invoice dates and renders results', 
 });
 
 
+
+test('comparison normalizes safe OCR spelling variants without merging uncertain names', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const payload = (name) => JSON.stringify({
+      schema_version:'1.0', document_type:'combined', check_date:'2026-10-06',
+      source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
+      invoices:[{number:'INV-1',date:'2026-10-06',continuation:false,last_line_number:1,
+        items:[{line:1,name,quantity:2,quantity_status:'confirmed'}]}],
+      sales:[], review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+    });
+    const a = window.cmpParseJSON(payload('Лингвини с жаренными креветками'), false);
+    const b = window.cmpParseJSON(payload('Лингвини с жареными креветками'), false);
+    const uncertainA = window.cmpParseJSON(payload('Рогалики малина'), false);
+    const uncertainB = window.cmpParseJSON(payload('Рогалики с малиной'), false);
+    return {
+      safeKeysEqual: Object.keys(a.rows)[0] === Object.keys(b.rows)[0],
+      uncertainKeysEqual: Object.keys(uncertainA.rows)[0] === Object.keys(uncertainB.rows)[0]
+    };
+  });
+  expect(result.safeKeysEqual).toBe(true);
+  expect(result.uncertainKeysEqual).toBe(false);
+});
+
 test('comparison blocks applying OCR runs with unresolved invoice date', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const payload = JSON.stringify({
