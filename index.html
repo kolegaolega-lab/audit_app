@@ -7315,9 +7315,7 @@ function getOCRSafetyIssues(text,report,count){
       detail:"Проверьте: " + statusDetails.join("; ") + "."
     });
   }
-  // Если рукописные строки уже перечислены через quantity_status, не дублируем
-  // отдельное предупреждение из review.handwritten_confirmation.
-  if ((r.handwritten_confirmation||[]).length && !handwrittenItems.length) {
+  if ((r.handwritten_confirmation||[]).length) {
     out.push({
       code:"handwritten-confirmation",
       title:"Есть рукописные значения, требующие подтверждения",
