@@ -2666,7 +2666,7 @@ function computeFIFO(row) {
 function emptyResult() { return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null }; }
 function getRowStatus(calc, row) {
   if (row && row.salesOnly) return { cls: 'row-info', label: 'info' };
-  if (row && row.stock != null && (!Array.isArray(row.incoming) || row.incoming.length === 0)) return { cls: 'row-danger', label: 'danger' };
+  if (row && row.stock != null && (!Array.isArray(row.incoming) || !row.incoming.some(p => p && /^\d{4}-\d{2}-\d{2}$/.test(String(p.date || '')) && Number(p.qty) > 0))) return { cls: 'row-danger', label: 'danger' };
   if (row && row.stock == null) return { cls: 'row-unknown', label: 'empty' };
   if (!calc || calc.soldExpired === null) return { cls: 'row-unknown', label: 'unknown' };
   if (calc.soldExpired > 0) return { cls: 'row-danger', label: 'danger' };
@@ -2701,7 +2701,7 @@ function parseShelfLife(str) {
   return clampNum(n, 1, 10000, null);
 }
 
-function parseJSON(text,referenceDate){let d;try{d=typeof text==="string"?JSON.parse(text):text}catch(e){throw Error("JSON имеет неверный формат.")}if(!d||typeof d!=="object"||Array.isArray(d))throw Error("JSON должен быть объектом.");const parsedCheckDate=String(d.check_date||"").trim();const effectiveReference=parsedCheckDate?parseDateRu(parsedCheckDate,referenceDate):referenceDate;const rows={};const add=n=>{const c=cleanProductName(n);if(!c||isServiceLine(c)||isIgnored(c))return null;const a=applyAliases(c),k=normalizeName(a),p=PRODUCTS.find(x=>normalizeName(x.name)===k);/* OCR parser intentionally keeps all categories; category filtering is applied only when building the audit table. */if(!rows[k])rows[k]={name:a,stock:null,sales:0,_originalSales:0,shelfLife:p?p.shelfLife:null,category:p?(p.category||null):null,incoming:[],salesOnly:false};return rows[k]};(function(){const invoiceDates={};let lastInvoiceDate="";(d.invoices||[]).forEach(inv=>{const number=String(inv.number||"").trim();const rawDate=String(inv.date||"").trim();let date="";if(rawDate){date=/^\\d{4}-\\d{2}-\\d{2}$/.test(rawDate)?rawDate:(parseDateRu(rawDate,effectiveReference)||"");if(date){if(number)invoiceDates[number]=date;lastInvoiceDate=date}}else if(inv.continuation){date=(number&&invoiceDates[number])||lastInvoiceDate||""}else{const fallback=String(d.check_date||"").trim();date=/^\\d{4}-\\d{2}-\\d{2}$/.test(fallback)?fallback:(parseDateRu(fallback,effectiveReference)||"")} (inv.items||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed"&&date)row.incoming.push({date,qty:clampNum(it.quantity,0,MAX_NUM,0)})})})})();(d.sales||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed")row.sales+=clampNum(it.quantity,0,MAX_NUM,0)});Object.values(rows).forEach(r=>r.incoming=mergeIncomingByDate(r.incoming));return{rows:Object.values(rows),truncated:false,json:d,effectiveReference}}
+function parseJSON(text,referenceDate){let d;try{d=typeof text==="string"?JSON.parse(text):text}catch(e){throw Error("JSON имеет неверный формат.")}if(!d||typeof d!=="object"||Array.isArray(d))throw Error("JSON должен быть объектом.");const parsedCheckDate=String(d.check_date||"").trim();const effectiveReference=parsedCheckDate?parseDateRu(parsedCheckDate,referenceDate):referenceDate;const rows={};const add=n=>{const c=cleanProductName(n);if(!c||isServiceLine(c)||isIgnored(c))return null;const a=applyAliases(c),k=normalizeName(a),p=PRODUCTS.find(x=>normalizeName(x.name)===k);/* OCR parser intentionally keeps all categories; category filtering is applied only when building the audit table. */if(!rows[k])rows[k]={name:a,stock:null,sales:0,_originalSales:0,shelfLife:p?p.shelfLife:null,category:p?(p.category||null):null,incoming:[],salesOnly:false};return rows[k]};(function(){const invoiceDates={};let lastInvoiceDate="";(d.invoices||[]).forEach(inv=>{const number=String(inv.number||"").trim();const rawDate=String(inv.date||"").trim();let date="";if(rawDate){date=/^\\d{4}-\\d{2}-\\d{2}$/.test(rawDate)?rawDate:(parseDateRu(rawDate,effectiveReference)||"");if(date){if(number)invoiceDates[number]=date;lastInvoiceDate=date}}else if(inv.continuation){date=(number&&invoiceDates[number])||lastInvoiceDate||"" }else{date=""} (inv.items||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed"&&date)row.incoming.push({date,qty:clampNum(it.quantity,0,MAX_NUM,0)})})})})();(d.sales||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed")row.sales+=clampNum(it.quantity,0,MAX_NUM,0)});Object.values(rows).forEach(r=>r.incoming=mergeIncomingByDate(r.incoming));return{rows:Object.values(rows),truncated:false,json:d,effectiveReference}}
 function sortRowsAlphabetically(rows) {
   return [...rows].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' }));
 }
@@ -6954,7 +6954,17 @@ function validateAIResponse(j1, j2, report, count) {
     }
   });
 
-  /* 9. Даты накладных: ±30 дней */
+  /* 9. Дата накладной обязательна. Неизвестная дата не превращается в дату аудита. */
+  (d.invoices || []).forEach(inv => {
+    const ds = String(inv.date || '').trim();
+    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(ds)) {
+      issues.push({ level: 'error', code: inv.continuation ? 'continuation-date-unresolved' : 'invoice-date-missing',
+        title: inv.continuation ? 'Не удалось определить дату продолжения накладной' : 'Не удалось определить дату накладной',
+        detail: (inv.number ? ('№' + inv.number + ' · ') : '') + 'требуется ручная сверка' });
+    }
+  });
+
+  /* 10. Даты накладных: ±30 дней */
   const checkDateStr = String(d.check_date || '');
   const checkDate = /^\d{4}-\d{2}-\d{2}$/.test(checkDateStr) ? new Date(checkDateStr + 'T12:00:00') : null;
   if (checkDate && !isNaN(checkDate.getTime())) {
@@ -7028,6 +7038,8 @@ function getOCRSafetyIssues(text,report,count){
   if (!report || !report.hasBlocks) { out.push({code:"missing-ai-report",title:"Нет структурированного отчёта OCR"}); return out; }
   if (Number(d.source?.photo_count) !== Number(count) || Number(d.source?.processed_photo_count) !== Number(count))
     out.push({code:"completeness-mismatch",title:"Не подтверждена обработка всех фотографий"});
+  const missingInvoiceDates = (d.invoices || []).filter(inv => !/^\\d{4}-\\d{2}-\\d{2}$/.test(String(inv?.date || '').trim()));
+  if (missingInvoiceDates.length) out.push({code:"invoice-date-review",title:"Есть накладные без подтверждённой даты"});
   const r = d.review || {};
   if ((r.unreadable||[]).length) out.push({code:"unreadable",title:"Есть нечитаемые значения"});
   if ((r.handwritten_confirmation||[]).length) out.push({code:"handwritten-confirmation",title:"Есть рукописные значения, требующие подтверждения"});
@@ -7208,7 +7220,7 @@ function mergeSeparatedOCRJson(invoiceJson, salesJson, dateLabel) {
   const normalizedInvoices = (inv?.invoices || []).map(x => {
     const copy = { ...x };
     const number = String(copy.number || "").trim();
-    if (!copy.date && copy.continuation) copy.date = (number && invoiceDates[number]) || lastInvoiceDate || iso;
+    if (!copy.date && copy.continuation) copy.date = (number && invoiceDates[number]) || lastInvoiceDate || "";
     return copy;
   });
   const review = {
@@ -7226,7 +7238,7 @@ function mergeSeparatedOCRJson(invoiceJson, salesJson, dateLabel) {
       processed_photo_count: Number(inv?.source?.processed_photo_count || 0) + Number(sal?.source?.processed_photo_count || 0),
       duplicate_photo_count: Number(inv?.source?.duplicate_photo_count || 0) + Number(sal?.source?.duplicate_photo_count || 0)
     },
-    invoices: normalizedInvoices.filter(x => String(x.date || '') === iso),
+    invoices: normalizedInvoices,
     sales: sal?.sales || [],
     review
   });
