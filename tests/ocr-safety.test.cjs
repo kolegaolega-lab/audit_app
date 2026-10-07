@@ -385,6 +385,13 @@ test('OCR name mismatch can be explicitly confirmed and then stops blocking the 
   assert.match(html, /Это одно и то же название/);
 });
 
+test('application version is consistent across runtime and visible UI', () => {
+  assert.match(html, /const APP_VERSION = ['"]v9\.24\.19['"]/);
+  assert.match(html, /id="moreAppVersion">v9\.24\.19</);
+  assert.match(html, /id="aboutVersion">[^<]*v9\.24\.19</);
+  assert.doesNotMatch(html, /v9\.24\.1[6-8]/);
+});
+
 test('double-run comparison merges likely OCR name variants into one row', () => {
   assert.match(html, /function cmpNameSimilarity\(a, b\)/);
   assert.match(html, /Возможное совпадение: «/);
