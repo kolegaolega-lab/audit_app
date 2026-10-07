@@ -292,7 +292,7 @@ test('OCR safety consolidates non-confirmed quantities into one actionable issue
   });
   const issues = context.getOCRSafetyIssues(json, reportFor(json), 2);
   assert.equal(issues.filter(x => x.code === 'quantity-status-review').length, 1);
-  assert.equal(issues.filter(x => x.code === 'handwritten-confirmation').length, 1);
+  assert.equal(issues.filter(x => x.code === 'handwritten-confirmation').length, 0);
   assert.match(issues.find(x => x.code === 'quantity-status-review').detail, /Безе мини ассорти/);
   assert.match(issues.find(x => x.code === 'quantity-status-review').detail, /Ром баба/);
 });
@@ -336,4 +336,24 @@ test('OCR fuzzy name warnings are deduplicated and quantity statuses use plain l
   assert.match(html, /количество записано от руки/);
   assert.match(html, /количество нужно уточнить/);
   assert.match(html, /Использование заблокировано\. Сначала исправьте ошибки распознавания/);
+});
+
+
+test('OCR safety does not duplicate handwritten confirmation when quantity status already identifies it', () => {
+  const json = validJson({
+    invoices: [{
+      number: '123', date: '2026-10-06', continuation: false,
+      last_line_number: 1, printed_total: null,
+      items: [{ line: 1, name: 'Безе мини ассорти', quantity: 3, quantity_status: 'handwritten' }]
+    }],
+    review: {
+      unreadable: [],
+      handwritten_confirmation: ['Безе мини ассорти'],
+      uncertain_rows: [],
+      notes: []
+    }
+  });
+  const issues = context.getOCRSafetyIssues(json, reportFor(json), 2);
+  assert.equal(issues.filter(x => x.code === 'quantity-status-review').length, 1);
+  assert.equal(issues.filter(x => x.code === 'handwritten-confirmation').length, 0);
 });
