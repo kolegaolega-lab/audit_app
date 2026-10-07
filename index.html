@@ -1857,7 +1857,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.24.10';
+const APP_VERSION = 'v9.24.11';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -7291,14 +7291,39 @@ function getOCRSafetyIssues(text,report,count){
   const r = d.review || {};
   if (!r || typeof r !== "object") out.push({code:"invalid-review",title:"Некорректный блок review"});
   if ((r.unreadable||[]).length) out.push({code:"unreadable",title:"Есть нечитаемые значения"});
-  if ((r.handwritten_confirmation||[]).length) out.push({code:"handwritten-confirmation",title:"Есть рукописные значения, требующие подтверждения"});
   if ((r.uncertain_rows||[]).length) out.push({code:"uncertain-rows",title:"Есть сомнительные строки — требуется ручная сверка"});
 
   const allowedStatuses = new Set(["confirmed","uncertain","unreadable","handwritten"]);
   const badStatus = allItems.filter(x => !x || !allowedStatuses.has(x.quantity_status));
-  if (badStatus.length) out.push({code:"quantity-status-review",title:"Есть количества без корректного статуса"});
   const unconfirmed = allItems.filter(x => x && x.quantity_status !== "confirmed");
-  if (unconfirmed.length) out.push({code:"quantity-status-review",title:"Есть количества без статуса confirmed"});
+  const handwrittenItems = unconfirmed.filter(x => x && x.quantity_status === "handwritten");
+  const statusDetails = unconfirmed.slice(0, 10).map(x => {
+    const name = String(x?.name || "Без названия").trim();
+    const line = Number.isInteger(Number(x?.line)) ? " · строка " + Number(x.line) : "";
+    return name + line + " · " + String(x.quantity_status || "нет статуса");
+  });
+  if (badStatus.length) {
+    out.push({
+      code:"quantity-status-review",
+      title:"Есть количества без корректного статуса",
+      detail:"Проверьте: " + statusDetails.slice(0, 10).join("; ") + (statusDetails.length > 10 ? " и ещё " + (statusDetails.length - 10) + "." : ".")
+    });
+  } else if (unconfirmed.length) {
+    out.push({
+      code:"quantity-status-review",
+      title:"Есть количества без статуса confirmed",
+      detail:"Проверьте: " + statusDetails.join("; ") + "."
+    });
+  }
+  // Если рукописные строки уже перечислены через quantity_status, не дублируем
+  // отдельное предупреждение из review.handwritten_confirmation.
+  if ((r.handwritten_confirmation||[]).length && !handwrittenItems.length) {
+    out.push({
+      code:"handwritten-confirmation",
+      title:"Есть рукописные значения, требующие подтверждения",
+      detail:"Указано в review: " + r.handwritten_confirmation.slice(0, 8).join("; ") + (r.handwritten_confirmation.length > 8 ? " и ещё " + (r.handwritten_confirmation.length - 8) + "." : ".")
+    });
+  }
 
   const invalidQty = allItems.filter(x => {
     if (!x || x.quantity_status !== "confirmed") return false;
@@ -8471,16 +8496,30 @@ function cmpRunCompare() {
     const a = d1.rows[k]; const b = d2.rows[k];
     const name = (a && a.name) || (b && b.name) || k;
     const dates = new Set([...(a ? Object.keys(a.incoming) : []), ...(b ? Object.keys(b.incoming) : [])]);
+    const details = [];
     let status = 'ok';
-    if (!a || !b) status = 'err';
-    else {
-      for (const dk of dates) {
-        if ((a.incoming[dk] || 0) !== (b.incoming[dk] || 0)) { status = 'warn'; break; }
+    if (!a || !b) {
+      status = 'err';
+      details.push('Позиция есть только в ' + (a ? 'прогоне 1' : 'прогоне 2'));
+    } else {
+      if (String(a.name || '') !== String(b.name || '')) {
+        details.push('Название: «' + String(a.name || '') + '» ↔ «' + String(b.name || '') + '»');
       }
-      if (status === 'ok' && a.sales !== b.sales) status = 'warn';
+      for (const dk of dates) {
+        if ((a.incoming[dk] || 0) !== (b.incoming[dk] || 0)) {
+          status = 'warn';
+          details.push('Приход ' + (dateLabels[dk] || dk) + ': ' + (a.incoming[dk] || 0) + ' ↔ ' + (b.incoming[dk] || 0));
+        }
+      }
+      if (a.sales !== b.sales) {
+        status = 'warn';
+        details.push('Продажи: ' + a.sales + ' ↔ ' + b.sales);
+      }
+      // Различие только в написании названия не является расхождением количества.
+      if (status === 'ok' && details.length) status = 'ok';
     }
     if (status === 'ok') okCount++; else if (status === 'warn') warnCount++; else errCount++;
-    rows.push({ key: k, name, a, b, dates: [...dates], status, edits: { incoming: {}, sales: null } });
+    rows.push({ key: k, name, a, b, dates: [...dates], status, details, edits: { incoming: {}, sales: null } });
   });
   const order = { err: 0, warn: 1, ok: 2 };
   rows.sort((x, y) => {
@@ -8489,6 +8528,24 @@ function cmpRunCompare() {
   });
 
   const checks = [];
+  const cmpDateToIso = value => {
+    const parsed = parseDateRu(String(value || ''), new Date());
+    if (!parsed) return '';
+    if (parsed instanceof Date) {
+      if (isNaN(parsed.getTime())) return '';
+      return [parsed.getFullYear(), String(parsed.getMonth() + 1).padStart(2, '0'), String(parsed.getDate()).padStart(2, '0')].join('-');
+    }
+    return /^\d{4}-\d{2}-\d{2}$/.test(String(parsed)) ? String(parsed) : '';
+  };
+  const checkDate1 = cmpDateToIso(d1full.document?.check_date);
+  const checkDate2 = cmpDateToIso(d2full.document?.check_date);
+  if (checkDate1 && checkDate2 && checkDate1 !== checkDate2) {
+    checks.push({
+      ok: false,
+      title: 'Дата проверки отличается между прогонами',
+      detail: 'Прогон 1: <b>' + escapeHtml(checkDate1) + '</b> · Прогон 2: <b>' + escapeHtml(checkDate2) + '</b>. Для одного и того же набора фото дата должна совпадать; перед применением проверьте дату аудита.'
+    });
+  }
   // Сверка — это отдельный путь к применению OCR-данных, поэтому она
   // обязана проходить ту же OCR safety gate, что и обычный Apply JSON.
   const cmpSafety = [];
@@ -8558,20 +8615,30 @@ function cmpRunCompare() {
   });
 
   const catalogSet = new Set(PRODUCTS.map(p => normalizeName(p.name)));
-  const notFound = [];
-  for (const key of Object.keys(d1full.rows)) {
-    const name = d1full.rows[key].name;
-    const allValues = Object.values(d1full.rows[key].incoming);
-    const totalQty = allValues.reduce((a, b) => a + b, 0);
-    if (totalQty === 0 && (d1.rows[key]?.sales || 0) === 0) continue;
-    if (!catalogSet.has(normalizeName(name))) notFound.push(name);
-  }
+  const notFoundByRun = new Map();
+  [[d1full, 'Прогон 1'], [d2full, 'Прогон 2']].forEach(([data, label]) => {
+    for (const key of Object.keys(data.rows)) {
+      const row = data.rows[key];
+      const allValues = Object.values(row.incoming);
+      const totalQty = allValues.reduce((a, b) => a + b, 0);
+      if (totalQty === 0 && (row.sales || 0) === 0) continue;
+      const normalized = normalizeName(row.name);
+      if (!catalogSet.has(normalized)) {
+        const prev = notFoundByRun.get(normalized);
+        notFoundByRun.set(normalized, {
+          name: row.name,
+          runs: prev ? [...new Set([...prev.runs, label])] : [label]
+        });
+      }
+    }
+  });
+  const notFound = [...notFoundByRun.values()];
   checks.push({
     ok: notFound.length === 0,
     title: 'Целостность справочника',
     detail: notFound.length === 0
-      ? 'Все позиции JSON есть в справочнике.'
-      : `Не найдены в справочнике: <b>${notFound.map(n => escapeHtml(n)).join('</b>, <b>')}</b>`
+      ? 'Все позиции обоих JSON есть в справочнике.'
+      : 'Не найдены: ' + notFound.map(x => '<b>' + escapeHtml(x.name) + '</b> (' + x.runs.join(', ') + ')').join(', ')
   });
 
   _cmpEditKey = null;
@@ -8770,9 +8837,12 @@ function cmpRenderResults() {
       const shown = edited ? r.edits.sales : `${sa} / ${sb}`;
       vals.push(`<span class="cmp-val ${cls}" data-key="${escapeHtml(r.key)}" data-dk="sales" data-kind="sales">Прод: ${shown}</span>`);
     }
+    const detailHtml = r.details && r.details.length
+      ? '<span class="cmp-detail">' + r.details.map(x => escapeHtml(x)).join(' · ') + '</span>'
+      : '';
     return `<div class="cmp-row ${r.status}" data-key="${escapeHtml(r.key)}">
       <span class="cmp-icon">${icon}</span>
-      <span class="cmp-name">${escapeHtml(r.name)}</span>
+      <span class="cmp-name">${escapeHtml(r.name)}${detailHtml}</span>
       <span class="cmp-vals">${vals.join('')}</span>
     </div>`;
   }).join('');
