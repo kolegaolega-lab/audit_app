@@ -241,3 +241,5 @@ test('finish check is blocked until all stock values are entered', async ({page}
   expect(result.disabled).toBe(true);
   expect(result.text).toMatch(/^Введите остаток: \d+$/);
 });
+
+// Regression suite: branch-level audit fixes are verified together in CI.
