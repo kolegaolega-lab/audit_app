@@ -26,8 +26,8 @@ const context = {
   emptyResult: () => ({ soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null }),
   mergeIncomingByDate: rows => [...(rows || [])].sort((a, b) => String(a.date).localeCompare(String(b.date))),
   parseDateRu(value, referenceDate) {
-    const m = String(value || '').match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
-    return m ? m[0] : '';
+    const m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : '';
   }
 };
 vm.createContext(context);
@@ -163,5 +163,5 @@ test('regression: missing invoice dates are blocking OCR safety issues', () => {
 });
 
 test('regression: UI missing-receipt guard requires a valid dated positive receipt', () => {
-  assert.match(html, /!row\.incoming\.some\(p => p && \/\^\\d\{4\}-\\d\{2\}-\\d\{2\}\$\/.test/);
+  assert.match(html, /!row\.incoming\.some\(p => p && \/\^\d\{4\}-\d\{2\}-\d\{2\}\$\/.test/);
 });
