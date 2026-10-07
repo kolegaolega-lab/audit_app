@@ -411,3 +411,19 @@ test('comparison blocks applying OCR runs with unresolved invoice date', async (
   expect(result.applyDisplay).toBe('none');
   expect(result.checkText).toContain('Есть накладные без подтверждённой даты');
 });
+
+
+test('Gemini response schema uses proto-compatible nullable fields', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const src = document.documentElement.innerHTML;
+    const schema = typeof OCR_JSON_SCHEMA !== 'undefined' ? OCR_JSON_SCHEMA : null;
+    return {
+      schema,
+      hasNullableArrays: src.includes('type:["string","null"]') || src.includes('type: ["string","null"]') ||
+        src.includes('type:["integer","null"]') || src.includes('type: ["integer","null"]')
+    };
+  });
+  expect(result.hasNullableArrays).toBe(false);
+  expect(result.schema).toBeTruthy();
+});
