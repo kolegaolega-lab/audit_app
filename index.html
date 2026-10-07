@@ -7354,7 +7354,7 @@ function hasUsableIncomingForAudit(row) {
   const checkDay = parsed || getTodayStr();
   const checkKey = typeof checkDay === 'string'
     ? checkDay
-    : [checkDay.getFullYear(), String(checkDay.getMonth() + 1).padStart(4, '0'), String(checkDay.getDate()).padStart(2, '0')].join('-');
+    : [checkDay.getFullYear(), String(checkDay.getMonth() + 1).padStart(2, '0'), String(checkDay.getDate()).padStart(2, '0')].join('-');
   const checkMoment = getCheckMoment(checkKey);
   return row.incoming.some(p => {
     if (!p || Number(p.qty) <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(String(p.date || ''))) return false;
