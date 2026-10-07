@@ -161,7 +161,7 @@ test('regression: unresolved continuation date must remain unresolved', () => {
 
 test('regression: missing invoice dates are blocking OCR safety issues', () => {
   assert.match(html, /code:"invoice-date-review"/);
-  assert.match(html, /code: inv\.continuation \? 'continuation-date-unresolved' : 'invoice-date-missing'/);
+  assert.match(html, /level:\s*['"]error['"][\s\S]{0,120}code:\s*inv\?\.continuation\s*\?\s*['"]continuation-date-unresolved['"]\s*:\s*['"]invoice-date-missing['"]/);
 });
 
 test('regression: UI missing-receipt guard uses the FIFO incoming helper', () => {
