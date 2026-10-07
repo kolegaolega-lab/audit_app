@@ -7188,6 +7188,22 @@ function mergeSeparatedOCRJson(invoiceJson, salesJson, dateLabel) {
     throw new Error('Некорректный JSON OCR.');
   }
   const iso = (dailyParseDateInput(dateLabel) || {}).iso || dateLabel;
+  const invoiceDates = {};
+  let lastInvoiceDate = "";
+  (inv?.invoices || []).forEach(x => {
+    const number = String(x?.number || "").trim();
+    const raw = String(x?.date || "").trim();
+    if (raw && /^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+      if (number) invoiceDates[number] = raw;
+      lastInvoiceDate = raw;
+    }
+  });
+  const normalizedInvoices = (inv?.invoices || []).map(x => {
+    const copy = { ...x };
+    const number = String(copy.number || "").trim();
+    if (!copy.date && copy.continuation) copy.date = (number && invoiceDates[number]) || lastInvoiceDate || iso;
+    return copy;
+  });
   const review = {
     unreadable: [...(inv?.review?.unreadable || []), ...(sal?.review?.unreadable || [])],
     handwritten_confirmation: [...(inv?.review?.handwritten_confirmation || []), ...(sal?.review?.handwritten_confirmation || [])],
@@ -7203,7 +7219,7 @@ function mergeSeparatedOCRJson(invoiceJson, salesJson, dateLabel) {
       processed_photo_count: Number(inv?.source?.processed_photo_count || 0) + Number(sal?.source?.processed_photo_count || 0),
       duplicate_photo_count: Number(inv?.source?.duplicate_photo_count || 0) + Number(sal?.source?.duplicate_photo_count || 0)
     },
-    invoices: (inv?.invoices || []).filter(x => String(x.date || '') === iso),
+    invoices: normalizedInvoices.filter(x => String(x.date || '') === iso),
     sales: sal?.sales || [],
     review
   });
