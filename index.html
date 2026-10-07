@@ -8720,12 +8720,45 @@ function cmpRunCompare() {
     }
   });
   const notFound = [...notFoundByRun.values()];
+  const catalogRows = [
+    ...cmpFindPossibleNameMatches(
+      [
+        ...Object.values(d1full.rows).map(r => ({...r, _side:'a'})),
+        ...Object.values(d2full.rows).map(r => ({...r, _side:'b'}))
+      ],
+      'a', 'b'
+    )
+  ];
+  const catalogPairKeys = new Set();
+  catalogRows.forEach(m => {
+    const aName = String(m.row?.name || '').trim();
+    const bName = String(m.candidate?.name || '').trim();
+    if (aName && bName) {
+      catalogPairKeys.add(cmpCanonicalName(aName));
+      catalogPairKeys.add(cmpCanonicalName(bName));
+    }
+  });
+  const catalogDetailParts = [];
+  catalogRows.forEach(m => {
+    const aName = String(m.row?.name || '').trim();
+    const bName = String(m.candidate?.name || '').trim();
+    if (aName && bName) {
+      catalogDetailParts.push('Возможное совпадение: <b>' + escapeHtml(aName) + '</b> ↔ <b>' + escapeHtml(bName) + '</b>');
+    }
+  });
+  notFound.forEach(x => {
+    const n = cmpCanonicalName(x.name);
+    if (catalogPairKeys.has(n)) return;
+    catalogDetailParts.push('<b>' + escapeHtml(x.name) + '</b> (' + x.runs.join(', ') + ')');
+  });
   checks.push({
     ok: notFound.length === 0,
-    title: 'Проверка справочника',
+    level: notFound.length === 0 ? 'ok' : 'warn',
+    title: notFound.length === 0 ? 'Проверка справочника' : 'Справочник: есть названия, требующие проверки',
     detail: notFound.length === 0
       ? 'Все позиции из обоих результатов есть в справочнике.'
-      : 'Не найдены: ' + notFound.map(x => '<b>' + escapeHtml(x.name) + '</b> (' + x.runs.join(', ') + ')').join(', ')
+      : catalogDetailParts.join(' · ') +
+        '<br><span class="cmp-detail">Это не ошибка OCR и не блокирует применение. Проверьте справочник, если позиция действительно должна быть в текущей категории.</span>'
   });
 
   _cmpEditKey = null;
@@ -8758,8 +8791,8 @@ function cmpRenderChecks(checks) {
   const el = $('cmpCheckResults'); if (!el) return;
   if (!checks.length) { el.innerHTML = '<div class="cmp-empty">Нет контролей.</div>'; return; }
   el.innerHTML = checks.map(c => {
-    const cls = c.ok ? 'ok' : 'err';
-    const icon = c.ok ? '✓' : '✗';
+    const cls = c.ok ? 'ok' : (c.level === 'warn' ? 'warn' : 'err');
+    const icon = c.ok ? '✓' : (c.level === 'warn' ? '⚠' : '✗');
     return `<div class="cmp-check ${cls}">
       <span class="cmp-check-icon">${icon}</span>
       <div class="cmp-check-body">
