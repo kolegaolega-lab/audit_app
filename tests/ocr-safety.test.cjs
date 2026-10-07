@@ -369,6 +369,16 @@ test('double-run comparison exposes concrete row-level differences', () => {
 });
 
 
+test('comparison issue review flow exposes filter, next-issue navigation, and live status recount', () => {
+  assert.match(html, /id="cmpNextIssueBtn"/);
+  assert.match(html, /data-filter="issues"/);
+  assert.match(html, /function cmpGoToNextIssue\(\)/);
+  assert.match(html, /function cmpApplyResultFilter\(filter\)/);
+  assert.match(html, /_cmpData\.okCount = _cmpData\.rows\.filter/);
+  assert.match(html, /Осталось проверить/);
+  assert.doesNotMatch(html, /warnCount \+ errCount/);
+});
+
 test('double-run comparison merges likely OCR name variants into one row', () => {
   assert.match(html, /function cmpNameSimilarity\(a, b\)/);
   assert.match(html, /Возможное совпадение: «/);
