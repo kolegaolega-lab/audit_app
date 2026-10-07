@@ -1046,7 +1046,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       <textarea id="jsonInput" maxlength="2000000" placeholder="Накладные с датами приходов + продажи iiko" style="margin-top:10px"></textarea>
       <div id="jsonCounter" class="counter"></div>
       <button id="applyJsonBtn" class="success block" style="margin-top:10px">Применить</button>
-      <button id="openCompareBtn" class="secondary block" style="margin-top:8px">Сверка</button>
+      <button id="openCompareBtn" class="secondary block" style="margin-top:8px">Сравнить результаты</button>
       <button id="openAIReportBtn" class="secondary block" style="margin-top:8px">Отчёт ИИ</button>
       <div id="jsonStatus" class="status"></div>
     </div>
@@ -6444,7 +6444,7 @@ function dailyParseDateInput(str) {
   const label = `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}`;
   return { iso, label };
 }
-function dailyRender(){const list=$("dailyList"),status=$("dailyStatus"),actions=$("dailyActions");if(!list)return;if(!_dailyAccum.length){list.innerHTML='<div class="hint">Пока ничего не накоплено.</div>';if(actions)actions.style.display="none";if(status){status.className="status";status.textContent=""}return}_dailyAccum.sort((a,b)=>b.iso.localeCompare(a.iso));list.innerHTML="";_dailyAccum.forEach(d=>{const row=document.createElement("div");row.style.cssText="display:flex;align-items:center;gap:6px;padding:10px;border:1px solid var(--separator);border-radius:9px;background:var(--bg-input);margin-bottom:6px";const info=document.createElement("div");info.style.cssText="flex:1;min-width:0";let n=0;try{const j=JSON.parse(d.json);n=(j.invoices||[]).reduce((z,x)=>z+(x.items||[]).length,0)+(j.sales||[]).length}catch(e){}const mark=d.blocked||d.needsCheck?' <span style="color:var(--orange);font-size:15px">⚠</span>':"";const wt=d.blocked?" · требуется проверка OCR":(d.needsCheck?" · проверьте сверку":"");info.innerHTML=`<div style="font-weight:600;font-size:14px">Получено за ${escapeHtml(d.label)}${mark}</div><div style="font-size:11.5px;color:var(--text-secondary);margin-top:2px">${n} позиций${wt}</div>`;const refresh=document.createElement("button");refresh.className="secondary";refresh.textContent="↻";refresh.title="Обновить из таблицы";refresh.style.cssText="flex:0 0 auto;min-height:34px;padding:6px 10px;font-size:14px";refresh.onclick=()=>{const ok=rebuildDailyJsonFromTable(d.iso);if(ok){dailyRender();showToast(`Дата ${d.label} обновлена из таблицы`)}else showToast("Не удалось обновить")};const del=document.createElement("button");del.className="secondary";del.textContent="Удалить";del.style.cssText="flex:0 0 auto;min-height:34px;padding:6px 12px;font-size:12.5px";del.onclick=()=>{_dailyAccum=_dailyAccum.filter(x=>x.iso!==d.iso);saveDailyAccum();dailyRender()};row.append(info,refresh,del);list.appendChild(row)});if(actions)actions.style.display="block";if(status){status.className="status show info";status.textContent=`В пакете дат: ${_dailyAccum.length}. Даты: ${_dailyAccum.map(d=>d.label).join(", ")}.`}}
+function dailyRender(){const list=$("dailyList"),status=$("dailyStatus"),actions=$("dailyActions");if(!list)return;if(!_dailyAccum.length){list.innerHTML='<div class="hint">Пока ничего не накоплено.</div>';if(actions)actions.style.display="none";if(status){status.className="status";status.textContent=""}return}_dailyAccum.sort((a,b)=>b.iso.localeCompare(a.iso));list.innerHTML="";_dailyAccum.forEach(d=>{const row=document.createElement("div");row.style.cssText="display:flex;align-items:center;gap:6px;padding:10px;border:1px solid var(--separator);border-radius:9px;background:var(--bg-input);margin-bottom:6px";const info=document.createElement("div");info.style.cssText="flex:1;min-width:0";let n=0;try{const j=JSON.parse(d.json);n=(j.invoices||[]).reduce((z,x)=>z+(x.items||[]).length,0)+(j.sales||[]).length}catch(e){}const mark=d.blocked||d.needsCheck?' <span style="color:var(--orange);font-size:15px">⚠</span>':"";const wt=d.blocked?" · требуется проверить распознавание":(d.needsCheck?" · проверьте сверку":"");info.innerHTML=`<div style="font-weight:600;font-size:14px">Получено за ${escapeHtml(d.label)}${mark}</div><div style="font-size:11.5px;color:var(--text-secondary);margin-top:2px">${n} позиций${wt}</div>`;const refresh=document.createElement("button");refresh.className="secondary";refresh.textContent="↻";refresh.title="Обновить из таблицы";refresh.style.cssText="flex:0 0 auto;min-height:34px;padding:6px 10px;font-size:14px";refresh.onclick=()=>{const ok=rebuildDailyJsonFromTable(d.iso);if(ok){dailyRender();showToast(`Дата ${d.label} обновлена из таблицы`)}else showToast("Не удалось обновить")};const del=document.createElement("button");del.className="secondary";del.textContent="Удалить";del.style.cssText="flex:0 0 auto;min-height:34px;padding:6px 12px;font-size:12.5px";del.onclick=()=>{_dailyAccum=_dailyAccum.filter(x=>x.iso!==d.iso);saveDailyAccum();dailyRender()};row.append(info,refresh,del);list.appendChild(row)});if(actions)actions.style.display="block";if(status){status.className="status show info";status.textContent=`В пакете дат: ${_dailyAccum.length}. Даты: ${_dailyAccum.map(d=>d.label).join(", ")}.`}}
 
 function buildSystemInstructionForGemini(){return["Ты OCR-ассистент French Bakery.","Ответ ВСЕГДА только JSON по JSON Schema. Никакого CSV, markdown и текста вне JSON.","Количество ТОРГ-12 = только колонка 8 «мест, штук», не колонка 7.","Нечитаемое не угадывай: quantity=null и status=unreadable/uncertain.","Рукописное количество помечай handwritten и добавляй в review.handwritten_confirmation.","В чеке quantity = только реально проданное количество; сумма не является количеством.","Каждую строку читай отдельно. Продолжение накладной без шапки присоединяй по нумерации. Дубликаты фото не суммируй."].join("\n")}
 
@@ -6924,7 +6924,7 @@ function validateAIResponse(j1, j2, report, count) {
   try { d = JSON.parse(String(j1 || '')); } catch (e) {}
   try { d2 = j2 ? JSON.parse(String(j2)) : null; } catch (e) {}
   if (!d || !report) {
-    return { overall: 'error', issues: [{ level: 'error', code: 'invalid-json', title: 'JSON OCR не прошёл разбор' }] };
+    return { overall: 'error', issues: [{ level: 'error', code: 'invalid-json', title: 'Результат распознавания не удалось обработать' }] };
   }
 
   /* 1. photo_count vs реальное число фото */
@@ -7006,7 +7006,7 @@ function validateAIResponse(j1, j2, report, count) {
     }
     if (maxRun >= 6) {
       issues.push({ level: 'warn', code: 'qty-stuck',
-        title: 'Паттерн залипания количеств',
+        title: 'Одно и то же количество повторяется слишком много раз подряд',
         detail: 'Одно и то же количество повторяется подряд ' + maxRun + ' раз — стоит проверить OCR.' });
     }
   }
@@ -7069,7 +7069,7 @@ function validateAIResponse(j1, j2, report, count) {
       const days = Math.abs((checkDate - dd) / 86400000);
       if (days > 30) {
         issues.push({ level: 'warn', code: 'date-out-of-range',
-          title: 'Дата накладной вне диапазона ±30 дней',
+          title: 'Дата накладной слишком сильно отличается от даты проверки',
           detail: (inv.number ? ('№' + inv.number + ' · ') : '') + ds + ' (Δ ' + Math.round(days) + ' дн.)' });
       }
     });
@@ -7161,10 +7161,10 @@ function getOCRSafetyIssues(text,report,count){
   let d;
   try { d = JSON.parse(String(text || "")); } catch(e) {}
   if (!d || typeof d !== "object" || Array.isArray(d)) {
-    out.push({code:"empty-json",title:"Пустой или некорректный JSON от OCR"}); return out;
+    out.push({code:"empty-json",title:"Пустой или некорректный результат распознавания"}); return out;
   }
   if (!report || !report.hasBlocks) {
-    out.push({code:"missing-ai-report",title:"Нет структурированного отчёта OCR"}); return out;
+    out.push({code:"missing-ai-report",title:"Нет подробного отчёта о распознавании"}); return out;
   }
 
   const isoDate = v => {
@@ -7181,18 +7181,18 @@ function getOCRSafetyIssues(text,report,count){
       !Number.isInteger(Number(source.photo_count)) ||
       !Number.isInteger(Number(source.processed_photo_count)) ||
       !Number.isInteger(Number(source.duplicate_photo_count))) {
-    out.push({code:"invalid-source",title:"Неполный блок source в JSON OCR"});
+    out.push({code:"invalid-source",title:"В результате распознавания не хватает данных об исходных фотографиях"});
   } else if (Number(source.photo_count) !== Number(count) || Number(source.processed_photo_count) !== Number(count)) {
     out.push({code:"completeness-mismatch",title:"Не подтверждена обработка всех фотографий"});
   }
 
   if (!isoDate(d.check_date)) {
-    out.push({code:"invalid-check-date",title:"Некорректная дата проверки в JSON"});
+    out.push({code:"invalid-check-date",title:"Некорректная дата проверки"});
   } else if (String(d.check_date) > getTodayStr()) {
-    out.push({code:"future-check-date",title:"Дата проверки находится в будущем"});
+    out.push({code:"future-check-date",title:"Дата проверки указана в будущем"});
   }
   if (!Array.isArray(d.invoices) || !Array.isArray(d.sales)) {
-    out.push({code:"invalid-document-arrays",title:"Некорректная структура invoices/sales"});
+    out.push({code:"invalid-document-arrays",title:"Не удалось правильно определить накладные и продажи"});
   }
 
   const invoices = Array.isArray(d.invoices) ? d.invoices : [];
@@ -7272,7 +7272,7 @@ function getOCRSafetyIssues(text,report,count){
     if (beyondLast.length) {
       out.push({
         code:'invoice-last-line-inconsistent',
-        title:'Неверный last_line_number накладной',
+        title:'Неверно определён номер последней строки накладной',
         detail:(g.number ? '№' + g.number + ' · ' : '') + 'есть строка ' + Math.max(...beyondLast) + ', но last_line_number=' + g.lastLine
       });
     }
@@ -7332,7 +7332,7 @@ function getOCRSafetyIssues(text,report,count){
 
   if (report.validation && Array.isArray(report.validation.issues)) {
     const errors = report.validation.issues.filter(x => x && x.level === "error");
-    if (errors.length) out.push({code:"validation-errors",title:"OCR содержит критические ошибки проверки"});
+    if (errors.length) out.push({code:"validation-errors",title:"Распознавание содержит ошибки, требующие проверки"});
   }
   return out;
 }
@@ -8188,7 +8188,7 @@ function renderAIReportModal(report) {
       if (checks.length) {
         h.push('<div class="ai-issue-row ' + (badChecks.length ? 'error' : 'ok') + '">' +
           '<span class="ai-issue-icon">' + (badChecks.length ? '✗' : '✓') + '</span><span class="ai-issue-body">' +
-          'Сверка сумм: проверено <b>' + checks.length + '</b>, расхождений <b>' + badChecks.length + '</b>' +
+          'Проверка сумм: проверено <b>' + checks.length + '</b>, расхождений <b>' + badChecks.length + '</b>' +
           '</span></div>');
         badChecks.forEach(c => {
           h.push('<div class="ai-issue-row error"><span class="ai-issue-icon">✗</span><span class="ai-issue-body">' +
