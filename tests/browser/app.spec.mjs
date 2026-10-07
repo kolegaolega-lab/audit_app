@@ -409,5 +409,5 @@ test('comparison blocks applying OCR runs with unresolved invoice date', async (
     };
   }, payload);
   expect(result.applyDisplay).toBe('none');
-  expect(result.checkText).toContain('не удалось определить дату накладной');
+  expect(result.checkText).toContain('Есть накладные без подтверждённой даты');
 });
