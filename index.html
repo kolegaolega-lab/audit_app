@@ -7080,7 +7080,11 @@ function getOCRSafetyIssues(text,report,count){
     out.push({code:"completeness-mismatch",title:"Не подтверждена обработка всех фотографий"});
   }
 
-  if (!isoDate(d.check_date)) out.push({code:"invalid-check-date",title:"Некорректная дата проверки в JSON"});
+  if (!isoDate(d.check_date)) {
+    out.push({code:"invalid-check-date",title:"Некорректная дата проверки в JSON"});
+  } else if (String(d.check_date) > getTodayStr()) {
+    out.push({code:"future-check-date",title:"Дата проверки находится в будущем"});
+  }
   if (!Array.isArray(d.invoices) || !Array.isArray(d.sales)) {
     out.push({code:"invalid-document-arrays",title:"Некорректная структура invoices/sales"});
   }
@@ -7089,6 +7093,10 @@ function getOCRSafetyIssues(text,report,count){
   const sales = Array.isArray(d.sales) ? d.sales : [];
   const missingInvoiceDates = invoices.filter(inv => !isoDate(inv?.date));
   if (missingInvoiceDates.length) out.push({code:"invoice-date-review",title:"Есть накладные без подтверждённой даты"});
+  if (isoDate(d.check_date)) {
+    const futureInvoices = invoices.filter(inv => isoDate(inv?.date) && String(inv.date).trim() > String(d.check_date).trim());
+    if (futureInvoices.length) out.push({code:"future-invoice-date",title:"Есть накладные с датой позже даты проверки"});
+  }
 
   const allItems = [];
   invoices.forEach(inv => {
