@@ -234,4 +234,49 @@ test('finish check guard requires every auditable stock value', async ({page}) =
   expect(source).toContain('btn.disabled = !rows.length || missingStock.length > 0');
 });
 
+
+test('history filename preserves seconds for duplicate-audit matching', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => window.parseHistoryFilename('07-123456-pabc-user.json'));
+  expect(result).toMatchObject({day:7,timeHH:'12',timeMM:'34',timeSS:'56',pointId:'pabc',login:'user'});
+});
+
+test('catalog aliases and prices round-trip through normalized lookups', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    window.ALIASES = [];
+    window.PRICES = {};
+    window.rebuildPriceIndex();
+    const aliasOk = window.addOrUpdateAlias('  Товар-А ', 'Товар Б');
+    const alias = window.findAlias('товар-а');
+    const priceOk = window.setPrice('Товар Б', '12.345');
+    return {aliasOk, aliasTarget: alias?.target, priceOk, price: window.getPriceFor('товар б')};
+  });
+  expect(result).toEqual({aliasOk:true,aliasTarget:'Товар Б',priceOk:true,price:12.35});
+});
+
+test('daily date parser rejects impossible dates and resolves valid dates', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => ({
+    valid: window.dailyParseDateInput('06.10.2026'),
+    invalid: window.dailyParseDateInput('31.02.2026')
+  }));
+  expect(result.valid.iso).toBe('2026-10-06');
+  expect(result.invalid).toBeNull();
+});
+
+test('point management rejects duplicate numbers and keeps active point valid', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    window._points = [];
+    window._activePointId = null;
+    const a = window.addPoint('001','Точка 1','');
+    const b = window.addPoint('001','Дубликат','');
+    const c = window.addPoint('002','Точка 2','');
+    const activeOk = window.setActivePointId(c.id);
+    return {a:!!a,b,points:window._points.map(x=>x.num),activeOk,active:window.getActivePoint()?.num};
+  });
+  expect(result).toEqual({a:true,b:null,points:['001','002'],activeOk:true,active:'002'});
+});
+
 // Regression suite: branch-level audit fixes are verified together in CI.
