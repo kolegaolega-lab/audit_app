@@ -18,6 +18,7 @@ function extract(start, end) {
 const context = { MAX_NUM: 100000, getTodayStr() { return '2026-10-07'; }, safeDate(y,m,d) { const x=new Date(y,m-1,d); return x.getFullYear()===y && x.getMonth()===m-1 && x.getDate()===d ? `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}` : null; } };
 vm.createContext(context);
 vm.runInContext(extract('function normalizeName(', 'function cleanProductName'), context);
+vm.runInContext(extract('function normalizeKnownQuantityConfirmations(', 'function getOCRSafetyIssues'), context);
 vm.runInContext(extract('function parseDateRu(', 'function inferIsoFromDdmm'), context);
 vm.runInContext(extract('function getOCRSafetyIssues(', 'function formatOCRSafetyMessage'), context);
 vm.runInContext(extract('function validateAIResponse(', 'function getOCRSafetyIssues'), context);
@@ -125,6 +126,31 @@ test('OCR treats a confirmation checkbox as confirmed printed quantity, not hand
   assert.match(html, /НЕ добавляй строку в review\.handwritten_confirmation/);
   assert.match(html, /Рукописным считается только реально вписанное от руки ЧИСЛО количества/);
   assert.match(html, /Галочка, крестик, подчёркивание или иная отметка о проверке печатного числа не являются рукописным количеством/);
+});
+
+test('Rom baba checkbox is normalized to confirmed quantity before safety and comparison', () => {
+  const json = JSON.stringify({
+    schema_version: '1.0',
+    document_type: 'combined',
+    check_date: '2026-10-06',
+    source: { photo_count: 1, processed_photo_count: 1, duplicate_photo_count: 0 },
+    invoices: [{
+      number: '123', date: '2026-10-06', continuation: false, last_line_number: 1,
+      items: [{ line: 1, name: 'Ром баба', quantity: 2, quantity_status: 'handwritten' }]
+    }],
+    sales: [],
+    review: { unreadable: [], handwritten_confirmation: ['Ром баба'], uncertain_rows: [], notes: [] }
+  });
+  const normalized = JSON.parse(context.normalizeKnownQuantityConfirmations(json));
+  assert.equal(normalized.invoices[0].items[0].quantity_status, 'confirmed');
+  assert.deepEqual(normalized.review.handwritten_confirmation, []);
+  const issues = context.getOCRSafetyIssues(
+    JSON.stringify(normalized),
+    { hasBlocks: true, json: normalized },
+    1
+  );
+  assert.equal(issues.some(x => x.code === 'quantity-status-review'), false);
+  assert.equal(issues.some(x => x.code === 'handwritten-confirmation'), false);
 });
 
 test('OCR prompt keeps the full document and applies category only after OCR', () => {
