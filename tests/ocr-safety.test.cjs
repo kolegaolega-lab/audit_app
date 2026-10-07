@@ -232,7 +232,7 @@ test('OCR safety blocks malformed confirmed quantities', () => {
 });
 
 test('OCR safety rejects invalid document structure and check date', () => {
-  const json = validJson({ check_date: '06.10.2026', invoices: {}, sales: [] });
+  const json = validJson({ check_date: '31.02.2026', invoices: {}, sales: [] });
   const issues = context.getOCRSafetyIssues(json, reportFor(json), 2);
   const codes = issues.map(x => x.code);
   assert.ok(codes.includes('invalid-check-date'));
