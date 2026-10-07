@@ -186,6 +186,22 @@ test('receipt on or before audit date counts as usable incoming', () => {
   assert.equal(r, true);
 });
 
+test('receipt outside shelf-life window is not a usable incoming', () => {
+  assert.equal(context.hasUsableIncomingForAudit({
+    _checkDate: '2026-10-06',
+    shelfLife: 24,
+    incoming: [{ date: '2026-10-04', qty: 10 }]
+  }), false);
+});
+
+test('receipt inside shelf-life window is a usable incoming', () => {
+  assert.equal(context.hasUsableIncomingForAudit({
+    _checkDate: '2026-10-06',
+    shelfLife: 48,
+    incoming: [{ date: '2026-10-05', qty: 10 }]
+  }), true);
+});
+
 test('session persists and restores the audit date used by FIFO', () => {
   assert.match(html, /checkDate: \(\(\) =>/);
   assert.match(html, /_checkDate: data\.checkDate/);
