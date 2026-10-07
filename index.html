@@ -2622,7 +2622,7 @@ function computeFIFO(row) {
     .filter(p => p.qty > 0 && p.writeOff);
 
   if (!parties.length) {
-    return { soldExpired: sales, expiredOnShelf: stock, freshOnShelf: 0, freshSold: 0, noIncoming: true };
+    return { soldExpired: sales, expiredOnShelf: stock, freshOnShelf: 0, freshSold: 0 };
   }
 
   let salesLeft = sales;
@@ -2657,10 +2657,10 @@ function computeFIFO(row) {
 
   return { soldExpired, expiredOnShelf, freshOnShelf, freshSold };
 }
-function emptyResult() { return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null, noIncoming: false }; }
+function emptyResult() { return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null }; }
 function getRowStatus(calc, row) {
   if (row && row.salesOnly) return { cls: 'row-info', label: 'info' };
-  if (calc && calc.noIncoming && row && row.stock != null) return { cls: 'row-danger', label: 'danger' };
+  if (row && row.stock != null && (!Array.isArray(row.incoming) || row.incoming.length === 0)) return { cls: 'row-danger', label: 'danger' };
   if (row && row.stock == null) return { cls: 'row-unknown', label: 'empty' };
   if (!calc || calc.soldExpired === null) return { cls: 'row-unknown', label: 'unknown' };
   if (calc.soldExpired > 0) return { cls: 'row-danger', label: 'danger' };
@@ -2669,7 +2669,7 @@ function getRowStatus(calc, row) {
 }
 function getCardStatus(calc, row) {
   if (row && row.salesOnly) return 'fresh';
-  if (calc && calc.noIncoming && row && row.stock != null) return 'danger';
+  if (row && row.stock != null && (!Array.isArray(row.incoming) || row.incoming.length === 0)) return 'danger';
   if (row && row.stock == null) return 'empty';
   if (!calc || calc.soldExpired === null) return 'fresh';
   if (calc.soldExpired > 0) return 'danger';
