@@ -2620,21 +2620,18 @@ function computeFIFO(row) {
   const shelfLife = clampNum(row.shelfLife, 1, 10000, 72);
   const moment = getCheckMoment(row._checkDate);
 
-  const checkDate = parseDateRu(row._checkDate || '', moment) || new Date(moment.getFullYear(), moment.getMonth(), moment.getDate());
-  const checkDayStart = new Date(checkDate.getFullYear(), checkDate.getMonth(), checkDate.getDate());
+  const checkDayKey = parseDateRu(row._checkDate || '', moment)
+    || [moment.getFullYear(), String(moment.getMonth() + 1).padStart(2, '0'), String(moment.getDate()).padStart(2, '0')].join('-');
 
   const parties = mergeIncomingByDate(row.incoming)
     .map(p => {
-      const partyDate = parseDateRu(p.date, checkDate);
-      const partyDateKey = partyDate
-        ? [partyDate.getFullYear(), String(partyDate.getMonth() + 1).padStart(2, '0'), String(partyDate.getDate()).padStart(2, '0')].join('-')
-        : '';
+      const partyDateKey = parseDateRu(p.date, moment);
       const writeOff = partyDateKey ? getWriteOffMoment(partyDateKey, shelfLife) : null;
-      return { date: p.date, partyDate, partyDateKey, qty: clampNum(p.qty, 0, MAX_NUM, 0), writeOff };
+      return { date: p.date, partyDateKey, qty: clampNum(p.qty, 0, MAX_NUM, 0), writeOff };
     })
     // A receipt dated after the audit date cannot physically be available yet.
     // Never let a future OCR/date error create fresh stock.
-    .filter(p => p.qty > 0 && p.partyDate && p.partyDate <= checkDayStart && p.writeOff);
+    .filter(p => p.qty > 0 && p.partyDateKey && p.partyDateKey <= checkDayKey && p.writeOff);
 
   if (!parties.length) {
     return { soldExpired: sales, expiredOnShelf: stock, freshOnShelf: 0, freshSold: 0 };
