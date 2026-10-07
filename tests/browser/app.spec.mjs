@@ -450,7 +450,7 @@ test('OCR validation does not freeze on large reference catalog', async ({page})
     const items = Array.from({length:120}, (_, i) => ({
       line:i + 1,
       name:'OCR товар с другим длинным названием ' + i,
-      quantity:2,
+      quantity:(i % 5) + 1,
       quantity_status:'confirmed'
     }));
     const json = JSON.stringify({
