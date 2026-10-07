@@ -18,7 +18,7 @@ const context = {
   MAX_NUM: 100000,
   SHELF_LIFE_START_HOUR: 7,
   WRITE_OFF_HOUR: 22,
-  getCheckMoment: () => new Date(2026, 9, 3, 12, 0, 0),
+  getCheckMoment: (value) => { const m = String(value || '').match(/^(\\d{4})-(\\d{2})-(\\d{2})$/); return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0) : new Date(2026, 9, 3, 12, 0, 0); },
   clampNum(v, min, max, fallback) {
     const n = Number(v);
     return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
@@ -181,7 +181,7 @@ test('future receipt does not count as a usable incoming for the audit date', ()
 test('receipt on or before audit date counts as usable incoming', () => {
   const r = context.hasUsableIncomingForAudit({
     _checkDate: '2026-10-06',
-    incoming: [{ date: '2026-10-06', qty: 10 }]
+    shelfLife: 24, incoming: [{ date: '2026-10-06', qty: 10 }]
   });
   assert.equal(r, true);
 });
