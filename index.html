@@ -7324,7 +7324,9 @@ function getOCRSafetyIssues(text,report,count){
       detail:"Проверьте: " + statusDetails.join("; ") + "."
     });
   }
-  if ((r.handwritten_confirmation||[]).length) {
+  // handwritten уже входит в общее сообщение quantity-status-review.
+  // Одно и то же значение не должно давать две блокировки.
+  if ((r.handwritten_confirmation||[]).length && !unconfirmed.length) {
     out.push({
       code:"handwritten-confirmation",
       title:"Есть значения, которые нужно проверить вручную",
