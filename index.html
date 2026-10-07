@@ -2614,12 +2614,20 @@ function computeFIFO(row) {
   const shelfLife = clampNum(row.shelfLife, 1, 10000, 72);
   const moment = getCheckMoment(row._checkDate);
 
-  const checkDayKey = parseDateRu(row._checkDate || '', moment)
-    || new Date(moment.getFullYear(), moment.getMonth(), moment.getDate());
+  const toDayKey = value => {
+    if (value instanceof Date && !isNaN(value.getTime())) {
+      return [value.getFullYear(), String(value.getMonth() + 1).padStart(2, '0'), String(value.getDate()).padStart(2, '0')].join('-');
+    }
+    const s = String(value || '').trim();
+    return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : '';
+  };
+  const parsedCheckDay = parseDateRu(row._checkDate || '', moment);
+  const checkDayKey = toDayKey(parsedCheckDay) ||
+    [moment.getFullYear(), String(moment.getMonth() + 1).padStart(2, '0'), String(moment.getDate()).padStart(2, '0')].join('-');
 
   const parties = mergeIncomingByDate(row.incoming)
     .map(p => {
-      const partyDateKey = parseDateRu(p.date, moment);
+      const partyDateKey = toDayKey(parseDateRu(p.date, moment));
       const writeOff = partyDateKey ? getWriteOffMoment(partyDateKey, shelfLife) : null;
       return { date: p.date, partyDateKey, qty: clampNum(p.qty, 0, MAX_NUM, 0), writeOff };
     })
