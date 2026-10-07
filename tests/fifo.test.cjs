@@ -25,6 +25,7 @@ const context = {
   },
   emptyResult: () => ({ soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null }),
   mergeIncomingByDate: rows => [...(rows || [])].sort((a, b) => String(a.date).localeCompare(String(b.date))),
+  getTodayStr() { return '2026-10-06'; },
   parseDateRu(value, referenceDate) {
     const m = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
     return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : '';
@@ -33,6 +34,7 @@ const context = {
 vm.createContext(context);
 vm.runInContext(extractFunction(html, 'getWriteOffMoment', 'function parseDateRu('), context);
 vm.runInContext(extractFunction(html, 'computeFIFO', 'function emptyResult('), context);
+vm.runInContext(extractFunction(html, 'hasUsableIncomingForAudit', 'function getRowStatus('), context);
 
 const computeFIFO = (...args) => JSON.parse(JSON.stringify(context.computeFIFO(...args)));
 const expiry = (date, hours) => context.getWriteOffMoment(date, hours);
@@ -166,4 +168,27 @@ test('regression: UI missing-receipt guard requires a valid dated positive recei
   assert.ok(
     html.includes("!row.incoming.some(p => p && /^\\d{4}-\\d{2}-\\d{2}$/.test(String(p.date || '')) && Number(p.qty) > 0)")
   );
+});
+
+
+test('future receipt does not count as a usable incoming for the audit date', () => {
+  const r = context.hasUsableIncomingForAudit({
+    _checkDate: '2026-10-06',
+    incoming: [{ date: '2026-10-07', qty: 10 }]
+  });
+  assert.equal(r, false);
+});
+
+test('receipt on or before audit date counts as usable incoming', () => {
+  const r = context.hasUsableIncomingForAudit({
+    _checkDate: '2026-10-06',
+    incoming: [{ date: '2026-10-06', qty: 10 }]
+  });
+  assert.equal(r, true);
+});
+
+test('session persists and restores the audit date used by FIFO', () => {
+  assert.match(html, /checkDate: \(\(\) =>/);
+  assert.match(html, /_checkDate: data\.checkDate/);
+  assert.match(html, /const SESSION_VERSION = 7/);
 });
