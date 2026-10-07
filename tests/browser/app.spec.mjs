@@ -154,3 +154,25 @@ test('product cards do not render duplicate incoming summary', async ({page}) =>
   });
   expect(result.incomingSummaryCount).toBe(0);
 });
+
+
+test('OCR recognition shows visible processing progress UI', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const box = document.querySelector('#ocrProgress');
+    const spinner = document.querySelector('.ocr-spinner');
+    const fill = document.querySelector('#ocrProgressFill');
+    window.setOCRProgress('Распознавание', 'Ожидаю ответ Gemini…', 42);
+    return {
+      exists: !!box,
+      spinner: !!spinner,
+      fill: !!fill,
+      visible: box?.classList.contains('show'),
+      width: fill?.style.width,
+      title: document.querySelector('#ocrProgressTitle')?.textContent
+    };
+  });
+  expect(result).toEqual({
+    exists: true, spinner: true, fill: true, visible: true, width: '42%', title: 'Распознавание'
+  });
+});
