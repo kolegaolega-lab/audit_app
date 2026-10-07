@@ -8693,7 +8693,7 @@ function cmpRunCompare() {
     ok: notFound.length === 0,
     title: 'Проверка справочника',
     detail: notFound.length === 0
-      ? 'Все позиции обоих JSON есть в справочнике.'
+      ? 'Все позиции из обоих результатов есть в справочнике.'
       : 'Не найдены: ' + notFound.map(x => '<b>' + escapeHtml(x.name) + '</b> (' + x.runs.join(', ') + ')').join(', ')
   });
 
