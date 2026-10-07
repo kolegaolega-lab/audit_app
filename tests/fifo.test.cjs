@@ -163,5 +163,7 @@ test('regression: missing invoice dates are blocking OCR safety issues', () => {
 });
 
 test('regression: UI missing-receipt guard requires a valid dated positive receipt', () => {
-  assert.match(html, /!row\.incoming\.some\(p => p && \/\^\d\{4\}-\d\{2\}-\d\{2\}\$\/.test/);
+  assert.ok(
+    html.includes("!row.incoming.some(p => p && /^\\d{4}-\\d{2}-\\d{2}$/.test(String(p.date || '')) && Number(p.qty) > 0)")
+  );
 });
