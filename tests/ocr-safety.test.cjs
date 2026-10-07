@@ -15,7 +15,7 @@ function extract(start, end) {
   return html.slice(a, b);
 }
 
-const context = { MAX_NUM: 100000, safeDate(y,m,d) { const x=new Date(y,m-1,d); return x.getFullYear()===y && x.getMonth()===m-1 && x.getDate()===d ? `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}` : null; } };
+const context = { MAX_NUM: 100000, getTodayStr() { return '2026-10-07'; }, safeDate(y,m,d) { const x=new Date(y,m-1,d); return x.getFullYear()===y && x.getMonth()===m-1 && x.getDate()===d ? `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}` : null; } };
 vm.createContext(context);
 vm.runInContext(extract('function normalizeName(', 'function cleanProductName'), context);
 vm.runInContext(extract('function parseDateRu(', 'function inferIsoFromDdmm'), context);
