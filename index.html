@@ -8948,7 +8948,7 @@ function cmpRenderResults() {
 function cmpApplyMatched() {
   if (!_cmpData) return;
   if (_cmpData.comparisonValid === false) {
-    showToast('Использование заблокировано. Проверьте дату и ошибки распознавания.');
+    showToast('Использование заблокировано. Сначала исправьте ошибки распознавания.');
     return;
   }
   const hasEdits = r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null);
