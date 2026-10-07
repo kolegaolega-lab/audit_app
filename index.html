@@ -7157,7 +7157,7 @@ function getOCRSafetyIssues(text,report,count){
     }
     const beyondLast = lines.filter(n => n > g.lastLine);
     if (missing.length) {
-      const shown = missing.length <= 8 ? missing.join(', ') : missing.slice(0,8).join(', ') + '…';
+      const shown = missing.length <= 8 ? missing.join(', ') : missing.slice(0,7).join(', ') + '…' + missing[missing.length - 1];
       out.push({
         code:'invoice-line-gap',
         title:'В накладной пропущена строка',
