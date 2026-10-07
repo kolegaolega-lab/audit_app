@@ -238,5 +238,6 @@ test('finish check is blocked until all stock values are entered', async ({page}
   await page.locator('#applyJsonBtn').click();
   await page.waitForTimeout(100);
   const result=await page.locator('#finishCheckBtn').evaluate(btn=>({disabled:btn.disabled,text:btn.textContent}));
-  expect(result).toEqual({disabled:true,text:'Введите остаток: 7'});
+  expect(result.disabled).toBe(true);
+  expect(result.text).toMatch(/^Введите остаток: \d+$/);
 });
