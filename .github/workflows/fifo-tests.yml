@@ -4,9 +4,10 @@ on:
   push:
     branches:
       - fix/fifo-shelf-life
+      - fix/fifo-ignore-future-receipts
   pull_request:
     branches:
-      - fix/fifo-shelf-life
+      - main
 
 jobs:
   regression-tests:
