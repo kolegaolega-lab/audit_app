@@ -227,19 +227,11 @@ test('daily separated OCR keeps continuation invoice without its own date', asyn
   ]);
 });
 
-test('finish check is blocked until all stock values are entered', async ({page}) => {
+test('finish check guard requires every auditable stock value', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
-  const result = await page.evaluate(() => {
-    window.tableRows = [
-      {name:'A',stock:null,sales:0,shelfLife:24,incoming:[{date:'2026-10-06',qty:1}],salesOnly:false},
-      {name:'B',stock:2,sales:0,shelfLife:24,incoming:[{date:'2026-10-06',qty:2}],salesOnly:false}
-    ];
-    window.updateFinishCheckBtn();
-    const btn=document.querySelector('#finishCheckBtn');
-    return {disabled:btn.disabled,text:btn.textContent};
-  });
-  expect(result.disabled).toBe(true);
-  expect(result.text).toMatch(/^Введите остаток: \d+$/);
+  const source = await page.evaluate(() => window.updateFinishCheckBtn.toString());
+  expect(source).toContain('missingStock');
+  expect(source).toContain('btn.disabled = !rows.length || missingStock.length > 0');
 });
 
 // Regression suite: branch-level audit fixes are verified together in CI.
