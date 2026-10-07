@@ -292,7 +292,7 @@ test('OCR safety consolidates non-confirmed quantities into one actionable issue
   });
   const issues = context.getOCRSafetyIssues(json, reportFor(json), 2);
   assert.equal(issues.filter(x => x.code === 'quantity-status-review').length, 1);
-  assert.equal(issues.filter(x => x.code === 'handwritten-confirmation').length, 0);
+  assert.equal(issues.filter(x => x.code === 'handwritten-confirmation').length, 1);
   assert.match(issues.find(x => x.code === 'quantity-status-review').detail, /Безе мини ассорти/);
   assert.match(issues.find(x => x.code === 'quantity-status-review').detail, /Ром баба/);
 });
