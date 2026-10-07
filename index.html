@@ -1034,8 +1034,8 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 
   <div class="section" data-tab="check" id="importSection">
     <div class="section-header">
-      <h2>Шаг 3 · Загрузка результата</h2>
-      <p class="desc">Вставьте результат распознавания, который вернул ИИ, или загрузите файл.</p>
+      <h2>Шаг 3 · Проверка результата</h2>
+      <p class="desc">Вставьте полученный результат распознавания или загрузите его из файла.</p>
     </div>
     <div class="section-body">
       <div class="row">
@@ -1047,7 +1047,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       <div id="jsonCounter" class="counter"></div>
       <button id="applyJsonBtn" class="success block" style="margin-top:10px">Применить</button>
       <button id="openCompareBtn" class="secondary block" style="margin-top:8px">Сравнить результаты</button>
-      <button id="openAIReportBtn" class="secondary block" style="margin-top:8px">Отчёт ИИ</button>
+      <button id="openAIReportBtn" class="secondary block" style="margin-top:8px">Отчёт о распознавании</button>
       <div id="jsonStatus" class="status"></div>
     </div>
   </div>
@@ -1221,7 +1221,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       <span class="legend-item"><span class="legend-dot danger"></span> Продано просрочки</span>
       <span class="legend-item"><span class="legend-dot unknown"></span> Срок не задан</span>
       <span class="legend-item"><span class="legend-dot info"></span> Только продажи</span>
-      <span class="legend-item"><span class="legend-dot edited"></span> Приход исправлен</span>
+      <span class="legend-item"><span class="legend-dot edited"></span> Приход отличается — исправлен</span>
     </div>
   </div>
 
@@ -1543,8 +1543,8 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 <div id="compareModal" class="modal hidden">
   <div class="modal-content" id="compareModalContent">
     <div class="modal-header">
-      <h3>Сравнение двух результатов</h3>
-      <p class="hint">Совпавшие данные можно использовать, расхождения нужно проверить.</p>
+      <h3>Повторная проверка</h3>
+      <p class="hint">Сравним два результата распознавания. Совпавшие данные можно использовать, а отличия нужно проверить.</p>
     </div>
 
     <div class="cmp-scroll">
@@ -1552,15 +1552,15 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       <div class="cmp-section">
         <div class="cmp-section-header">
           <div>
-            <h2>Данные для сравнения</h2>
-            <p class="desc">Вставьте два результата распознавания для сравнения.</p>
+            <h2>Два результата</h2>
+            <p class="desc">Здесь сравниваются два результата одного и того же распознавания.</p>
           </div>
           <button type="button" class="cmp-clear-btn" id="cmpClearBtn">Очистить</button>
         </div>
         <div class="cmp-section-body">
-          <label>Первый результат</label>
+          <label>Результат 1</label>
           <textarea id="cmpJson1" class="cmp-textarea"></textarea>
-          <label>Второй результат</label>
+          <label>Результат 2</label>
           <textarea id="cmpJson2" class="cmp-textarea"></textarea>
         </div>
       </div>
@@ -1568,8 +1568,8 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       <div class="cmp-section">
         <div class="cmp-section-header">
           <div>
-            <h2>Контроль накладных</h2>
-            <p class="desc">До 4 накладных. Дата, №, последний № позиции, печатный итог.</p>
+            <h2>Дополнительная проверка накладных</h2>
+            <p class="desc">Если хотите, можно дополнительно проверить номера и итог накладных.</p>
           </div>
         </div>
         <div class="cmp-section-body">
@@ -1581,7 +1581,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       <div class="cmp-section" id="cmpChecksSection" style="display:none">
         <div class="cmp-section-header">
           <div>
-            <h2>Контроли</h2>
+            <h2>Итог проверки</h2>
           </div>
         </div>
         <div class="cmp-section-body">
@@ -1593,8 +1593,8 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       <div class="cmp-section" id="cmpResultsSection" style="display:none">
         <div class="cmp-section-header">
           <div>
-            <h2>Расхождения по позициям</h2>
-            <p class="desc">Тап на значение — выбрать.</p>
+            <h2>Где результаты отличаются</h2>
+            <p class="desc">Нажмите на число, чтобы выбрать правильный вариант.</p>
           </div>
         </div>
         <div class="cmp-section-body">
@@ -1605,8 +1605,8 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     </div>
 
     <div class="modal-footer">
-      <button id="cmpApplyBtn" class="success block" style="display:none;margin-bottom:8px">Применить в таблицу</button>
-      <button type="button" id="cmpRunBtn" class="primary block">Проверить всё</button>
+      <button id="cmpApplyBtn" class="success block" style="display:none;margin-bottom:8px">Использовать совпавшие данные</button>
+      <button type="button" id="cmpRunBtn" class="primary block">Сравнить результаты</button>
       <button id="cmpCloseBtn" class="secondary block" style="margin-top:8px">Закрыть</button>
     </div>
   </div>
@@ -1813,7 +1813,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     <div class="sheet-handle"></div>
     <div class="ai-status-bar" id="aiReportStatusBar">
       <span class="ai-status-dot" id="aiReportStatusDot"></span>
-      <span class="ai-status-text" id="aiReportStatusText">Отчёт ИИ</span>
+      <span class="ai-status-text" id="aiReportStatusText">Отчёт о распознавании</span>
     </div>
     <div class="sheet-scroll" id="aiReportBody"></div>
     <div class="modal-footer">
@@ -1857,7 +1857,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.24.12';
+const APP_VERSION = 'v9.24.13';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -2639,7 +2639,7 @@ function computeFIFO(row) {
       const writeOff = partyDateKey ? getWriteOffMoment(partyDateKey, shelfLife) : null;
       return { date: p.date, partyDateKey, qty: clampNum(p.qty, 0, MAX_NUM, 0), writeOff };
     })
-    // Приход с датой позже даты аудита физически ещё не может быть доступен.
+    // Приход отличается — с датой позже даты аудита физически ещё не может быть доступен.
     // Не позволяем ошибке OCR/даты сделать такой остаток свежим.
     .filter(p => p.qty > 0 && p.partyDateKey && p.partyDateKey <= checkDayKey && p.writeOff);
 
@@ -2717,7 +2717,7 @@ function parseShelfLife(str) {
   return clampNum(n, 1, 10000, null);
 }
 
-function parseJSON(text,referenceDate){let d;try{d=typeof text==="string"?JSON.parse(text):text}catch(e){throw Error("JSON имеет неверный формат.")}if(!d||typeof d!=="object"||Array.isArray(d))throw Error("JSON должен быть объектом.");const parsedCheckDate=String(d.check_date||"").trim();const effectiveReference=parsedCheckDate?parseDateRu(parsedCheckDate,referenceDate):referenceDate;const rows={};const add=n=>{const c=cleanProductName(n);if(!c||isServiceLine(c)||isIgnored(c))return null;const a=applyAliases(c),k=normalizeName(a),p=PRODUCTS.find(x=>normalizeName(x.name)===k);/* OCR parser intentionally keeps all categories; category filtering is applied only when building the audit table. */if(!rows[k])rows[k]={name:a,stock:null,sales:0,_originalSales:0,shelfLife:p?p.shelfLife:null,category:p?(p.category||null):null,incoming:[],salesOnly:false};return rows[k]};(function(){const invoiceDates={};let lastInvoiceDate="";(d.invoices||[]).forEach(inv=>{const number=String(inv.number||"").trim();const rawDate=String(inv.date||"").trim();let date="";if(rawDate){date=/^\d{4}-\d{2}-\d{2}$/.test(rawDate)?rawDate:(parseDateRu(rawDate,effectiveReference)||"");if(date){if(number)invoiceDates[number]=date;lastInvoiceDate=date}}else if(inv.continuation){date=(number&&invoiceDates[number])||lastInvoiceDate||"" }else{date=""} (inv.items||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed"&&date)row.incoming.push({date,qty:clampNum(it.quantity,0,MAX_NUM,0)})})})})();(d.sales||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed")row.sales+=clampNum(it.quantity,0,MAX_NUM,0)});Object.values(rows).forEach(r=>r.incoming=mergeIncomingByDate(r.incoming));return{rows:Object.values(rows),truncated:false,json:d,effectiveReference}}
+function parseJSON(text,referenceDate){let d;try{d=typeof text==="string"?JSON.parse(text):text}catch(e){throw Error("Не удалось прочитать результат распознавания.")}if(!d||typeof d!=="object"||Array.isArray(d))throw Error("JSON должен быть объектом.");const parsedCheckDate=String(d.check_date||"").trim();const effectiveReference=parsedCheckDate?parseDateRu(parsedCheckDate,referenceDate):referenceDate;const rows={};const add=n=>{const c=cleanProductName(n);if(!c||isServiceLine(c)||isIgnored(c))return null;const a=applyAliases(c),k=normalizeName(a),p=PRODUCTS.find(x=>normalizeName(x.name)===k);/* OCR parser intentionally keeps all categories; category filtering is applied only when building the audit table. */if(!rows[k])rows[k]={name:a,stock:null,sales:0,_originalSales:0,shelfLife:p?p.shelfLife:null,category:p?(p.category||null):null,incoming:[],salesOnly:false};return rows[k]};(function(){const invoiceDates={};let lastInvoiceDate="";(d.invoices||[]).forEach(inv=>{const number=String(inv.number||"").trim();const rawDate=String(inv.date||"").trim();let date="";if(rawDate){date=/^\d{4}-\d{2}-\d{2}$/.test(rawDate)?rawDate:(parseDateRu(rawDate,effectiveReference)||"");if(date){if(number)invoiceDates[number]=date;lastInvoiceDate=date}}else if(inv.continuation){date=(number&&invoiceDates[number])||lastInvoiceDate||"" }else{date=""} (inv.items||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed"&&date)row.incoming.push({date,qty:clampNum(it.quantity,0,MAX_NUM,0)})})})})();(d.sales||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed")row.sales+=clampNum(it.quantity,0,MAX_NUM,0)});Object.values(rows).forEach(r=>r.incoming=mergeIncomingByDate(r.incoming));return{rows:Object.values(rows),truncated:false,json:d,effectiveReference}}
 function sortRowsAlphabetically(rows) {
   return [...rows].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' }));
 }
@@ -6115,9 +6115,9 @@ async function applyJSON() {
     if (!jsonInput) throw new Error('Поле ввода не найдено.');
     const text = jsonInput.value.trim();
     if (!text) throw new Error('Поле пустое.');
-    if (text.length > MAX_JSON_BYTES) throw new Error('JSON слишком большой (макс. 2 МБ).');
+    if (text.length > MAX_JSON_BYTES) throw new Error('Файл результата слишком большой (максимум 2 МБ).');
     let safetyData;
-    try { safetyData = JSON.parse(text); } catch (e) { throw new Error('JSON имеет неверный формат.'); }
+    try { safetyData = JSON.parse(text); } catch (e) { throw new Error('Не удалось прочитать результат распознавания.'); }
     const safetyCount = Number(safetyData?.source?.photo_count);
     const safetyReport = { hasBlocks: true, validation: { issues: [] } };
     safetyReport.validation = validateAIResponse(text, text, safetyReport, Number.isFinite(safetyCount) ? safetyCount : -1);
@@ -7011,7 +7011,7 @@ function validateAIResponse(j1, j2, report, count) {
     }
   }
 
-  /* 8. Продажи: статус qty */
+  /* 8. Продажи отличаются: статус qty */
   (d.sales || []).forEach(i => {
     if (i.quantity_status !== 'confirmed') {
       issues.push({ level: 'warn', code: 'sales-quantity-review',
@@ -7367,7 +7367,7 @@ function hasUsableIncomingForAudit(row) {
 function formatOCRSafetyMessage(issues) {
   const titles = (issues || []).filter(Boolean).map(i => i.title).filter(Boolean);
   if (!titles.length) return '';
-  return 'Автоприменение остановлено: ' + titles.slice(0, 2).join('; ') +
+  return 'Нужно проверить: ' + titles.slice(0, 2).join('; ') +
     (titles.length > 2 ? ' и ещё ' + (titles.length - 2) + '.' : '.');
 }
 
@@ -7422,11 +7422,11 @@ function summarizeAIReport(report) {
     }
   }
   if (!issues.length) {
-    return { ok: true, hasBlockingIssue: false, issues: [], text: 'Отчёт ИИ: проверки пройдены' };
+    return { ok: true, hasBlockingIssue: false, issues: [], text: 'Отчёт о распознавании: проверки пройдены' };
   }
   return {
     ok: false, hasBlockingIssue, issues,
-    text: 'Отчёт ИИ: ' + issues.map(i => i.text).join(' · ')
+    text: 'Отчёт о распознавании: ' + issues.map(i => i.text).join(' · ')
   };
 }
 
@@ -7628,7 +7628,7 @@ async function recognizeDaily(){
       const d=await res.json();
       const raw=(d?.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("");
       const j=extractJsonFromGeminiText(raw);
-      if(!j)throw Error("Невалидный JSON "+type);
+      if(!j)throw Error("Результат распознавания имеет неверный формат "+type);
       return j;
     };
     const one=async(type,files)=>{if(!files.length)return {a:"",b:""};setOCRProgress("Распознаю "+(type==="invoice"?"накладные":"чек продаж"),files.length+" фото отправлены в Gemini…",type==="invoice"?35:60);const out={a:await run(type,files,1),b:""};if(two){setOCRProgress("Повторная сверка","Второй прогон: "+(type==="invoice"?"накладных":"чека продаж")+"…",type==="invoice"?48:72);out.b=await run(type,files,2)}return out};
@@ -8065,7 +8065,7 @@ function updateAIReportBtnVisibility() {
 }
 function openAIReport() {
   if (!_lastAIReport || !_lastAIReport.hasBlocks) {
-    showToast('Отчёт ИИ пока пуст');
+    showToast('Отчёт о распознавании пока пуст');
     return;
   }
   renderAIReportModal(_lastAIReport);
@@ -8127,10 +8127,10 @@ function renderAIReportModal(report) {
   if (statusDot) statusDot.className = 'ai-status-dot ' + overall;
   if (statusText) {
     statusText.textContent = overall === 'ok'
-      ? 'Распознавание проверено'
+      ? 'Распознавание прошло проверку'
       : overall === 'err'
-        ? 'Есть критичные проблемы — проверьте результат'
-        : 'Есть замечания — проверьте результат';
+        ? 'Нужно проверить результат'
+        : 'Есть моменты, которые нужно проверить';
   }
   if (statusBar) {
     statusBar.style.background = overall === 'err' ? 'var(--red-soft)'
@@ -8173,7 +8173,7 @@ function renderAIReportModal(report) {
     h.push('<div class="sheet-section">');
     h.push('<div class="sheet-section-header">');
     h.push('<h2>' + s.icon + ' ' + escapeHtml(s.title) + '</h2>');
-    h.push('<p class="desc">Отдельное распознавание этого типа документа.</p>');
+    h.push('<p class="desc">Этот документ проверяется отдельно.</p>');
     h.push('</div>');
     h.push('<div class="sheet-section-body">');
 
@@ -8199,7 +8199,7 @@ function renderAIReportModal(report) {
       if (checks.length) {
         h.push('<div class="ai-issue-row ' + (badChecks.length ? 'error' : 'ok') + '">' +
           '<span class="ai-issue-icon">' + (badChecks.length ? '✗' : '✓') + '</span><span class="ai-issue-body">' +
-          'Проверка сумм: проверено <b>' + checks.length + '</b>, расхождений <b>' + badChecks.length + '</b>' +
+          'Проверка итогов накладных: проверено <b>' + checks.length + '</b>, расхождений <b>' + badChecks.length + '</b>' +
           '</span></div>');
         badChecks.forEach(c => {
           h.push('<div class="ai-issue-row error"><span class="ai-issue-icon">✗</span><span class="ai-issue-body">' +
@@ -8209,27 +8209,27 @@ function renderAIReportModal(report) {
         });
       }
       if (rpt.gaps && rpt.gaps.hasGap) {
-        h.push('<div class="ai-issue-row warn"><span class="ai-issue-icon">⚠</span><span class="ai-issue-body">Обнаружен возможный разрыв нумерации строк.</span></div>');
+        h.push('<div class="ai-issue-row warn"><span class="ai-issue-icon">⚠</span><span class="ai-issue-body">Возможно, в накладной пропущена строка.</span></div>');
       }
     } else {
-      h.push('<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Для чека количество берётся из позиции <b>«К-во»</b>; сумма продажи не используется как количество.</span></div>');
+      h.push('<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Для чека берётся именно количество товара. Сумма продажи в расчёт не входит.</span></div>');
     }
 
     if (rpt.unreadable && !rpt.unreadable.isEmpty) {
       h.push('<div class="ai-issue-row warn"><span class="ai-issue-icon">⚠</span><span class="ai-issue-body">' +
-        '<b>Есть нечитаемые значения.</b><br>' + escapeHtml(rpt.unreadable.raw || '') + '</span></div>');
+        '<b>Есть значения, которые плохо читаются.</b><br>' + escapeHtml(rpt.unreadable.raw || '') + '</span></div>');
     } else {
-      h.push('<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Критичных нечитаемых значений не отмечено.</span></div>');
+      h.push('<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Все важные значения читаются.</span></div>');
     }
 
     if (rpt.handwrittenConfirmation && !rpt.handwrittenConfirmation.isEmpty) {
       h.push('<div class="ai-issue-row warn"><span class="ai-issue-icon">⚠</span><span class="ai-issue-body">' +
-        '<b>Есть рукописные значения.</b><br>' + escapeHtml(rpt.handwrittenConfirmation.raw || '') + '</span></div>');
+        '<b>Есть количества, записанные от руки.</b><br>' + escapeHtml(rpt.handwrittenConfirmation.raw || '') + '</span></div>');
     }
 
     const issues = (s.val && s.val.issues) || [];
     if (!issues.length) {
-      h.push('<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Проверки ответа: ошибок не обнаружено.</span></div>');
+      h.push('<div class="ai-issue-row ok"><span class="ai-issue-icon">✓</span><span class="ai-issue-body">Ошибок не найдено.</span></div>');
     } else {
       issues.forEach(it => {
         const cls = it.level === 'error' ? 'error' : 'warn';
@@ -8262,7 +8262,7 @@ function renderAIReportModal(report) {
     '<span class="ai-issue-icon">' + (overall === 'ok' ? '✓' : overall === 'err' ? '✗' : '⚠') + '</span>' +
     '<span class="ai-issue-body">' +
     (overall === 'ok' ? 'Критичных проблем распознавания не обнаружено.'
-      : overall === 'err' ? 'Есть критичные проблемы — проверьте результат глазами.'
+      : overall === 'err' ? 'Нужно проверить результат глазами.'
       : 'Есть замечания — стоит проверить.') +
     '</span></div></div></div>';
 
@@ -8285,14 +8285,32 @@ function renderAIReportModal(report) {
     .map(s => s.rpt && s.rpt.fullRaw ? ('=== ' + s.title + ' ===\n' + s.rpt.fullRaw) : '')
     .filter(Boolean).join('\n\n');
   if (rawParts) {
-    html += '<div class="sheet-section"><div class="sheet-section-header">' +
-      '<h2>Технический ответ ИИ</h2>' +
-      '<p class="desc">Нужен только для диагностики OCR.</p></div>' +
+    html += '<details class="sheet-section" style="margin-top:12px">' +
+      '<summary style="padding:14px 12px;font-size:13px;font-weight:600;cursor:pointer">Показать дополнительные данные</summary>' +
       '<div class="sheet-section-body">' +
-      '<pre class="ai-raw">' + escapeHtml(rawParts) + '</pre></div></div>';
+      '<p class="hint" style="margin-top:0">Эти данные нужны только для разбора спорных случаев.</p>' +
+      '<pre class="ai-raw">' + escapeHtml(rawParts) + '</pre></div></details>';
   }
 
   body.innerHTML = html;
+}
+
+function plainUserText(value) {
+  let t = String(value == null ? '' : value);
+  const map = [
+    [/\bJSON\b/gi, 'результат распознавания'],
+    [/\bOCR\b/gi, 'распознавание'],
+    [/\bневалидн(?:ый|ая|ое|ые)\b/gi, 'неверн/* ═══════════════════════════════════════════
+   UI HELPERS'],
+    [/\bвалидн(?:ый|ая|ое|ые)\b/gi, 'корректн/* ═══════════════════════════════════════════
+   UI HELPERS'],
+    [/техническ(?:ий|ая|ое|ие)\s+ответ/gi, 'дополнительные данные'],
+    [/диагностическ(?:ая|ий|ое|ие)\s*:/gi, 'для справки:'],
+    [/сверка/gi, 'сравнение'],
+    [/прогон(?:а|е|ы)?/gi, 'результат'],
+  ];
+  map.forEach(([re, rep]) => { t = t.replace(re, rep); });
+  return t;
 }
 
 /* ═══════════════════════════════════════════
@@ -8521,7 +8539,7 @@ function cmpRunCompare() {
   try {
     const t1 = $('cmpJson1') ? $('cmpJson1').value : '';
     const t2 = $('cmpJson2') ? $('cmpJson2').value : '';
-  if (!t1.trim() || !t2.trim()) { showToast('Заполни оба JSON'); return; }
+  if (!t1.trim() || !t2.trim()) { showToast('Вставьте оба результата распознавания.'); return; }
   // Два представления одного JSON:
   // 1) full — весь документ, независимо от выбранной категории, для контроля полноты;
   // 2) filtered — только выбранная категория для рабочего сравнения FIFO.
@@ -8529,7 +8547,7 @@ function cmpRunCompare() {
   const d2full = cmpParseJSON(t2, false);
   const d1 = cmpParseJSON(t1, true);
   const d2 = cmpParseJSON(t2, true);
-  if (!d1 || !d2 || !d1full || !d2full) { showToast('Не удалось разобрать JSON'); return; }
+  if (!d1 || !d2 || !d1full || !d2full) { showToast('Не удалось прочитать один из результатов распознавания.'); return; }
 
   const allKeys = new Set([...Object.keys(d1.rows), ...Object.keys(d2.rows)]);
   const dateLabels = {};
@@ -8545,20 +8563,20 @@ function cmpRunCompare() {
     let status = 'ok';
     if (!a || !b) {
       status = 'err';
-      details.push('Позиция есть только в ' + (a ? 'прогоне 1' : 'прогоне 2'));
+      details.push('Позиция есть только в ' + (a ? 'результате 1' : 'результате 2'));
     } else {
       if (String(a.name || '') !== String(b.name || '')) {
-        details.push('Название: «' + String(a.name || '') + '» ↔ «' + String(b.name || '') + '»');
+        details.push('Название отличается: «' + String(a.name || '') + '» ↔ «' + String(b.name || '') + '»');
       }
       for (const dk of dates) {
         if ((a.incoming[dk] || 0) !== (b.incoming[dk] || 0)) {
           status = 'warn';
-          details.push('Приход ' + (dateLabels[dk] || dk) + ': ' + (a.incoming[dk] || 0) + ' ↔ ' + (b.incoming[dk] || 0));
+          details.push('Приход отличается — ' + (dateLabels[dk] || dk) + ': ' + (a.incoming[dk] || 0) + ' ↔ ' + (b.incoming[dk] || 0));
         }
       }
       if (a.sales !== b.sales) {
         status = 'warn';
-        details.push('Продажи: ' + a.sales + ' ↔ ' + b.sales);
+        details.push('Продажи отличаются: ' + a.sales + ' ↔ ' + b.sales);
       }
       // Различие только в написании названия не является расхождением количества.
       if (status === 'ok' && details.length) status = 'ok';
@@ -8575,7 +8593,7 @@ function cmpRunCompare() {
   possibleNameMatches.forEach(m => {
     const target = m.row;
     if (!target.details) target.details = [];
-    target.details.push('Возможный OCR-вариант: «' + String(m.candidate.name || '') + '»');
+    target.details.push('Возможно, название прочитано иначе: «' + String(m.candidate.name || '') + '»');
   });
   const order = { err: 0, warn: 1, ok: 2 };
   rows.sort((x, y) => {
@@ -8603,7 +8621,7 @@ function cmpRunCompare() {
   const buildCmpSafety = (raw, data, label, otherRaw) => {
     try {
       const report = parseAIReport(raw);
-      if (!report) return [{ code:'empty-json', title:label + ': некорректный JSON', detail:'Не удалось разобрать JSON.' }];
+      if (!report) return [{ code:'empty-json', title:label + ': некорректный JSON', detail:'Не удалось прочитать один из результатов распознавания..' }];
       const photoCount = Number(data?.document?.source?.photo_count);
       report.validation = validateAIResponse(raw, otherRaw || '', report, Number.isInteger(photoCount) ? photoCount : 0);
       const issues = getOCRSafetyIssues(raw, report, Number.isInteger(photoCount) ? photoCount : 0);
@@ -8875,12 +8893,12 @@ function cmpRenderResults() {
     stats.innerHTML =
       (comparisonValid
         ? '<span class="big">' + okCount + ' из ' + total + ' совпало</span>'
-        : '<span class="big" style="color:var(--red)">Сравнение нельзя использовать</span>' +
-          '<div class="cmp-detail" style="margin:4px 0 8px">Результаты ниже показаны только для проверки. Использование этих данных заблокировано.</div>' +
+        : '<span class="big" style="color:var(--red)">Пока нельзя использовать результат</span>' +
+          '<div class="cmp-detail" style="margin:4px 0 8px">Ниже показано, где результаты отличаются. Сначала исправьте отмеченные места.</div>' +
           '<div class="cmp-detail">Для справки: ' + okCount + ' из ' + total + ' совпало</div>') +
-      '<div class="row"><span>✓ Совпало</span><b class="green">' + okCount + '</b></div>' +
-      '<div class="row"><span>⚠ Расхождения</span><b class="orange">' + warnCount + '</b></div>' +
-      '<div class="row"><span>✗ Только в одном</span><b class="red">' + errCount + '</b></div>';
+      '<div class="row"><span>✓ Совпадает</span><b class="green">' + okCount + '</b></div>' +
+      '<div class="row"><span>⚠ Отличия</span><b class="orange">' + warnCount + '</b></div>' +
+      '<div class="row"><span>✗ Есть только в одном результате</span><b class="red">' + errCount + '</b></div>';
   }
   if (!out) return;
   if (!rows.length) { out.innerHTML = '<div class="cmp-empty">Оба JSON пусты.</div>'; return; }
@@ -8950,7 +8968,7 @@ function cmpRenderResults() {
 function cmpApplyMatched() {
   if (!_cmpData) return;
   if (_cmpData.comparisonValid === false) {
-    showToast('Использование заблокировано. Сначала исправьте ошибки распознавания.');
+    showToast('Нельзя использовать эти данные, пока не исправлены отмеченные ошибки.');
     return;
   }
   const hasEdits = r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null);
@@ -9034,7 +9052,7 @@ function cmpApplyMatched() {
   updateSegmentedCounters();
   scheduleSessionSave();
   if (_needsCheckNames.size) {
-    showToast(`Применено: ${applied}. Проверить вручную: ${_needsCheckNames.size}`);
+    showToast(`Применено: ${applied}. Нужно проверить вручную: ${_needsCheckNames.size}`);
   } else {
     showToast(`Применено: ${applied}`);
   }
@@ -9441,7 +9459,7 @@ function bindUI() {
     autoResizeTextarea(); updateJsonCounter();
     renderTable(); updateUnknownBanner(); updateNoCategoryBanner();
     const st = $('jsonStatus');
-    if (st) { st.className = 'status show ok'; st.textContent = 'Сессия восстановлена.'; }
+    if (st) { st.className = 'status show ok'; st.textContent = 'Предыдущая проверка восстановлена.'; }
   };
   const clearBtn = $('clearBtn');
   if (clearBtn) clearBtn.onclick = async () => {
@@ -9518,7 +9536,7 @@ function bindUI() {
       await renderPhotoQueue();
 
       const cs2 = $('jsonStatus');
-      if (cs2) { cs2.className = 'status show ok'; cs2.textContent = 'Данные очищены. Можно загружать новые фото.'; }
+      if (cs2) { cs2.className = 'status show ok'; cs2.textContent = 'Данные очищены. Можно начать новую проверку.'; }
     } finally { setTimeout(() => { pendingSessionReset = false; }, 500); }
   };
 
@@ -10186,7 +10204,7 @@ function init() {
     autoResizeTextarea(); updateJsonCounter();
     const ageMin = Math.max(0, Math.round((Date.now() - session.savedAt) / 60000));
     const st = $('jsonStatus');
-    if (st) { st.className = 'status show info'; st.textContent = `Сессия восстановлена (${ageMin} мин назад).`; }
+    if (st) { st.className = 'status show info'; st.textContent = `Предыдущая проверка восстановлена (${ageMin} мин назад).`; }
   }
 
   _profile = loadProfile();
