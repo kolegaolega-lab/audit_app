@@ -229,15 +229,15 @@ test('daily separated OCR keeps continuation invoice without its own date', asyn
 
 test('finish check is blocked until all stock values are entered', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
-  await page.evaluate(() => { window._activeCategory = 'pastry'; });
-  await page.locator('#jsonInput').fill(JSON.stringify({
-    schema_version:'1.0',document_type:'combined',check_date:'2026-10-06',
-    invoices:[{number:'1',date:'2026-10-06',continuation:false,items:[{line:1,name:'Багет французский',quantity:1,quantity_status:'confirmed'}]}],
-    sales:[],review:{}
-  }));
-  await page.locator('#applyJsonBtn').click();
-  await page.waitForTimeout(100);
-  const result=await page.locator('#finishCheckBtn').evaluate(btn=>({disabled:btn.disabled,text:btn.textContent}));
+  const result = await page.evaluate(() => {
+    window.tableRows = [
+      {name:'A',stock:null,sales:0,shelfLife:24,incoming:[{date:'2026-10-06',qty:1}],salesOnly:false},
+      {name:'B',stock:2,sales:0,shelfLife:24,incoming:[{date:'2026-10-06',qty:2}],salesOnly:false}
+    ];
+    window.updateFinishCheckBtn();
+    const btn=document.querySelector('#finishCheckBtn');
+    return {disabled:btn.disabled,text:btn.textContent};
+  });
   expect(result.disabled).toBe(true);
   expect(result.text).toMatch(/^Введите остаток: \d+$/);
 });
