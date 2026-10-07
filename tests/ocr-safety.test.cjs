@@ -150,6 +150,22 @@ test('OCR validation catches suspicious quantity patterns', () => {
   assert.ok(result.issues.some(x => x.code === 'qty-stuck'));
 });
 
+test('OCR validation does not flag a normal short run of equal quantities', () => {
+  const quantities = [3,3,3,3,3,1,2,1];
+  const json = validJson({
+    invoices: [{
+      number: '123', date: '2026-10-06', continuation: false,
+      last_line_number: quantities.length, printed_total: null,
+      items: quantities.map((q, i) => ({
+        line: i + 1, name: 'Товар ' + (i + 1), quantity: q,
+        quantity_status: 'confirmed', price: 10, amount: q * 10
+      }))
+    }]
+  });
+  const result = context.validateAIResponse(json, '', reportFor(json), 2);
+  assert.equal(result.issues.some(x => x.code === 'qty-stuck'), false);
+});
+
 test('OCR safety accepts duplicate photos only when processing count still matches', () => {
   const json = validJson({
     source: { photo_count: 3, processed_photo_count: 3, duplicate_photo_count: 1 }
