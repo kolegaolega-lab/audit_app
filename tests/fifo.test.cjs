@@ -164,10 +164,9 @@ test('regression: missing invoice dates are blocking OCR safety issues', () => {
   assert.match(html, /code: inv\.continuation \? 'continuation-date-unresolved' : 'invoice-date-missing'/);
 });
 
-test('regression: UI missing-receipt guard requires a valid dated positive receipt', () => {
-  assert.ok(
-    html.includes("!row.incoming.some(p => p && /^\\d{4}-\\d{2}-\\d{2}$/.test(String(p.date || '')) && Number(p.qty) > 0)")
-  );
+test('regression: UI missing-receipt guard uses the FIFO incoming helper', () => {
+  assert.match(html, /!hasUsableIncomingForAudit\(row\)/);
+  assert.match(html, /const noIncoming = !row\.salesOnly && row\.stock != null && !hasUsableIncomingForAudit\(row\)/);
 });
 
 
