@@ -2674,7 +2674,7 @@ function computeFIFO(row) {
 function emptyResult() { return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null }; }
 function getRowStatus(calc, row) {
   if (row && row.salesOnly) return { cls: 'row-info', label: 'info' };
-  if (row && row.stock != null && (!Array.isArray(row.incoming) || !row.incoming.some(p => p && /^\d{4}-\d{2}-\d{2}$/.test(String(p.date || '')) && Number(p.qty) > 0))) return { cls: 'row-danger', label: 'danger' };
+  if (row && row.stock != null && (!hasUsableIncomingForAudit(row))) return { cls: 'row-danger', label: 'danger' };
   if (row && row.stock == null) return { cls: 'row-unknown', label: 'empty' };
   if (!calc || calc.soldExpired === null) return { cls: 'row-unknown', label: 'unknown' };
   if (calc.soldExpired > 0) return { cls: 'row-danger', label: 'danger' };
@@ -2683,7 +2683,7 @@ function getRowStatus(calc, row) {
 }
 function getCardStatus(calc, row) {
   if (row && row.salesOnly) return 'fresh';
-  if (row && row.stock != null && (!Array.isArray(row.incoming) || !row.incoming.some(p => p && /^\d{4}-\d{2}-\d{2}$/.test(String(p.date || '')) && Number(p.qty) > 0))) return 'danger';
+  if (row && row.stock != null && (!hasUsableIncomingForAudit(row))) return 'danger';
   if (row && row.stock == null) return 'empty';
   if (!calc || calc.soldExpired === null) return 'fresh';
   if (calc.soldExpired > 0) return 'danger';
@@ -5165,7 +5165,7 @@ function updateCardResults() {
     const freshStock = calc.freshOnShelf;
     const freshSales = calc.freshSold;
     const incoming = getIncomingSummary(row);
-    const noIncoming = !row.salesOnly && row.stock != null && (!Array.isArray(row.incoming) || row.incoming.length === 0);
+    const noIncoming = !row.salesOnly && row.stock != null && !hasUsableIncomingForAudit(row);
     res.innerHTML = `
       <div class="card-result-source">Приходы: <b>${escapeHtml(noIncoming ? "нет — просрочка, проверить с персоналом" : incoming.text)}</b></div>
       <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
@@ -7042,19 +7042,78 @@ function getOCRSafetyIssues(text,report,count){
   const out=[];
   let d;
   try { d = JSON.parse(String(text || "")); } catch(e) {}
-  if (!d || typeof d !== "object") { out.push({code:"empty-json",title:"Пустой или некорректный JSON от OCR"}); return out; }
-  if (!report || !report.hasBlocks) { out.push({code:"missing-ai-report",title:"Нет структурированного отчёта OCR"}); return out; }
-  if (Number(d.source?.photo_count) !== Number(count) || Number(d.source?.processed_photo_count) !== Number(count))
+  if (!d || typeof d !== "object" || Array.isArray(d)) {
+    out.push({code:"empty-json",title:"Пустой или некорректный JSON от OCR"}); return out;
+  }
+  if (!report || !report.hasBlocks) {
+    out.push({code:"missing-ai-report",title:"Нет структурированного отчёта OCR"}); return out;
+  }
+
+  const isoDate = v => /^\d{4}-\d{2}-\d{2}$/.test(String(v || "").trim()) && !!parseDateRu(String(v), new Date());
+  const source = d.source;
+  if (!source || typeof source !== "object" ||
+      !Number.isInteger(Number(source.photo_count)) ||
+      !Number.isInteger(Number(source.processed_photo_count)) ||
+      !Number.isInteger(Number(source.duplicate_photo_count))) {
+    out.push({code:"invalid-source",title:"Неполный блок source в JSON OCR"});
+  } else if (Number(source.photo_count) !== Number(count) || Number(source.processed_photo_count) !== Number(count)) {
     out.push({code:"completeness-mismatch",title:"Не подтверждена обработка всех фотографий"});
-  const missingInvoiceDates = (d.invoices || []).filter(inv => !/^\d{4}-\d{2}-\d{2}$/.test(String(inv?.date || '').trim()));
+  }
+
+  if (!isoDate(d.check_date)) out.push({code:"invalid-check-date",title:"Некорректная дата проверки в JSON"});
+  if (!Array.isArray(d.invoices) || !Array.isArray(d.sales)) {
+    out.push({code:"invalid-document-arrays",title:"Некорректная структура invoices/sales"});
+  }
+
+  const invoices = Array.isArray(d.invoices) ? d.invoices : [];
+  const sales = Array.isArray(d.sales) ? d.sales : [];
+  const missingInvoiceDates = invoices.filter(inv => !isoDate(inv?.date));
   if (missingInvoiceDates.length) out.push({code:"invoice-date-review",title:"Есть накладные без подтверждённой даты"});
+
+  const allItems = [];
+  invoices.forEach(inv => {
+    if (!Array.isArray(inv?.items)) {
+      out.push({code:"invalid-invoice-items",title:"У накладной отсутствует список строк"});
+      return;
+    }
+    inv.items.forEach(item => allItems.push(item));
+  });
+  sales.forEach(item => allItems.push(item));
+
   const r = d.review || {};
+  if (!r || typeof r !== "object") out.push({code:"invalid-review",title:"Некорректный блок review"});
   if ((r.unreadable||[]).length) out.push({code:"unreadable",title:"Есть нечитаемые значения"});
   if ((r.handwritten_confirmation||[]).length) out.push({code:"handwritten-confirmation",title:"Есть рукописные значения, требующие подтверждения"});
   if ((r.uncertain_rows||[]).length) out.push({code:"uncertain-rows",title:"Есть сомнительные строки — требуется ручная сверка"});
-  const bad = [...(d.invoices||[]).flatMap(x=>x.items||[]), ...(d.sales||[])].filter(x=>x.quantity_status !== "confirmed");
-  if (bad.length) out.push({code:"quantity-status-review",title:"Есть количества без статуса confirmed"});
+
+  const allowedStatuses = new Set(["confirmed","uncertain","unreadable","handwritten"]);
+  const badStatus = allItems.filter(x => !x || !allowedStatuses.has(x.quantity_status));
+  if (badStatus.length) out.push({code:"quantity-status-review",title:"Есть количества без корректного статуса"});
+  const unconfirmed = allItems.filter(x => x && x.quantity_status !== "confirmed");
+  if (unconfirmed.length) out.push({code:"quantity-status-review",title:"Есть количества без статуса confirmed"});
+
+  const invalidQty = allItems.filter(x => {
+    if (!x || x.quantity_status !== "confirmed") return false;
+    const q = Number(x.quantity);
+    return !Number.isFinite(q) || q < 0 || !Number.isInteger(q) || q > MAX_NUM;
+  });
+  if (invalidQty.length) out.push({code:"invalid-quantity",title:"Есть некорректные подтверждённые количества"});
+
+  if (report.validation && Array.isArray(report.validation.issues)) {
+    const errors = report.validation.issues.filter(x => x && x.level === "error");
+    if (errors.length) out.push({code:"validation-errors",title:"OCR содержит критические ошибки проверки"});
+  }
   return out;
+}
+
+function hasUsableIncomingForAudit(row) {
+  if (!row || row.salesOnly || !Array.isArray(row.incoming)) return false;
+  const checkDay = parseDateRu(row._checkDate || '', new Date()) || getTodayStr();
+  return row.incoming.some(p => {
+    if (!p || Number(p.qty) <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(String(p.date || ''))) return false;
+    const partyDay = parseDateRu(p.date, new Date());
+    return !!partyDay && partyDay <= checkDay;
+  });
 }
 
 function formatOCRSafetyMessage(issues) {
@@ -7511,7 +7570,7 @@ function renderReport() {
       if (c.freshOnShelf != null) totalFreshOnShelf += c.freshOnShelf;
       if (c.expiredOnShelf != null) totalExpiredOnShelf += c.expiredOnShelf;
       if (c.soldExpired != null) totalSoldExpired += c.soldExpired;
-      if (!r.salesOnly && r.stock != null && (!Array.isArray(r.incoming) || !r.incoming.some(p => p && /^\d{4}-\d{2}-\d{2}$/.test(String(p.date || '')) && Number(p.qty) > 0)) && (r.stock > 0 || r.sales > 0)) totalNoIncoming++;
+      if (!r.salesOnly && r.stock != null && !hasUsableIncomingForAudit(r) && (r.stock > 0 || r.sales > 0)) totalNoIncoming++;
       if ((c.soldExpired || 0) > 0 || (c.expiredOnShelf || 0) > 0) totalProblems++;
     });
 
