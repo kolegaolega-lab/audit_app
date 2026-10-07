@@ -304,6 +304,15 @@ test('double-run comparison checks differing check dates and both-run catalog in
   assert.match(html, /Прогон 1.*Прогон 2/);
 });
 
+test('double-run comparison marks mismatched check dates as invalid and blocks Apply', () => {
+  assert.match(html, /const checkDateMismatch = !!\(checkDate1 && checkDate2 && checkDate1 !== checkDate2\)/);
+  assert.match(html, /comparisonValid: !checkDateMismatch && cmpSafety\.length === 0/);
+  assert.match(html, /Результаты ниже показаны только для диагностики\. Применение заблокировано/);
+  assert.match(html, /const comparisonBlocked = _cmpData\.comparisonValid === false/);
+  assert.match(html, /!safetyBlocked && !comparisonBlocked/);
+  assert.match(html, /Применение заблокировано: сверка невалидна/);
+});
+
 test('double-run comparison exposes concrete row-level differences', () => {
   assert.match(html, /const details = \[\];/);
   assert.match(html, /Название: «/);
