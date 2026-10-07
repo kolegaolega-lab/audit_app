@@ -7349,18 +7349,21 @@ function getOCRSafetyIssues(text,report,count){
 }
 
 function hasUsableIncomingForAudit(row) {
-  if (!row || row.salesOnly || !Array.isArray(row.incoming)) return false;
+  if (!row || row.salesOnly || !Array.isArray(row.incoming) || row.shelfLife == null) return false;
   const parsed = parseDateRu(row._checkDate || '', new Date());
   const checkDay = parsed || getTodayStr();
   const checkKey = typeof checkDay === 'string'
     ? checkDay
-    : [checkDay.getFullYear(), String(checkDay.getMonth() + 1).padStart(2, '0'), String(checkDay.getDate()).padStart(2, '0')].join('-');
+    : [checkDay.getFullYear(), String(checkDay.getMonth() + 1).padStart(4, '0'), String(checkDay.getDate()).padStart(2, '0')].join('-');
+  const checkMoment = getCheckMoment(checkKey);
   return row.incoming.some(p => {
     if (!p || Number(p.qty) <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(String(p.date || ''))) return false;
     const partyDay = parseDateRu(p.date, new Date());
     if (!partyDay) return false;
     const partyKey = [partyDay.getFullYear(), String(partyDay.getMonth() + 1).padStart(2, '0'), String(partyDay.getDate()).padStart(2, '0')].join('-');
-    return partyKey <= checkKey;
+    if (partyKey > checkKey) return false;
+    const writeOff = getWriteOffMoment(partyKey, row.shelfLife);
+    return !!writeOff && writeOff > checkMoment;
   });
 }
 
@@ -8339,6 +8342,13 @@ function cmpNameTokens(name) {
     .replace(/[^a-zа-яё0-9]+/gi, ' ')
     .split(/\s+/).filter(Boolean);
 }
+function cmpCanonicalName(name) {
+  return normalizeName(name)
+    .replace(/\bжаренными\b/g, 'жареными')
+    .replace(/\bжаренныи\b/g, 'жареный')
+    .replace(/\bмалина\b/g, 'малиной');
+}
+
 function cmpNameSimilarity(a, b) {
   const aa = cmpNameTokens(a), bb = cmpNameTokens(b);
   if (!aa.length || !bb.length) return 0;
@@ -8346,7 +8356,7 @@ function cmpNameSimilarity(a, b) {
   let common = 0;
   sa.forEach(x => { if (sb.has(x)) common++; });
   const tokenScore = (2 * common) / (sa.size + sb.size);
-  const na = normalizeName(a), nb = normalizeName(b);
+  const na = cmpCanonicalName(a), nb = cmpCanonicalName(b);
   const max = Math.max(na.length, nb.length);
   let i = 0;
   while (i < Math.min(na.length, nb.length) && na[i] === nb[i]) i++;
@@ -8391,7 +8401,7 @@ function cmpParseJSON(text, applyCategory = true){
   const add = n => {
     const c = cleanProductName(n);
     if (!c || isServiceLine(c) || isIgnored(c)) return null;
-    const a = applyAliases(c), k = normalizeName(a);
+    const a = applyAliases(c), k = cmpCanonicalName(a);
     if (!_cmpProductIndexCache) {
       const map = new Map();
       PRODUCTS.forEach(x => { const nk = normalizeName(x.name); if (nk && !map.has(nk)) map.set(nk, x); });
