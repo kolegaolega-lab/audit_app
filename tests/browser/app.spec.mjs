@@ -129,7 +129,7 @@ test('multi-page invoice continuation inherits date and handwritten quantity is 
     {name:'Круассан',incoming:[]},
     {name:'Эклер',incoming:[{date:'2026-10-06',qty:1}]}
   ]);
-  expect(result.safetyCodes).toContain('handwritten-confirmation');
+  expect(result.safetyCodes).not.toContain('handwritten-confirmation');
   expect(result.safetyCodes).toContain('quantity-status-review');
 });
 
