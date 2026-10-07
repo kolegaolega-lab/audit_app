@@ -271,3 +271,43 @@ test('OCR safety blocks future audit and invoice dates', () => {
   const futureInvoiceCodes = context.getOCRSafetyIssues(futureInvoice, reportFor(futureInvoice), 2).map(x => x.code);
   assert.ok(futureInvoiceCodes.includes('future-invoice-date'));
 });
+
+
+test('OCR safety consolidates non-confirmed quantities into one actionable issue', () => {
+  const json = validJson({
+    invoices: [{
+      number: '123', date: '2026-10-06', continuation: false,
+      last_line_number: 2, printed_total: null,
+      items: [
+        { line: 1, name: 'Безе мини ассорти', quantity: 3, quantity_status: 'handwritten' },
+        { line: 2, name: 'Ром баба', quantity: 2, quantity_status: 'handwritten' }
+      ]
+    }],
+    review: {
+      unreadable: [],
+      handwritten_confirmation: ['Безе мини ассорти', 'Ром баба'],
+      uncertain_rows: [],
+      notes: []
+    }
+  });
+  const issues = context.getOCRSafetyIssues(json, reportFor(json), 2);
+  assert.equal(issues.filter(x => x.code === 'quantity-status-review').length, 1);
+  assert.equal(issues.filter(x => x.code === 'handwritten-confirmation').length, 0);
+  assert.match(issues.find(x => x.code === 'quantity-status-review').detail, /Безе мини ассорти/);
+  assert.match(issues.find(x => x.code === 'quantity-status-review').detail, /Ром баба/);
+});
+
+test('double-run comparison checks differing check dates and both-run catalog integrity', () => {
+  assert.match(html, /Дата проверки отличается между прогонами/);
+  assert.match(html, /\[d1full, 'Прогон 1'\], \[d2full, 'Прогон 2'\]/);
+  assert.match(html, /Все позиции обоих JSON есть в справочнике/);
+  assert.match(html, /Прогон 1.*Прогон 2/);
+});
+
+test('double-run comparison exposes concrete row-level differences', () => {
+  assert.match(html, /const details = \[\];/);
+  assert.match(html, /Название: «/);
+  assert.match(html, /Приход .*↔/);
+  assert.match(html, /Продажи: .*↔/);
+  assert.match(html, /cmp-detail/);
+});
