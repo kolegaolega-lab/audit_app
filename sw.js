@@ -1,11 +1,11 @@
 /* ═══════════════════════════════════════════
    French Bakery Аудит — Service Worker
-   v9.24.17 · shell + runtime + offline fallback
+   v9.24.18 · shell + runtime + offline fallback
    ═══════════════════════════════════════════ */
 
 'use strict';
 
-const SW_VERSION = 'v87.60';
+const SW_VERSION = 'v87.61';
 const CACHE_SHELL = 'fb-audit-' + SW_VERSION;
 const CACHE_RUNTIME = 'fb-audit-runtime-' + SW_VERSION;
 const CACHE_MAX_ENTRIES = 80;
