@@ -104,7 +104,7 @@ test('stock beyond known receipts is not treated as fresh', () => {
     { freshOnShelf:1, expiredOnShelf:2, freshSold:0, soldExpired:0 });
 });
 
-test('no receipts means stock and sales are flagged as unconfirmed/expired', () => {
+test('no receipts means stock and sales are flagged as expired', () => {
   assert.deepEqual(computeFIFO(row(24, [], 1, 2)),
     { freshOnShelf:0, expiredOnShelf:1, freshSold:0, soldExpired:2 });
 });
