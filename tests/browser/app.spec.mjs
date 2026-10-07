@@ -188,3 +188,55 @@ test('OCR recognition shows visible processing progress UI', async ({page}) => {
   expect(layout.overlaps).toBe(false);
   expect(layout.gap).toBeGreaterThanOrEqual(0);
 });
+
+
+test('OCR parser keeps all categories in full JSON even when an audit category is selected', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    window._activeCategory = 'desserts';
+    const payload = {
+      schema_version:'1.0', document_type:'combined', check_date:'2026-10-06',
+      invoices:[], sales:[
+        {name:'Десерт Ореховый',quantity:1,quantity_status:'confirmed'},
+        {name:'Круассан',quantity:2,quantity_status:'confirmed'}
+      ], review:{}
+    };
+    const parsed = window.parseJSON(JSON.stringify(payload), new Date('2026-10-06T10:00:00'));
+    return parsed.rows.map(r => r.name).sort();
+  });
+  expect(result).toEqual(['Десерт Ореховый','Круассан']);
+});
+
+test('daily separated OCR keeps continuation invoice without its own date', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const inv = {
+      source:{photo_count:2,processed_photo_count:2,duplicate_photo_count:0},
+      invoices:[
+        {number:'217246',date:'2026-10-06',continuation:false,items:[{line:1,name:'Товар A',quantity:2,quantity_status:'confirmed'}]},
+        {number:'217246',date:null,continuation:true,items:[{line:2,name:'Товар B',quantity:3,quantity_status:'confirmed'}]}
+      ],review:{}
+    };
+    const sal = {source:{photo_count:0,processed_photo_count:0,duplicate_photo_count:0},invoices:[],sales:[],review:{}};
+    const out = JSON.parse(window.mergeSeparatedOCRJson(JSON.stringify(inv),JSON.stringify(sal),'06.10'));
+    return out.invoices.map(x => ({number:x.number,date:x.date,continuation:x.continuation,items:x.items.length}));
+  });
+  expect(result).toEqual([
+    {number:'217246',date:'2026-10-06',continuation:false,items:1},
+    {number:'217246',date:'2026-10-06',continuation:true,items:1}
+  ]);
+});
+
+test('finish check is blocked until all stock values are entered', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    window.tableRows = [
+      {name:'A',stock:null,sales:0,shelfLife:24,incoming:[{date:'2026-10-06',qty:1}],salesOnly:false},
+      {name:'B',stock:2,sales:0,shelfLife:24,incoming:[{date:'2026-10-06',qty:2}],salesOnly:false}
+    ];
+    window.updateFinishCheckBtn();
+    const btn=document.querySelector('#finishCheckBtn');
+    return {disabled:btn.disabled,text:btn.textContent};
+  });
+  expect(result).toEqual({disabled:true,text:'Введите остаток: 1'});
+});
