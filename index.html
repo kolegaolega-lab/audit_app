@@ -8680,23 +8680,9 @@ function validateAIResponse(csv1, csv2, report, photoCount) {
     }
   } catch (e) { console.warn('validate: digit-confusion', e); }
 
-  /* --- 10. Разное количество строк между прогонами --- */
-  try {
-    if (csv1 && csv2) {
-      const n1 = countCsvRows(csv1);
-      const n2 = countCsvRows(csv2);
-      if (n1 > 0 && n2 > 0 && n1 !== n2) {
-        issues.push({
-          level: 'warn',
-          code: 'run-count-diff',
-          title: 'Прогоны вернули разное количество строк',
-          detail: 'Прогон 1: ' + n1 + ' строк. Прогон 2: ' + n2 +
-                  ' строк. Разница: ' + Math.abs(n1 - n2) +
-                  '. Один из прогонов что-то потерял или добавил.'
-        });
-      }
-    }
-  } catch (e) { console.warn('validate: run-count-diff', e); }
+  /* v9.21.0: число сырых CSV-строк не считается самостоятельной ошибкой.
+     Реальное сравнение выполняется по уникальным нормализованным позициям
+     в отдельной «Сверке двух результатов». */
 
   /* --- 11. Модель пометила фото как «дубль/черновик» --- */
   try {
