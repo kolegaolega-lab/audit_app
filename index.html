@@ -7017,7 +7017,7 @@ function validateAIResponse(j1, j2, report, count) {
   (d.sales || []).forEach(i => {
     if (i.quantity_status !== 'confirmed') {
       issues.push({ level: 'warn', code: 'sales-quantity-review',
-        title: 'Количество продаж требует подтверждения',
+        title: 'Продажи не подтверждены',
         detail: (i.name || '') + ' · статус: ' + (i.quantity_status || '—') });
     }
   });
