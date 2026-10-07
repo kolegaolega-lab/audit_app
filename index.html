@@ -2717,7 +2717,7 @@ function parseShelfLife(str) {
   return clampNum(n, 1, 10000, null);
 }
 
-function parseJSON(text,referenceDate){let d;try{d=typeof text==="string"?JSON.parse(text):text}catch(e){throw Error("Не удалось прочитать результат распознавания.")}if(!d||typeof d!=="object"||Array.isArray(d))throw Error("JSON должен быть объектом.");const parsedCheckDate=String(d.check_date||"").trim();const effectiveReference=parsedCheckDate?parseDateRu(parsedCheckDate,referenceDate):referenceDate;const rows={};const add=n=>{const c=cleanProductName(n);if(!c||isServiceLine(c)||isIgnored(c))return null;const a=applyAliases(c),k=normalizeName(a),p=PRODUCTS.find(x=>normalizeName(x.name)===k);/* OCR parser intentionally keeps all categories; category filtering is applied only when building the audit table. */if(!rows[k])rows[k]={name:a,stock:null,sales:0,_originalSales:0,shelfLife:p?p.shelfLife:null,category:p?(p.category||null):null,incoming:[],salesOnly:false};return rows[k]};(function(){const invoiceDates={};let lastInvoiceDate="";(d.invoices||[]).forEach(inv=>{const number=String(inv.number||"").trim();const rawDate=String(inv.date||"").trim();let date="";if(rawDate){date=/^\d{4}-\d{2}-\d{2}$/.test(rawDate)?rawDate:(parseDateRu(rawDate,effectiveReference)||"");if(date){if(number)invoiceDates[number]=date;lastInvoiceDate=date}}else if(inv.continuation){date=(number&&invoiceDates[number])||lastInvoiceDate||"" }else{date=""} (inv.items||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed"&&date)row.incoming.push({date,qty:clampNum(it.quantity,0,MAX_NUM,0)})})})})();(d.sales||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed")row.sales+=clampNum(it.quantity,0,MAX_NUM,0)});Object.values(rows).forEach(r=>r.incoming=mergeIncomingByDate(r.incoming));return{rows:Object.values(rows),truncated:false,json:d,effectiveReference}}
+function parseJSON(text,referenceDate){let d;try{d=typeof text==="string"?JSON.parse(text):text}catch(e){throw Error("Не удалось прочитать результат распознавания.")}if(!d||typeof d!=="object"||Array.isArray(d))throw Error("Не удалось прочитать результат распознавания.");const parsedCheckDate=String(d.check_date||"").trim();const effectiveReference=parsedCheckDate?parseDateRu(parsedCheckDate,referenceDate):referenceDate;const rows={};const add=n=>{const c=cleanProductName(n);if(!c||isServiceLine(c)||isIgnored(c))return null;const a=applyAliases(c),k=normalizeName(a),p=PRODUCTS.find(x=>normalizeName(x.name)===k);/* OCR parser intentionally keeps all categories; category filtering is applied only when building the audit table. */if(!rows[k])rows[k]={name:a,stock:null,sales:0,_originalSales:0,shelfLife:p?p.shelfLife:null,category:p?(p.category||null):null,incoming:[],salesOnly:false};return rows[k]};(function(){const invoiceDates={};let lastInvoiceDate="";(d.invoices||[]).forEach(inv=>{const number=String(inv.number||"").trim();const rawDate=String(inv.date||"").trim();let date="";if(rawDate){date=/^\d{4}-\d{2}-\d{2}$/.test(rawDate)?rawDate:(parseDateRu(rawDate,effectiveReference)||"");if(date){if(number)invoiceDates[number]=date;lastInvoiceDate=date}}else if(inv.continuation){date=(number&&invoiceDates[number])||lastInvoiceDate||"" }else{date=""} (inv.items||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed"&&date)row.incoming.push({date,qty:clampNum(it.quantity,0,MAX_NUM,0)})})})})();(d.sales||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed")row.sales+=clampNum(it.quantity,0,MAX_NUM,0)});Object.values(rows).forEach(r=>r.incoming=mergeIncomingByDate(r.incoming));return{rows:Object.values(rows),truncated:false,json:d,effectiveReference}}
 function sortRowsAlphabetically(rows) {
   return [...rows].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' }));
 }
@@ -4813,7 +4813,7 @@ function renderTable() {
         const warnIcon = document.createElement('span');
         warnIcon.className = 'check-warn-icon';
         warnIcon.textContent = '⚠';
-        warnIcon.title = 'Расхождение в сверке — проверь по фото';
+        warnIcon.title = 'Есть отличие — проверьте по фото';
         tdName.appendChild(warnIcon);
       }
       tr.appendChild(tdName);
@@ -5102,7 +5102,7 @@ function renderCards() {
       const warnIcon = document.createElement('span');
       warnIcon.className = 'check-warn-icon';
       warnIcon.textContent = '⚠';
-      warnIcon.title = 'Расхождение в сверке — проверь по фото';
+      warnIcon.title = 'Есть отличие — проверьте по фото';
       nameEl.appendChild(warnIcon);
     }
     const shelfEl = document.createElement('div');
@@ -6333,7 +6333,7 @@ ${intro}
 
 🔴 ПРАВИЛА ИСПОЛЬЗОВАНИЯ СПРАВОЧНИКА:
 
-1. В JSON включай КАЖДУ товарную позицию, которую реально видишь в документе.
+1. В результате включай КАЖДУ товарную позицию, которую реально видишь в документе.
    НЕЛЬЗЯ удалять строку только потому, что она относится к другой категории.
    Для чека это означает: распознай ВЕСЬ раздел продаж от первой товарной
    позиции до «Итого для продажи».
@@ -7053,7 +7053,7 @@ function validateAIResponse(j1, j2, report, count) {
     if (inv?.continuation && num && knownInvoiceDates.has(num)) return;
     issues.push({ level: 'error', code: inv?.continuation ? 'continuation-date-unresolved' : 'invoice-date-missing',
       title: inv?.continuation ? 'Не удалось определить дату продолжения накладной' : 'Не удалось определить дату накладной',
-      detail: (num ? ('№' + num + ' · ') : '') + 'требуется ручная сверка' });
+      detail: (num ? ('№' + num + ' · ') : '') + 'нужно проверить вручную' });
   });
 
   /* 10. Даты накладных: ±30 дней */
@@ -7256,7 +7256,7 @@ function getOCRSafetyIssues(text,report,count){
       .map(x => Number(x?.line))
       .filter(Number.isInteger);
     if (!lines.length) {
-      out.push({code:'invoice-line-numbers-missing',title:'У накладной отсутствует нумерация строк',detail:(g.number ? '№' + g.number + ' · ' : '') + 'требуется ручная сверка'});
+      out.push({code:'invoice-line-numbers-missing',title:'У накладной отсутствует нумерация строк',detail:(g.number ? '№' + g.number + ' · ' : '') + 'нужно проверить вручную'});
       return;
     }
     const unique = new Set(lines);
@@ -7296,7 +7296,7 @@ function getOCRSafetyIssues(text,report,count){
   const r = d.review || {};
   if (!r || typeof r !== "object") out.push({code:"invalid-review",title:"Некорректный блок review"});
   if ((r.unreadable||[]).length) out.push({code:"unreadable",title:"Есть нечитаемые значения"});
-  if ((r.uncertain_rows||[]).length) out.push({code:"uncertain-rows",title:"Есть сомнительные строки — требуется ручная сверка"});
+  if ((r.uncertain_rows||[]).length) out.push({code:"uncertain-rows",title:"Есть сомнительные строки — нужно проверить вручную"});
 
   const allowedStatuses = new Set(["confirmed","uncertain","unreadable","handwritten"]);
   const badStatus = allItems.filter(x => !x || !allowedStatuses.has(x.quantity_status));
@@ -7379,7 +7379,7 @@ function summarizeAIReport(report) {
   if (report.checks && report.checks.length) {
     const bad = report.checks.filter(c => c.status === 'mismatch');
     if (bad.length) {
-      issues.push({ type: 'error', text: 'Расхождение в сверке: ' + bad.map(c => c.num).join(', ') });
+      issues.push({ type: 'error', text: 'Есть расхождение:  ' + bad.map(c => c.num).join(', ') });
       hasBlockingIssue = true;
     }
   }
@@ -7484,13 +7484,13 @@ async function recognizeWithGemini(){
       const d = await res.json();
       const raw = (d?.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("");
       const j = extractJsonFromGeminiText(raw);
-      if (!j) throw Error("Gemini вернул невалидный JSON.");
+      if (!j) throw Error("Не удалось получить понятный результат распознавания.");
       return j;
     };
     let a = await run(1), b = "";
-    setOCRProgress("Ответ получен", two ? "Запускаю второй прогон для сверки…" : "Проверяю структуру JSON…", two ? 58 : 72);
+    setOCRProgress("Ответ получен", two ? "Запускаю второй прогон для сверки…" : "Проверяю результат…", two ? 58 : 72);
     if (two) { await new Promise(r => setTimeout(r, 800)); b = await run(2); setOCRProgress("Оба ответа получены", "Сверяю результаты…", 82); }
-    setOCRProgress("Проверяю распознавание","Анализирую JSON и качество OCR…",88);
+    setOCRProgress("Проверяю распознавание","Проверяю качество распознавания…",88);
     $("jsonInput").value = a;
     autoResizeTextarea();
     updateJsonCounter();
@@ -7516,16 +7516,16 @@ async function recognizeWithGemini(){
     }
     if (b) {
       finishOCRProgress(true);
-      set(s.length ? "warn" : "info", s.length ? formatOCRSafetyMessage(s) : "Получены два JSON-ответа. Открываю сверку.");
+      set(s.length ? "warn" : "info", s.length ? formatOCRSafetyMessage(s) : "Получены два результата. Открываю сравнение.");
       setTimeout(() => openCompareModal({ first: a, second: b }), 300);
     } else if (s.length) {
       finishOCRProgress(true);
-      set("warn", formatOCRSafetyMessage(s) + " JSON сохранён.");
+      set("warn", formatOCRSafetyMessage(s) + " Результат сохранён.");
     } else {
-      set("info", "Применяю JSON…");
+      set("info", "Применяю результат…");
       await applyJSON();
       finishOCRProgress(true);
-      set("ok", "JSON применён.");
+      set("ok", "Результат применён.");
     }
   } catch (e) {
     const raw=String(e?.message||e||"");
@@ -7548,7 +7548,7 @@ function mergeSeparatedOCRJson(invoiceJson, salesJson, dateLabel) {
     inv = invoiceJson ? JSON.parse(invoiceJson) : null;
     sal = salesJson ? JSON.parse(salesJson) : null;
   } catch (e) {
-    throw new Error('Некорректный JSON OCR.');
+    throw new Error('Не удалось прочитать результат распознавания.');
   }
   const iso = (dailyParseDateInput(dateLabel) || {}).iso || dateLabel;
   const invoiceDates = {};
@@ -7691,7 +7691,7 @@ async function recognizeDaily(){
     if(entry.blocked||entry.needsCheck){
       _lastGeminiJsons={first:j1,second:j2||j1};
       _dailyEditing=parsed.iso;
-      set("warn","JSON сохранён, но требует проверки.");
+      set("warn","Результат сохранён, но его нужно проверить.");
       setTimeout(()=>openCompareModal({first:j1,second:j2||j1}),300);
     }else{
       set("ok","Накладные и чек распознаны раздельно и объединены.");
@@ -7715,7 +7715,7 @@ function finalizeDailyEditing() {
     if (entry) showToast(`Дата ${entry.label} обновлена из таблицы`);
   }
 }
-async function buildDailyJson(){const st=$("dailyStatus");if(!_dailyAccum.length){if(st){st.className="status show err";st.textContent="Накопитель пуст."}return}if(!isValidCategory(_activeCategory)){if(st){st.className="status show err";st.textContent="Сначала выберите категорию."}return}_dailyAccum.sort((a,b)=>a.iso.localeCompare(b.iso));const bad=_dailyAccum.filter(x=>x.blocked||x.needsCheck);if(bad.length){if(st){st.className="status show err";st.textContent="Нельзя собрать итог: есть даты с непроверенным JSON — "+bad.map(x=>x.label).join(", ")}return}const inv=[],sales=[];for(const e of _dailyAccum){const d=JSON.parse(e.json);inv.push(...(d.invoices||[]));if(e.iso===_dailyAccum[_dailyAccum.length-1].iso)sales.push(...(d.sales||[]))}const final={schema_version:"1.0",document_type:"combined",check_date:_dailyAccum[_dailyAccum.length-1].iso,source:{photo_count:0,processed_photo_count:0,duplicate_photo_count:0},invoices:inv,sales,review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}};const field=$("jsonInput");if(field){field.value=JSON.stringify(final,null,2);autoResizeTextarea();updateJsonCounter()}await applyJSON();_dailyAccum=[];saveDailyAccum();dailyRender();if(st){st.className="status show ok";st.textContent="Итоговый JSON применён."}}
+async function buildDailyJson(){const st=$("dailyStatus");if(!_dailyAccum.length){if(st){st.className="status show err";st.textContent="Накопитель пуст."}return}if(!isValidCategory(_activeCategory)){if(st){st.className="status show err";st.textContent="Сначала выберите категорию."}return}_dailyAccum.sort((a,b)=>a.iso.localeCompare(b.iso));const bad=_dailyAccum.filter(x=>x.blocked||x.needsCheck);if(bad.length){if(st){st.className="status show err";st.textContent="Нельзя собрать итог: есть даты с непроверенным JSON — "+bad.map(x=>x.label).join(", ")}return}const inv=[],sales=[];for(const e of _dailyAccum){const d=JSON.parse(e.json);inv.push(...(d.invoices||[]));if(e.iso===_dailyAccum[_dailyAccum.length-1].iso)sales.push(...(d.sales||[]))}const final={schema_version:"1.0",document_type:"combined",check_date:_dailyAccum[_dailyAccum.length-1].iso,source:{photo_count:0,processed_photo_count:0,duplicate_photo_count:0},invoices:inv,sales,review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}};const field=$("jsonInput");if(field){field.value=JSON.stringify(final,null,2);autoResizeTextarea();updateJsonCounter()}await applyJSON();_dailyAccum=[];saveDailyAccum();dailyRender();if(st){st.className="status show ok";st.textContent="Итоговый Результат применён."}}
 
 function dailyClear() {
   if (!_dailyAccum.length) return;
@@ -8189,7 +8189,7 @@ function renderAIReportModal(report) {
       const ok = p == null || p === r;
       h.push('<div class="ai-issue-row ' + (ok ? 'ok' : 'error') + '">' +
         '<span class="ai-issue-icon">' + (ok ? '✓' : '✗') + '</span><span class="ai-issue-body">' +
-        'Полнота: получено <b>' + r + '</b>, обработано <b>' + (p == null ? '—' : p) + '</b>' +
+        'Обработано фото: получено <b>' + r + '</b>, обработано <b>' + (p == null ? '—' : p) + '</b>' +
         (ok ? '' : ' — часть материалов не обработана.') + '</span></div>');
     }
 
@@ -8293,24 +8293,6 @@ function renderAIReportModal(report) {
   }
 
   body.innerHTML = html;
-}
-
-function plainUserText(value) {
-  let t = String(value == null ? '' : value);
-  const map = [
-    [/\bJSON\b/gi, 'результат распознавания'],
-    [/\bOCR\b/gi, 'распознавание'],
-    [/\bневалидн(?:ый|ая|ое|ые)\b/gi, 'неверн/* ═══════════════════════════════════════════
-   UI HELPERS'],
-    [/\bвалидн(?:ый|ая|ое|ые)\b/gi, 'корректн/* ═══════════════════════════════════════════
-   UI HELPERS'],
-    [/техническ(?:ий|ая|ое|ие)\s+ответ/gi, 'дополнительные данные'],
-    [/диагностическ(?:ая|ий|ое|ие)\s*:/gi, 'для справки:'],
-    [/сверка/gi, 'сравнение'],
-    [/прогон(?:а|е|ы)?/gi, 'результат'],
-  ];
-  map.forEach(([re, rep]) => { t = t.replace(re, rep); });
-  return t;
 }
 
 /* ═══════════════════════════════════════════
@@ -8615,13 +8597,13 @@ function cmpRunCompare() {
   // Два результата могут быть получены в разные дни или содержать разную дату аудита,
   // но при одинаковых фотографиях накладных должны сравниваться по самим накладным,
   // их датам, товарам, количествам и продажам.
-  // Сверка — это отдельный путь к применению OCR-данных, поэтому она
+  // Сравнение — это отдельный путь к применению OCR-данных, поэтому она
   // обязана проходить ту же OCR safety gate, что и обычный Apply JSON.
   const cmpSafety = [];
   const buildCmpSafety = (raw, data, label, otherRaw) => {
     try {
       const report = parseAIReport(raw);
-      if (!report) return [{ code:'empty-json', title:label + ': некорректный JSON', detail:'Не удалось прочитать один из результатов распознавания..' }];
+      if (!report) return [{ code:'empty-json', title:label + ': неверный результат распознавания', detail:'Не удалось прочитать один из результатов распознавания.' }];
       const photoCount = Number(data?.document?.source?.photo_count);
       report.validation = validateAIResponse(raw, otherRaw || '', report, Number.isInteger(photoCount) ? photoCount : 0);
       const issues = getOCRSafetyIssues(raw, report, Number.isInteger(photoCount) ? photoCount : 0);
@@ -8640,7 +8622,7 @@ function cmpRunCompare() {
   cmpSafety.forEach(issue => checks.push({
     ok: false,
     title: issue.title,
-    detail: issue.detail || 'Требуется исправление OCR-данных.'
+    detail: issue.detail || 'Нужно исправить отмеченную проблему.'
   }));
   _cmpNakls.filter(n => n.date).forEach(n => {
     const dateKey = (() => {
@@ -8657,9 +8639,9 @@ function cmpRunCompare() {
 
     let c1ok = true, c1detail = '';
     if (lastNum > 0) {
-      if (maxCount === lastNum) { c1ok = true; c1detail = `В JSON ${maxCount} поз. — совпадает с последним № ${lastNum}.`; }
-      else if (maxCount < lastNum) { c1ok = false; c1detail = `В JSON ${maxCount} поз., в накладной ${lastNum}. Возможно, потеряна строка.`; }
-      else { c1ok = false; c1detail = `В JSON ${maxCount} поз., в накладной только ${lastNum}. Лишние строки.`; }
+      if (maxCount === lastNum) { c1ok = true; c1detail = `В результате ${maxCount} поз. — совпадает с последним № ${lastNum}.`; }
+      else if (maxCount < lastNum) { c1ok = false; c1detail = `В результате ${maxCount} поз., в накладной ${lastNum}. Возможно, потеряна строка.`; }
+      else { c1ok = false; c1detail = `В результате ${maxCount} поз., в накладной только ${lastNum}. Лишние строки.`; }
     } else { c1detail = 'Последний № не задан — пропущено.'; }
     checks.push({ ok: c1ok, title: `№${n.num} (${dateKey}) — количество позиций`, detail: c1detail });
 
@@ -8668,7 +8650,7 @@ function cmpRunCompare() {
       const diff2 = sig2.total - printedTotal;
       const tol = 0.02;
       const bothOk = Math.abs(diff1) <= tol && Math.abs(diff2) <= tol;
-      let detail = `JSON №1: <b>${sig1.total.toFixed(2)}</b> (Δ${diff1.toFixed(2)}), JSON №2: <b>${sig2.total.toFixed(2)}</b> (Δ${diff2.toFixed(2)}), печатный: <b>${printedTotal.toFixed(2)}</b>.`;
+      let detail = `Результат 1: <b>${sig1.total.toFixed(2)}</b> (Δ${diff1.toFixed(2)}), Результат 2: <b>${sig2.total.toFixed(2)}</b> (Δ${diff2.toFixed(2)}), печатный: <b>${printedTotal.toFixed(2)}</b>.`;
       if (!bothOk) {
         const absDiff = Math.abs(diff1);
         const found = cmpFindRowByDiff(d1, absDiff) || cmpFindRowByDiff(d2, absDiff);
@@ -8901,7 +8883,7 @@ function cmpRenderResults() {
       '<div class="row"><span>✗ Есть только в одном результате</span><b class="red">' + errCount + '</b></div>';
   }
   if (!out) return;
-  if (!rows.length) { out.innerHTML = '<div class="cmp-empty">Оба JSON пусты.</div>'; return; }
+  if (!rows.length) { out.innerHTML = '<div class="cmp-empty">Оба результата пусты.</div>'; return; }
   out.innerHTML = rows.map(r => {
     const icon = r.status === 'ok' ? '✓' : r.status === 'warn' ? '⚠' : '✗';
     const vals = [];
@@ -8962,7 +8944,7 @@ function cmpRenderResults() {
   const comparisonBlocked = _cmpData.comparisonValid === false;
   if (applyBtn) {
     applyBtn.style.display = (!safetyBlocked && !comparisonBlocked && (okCount || hasEdits)) ? 'block' : 'none';
-    if (comparisonBlocked) applyBtn.title = 'Сначала исправьте причину невалидной сверки';
+    if (comparisonBlocked) applyBtn.title = 'Сначала исправьте отмеченные ошибки';
   }
 }
 function cmpApplyMatched() {
