@@ -7027,21 +7027,35 @@ function validateAIResponse(j1, j2, report, count) {
     });
   }
 
-  /* 10. Fuzzy-матч справочника */
+  /* 10. Fuzzy-матч справочника
+     Это диагностическая проверка, а не блокирующая логика. Она не должна
+     замораживать Safari на большом пользовательском справочнике.
+     Нормализованные имена кэшируем, кандидатов ограничиваем по длине и
+     прерываем поиск по небольшому временному бюджету. Пропуск fuzzy-проверки
+     не влияет на FIFO: точное сопоставление выполняется отдельно. */
   if (typeof PRODUCTS !== 'undefined' && PRODUCTS.length) {
+    const startedAt = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    const FUZZY_BUDGET_MS = 120;
     const catalogByLen = new Map();
+    const exactNames = new Set();
+    const normalizedCatalog = [];
     PRODUCTS.forEach(p => {
       const k = normalizeName(p.name);
+      if (!k) return;
+      exactNames.add(k);
+      normalizedCatalog.push(k);
       const len = k.length;
       for (let L = Math.max(0, len - 2); L <= len + 2; L++) {
         if (!catalogByLen.has(L)) catalogByLen.set(L, []);
-        catalogByLen.get(L).push(k);
+        const bucket = catalogByLen.get(L);
+        if (bucket.length < 300) bucket.push(k);
       }
     });
+    let fuzzyTimedOut = false;
     const checkName = (name) => {
+      if (fuzzyTimedOut) return;
       const n = normalizeName(name || '');
-      if (!n) return;
-      if (PRODUCTS.some(p => normalizeName(p.name) === n)) return;
+      if (!n || exactNames.has(n)) return;
       const cands = catalogByLen.get(n.length) || [];
       for (const c of cands) {
         if (Math.abs(c.length - n.length) > 2) continue;
@@ -7051,10 +7065,26 @@ function validateAIResponse(j1, j2, report, count) {
             detail: '«' + name + '» похоже на «' + c + '»' });
           return;
         }
+        const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+        if (now - startedAt > FUZZY_BUDGET_MS) {
+          fuzzyTimedOut = true;
+          return;
+        }
       }
     };
-    (d.invoices || []).forEach(inv => (inv.items || []).forEach(i => checkName(i.name)));
-    (d.sales || []).forEach(i => checkName(i.name));
+    for (const inv of (d.invoices || [])) {
+      for (const item of (inv.items || [])) {
+        checkName(item.name);
+        if (fuzzyTimedOut) break;
+      }
+      if (fuzzyTimedOut) break;
+    }
+    if (!fuzzyTimedOut) {
+      for (const item of (d.sales || [])) {
+        checkName(item.name);
+        if (fuzzyTimedOut) break;
+      }
+    }
   }
 
   /* 11. Разное число строк между двумя прогонами */
