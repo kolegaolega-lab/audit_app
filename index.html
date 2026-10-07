@@ -6995,8 +6995,18 @@ function validateAIResponse(j1, j2, report, count) {
      для проверки и не считаем это ошибкой OCR. */
   const toIsoDate = value => {
     const parsed = parseDateRu(String(value || ''), new Date());
-    if (!parsed || isNaN(parsed.getTime())) return '';
-    return [parsed.getFullYear(), String(parsed.getMonth() + 1).padStart(2, '0'), String(parsed.getDate()).padStart(2, '0')].join('-');
+    if (!parsed) return '';
+    if (parsed instanceof Date) {
+      if (isNaN(parsed.getTime())) return '';
+      return [parsed.getFullYear(), String(parsed.getMonth() + 1).padStart(2, '0'), String(parsed.getDate()).padStart(2, '0')].join('-');
+    }
+    const normalized = String(parsed).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return normalized;
+    const m = normalized.match(/^(\d{4})[-.](\d{1,2})[-.](\d{1,2})$/);
+    if (!m) return '';
+    const y = Number(m[1]), mo = Number(m[2]), d = Number(m[3]);
+    const iso = [String(y).padStart(4, '0'), String(mo).padStart(2, '0'), String(d).padStart(2, '0')].join('-');
+    return safeDate(y, mo, d) ? iso : '';
   };
   const knownInvoiceDates = new Map();
   (d.invoices || []).forEach(inv => {
