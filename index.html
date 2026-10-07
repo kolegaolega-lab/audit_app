@@ -8555,7 +8555,12 @@ function cmpRunCompare() {
       if (!report) return [{ code:'empty-json', title:label + ': некорректный JSON', detail:'Не удалось разобрать JSON.' }];
       const photoCount = Number(data?.document?.source?.photo_count);
       report.validation = validateAIResponse(raw, otherRaw || '', report, Number.isInteger(photoCount) ? photoCount : 0);
-      return getOCRSafetyIssues(raw, report, Number.isInteger(photoCount) ? photoCount : 0)
+      const issues = getOCRSafetyIssues(raw, report, Number.isInteger(photoCount) ? photoCount : 0);
+      const hasQuantityStatusIssue = issues.some(x => x?.code === 'quantity-status-review');
+      // В сверке не показываем два сообщения об одном и том же: handwritten-confirmation
+      // уже входит в подробный quantity-status-review, если OCR проставил статус строки.
+      return issues
+        .filter(x => !(hasQuantityStatusIssue && x?.code === 'handwritten-confirmation'))
         .map(x => ({ ...x, title: label + ': ' + x.title }));
     } catch (e) {
       return [{ code:'comparison-safety-error', title:label + ': ошибка safety-проверки', detail:String(e?.message || e || 'Неизвестная ошибка') }];
