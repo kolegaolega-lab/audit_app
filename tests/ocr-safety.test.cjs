@@ -298,19 +298,19 @@ test('OCR safety consolidates non-confirmed quantities into one actionable issue
 });
 
 test('double-run comparison checks differing check dates and both-run catalog integrity', () => {
-  assert.match(html, /Дата проверки отличается между прогонами/);
-  assert.match(html, /\[d1full, 'Прогон 1'\], \[d2full, 'Прогон 2'\]/);
+  assert.match(html, /Дата проверки отличается/);
+  assert.match(html, /\[d1full, 'Первый результат'\], \[d2full, 'Второй результат'\]/);
   assert.match(html, /Все позиции обоих JSON есть в справочнике/);
-  assert.match(html, /Прогон 1.*Прогон 2/);
+  assert.match(html, /Первый результат.*Второй результат/);
 });
 
 test('double-run comparison marks mismatched check dates as invalid and blocks Apply', () => {
   assert.match(html, /const checkDateMismatch = !!\(checkDate1 && checkDate2 && checkDate1 !== checkDate2\)/);
   assert.match(html, /comparisonValid: !checkDateMismatch && cmpSafety\.length === 0/);
-  assert.match(html, /Результаты ниже показаны только для диагностики\. Применение заблокировано/);
+  assert.match(html, /Результаты ниже показаны только для проверки\. Использование этих данных заблокировано/);
   assert.match(html, /const comparisonBlocked = _cmpData\.comparisonValid === false/);
   assert.match(html, /!safetyBlocked && !comparisonBlocked/);
-  assert.match(html, /Применение заблокировано: сверка невалидна/);
+  assert.match(html, /Использование заблокировано\. Проверьте дату и ошибки распознавания/);
 });
 
 test('double-run comparison exposes concrete row-level differences', () => {
