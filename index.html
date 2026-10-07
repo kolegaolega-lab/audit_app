@@ -7929,7 +7929,7 @@ function cmpSplitLine(line, sep) {
   }
   out.push(cur); return out;
 }
-function cmpParseJSON(text){let d;try{d=typeof text==="string"?JSON.parse(text):text}catch(e){return null}if(!d||typeof d!=="object")return null;const rows={},order=[],dateCols=[];const add=n=>{const c=cleanProductName(n);if(!c||isServiceLine(c)||isIgnored(c))return null;const a=applyAliases(c),k=normalizeName(a);if(!rows[k]){rows[k]={name:a,incoming:{},sales:0};order.push(k)}return rows[k]};(d.invoices||[]).forEach(inv=>{const iso=String(inv.date||d.check_date||""),m=iso.match(/^(\d{4})-(\d{2})-(\d{2})$/),dk=m?m[3]+"."+m[2]:iso;if(dk&&!dateCols.some(x=>x.key===dk))dateCols.push({key:dk,label:dk});(inv.items||[]).forEach(it=>{if(it.quantity==null||it.quantity_status==="unreadable")return;const row=add(it.name);if(row)row.incoming[dk]=(row.incoming[dk]||0)+clampNum(it.quantity,0,MAX_NUM,0)})});(d.sales||[]).forEach(it=>{if(it.quantity==null||it.quantity_status==="unreadable")return;const row=add(it.name);if(row)row.sales+=clampNum(it.quantity,0,MAX_NUM,0)});return order.length?{rows,order,dateCols}:null}
+function cmpParseJSON(text, applyCategory = true){let d;try{d=typeof text==="string"?JSON.parse(text):text}catch(e){return null}if(!d||typeof d!=="object")return null;const rows={},order=[],dateCols=[];const add=n=>{const c=cleanProductName(n);if(!c||isServiceLine(c)||isIgnored(c))return null;const a=applyAliases(c),k=normalizeName(a),p=PRODUCTS.find(x=>normalizeName(x.name)===k);if(applyCategory&&p&&_activeCategory&&p.category&&p.category!==_activeCategory)return null;if(!rows[k]){rows[k]={name:a,incoming:{},sales:0,category:p?(p.category||null):null};order.push(k)}return rows[k]};(d.invoices||[]).forEach(inv=>{const iso=String(inv.date||d.check_date||""),m=iso.match(/^(\d{4})-(\d{2})-(\d{2})$/),dk=m?m[3]+"."+m[2]:iso;if(dk&&!dateCols.some(x=>x.key===dk))dateCols.push({key:dk,label:dk});(inv.items||[]).forEach(it=>{if(it.quantity==null||it.quantity_status==="unreadable")return;const row=add(it.name);if(row)row.incoming[dk]=(row.incoming[dk]||0)+clampNum(it.quantity,0,MAX_NUM,0)})});(d.sales||[]).forEach(it=>{if(it.quantity==null||it.quantity_status==="unreadable")return;const row=add(it.name);if(row)row.sales+=clampNum(it.quantity,0,MAX_NUM,0)});return order.length?{rows,order,dateCols,document:d}:null}
 function cmpCalcSigmaForDate(jsonData, dateKey) {
   let total = 0; let count = 0; const missing = [];
   for (const key of jsonData.order) {
@@ -8021,9 +8021,14 @@ function cmpRunCompare() {
   const t1 = $('cmpJson1') ? $('cmpJson1').value : '';
   const t2 = $('cmpJson2') ? $('cmpJson2').value : '';
   if (!t1.trim() || !t2.trim()) { showToast('Заполни оба JSON'); return; }
-  const d1 = cmpParseJSON(t1);
-  const d2 = cmpParseJSON(t2);
-  if (!d1 || !d2) { showToast('Не удалось разобрать JSON'); return; }
+  // Два представления одного JSON:
+  // 1) full — весь документ, независимо от выбранной категории, для контроля полноты;
+  // 2) filtered — только выбранная категория для рабочего сравнения FIFO.
+  const d1full = cmpParseJSON(t1, false);
+  const d2full = cmpParseJSON(t2, false);
+  const d1 = cmpParseJSON(t1, true);
+  const d2 = cmpParseJSON(t2, true);
+  if (!d1 || !d2 || !d1full || !d2full) { showToast('Не удалось разобрать JSON'); return; }
 
   const allKeys = new Set([...Object.keys(d1.rows), ...Object.keys(d2.rows)]);
   const dateLabels = {};
@@ -8057,8 +8062,10 @@ function cmpRunCompare() {
     const dateKey = n.date;
     const printedTotal = Number(String(n.total).replace(',', '.').replace(/[^\d.]/g, '')) || 0;
     const lastNum = parseInt(String(n.lastNum).replace(/[^\d]/g, ''), 10) || 0;
-    const sig1 = cmpCalcSigmaForDate(d1, dateKey);
-    const sig2 = cmpCalcSigmaForDate(d2, dateKey);
+    // Печатный итог и номер последней строки относятся ко всей накладной,
+    // поэтому эти проверки всегда считаются по полному JSON, а не по категории.
+    const sig1 = cmpCalcSigmaForDate(d1full, dateKey);
+    const sig2 = cmpCalcSigmaForDate(d2full, dateKey);
     const maxCount = Math.max(sig1.count, sig2.count);
 
     let c1ok = true, c1detail = '';
@@ -8096,9 +8103,9 @@ function cmpRunCompare() {
 
   const catalogSet = new Set(PRODUCTS.map(p => normalizeName(p.name)));
   const notFound = [];
-  for (const key of Object.keys(d1.rows)) {
-    const name = d1.rows[key].name;
-    const allValues = Object.values(d1.rows[key].incoming);
+  for (const key of Object.keys(d1full.rows)) {
+    const name = d1full.rows[key].name;
+    const allValues = Object.values(d1full.rows[key].incoming);
     const totalQty = allValues.reduce((a, b) => a + b, 0);
     if (totalQty === 0 && d1.rows[key].sales === 0) continue;
     if (!catalogSet.has(normalizeName(name))) notFound.push(name);
@@ -8115,7 +8122,7 @@ function cmpRunCompare() {
   _cmpEditDk = null;
   _cmpEditKind = null;
   _cmpAppliedForDaily = false;
-  _cmpData = { rows, dateLabels, okCount, warnCount, errCount, json1: d1, json2: d2, checks };
+  _cmpData = { rows, dateLabels, okCount, warnCount, errCount, json1: d1, json2: d2, json1Full: d1full, json2Full: d2full, checks };
   cmpRenderChecks(checks);
   cmpRenderResults();
   setTimeout(() => {
