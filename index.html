@@ -8047,7 +8047,45 @@ function cmpSplitLine(line, sep) {
   }
   out.push(cur); return out;
 }
-function cmpParseJSON(text, applyCategory = true){let d;try{d=typeof text==="string"?JSON.parse(text):text}catch(e){return null}if(!d||typeof d!=="object")return null;const rows={},order=[],dateCols=[];const add=n=>{const c=cleanProductName(n);if(!c||isServiceLine(c)||isIgnored(c))return null;const a=applyAliases(c),k=normalizeName(a),p=PRODUCTS.find(x=>normalizeName(x.name)===k);if(applyCategory&&p&&_activeCategory&&p.category&&p.category!==_activeCategory)return null;if(!rows[k]){rows[k]={name:a,incoming:{},sales:0,category:p?(p.category||null):null};order.push(k)}return rows[k]};(d.invoices||[]).forEach(inv=>{const iso=String(inv.date||d.check_date||""),m=iso.match(/^(\d{4})-(\d{2})-(\d{2})$/),dk=m?m[3]+"."+m[2]:iso;if(dk&&!dateCols.some(x=>x.key===dk))dateCols.push({key:dk,label:dk});(inv.items||[]).forEach(it=>{if(it.quantity==null||it.quantity_status==="unreadable")return;const row=add(it.name);if(row)row.incoming[dk]=(row.incoming[dk]||0)+clampNum(it.quantity,0,MAX_NUM,0)})});(d.sales||[]).forEach(it=>{if(it.quantity==null||it.quantity_status==="unreadable")return;const row=add(it.name);if(row)row.sales+=clampNum(it.quantity,0,MAX_NUM,0)});return order.length?{rows,order,dateCols,document:d}:null}
+function cmpParseJSON(text, applyCategory = true){
+  let d;
+  try { d = typeof text === "string" ? JSON.parse(text) : text; } catch(e) { return null; }
+  if (!d || typeof d !== "object" || Array.isArray(d)) return null;
+  const rows = {}, order = [], dateCols = [];
+  const add = n => {
+    const c = cleanProductName(n);
+    if (!c || isServiceLine(c) || isIgnored(c)) return null;
+    const a = applyAliases(c), k = normalizeName(a);
+    const p = PRODUCTS.find(x => normalizeName(x.name) === k);
+    if (applyCategory && p && _activeCategory && p.category && p.category !== _activeCategory) return null;
+    if (!rows[k]) {
+      rows[k] = { name: a, incoming: {}, sales: 0, category: p ? (p.category || null) : null };
+      order.push(k);
+    }
+    return rows[k];
+  };
+  const addDateCol = (invDate) => {
+    const iso = String(invDate || "").trim();
+    const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const dk = m ? m[3] + "." + m[2] : "—";
+    if (!dateCols.some(x => x.key === dk)) dateCols.push({ key: dk, label: dk });
+    return dk;
+  };
+  (Array.isArray(d.invoices) ? d.invoices : []).forEach(inv => {
+    const dk = addDateCol(inv && inv.date);
+    (Array.isArray(inv?.items) ? inv.items : []).forEach(it => {
+      if (!it || it.quantity == null || it.quantity_status !== "confirmed") return;
+      const row = add(it.name);
+      if (row) row.incoming[dk] = (row.incoming[dk] || 0) + clampNum(it.quantity, 0, MAX_NUM, 0);
+    });
+  });
+  (Array.isArray(d.sales) ? d.sales : []).forEach(it => {
+    if (!it || it.quantity == null || it.quantity_status !== "confirmed") return;
+    const row = add(it.name);
+    if (row) row.sales += clampNum(it.quantity, 0, MAX_NUM, 0);
+  });
+  return order.length ? { rows, order, dateCols, document: d } : null;
+}
 function cmpCalcSigmaForDate(jsonData, dateKey) {
   let total = 0; let count = 0; const missing = [];
   for (const key of jsonData.order) {
