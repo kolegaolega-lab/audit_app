@@ -8590,30 +8590,41 @@ function cmpRunCompare() {
     let status = 'ok';
     if (!a || !b) {
       status = 'warn';
-      details.push('Позиция есть только в ' + (a ? 'результате 1' : 'результате 2'));
+      details.push('Есть только в ' + (a ? 'результате 1' : 'результате 2'));
     } else {
       if (String(a.name || '') !== String(b.name || '')) {
-        details.push('Название отличается: «' + String(a.name || '') + '» ↔ «' + String(b.name || '') + '»');
+        status = 'warn';
+        details.push('Название не совпадает: «' + String(a.name || '') + '» ↔ «' + String(b.name || '') + '»');
       }
       for (const dk of dates) {
-        if ((a.incoming[dk] || 0) !== (b.incoming[dk] || 0)) {
+        const dateLabel = dateLabels[dk] || dk;
+        const aQty = a.incoming[dk] || 0;
+        const bQty = b.incoming[dk] || 0;
+        if (aQty !== bQty) {
           status = 'err';
-          details.push('Приход отличается — ' + (dateLabels[dk] || dk) + ': ' + (a.incoming[dk] || 0) + ' ↔ ' + (b.incoming[dk] || 0));
+          details.push('Приход не совпадает · ' + dateLabel + ' · ' + aQty + ' шт. ↔ ' + bQty + ' шт.');
         }
-        if (a.incomingStatus?.[dk] && b.incomingStatus?.[dk]) {
-          if (a.incomingStatus[dk] === b.incomingStatus[dk]) {
-            details.push('Количество требует подтверждения — ' + (dateLabels[dk] || dk) + ': ' + a.incoming[dk]);
-          }
-        } else if (a.incomingStatus?.[dk] || b.incomingStatus?.[dk]) {
-          details.push('Количество требует подтверждения — ' + (dateLabels[dk] || dk) + ': ' + (a.incomingStatus?.[dk] ? 'первый результат' : 'второй результат'));
+
+        const aNeedsQty = !!a.incomingStatus?.[dk];
+        const bNeedsQty = !!b.incomingStatus?.[dk];
+        if (aNeedsQty || bNeedsQty) {
+          if (status === 'ok') status = 'warn';
+          const source = aNeedsQty && bNeedsQty
+            ? 'оба результата'
+            : (aNeedsQty ? 'результат 1' : 'результат 2');
+          details.push('Количество не подтверждено · ' + dateLabel + ' · ' + source);
         }
       }
       if (a.sales !== b.sales) {
         status = 'err';
-        details.push('Продажи отличаются: ' + a.sales + ' ↔ ' + b.sales);
+        details.push('Продажи не совпадают · ' + a.sales + ' шт. ↔ ' + b.sales + ' шт.');
       }
       if (a.salesStatus !== 'confirmed' || b.salesStatus !== 'confirmed') {
-        details.push('Количество продаж требует подтверждения');
+        if (status === 'ok') status = 'warn';
+        const source = a.salesStatus !== 'confirmed' && b.salesStatus !== 'confirmed'
+          ? 'оба результата'
+          : (a.salesStatus !== 'confirmed' ? 'результат 1' : 'результат 2');
+        details.push('Продажи не подтверждены · ' + source);
       }
     }
     if (status === 'ok') okCount++; else if (status === 'warn') warnCount++; else errCount++;
@@ -9037,10 +9048,9 @@ function cmpRenderResults() {
     const comparisonValid = _cmpData.comparisonValid !== false;
     stats.innerHTML =
       (comparisonValid
-        ? '<span class="big">' + okCount + ' из ' + total + ' позиций сопоставлено</span>'
-        : '<span class="big" style="color:var(--red)">Пока нельзя использовать результат</span>' +
-          '<div class="cmp-detail" style="margin:4px 0 8px">Есть данные, которые нужно проверить перед применением. Нажмите на строку или число, выберите правильное значение и сохраните.</div>' +
-          '<div class="cmp-detail">Для справки: ' + okCount + ' из ' + total + ' позиций совпало.</div>') +
+        ? '<span class="big">' + okCount + ' из ' + total + ' позиций совпадает</span>'
+        : '<span class="big" style="color:var(--red)">Результат заблокирован</span>' +
+          '<div class="cmp-detail" style="margin:4px 0 8px">Исправьте отмеченные строки перед применением.</div>') +
       '<div class="row"><span>✓ Совпадает</span><b class="green">' + okCount + '</b></div>' +
       '<div class="row"><span>⚠ Требует проверки</span><b class="orange">' + warnCount + '</b></div>' +
       '<div class="row"><span>✗ Количественные расхождения</span><b class="red">' + errCount + '</b></div>';
@@ -9107,7 +9117,7 @@ function cmpRenderResults() {
   const comparisonBlocked = _cmpData.comparisonValid === false;
   if (applyBtn) {
     applyBtn.style.display = (!safetyBlocked && !comparisonBlocked && (okCount || hasEdits)) ? 'block' : 'none';
-    if (comparisonBlocked) applyBtn.title = 'Сначала проверьте количественные расхождения и подтвердите количества, записанные от руки';
+    if (comparisonBlocked) applyBtn.title = 'Исправьте отмеченные строки перед применением';
   }
 }
 function cmpApplyMatched() {
