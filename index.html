@@ -7105,6 +7105,55 @@ function getOCRSafetyIssues(text,report,count){
     if (futureInvoices.length) out.push({code:"future-invoice-date",title:"Есть накладные с датой позже даты проверки"});
   }
 
+  // Проверка полноты сквозной нумерации строк каждой накладной.
+  // Важно: continuation-страницы приходят отдельными объектами, поэтому
+  // группируем их по номеру + дате и проверяем диапазон 1..last_line_number.
+  // Если OCR сообщает last_line_number=29, но фактически вернул только 1..28,
+  // такой JSON нельзя передавать в FIFO: строка могла быть пропущена.
+  const invoiceGroups = new Map();
+  invoices.forEach((inv, invIndex) => {
+    const number = String(inv?.number || '').trim();
+    const date = String(inv?.date || '').trim();
+    const key = number ? (number + '|' + date) : ('__invoice_' + invIndex);
+    if (!invoiceGroups.has(key)) invoiceGroups.set(key, { number, date, items: [], lastLine: 0 });
+    const g = invoiceGroups.get(key);
+    const declaredLast = Number(inv?.last_line_number);
+    if (Number.isInteger(declaredLast) && declaredLast > g.lastLine) g.lastLine = declaredLast;
+    if (Array.isArray(inv?.items)) g.items.push(...inv.items);
+  });
+  invoiceGroups.forEach(g => {
+    if (!g.items.length || !g.lastLine) return;
+    const lines = g.items
+      .map(x => Number(x?.line))
+      .filter(Number.isInteger);
+    if (!lines.length) {
+      out.push({code:'invoice-line-numbers-missing',title:'У накладной отсутствует нумерация строк',detail:(g.number ? '№' + g.number + ' · ' : '') + 'требуется ручная сверка'});
+      return;
+    }
+    const unique = new Set(lines);
+    const missing = [];
+    const start = Math.min(...lines);
+    if (start === 1 && g.lastLine >= 1) {
+      for (let n = 1; n <= g.lastLine; n++) if (!unique.has(n)) missing.push(n);
+    }
+    const beyondLast = lines.filter(n => n > g.lastLine);
+    if (missing.length) {
+      const shown = missing.length <= 8 ? missing.join(', ') : missing.slice(0,8).join(', ') + '…';
+      out.push({
+        code:'invoice-line-gap',
+        title:'В накладной пропущена строка',
+        detail:(g.number ? '№' + g.number + ' · ' : '') + 'отсутствуют строки: ' + shown
+      });
+    }
+    if (beyondLast.length) {
+      out.push({
+        code:'invoice-last-line-inconsistent',
+        title:'Неверный last_line_number накладной',
+        detail:(g.number ? '№' + g.number + ' · ' : '') + 'есть строка ' + Math.max(...beyondLast) + ', но last_line_number=' + g.lastLine
+      });
+    }
+  });
+
   const allItems = [];
   invoices.forEach(inv => {
     if (!Array.isArray(inv?.items)) {
