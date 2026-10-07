@@ -229,7 +229,7 @@ test('daily separated OCR keeps continuation invoice without its own date', asyn
 
 test('finish check is blocked until all stock values are entered', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
-  await page.locator('.cat-btn[data-cat="pastry"]').click();
+  await page.evaluate(() => { window._activeCategory = 'pastry'; });
   await page.locator('#jsonInput').fill(JSON.stringify({
     schema_version:'1.0',document_type:'combined',check_date:'2026-10-06',
     invoices:[{number:'1',date:'2026-10-06',continuation:false,items:[{line:1,name:'Багет французский',quantity:1,quantity_status:'confirmed'}]}],
