@@ -347,14 +347,24 @@ test('double-run comparison remains valid when only audit check_date differs', (
   assert.doesNotMatch(html, /comparisonValid: !checkDateMismatch/);
   assert.match(html, /const comparisonBlocked = _cmpData\.comparisonValid === false/);
   assert.match(html, /!safetyBlocked && !comparisonBlocked/);
-  assert.match(html, /Нельзя использовать эти данные, пока не исправлены отмеченные ошибки/);
+  assert.match(html, /Исправьте отмеченные строки перед применением/);
 });
+
+test('double-run comparison uses warning severity for unconfirmed quantities', () => {
+  assert.match(html, /if \(aNeedsQty \|\| bNeedsQty\) \{/);
+  assert.match(html, /if \(status === 'ok'\) status = 'warn';/);
+  assert.match(html, /Количество не подтверждено · /);
+  assert.match(html, /Есть только в /);
+  assert.doesNotMatch(html, /Позиция есть только в /);
+  assert.doesNotMatch(html, /Количество требует подтверждения — /);
+});
+
 
 test('double-run comparison exposes concrete row-level differences', () => {
   assert.match(html, /const details = \[\];/);
-  assert.match(html, /Название отличается: «/);
-  assert.match(html, /Приход отличается — .*↔/);
-  assert.match(html, /Продажи отличаются: .*↔/);
+  assert.match(html, /Название не совпадает: «/);
+  assert.match(html, /Приход не совпадает · .*↔/);
+  assert.match(html, /Продажи не совпадают · .*↔/);
   assert.match(html, /cmp-detail/);
 });
 
