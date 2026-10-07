@@ -202,6 +202,13 @@ test('receipt inside shelf-life window is a usable incoming', () => {
   }), true);
 });
 
+
+test('regression: catalog matching uses canonical OCR names', () => {
+  assert.match(html, /const nk = cmpCanonicalName\(x\.name\)/);
+  assert.match(html, /const key = cmpCanonicalName\(r\.name\);\s*const p = PRODUCTS\.find\(x => cmpCanonicalName\(x\.name\) === key\)/);
+  assert.match(html, /const catalogSet = new Set\(PRODUCTS\.map\(p => cmpCanonicalName\(p\.name\)\)\)/);
+});
+
 test('session persists and restores the audit date used by FIFO', () => {
   assert.match(html, /checkDate: \(\(\) =>/);
   assert.match(html, /_checkDate: data\.checkDate/);
