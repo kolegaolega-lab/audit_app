@@ -379,7 +379,7 @@ test('comparison normalizes ISO and Russian invoice dates and renders results', 
   expect(result.p2Date).toBe('06.10');
   expect(result.p1Qty).toBe(2);
   expect(result.p2Qty).toBe(2);
-  expect(result.stats).toContain('1 из 1 позиций совпадает');
+  expect(result.stats).toContain('✓ Без замечаний1');
   expect(result.resultsVisible).toBe('block');
   expect(result.checksVisible).toBe('block');
 });
