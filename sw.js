@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════
    French Bakery Аудит — Service Worker
-   v9.24.14 · shell + runtime + offline fallback
+   v9.24.15 · shell + runtime + offline fallback
    ═══════════════════════════════════════════ */
 
 'use strict';
