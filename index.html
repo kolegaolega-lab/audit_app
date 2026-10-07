@@ -1902,6 +1902,8 @@ const CATEGORY_CYCLE = [null, 'desserts', 'lunches', 'pastry'];
    СОСТОЯНИЕ
    ═══════════════════════════════════════════ */
 let PRODUCTS = [];
+let _ocrSafetyCatalogCache = null;
+let _cmpProductIndexCache = null;
 let IGNORED = [];
 let ALIASES = [];
 let PRICES = {};
@@ -2346,6 +2348,8 @@ function loadCatalog() {
   return FACTORY_CATALOG.map(([name, hours]) => ({ name, shelfLife: hours, category: null }));
 }
 function saveCatalog() {
+  _ocrSafetyCatalogCache = null;
+  _cmpProductIndexCache = null;
   try { localStorage.setItem(CATALOG_KEY, JSON.stringify(PRODUCTS)); }
   catch (e) { console.warn('saveCatalog:', e); }
   if (typeof renderMoreCounts === 'function') renderMoreCounts();
@@ -7053,21 +7057,23 @@ function validateAIResponse(j1, j2, report, count) {
   if (typeof PRODUCTS !== 'undefined' && PRODUCTS.length) {
     const startedAt = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
     const FUZZY_BUDGET_MS = 120;
-    const catalogByLen = new Map();
-    const exactNames = new Set();
-    const normalizedCatalog = [];
-    PRODUCTS.forEach(p => {
-      const k = normalizeName(p.name);
-      if (!k) return;
-      exactNames.add(k);
-      normalizedCatalog.push(k);
-      const len = k.length;
-      for (let L = Math.max(0, len - 2); L <= len + 2; L++) {
-        if (!catalogByLen.has(L)) catalogByLen.set(L, []);
-        const bucket = catalogByLen.get(L);
-        if (bucket.length < 300) bucket.push(k);
-      }
-    });
+    if (!_ocrSafetyCatalogCache) {
+      const catalogByLen = new Map();
+      const exactNames = new Set();
+      PRODUCTS.forEach(p => {
+        const k = normalizeName(p.name);
+        if (!k) return;
+        exactNames.add(k);
+        const len = k.length;
+        for (let L = Math.max(0, len - 2); L <= len + 2; L++) {
+          if (!catalogByLen.has(L)) catalogByLen.set(L, []);
+          const bucket = catalogByLen.get(L);
+          if (bucket.length < 300) bucket.push(k);
+        }
+      });
+      _ocrSafetyCatalogCache = { catalogByLen, exactNames };
+    }
+    const { catalogByLen, exactNames } = _ocrSafetyCatalogCache;
     let fuzzyTimedOut = false;
     const checkName = (name) => {
       if (fuzzyTimedOut) return;
@@ -7425,9 +7431,11 @@ async function recognizeWithGemini(){
       updateAIReportBtnVisibility();
     }
     if (b) {
+      finishOCRProgress(true);
       set(s.length ? "warn" : "info", s.length ? formatOCRSafetyMessage(s) : "Получены два JSON-ответа. Открываю сверку.");
       setTimeout(() => openCompareModal({ first: a, second: b }), 300);
     } else if (s.length) {
+      finishOCRProgress(true);
       set("warn", formatOCRSafetyMessage(s) + " JSON сохранён.");
     } else {
       set("info", "Применяю JSON…");
@@ -8263,7 +8271,12 @@ function cmpParseJSON(text, applyCategory = true){
     const c = cleanProductName(n);
     if (!c || isServiceLine(c) || isIgnored(c)) return null;
     const a = applyAliases(c), k = normalizeName(a);
-    const p = PRODUCTS.find(x => normalizeName(x.name) === k);
+    if (!_cmpProductIndexCache) {
+      const map = new Map();
+      PRODUCTS.forEach(x => { const nk = normalizeName(x.name); if (nk && !map.has(nk)) map.set(nk, x); });
+      _cmpProductIndexCache = map;
+    }
+    const p = _cmpProductIndexCache.get(k);
     if (applyCategory && p && _activeCategory && p.category && p.category !== _activeCategory) return null;
     if (!rows[k]) {
       rows[k] = { name: a, incoming: {}, sales: 0, category: p ? (p.category || null) : null };
