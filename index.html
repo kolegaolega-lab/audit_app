@@ -450,7 +450,13 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .cmp-val.editing{padding:0;background:transparent}
 .cmp-edit-input{width:72px;height:26px;padding:2px 6px;border:1px solid var(--accent);border-radius:6px;background:var(--bg-card);color:var(--text);font-size:12px;font-weight:600;text-align:center;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none}
 .cmp-empty{text-align:center;padding:20px;color:var(--text-tertiary);font-size:12.5px}
-.cmp-progress{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;padding:10px 12px;border-radius:10px;background:var(--bg-input);font-size:12.5px}.cmp-progress strong{font-size:14px}.cmp-progress.warn{color:var(--orange)}.cmp-progress.ok{color:var(--green)}
+.cmp-progress{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;padding:10px 12px;border-radius:10px;background:var(--bg-input);font-size:12.5px}.cmp-progress strong{font-size:14px}
+.cmp-results-toolbar{display:flex;align-items:center;gap:8px;justify-content:space-between;margin:0 0 10px}
+.cmp-filter{display:flex;gap:4px;background:var(--bg-input);border-radius:10px;padding:3px}
+.cmp-filter-btn{min-height:34px;padding:6px 10px;font-size:12px;background:transparent;color:var(--text-secondary);border-radius:8px}
+.cmp-filter-btn.active{background:var(--bg-card);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.cmp-next-btn{min-height:36px;padding:7px 10px;font-size:12px;background:var(--orange-soft);color:var(--orange);font-weight:600;flex:0 0 auto}
+@media(max-width:520px){.cmp-results-toolbar{align-items:stretch;flex-direction:column}.cmp-next-btn{width:100%}}.cmp-progress.warn{color:var(--orange)}.cmp-progress.ok{color:var(--green)}
 .cmp-edit-card{margin:-3px 0 8px;padding:14px 12px;border-radius:0 0 8px 8px;background:var(--bg-elev-2);border:1px solid var(--separator-opaque);border-top:0}
 .cmp-edit-title{font-size:14.5px;font-weight:700;margin:0 0 3px;line-height:1.3}
 .cmp-edit-sub{font-size:11.5px;color:var(--text-secondary);margin:0 0 12px;line-height:1.4}
@@ -1603,6 +1609,13 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
           </div>
         </div>
         <div class="cmp-section-body">
+          <div class="cmp-results-toolbar">
+            <div class="cmp-filter" role="group" aria-label="Фильтр результатов">
+              <button type="button" class="cmp-filter-btn active" data-filter="all">Все</button>
+              <button type="button" class="cmp-filter-btn" data-filter="issues">Требуют проверки</button>
+            </div>
+            <button type="button" id="cmpNextIssueBtn" class="cmp-next-btn" style="display:none">Перейти к следующей проблеме</button>
+          </div>
           <div id="cmpResults"></div>
         </div>
       </div>
@@ -8935,8 +8948,28 @@ function cmpRefreshSafetyGate() {
     if (!allResolved) unresolved.push(issue);
   });
 
-  _cmpData.safetyIssues = unresolved;
-  _cmpData.comparisonValid = unresolved.length === 0;
+  // После выбора значения пересчитываем статус строки.
+  (_cmpData.rows || []).forEach(row => {
+    if (!row) return;
+    const nameMismatch = row.a && row.b && String(row.a.name || '') !== String(row.b.name || '');
+    let unresolvedValue = false;
+    (row.dates || []).forEach(dk => {
+      const aVal = row.a ? (row.a.incoming?.[dk] || 0) : null;
+      const bVal = row.b ? (row.b.incoming?.[dk] || 0) : null;
+      if (aVal !== bVal && !hasEdit(row, dk, 'incoming')) unresolvedValue = true;
+      if ((row.a?.incomingStatus?.[dk] || row.b?.incomingStatus?.[dk]) && !hasEdit(row, dk, 'incoming')) unresolvedValue = true;
+    });
+    if (row.a || row.b) {
+      const aSales = row.a ? row.a.sales : null;
+      const bSales = row.b ? row.b.sales : null;
+      if (aSales !== bSales && !hasEdit(row, 'sales', 'sales')) unresolvedValue = true;
+      if ((row.a?.salesStatus !== 'confirmed' || row.b?.salesStatus !== 'confirmed') && !hasEdit(row, 'sales', 'sales')) unresolvedValue = true;
+    }
+    row.status = nameMismatch ? (unresolvedValue ? 'err' : 'warn') : (unresolvedValue ? 'err' : 'ok');
+  });
+  _cmpData.okCount = _cmpData.rows.filter(r => r.status === 'ok').length;
+  _cmpData.warnCount = _cmpData.rows.filter(r => r.status === 'warn').length;
+  _cmpData.errCount = _cmpData.rows.filter(r => r.status === 'err').length;
   if (Array.isArray(_cmpData.checks)) {
     _cmpData.checks.forEach(c => {
       if (!c || !c._safetyCode) return;
@@ -9096,12 +9129,18 @@ function cmpRenderResults() {
       '<div class="row"><span>✗ Расхождения</span><b class="red">' + errCount + '</b></div>';
   }
   const progress = $('cmpProgress');
-  const unresolvedCount = warnCount + errCount;
+  const unresolvedCount = _cmpData.rows.filter(r => r.status !== 'ok').length +
+    (_cmpData.safetyIssues || []).filter(i => i && i.code === 'quantity-status-review').length;
   if (progress) {
     progress.className = 'cmp-progress ' + (unresolvedCount ? 'warn' : 'ok');
     progress.innerHTML = unresolvedCount
       ? '<span>Осталось проверить</span><strong>' + unresolvedCount + '</strong>'
       : '<span>Все позиции проверены</span><strong>✓</strong>';
+  }
+  const nextBtn = $('cmpNextIssueBtn');
+  if (nextBtn) {
+    nextBtn.style.display = unresolvedCount ? 'block' : 'none';
+    nextBtn.textContent = unresolvedCount > 1 ? 'Перейти к следующей проблеме' : 'Проверить оставшуюся проблему';
   }
   if (!out) return;
   if (!rows.length) { out.innerHTML = '<div class="cmp-empty">В двух результатах нет позиций для сравнения.</div>'; return; }
@@ -9133,6 +9172,7 @@ function cmpRenderResults() {
       <span class="cmp-vals">${vals.join('')}</span>
     </div>`;
   }).join('');
+  cmpApplyResultFilter(document.querySelector('.cmp-filter-btn.active')?.dataset.filter || 'all');
   out.querySelectorAll('.cmp-val').forEach(pill => {
     pill.addEventListener('click', e => {
       e.stopPropagation();
@@ -9269,9 +9309,49 @@ function cmpApplyMatched() {
   closeCompareModal();
   setTimeout(() => { scrollToSection($('resultSection')); }, 300);
 }
+function cmpGoToNextIssue() {
+  if (!_cmpData) return;
+  const rows = (_cmpData.rows || []).filter(r => r.status !== 'ok');
+  if (rows.length) {
+    const row = rows[0];
+    const target = [...document.querySelectorAll('#cmpResults .cmp-row')].find(el => el.dataset.key === String(row.key));
+    if (target) {
+      target.scrollIntoView({ behavior:'smooth', block:'center' });
+      setTimeout(() => {
+        const value = target.querySelector('.cmp-val.diff, .cmp-val') ;
+        if (value) value.click();
+      }, 350);
+      return;
+    }
+  }
+  const candidate = (_cmpData.rows || []).find(r =>
+    Object.keys(r.a?.incomingStatus || {}).some(dk => !r.edits?.incoming?.[dk]) ||
+    Object.keys(r.b?.incomingStatus || {}).some(dk => !r.edits?.incoming?.[dk]) ||
+    (r.a?.salesStatus !== 'confirmed' && r.edits?.sales == null) ||
+    (r.b?.salesStatus !== 'confirmed' && r.edits?.sales == null)
+  );
+  if (candidate) {
+    const dk = Object.keys(candidate.a?.incomingStatus || {}).find(d => !candidate.edits?.incoming?.[d]) ||
+      Object.keys(candidate.b?.incomingStatus || {}).find(d => !candidate.edits?.incoming?.[d]);
+    cmpOpenEdit(candidate.key, dk || 'sales', dk ? 'incoming' : 'sales');
+  }
+}
+function cmpApplyResultFilter(filter) {
+  document.querySelectorAll('.cmp-filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  document.querySelectorAll('#cmpResults .cmp-row').forEach(row => {
+    row.style.display = filter === 'issues' && row.classList.contains('ok') ? 'none' : '';
+  });
+}
+
 function cmpBindUI() {
   const openBtn = $('openCompareBtn'); if (openBtn) openBtn.onclick = () => openCompareModal();
   const runBtn = $('cmpRunBtn'); if (runBtn) runBtn.onclick = cmpRunCompare;
+  const nextIssueBtn = $('cmpNextIssueBtn'); if (nextIssueBtn) nextIssueBtn.onclick = cmpGoToNextIssue;
+  document.querySelectorAll('.cmp-filter-btn').forEach(btn => {
+    btn.onclick = () => cmpApplyResultFilter(btn.dataset.filter || 'all');
+  });
   const clearBtn = $('cmpClearBtn');
   if (clearBtn) clearBtn.onclick = () => {
     const a = $('cmpJson1'); const b = $('cmpJson2');
@@ -9285,6 +9365,8 @@ function cmpBindUI() {
     const checksSection = $('cmpChecksSection'); if (checksSection) checksSection.style.display = 'none';
     const resultsSection = $('cmpResultsSection'); if (resultsSection) resultsSection.style.display = 'none';
     const ap = $('cmpApplyBtn'); if (ap) ap.style.display = 'none';
+    const nextIssueBtn = $('cmpNextIssueBtn'); if (nextIssueBtn) nextIssueBtn.style.display = 'none';
+    cmpApplyResultFilter('all');
     _cmpData = null;
     _lastGeminiJsons = { first: '', second: '' };
     _dailyEditing = null;
