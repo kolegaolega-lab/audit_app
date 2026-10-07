@@ -123,7 +123,8 @@ test('OCR prompt keeps the full document and applies category only after OCR', (
   assert.match(html, /распознай ВЕСЬ раздел продаж/);
   assert.match(html, /Если товарной позиции НЕТ в справочнике — всё равно включи её в JSON/);
   assert.doesNotMatch(html, /В JSON включай ТОЛЬКО те позиции, которые есть в списке ниже/);
-  assert.match(html, /p&&_activeCategory&&p\.category!==_activeCategory/);
+  assert.match(html, /OCR parser intentionally keeps all categories/);
+  assert.doesNotMatch(html, /if\(p&&_activeCategory&&p\.category&&p\.category!==_activeCategory\)return null;/);
 });
 
 test('OCR validation catches duplicate rows inside one invoice', () => {
