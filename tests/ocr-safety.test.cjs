@@ -15,9 +15,10 @@ function extract(start, end) {
   return html.slice(a, b);
 }
 
-const context = {};
+const context = { MAX_NUM: 100000 };
 vm.createContext(context);
 vm.runInContext(extract('function normalizeName(', 'function cleanProductName'), context);
+vm.runInContext(extract('function parseDateRu(', 'function inferIsoFromDdmm'), context);
 vm.runInContext(extract('function getOCRSafetyIssues(', 'function formatOCRSafetyMessage'), context);
 vm.runInContext(extract('function validateAIResponse(', 'function getOCRSafetyIssues'), context);
 
@@ -197,4 +198,37 @@ test('production code uses structured JSON output and no legacy CSV parser', () 
   assert.doesNotMatch(html, /function parseNum\(/);
   assert.doesNotMatch(html, /function stripServiceSections\(/);
   assert.doesNotMatch(html, /async\s+async\s+function/);
+});
+
+
+test('OCR safety blocks validation errors that could otherwise reach applyJSON', () => {
+  const json = validJson();
+  const report = { hasBlocks: true, validation: { issues: [{ level: 'error', code: 'line-quantity-mismatch' }] } };
+  const issues = context.getOCRSafetyIssues(json, report, 2);
+  assert.ok(issues.some(x => x.code === 'validation-errors'));
+});
+
+test('OCR safety blocks malformed confirmed quantities', () => {
+  const json = validJson({
+    invoices: [{
+      number: '123', date: '2026-10-06', continuation: false, last_line_number: 2,
+      items: [{ line: 1, name: 'Пончик с фисташкой', quantity: -2, quantity_status: 'confirmed' }]
+    }]
+  });
+  const issues = context.getOCRSafetyIssues(json, reportFor(json), 2);
+  assert.ok(issues.some(x => x.code === 'invalid-quantity'));
+});
+
+test('OCR safety rejects invalid document structure and check date', () => {
+  const json = validJson({ check_date: '06.10.2026', invoices: {}, sales: [] });
+  const issues = context.getOCRSafetyIssues(json, reportFor(json), 2);
+  const codes = issues.map(x => x.code);
+  assert.ok(codes.includes('invalid-check-date'));
+  assert.ok(codes.includes('invalid-document-arrays'));
+});
+
+test('OCR compare does not fall back to audit date and ignores unconfirmed quantities', () => {
+  assert.match(html, /const iso = String\(invDate \|\| ""\)\.trim\(\);/);
+  assert.doesNotMatch(html, /String\(inv\.date\|\|d\.check_date\|\|""\)/);
+  assert.match(html, /it\.quantity_status !== "confirmed"/);
 });
