@@ -7134,7 +7134,7 @@ function getOCRSafetyIssues(text,report,count){
     out.push({code:"missing-ai-report",title:"Нет структурированного отчёта OCR"}); return out;
   }
 
-  const isoDate = v => /^\d{4}-\d{2}-\d{2}$/.test(String(v || "").trim()) && !!parseDateRu(String(v), new Date());
+  const isoDate = v => {\n    const parsed = parseDateRu(String(v || ''), new Date());\n    if (!parsed) return false;\n    if (parsed instanceof Date) return !isNaN(parsed.getTime());\n    const normalized = String(parsed).trim();\n    if (/^\\d{4}-\\d{2}-\\d{2}$/.test(normalized)) return true;\n    const m = normalized.match(/^(\\d{4})[-.](\\d{1,2})[-.](\\d{1,2})$/);\n    return !!m && !!safeDate(Number(m[1]), Number(m[2]), Number(m[3]));\n  };
   const source = d.source;
   if (!source || typeof source !== "object" ||
       !Number.isInteger(Number(source.photo_count)) ||
