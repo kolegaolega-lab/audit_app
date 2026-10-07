@@ -2245,6 +2245,9 @@ function normalizeName(s) {
     .replace(/(\d)\s*,\s*(\d)/g, '$1.$2')
     /* v9.19.9: пробел перед скобкой убираем (Адреналин 0.25(12) = Адреналин 0.25 (12)) */
     .replace(/\s+\(/g, '(')
+    /* v9.21.0: очевидные орфографические варианты названий. */
+    .replace(/жаренными/g, 'жареными')
+    .replace(/\bмалина\b/g, 'малиной')
     /* v9.19.11: типографские тире → обычный дефис */
     .replace(/[\u2010-\u2015\u2212]/g, '-')
     /* v9.19.11: любой дефис → пробел. «Суп Том-Ям» = «Суп Том Ям»,
@@ -10370,21 +10373,30 @@ function cmpRunCompare() {
     }
   });
 
+  /* v9.21.0: справочник проверяем по обоим результатам.
+     Это не то же самое, что расхождение между прогонами. */
   const catalogSet = new Set(PRODUCTS.map(p => normalizeName(p.name)));
   const notFound = [];
-  for (const key of Object.keys(d1.rows)) {
-    const name = d1.rows[key].name;
-    const allValues = Object.values(d1.rows[key].incoming);
-    const totalQty = allValues.reduce((a, b) => a + b, 0);
-    if (totalQty === 0 && d1.rows[key].sales === 0) continue;
-    if (!catalogSet.has(normalizeName(name))) notFound.push(name);
-  }
+  const seenNotFound = new Set();
+  [d1.rows, d2.rows].forEach(sourceRows => {
+    Object.keys(sourceRows).forEach(key => {
+      const row = sourceRows[key];
+      const totalQty = Object.values(row.incoming).reduce((a, b) => a + b, 0);
+      if (totalQty === 0 && row.sales === 0) return;
+      const normalized = normalizeName(row.name);
+      if (!catalogSet.has(normalized) && !seenNotFound.has(normalized)) {
+        seenNotFound.add(normalized);
+        notFound.push(row.name);
+      }
+    });
+  });
   checks.push({
     ok: notFound.length === 0,
-    title: 'Целостность справочника',
+    title: 'Названия товаров в справочнике',
     detail: notFound.length === 0
-      ? 'Все позиции CSV есть в справочнике.'
-      : `Не найдены в справочнике: <b>${notFound.map(n => escapeHtml(n)).join('</b>, <b>')}</b>`
+      ? 'Все распознанные позиции найдены в справочнике.'
+      : '<b>Нужно проверить:</b> ' + notFound.map(n => escapeHtml(n)).join(', ') +
+        '<br>Если это новые товары — добавьте их в справочник. Если это вариант написания — проверьте соответствие.'
   });
 
   _cmpEditKey = null;
