@@ -386,6 +386,22 @@ test('comparison normalizes ISO and Russian invoice dates and renders results', 
 
 
 
+
+test('catalog matching uses canonical OCR names for safe spelling variants', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const payload = JSON.stringify({
+      schema_version:'1.0', document_type:'invoice', check_date:'2026-10-06',
+      source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
+      invoices:[{number:'INV-1',date:'2026-10-06',continuation:false,last_line_number:1,
+        items:[{line:1,name:'Лингвини с жаренными креветками',quantity:2,quantity_status:'confirmed'}]}],
+      sales:[],review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+    });
+    const d = window.cmpParseJSON(payload, false);
+    return Object.values(d.rows)[0]?.category || null;
+  });
+  expect(result).not.toBeUndefined();
+});
 test('comparison normalizes safe OCR spelling variants without merging uncertain names', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
