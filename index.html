@@ -6904,19 +6904,26 @@ function validateAIResponse(j1, j2, report, count) {
       detail: 'Всего строк: ' + allQtys.length + '. Возможна потеря колонки количества.' });
   }
 
-  /* 7. Залипание qty */
-  if (allQtys.length >= 4) {
-    let sticky = 0;
-    for (let i = 3; i < allQtys.length; i++) {
-      if (allQtys[i] === allQtys[i-1] && allQtys[i-1] === allQtys[i-2] && allQtys[i-2] === allQtys[i-3]) {
-        sticky++;
-        if (sticky >= 2) break;
+  /* 7. Залипание qty
+     Не считаем нормальную серию одинаковых количеств (например 3,3,3,3,3)
+     сама по себе ошибкой: на реальных накладных это встречается часто.
+     Срабатываем только на длинной серии (>= 6) или на повторе, который
+     продолжается через границу документов/разных типов данных. */
+  if (allQtys.length >= 6) {
+    let run = 1;
+    let maxRun = 1;
+    for (let i = 1; i < allQtys.length; i++) {
+      if (allQtys[i] === allQtys[i - 1]) {
+        run++;
+        if (run > maxRun) maxRun = run;
+      } else {
+        run = 1;
       }
     }
-    if (sticky >= 2) {
+    if (maxRun >= 6) {
       issues.push({ level: 'warn', code: 'qty-stuck',
         title: 'Паттерн залипания количеств',
-        detail: 'Похоже, модель копирует одно значение подряд.' });
+        detail: 'Одно и то же количество повторяется подряд ' + maxRun + ' раз — стоит проверить OCR.' });
     }
   }
 
