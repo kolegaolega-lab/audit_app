@@ -1857,7 +1857,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.24.7';
+const APP_VERSION = 'v9.24.9';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -8218,7 +8218,8 @@ function cmpParseJSON(text, applyCategory = true){
   const addDateCol = (invDate) => {
     const iso = String(invDate || "").trim();
     const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    const dk = m ? m[3] + "." + m[2] : "—";
+    const parsed = parseDateRu(invDate, new Date());
+    const dk = parsed ? fmtDateRuShort(parsed) : "—";
     if (!dateCols.some(x => x.key === dk)) dateCols.push({ key: dk, label: dk });
     return dk;
   };
@@ -8369,7 +8370,10 @@ function cmpRunCompare() {
 
   const checks = [];
   _cmpNakls.filter(n => n.date).forEach(n => {
-    const dateKey = n.date;
+    const dateKey = (() => {
+      const parsed = parseDateRu(n.date, new Date());
+      return parsed ? fmtDateRuShort(parsed) : String(n.date || '').trim();
+    })();
     const printedTotal = Number(String(n.total).replace(',', '.').replace(/[^\d.]/g, '')) || 0;
     const lastNum = parseInt(String(n.lastNum).replace(/[^\d]/g, ''), 10) || 0;
     // Печатный итог и номер последней строки относятся ко всей накладной,
