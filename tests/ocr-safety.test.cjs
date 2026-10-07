@@ -201,6 +201,18 @@ test('production code uses structured JSON output and no legacy CSV parser', () 
 });
 
 
+test('recognizeWithGemini validates before applying the OCR safety gate', () => {
+  const validationPos = html.indexOf('if (p1) p1.validation = validateAIResponse(a, b, p1, items.length);');
+  const safetyPos = html.indexOf('const s = [...getOCRSafetyIssues(a, p1, items.length)');
+  assert.ok(validationPos >= 0 && safetyPos >= 0 && validationPos < safetyPos);
+});
+
+test('manual JSON import runs the production validator before OCR safety', () => {
+  const validationPos = html.indexOf('safetyReport.validation = validateAIResponse(text, text, safetyReport');
+  const safetyPos = html.indexOf('const safetyIssues = getOCRSafetyIssues(text, safetyReport');
+  assert.ok(validationPos >= 0 && safetyPos >= 0 && validationPos < safetyPos);
+});
+
 test('OCR safety blocks validation errors that could otherwise reach applyJSON', () => {
   const json = validJson();
   const report = { hasBlocks: true, validation: { issues: [{ level: 'error', code: 'line-quantity-mismatch' }] } };
