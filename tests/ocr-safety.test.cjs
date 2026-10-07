@@ -203,8 +203,13 @@ test('production code uses structured JSON output and no legacy CSV parser', () 
 
 test('recognizeWithGemini validates before applying the OCR safety gate', () => {
   const validationPos = html.indexOf('if (p1) p1.validation = validateAIResponse(a, b, p1, items.length);');
-  const safetyPos = html.indexOf('const s = [...getOCRSafetyIssues(a, p1, items.length)');
-  assert.ok(validationPos >= 0 && safetyPos >= 0 && validationPos < safetyPos);
+  const safetyPos = Math.min(
+    ...[
+      html.indexOf('const rawSafety = [...getOCRSafetyIssues(a, p1, items.length)'),
+      html.indexOf('const s = [...getOCRSafetyIssues(a, p1, items.length)')
+    ].filter(pos => pos >= 0)
+  );
+  assert.ok(validationPos >= 0 && Number.isFinite(safetyPos) && validationPos < safetyPos);
 });
 
 test('manual JSON import runs the production validator before OCR safety', () => {
