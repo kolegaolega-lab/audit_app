@@ -413,6 +413,44 @@ test('comparison blocks applying OCR runs with unresolved invoice date', async (
 });
 
 
+test('OCR validation does not freeze on large reference catalog', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const original = PRODUCTS.slice();
+    PRODUCTS = Array.from({length:5000}, (_, i) => ({
+      name: 'Тестовый товар с очень длинным названием ' + i,
+      shelfLife: 24,
+      category: 'desserts'
+    }));
+    const items = Array.from({length:120}, (_, i) => ({
+      line:i + 1,
+      name:'OCR товар с другим длинным названием ' + i,
+      quantity:2,
+      quantity_status:'confirmed'
+    }));
+    const json = JSON.stringify({
+      schema_version:'1.0',
+      document_type:'invoice',
+      check_date:'2026-10-06',
+      source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
+      invoices:[{
+        number:'BIG-1',date:'2026-10-06',continuation:false,last_line_number:120,
+        items
+      }],
+      sales:[],
+      review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+    });
+    const report = parseAIReport(json);
+    const started = performance.now();
+    const validation = validateAIResponse(json, '', report, 1);
+    const elapsedMs = performance.now() - started;
+    PRODUCTS = original;
+    return {elapsedMs, overall:validation.overall};
+  });
+  expect(result.elapsedMs).toBeLessThan(1000);
+  expect(result.overall).toBe('ok');
+});
+
 test('Gemini response schema uses proto-compatible nullable fields', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
