@@ -311,7 +311,7 @@ test('double-run comparison remains valid when only audit check_date differs', (
   assert.doesNotMatch(html, /comparisonValid: !checkDateMismatch/);
   assert.match(html, /const comparisonBlocked = _cmpData\.comparisonValid === false/);
   assert.match(html, /!safetyBlocked && !comparisonBlocked/);
-  assert.match(html, /Использование заблокировано\. Проверьте дату и ошибки распознавания/);
+  assert.match(html, /Использование заблокировано\. Сначала исправьте ошибки распознавания/);
 });
 
 test('double-run comparison exposes concrete row-level differences', () => {
