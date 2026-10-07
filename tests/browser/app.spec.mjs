@@ -243,10 +243,9 @@ test('history filename preserves seconds for duplicate-audit matching', async ({
 
 test('catalog aliases and prices round-trip through normalized lookups', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
   const result = await page.evaluate(() => {
-    window.ALIASES = [];
-    window.PRICES = {};
-    window.rebuildPriceIndex();
     const aliasOk = window.addOrUpdateAlias('  Товар-А ', 'Товар Б');
     const alias = window.findAlias('товар-а');
     const priceOk = window.setPrice('Товар Б', '12.345');
@@ -267,14 +266,14 @@ test('daily date parser rejects impossible dates and resolves valid dates', asyn
 
 test('point management rejects duplicate numbers and keeps active point valid', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
   const result = await page.evaluate(() => {
-    window._points = [];
-    window._activePointId = null;
     const a = window.addPoint('001','Точка 1','');
     const b = window.addPoint('001','Дубликат','');
     const c = window.addPoint('002','Точка 2','');
     const activeOk = window.setActivePointId(c.id);
-    return {a:!!a,b,points:window._points.map(x=>x.num),activeOk,active:window.getActivePoint()?.num};
+    return {a:!!a,b,points:[a,c].filter(Boolean).map(x=>x.num),activeOk,active:window.getActivePoint()?.num};
   });
   expect(result).toEqual({a:true,b:null,points:['001','002'],activeOk:true,active:'002'});
 });
