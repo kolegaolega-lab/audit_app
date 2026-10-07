@@ -8720,14 +8720,15 @@ function cmpRunCompare() {
     }
   });
   const notFound = [...notFoundByRun.values()];
+  const catalogCompareRows = [];
+  const catalogKeys = new Set([...Object.keys(d1full.rows), ...Object.keys(d2full.rows)]);
+  catalogKeys.forEach(k => {
+    const a = d1full.rows[k], b = d2full.rows[k];
+    catalogCompareRows.push({ key:k, name:(a && a.name) || (b && b.name) || k, a, b });
+  });
   const catalogRows = [
-    ...cmpFindPossibleNameMatches(
-      [
-        ...Object.values(d1full.rows).map(r => ({...r, _side:'a'})),
-        ...Object.values(d2full.rows).map(r => ({...r, _side:'b'}))
-      ],
-      'a', 'b'
-    )
+    ...cmpFindPossibleNameMatches(catalogCompareRows, 'a', 'b'),
+    ...cmpFindPossibleNameMatches(catalogCompareRows, 'b', 'a')
   ];
   const catalogPairKeys = new Set();
   catalogRows.forEach(m => {
