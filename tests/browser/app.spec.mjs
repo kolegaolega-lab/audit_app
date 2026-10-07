@@ -383,3 +383,31 @@ test('comparison normalizes ISO and Russian invoice dates and renders results', 
   expect(result.resultsVisible).toBe('block');
   expect(result.checksVisible).toBe('block');
 });
+
+
+test('comparison blocks applying OCR runs with unresolved invoice date', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const payload = JSON.stringify({
+    schema_version:'1.0',
+    document_type:'combined',
+    check_date:'2026-10-06',
+    source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
+    invoices:[{
+      number:'INV-BAD',date:'',continuation:false,last_line_number:1,
+      items:[{line:1,name:'Пончик с фисташкой',quantity:2,quantity_status:'confirmed'}]
+    }],
+    sales:[],
+    review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+  });
+  const result = await page.evaluate(json => {
+    document.querySelector('#cmpJson1').value = json;
+    document.querySelector('#cmpJson2').value = json;
+    window.cmpRunCompare();
+    return {
+      applyDisplay: document.querySelector('#cmpApplyBtn')?.style.display,
+      checkText: document.querySelector('#cmpCheckResults')?.textContent || ''
+    };
+  }, payload);
+  expect(result.applyDisplay).toBe('none');
+  expect(result.checkText).toContain('не удалось определить дату накладной');
+});
