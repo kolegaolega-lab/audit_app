@@ -1844,7 +1844,7 @@ const TOTAL_DEBOUNCE_MS = 150;
 const SEARCH_DEBOUNCE_MS = 120;
 const SYNC_DEBOUNCE_MS = 300;
 const SESSION_KEY = 'fbAuditSessionV6';
-const SESSION_VERSION = 6;
+const SESSION_VERSION = 7;
 const LEGACY_SESSION_KEY = 'fbAuditSessionV5';
 const CATALOG_KEY = 'fbAuditProducts';
 const IGNORED_KEY = 'fbAuditIgnored';
@@ -3157,7 +3157,11 @@ function saveSession() {
         salesOnly: !!r.salesOnly
       })),
       noCategory: noCategoryRows.slice(0, MAX_ROWS).map(r => ({ name: r.name })),
-      needsCheck: [..._needsCheckNames].slice(0, MAX_ROWS)
+      needsCheck: [..._needsCheckNames].slice(0, MAX_ROWS),
+      checkDate: (() => {
+        const r = tableRows.find(x => x && /^\d{4}-\d{2}-\d{2}$/.test(String(x._checkDate || '')));
+        return r ? String(r._checkDate) : '';
+      })()
     };
     localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
     showAutosaveBadge();
@@ -3175,7 +3179,16 @@ function loadSession() {
     const raw = localStorage.getItem(SESSION_KEY);
     if (!raw) return null;
     const data = JSON.parse(raw);
-    if (!data || data.version !== SESSION_VERSION) return null;
+    if (!data || (data.version !== SESSION_VERSION && data.version !== 6)) return null;
+    let checkDate = typeof data.checkDate === 'string' ? data.checkDate.trim() : '';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(checkDate) && typeof data.jsonText === 'string') {
+      try {
+        const j = JSON.parse(data.jsonText);
+        if (/^\d{4}-\d{2}-\d{2}$/.test(String(j?.check_date || ''))) checkDate = String(j.check_date);
+      } catch (e) {}
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(checkDate) || !parseDateRu(checkDate, new Date())) return null;
+    data.checkDate = checkDate;
     return data;
   } catch (e) { return null; }
 }
@@ -3202,7 +3215,8 @@ function applySession(data) {
             const orig = p._originalQty != null ? clampNum(p._originalQty, 0, MAX_NUM, qty) : qty;
             return { date: typeof p.date === 'string' ? p.date : '', qty, _originalQty: orig };
           }).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date)) : [],
-          salesOnly: !!r.salesOnly
+          salesOnly: !!r.salesOnly,
+          _checkDate: data.checkDate
         };
       }).filter(r => r.name);
     } else tableRows = [];
@@ -7114,11 +7128,17 @@ function getOCRSafetyIssues(text,report,count){
 
 function hasUsableIncomingForAudit(row) {
   if (!row || row.salesOnly || !Array.isArray(row.incoming)) return false;
-  const checkDay = parseDateRu(row._checkDate || '', new Date()) || getTodayStr();
+  const parsed = parseDateRu(row._checkDate || '', new Date());
+  const checkDay = parsed || getTodayStr();
+  const checkKey = typeof checkDay === 'string'
+    ? checkDay
+    : [checkDay.getFullYear(), String(checkDay.getMonth() + 1).padStart(2, '0'), String(checkDay.getDate()).padStart(2, '0')].join('-');
   return row.incoming.some(p => {
     if (!p || Number(p.qty) <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(String(p.date || ''))) return false;
     const partyDay = parseDateRu(p.date, new Date());
-    return !!partyDay && partyDay <= checkDay;
+    if (!partyDay) return false;
+    const partyKey = [partyDay.getFullYear(), String(partyDay.getMonth() + 1).padStart(2, '0'), String(partyDay.getDate()).padStart(2, '0')].join('-');
+    return partyKey <= checkKey;
   });
 }
 
