@@ -311,7 +311,7 @@ test('double-run comparison remains valid when only audit check_date differs', (
   assert.doesNotMatch(html, /comparisonValid: !checkDateMismatch/);
   assert.match(html, /const comparisonBlocked = _cmpData\.comparisonValid === false/);
   assert.match(html, /!safetyBlocked && !comparisonBlocked/);
-  assert.match(html, /Использование заблокировано\. Сначала исправьте ошибки распознавания/);
+  assert.match(html, /Нельзя использовать эти данные, пока не исправлены отмеченные ошибки/);
 });
 
 test('double-run comparison exposes concrete row-level differences', () => {
@@ -335,7 +335,7 @@ test('OCR fuzzy name warnings are deduplicated and quantity statuses use plain l
   assert.match(html, /const issueKey = n \+ '\\|' \+ c/);
   assert.match(html, /количество записано от руки/);
   assert.match(html, /количество нужно уточнить/);
-  assert.match(html, /Использование заблокировано\. Сначала исправьте ошибки распознавания/);
+  assert.match(html, /Нельзя использовать эти данные, пока не исправлены отмеченные ошибки/);
 });
 
 
