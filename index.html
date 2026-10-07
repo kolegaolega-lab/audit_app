@@ -8800,14 +8800,22 @@ function summarizeAIReport(report) {
   /* v9.20.0: клиентская валидация ответа */
   if (report.validation && report.validation.issues && report.validation.issues.length) {
     const errs = report.validation.issues.filter(i => i.level === 'error');
+    const warns = report.validation.issues.filter(i => i.level === 'warn');
     if (errs.length) {
       issues.push({
         type: 'error',
         text: errs.length + ' ' +
-              pluralize(errs.length, 'критичная ошибка', 'критичные ошибки', 'критичных ошибок') +
-              ' в ответе ИИ'
+              pluralize(errs.length, 'критическая проблема', 'критические проблемы', 'критических проблем') +
+              ' — требуется проверка'
       });
       hasBlockingIssue = true;
+    } else if (warns.length) {
+      issues.push({
+        type: 'warn',
+        text: warns.length + ' ' +
+              pluralize(warns.length, 'замечание', 'замечания', 'замечаний') +
+              ' — проверьте только указанные позиции'
+      });
     }
   }
 
@@ -10547,11 +10555,14 @@ function cmpRenderResults() {
   if (resultsSection) resultsSection.style.display = 'block';
   if (stats) {
     const total = okCount + warnCount + errCount;
+    const normalized = _cmpData && _cmpData.summary ? _cmpData.summary.normalizedMatches : 0;
     stats.innerHTML =
-      '<span class="big">' + okCount + ' из ' + total + ' совпало</span>' +
-      '<div class="row"><span>✓ Совпало</span><b class="green">' + okCount + '</b></div>' +
-      '<div class="row"><span>⚠ Расхождения</span><b class="orange">' + warnCount + '</b></div>' +
-      '<div class="row"><span>✗ Только в одном</span><b class="red">' + errCount + '</b></div>';
+      '<div class="big">' + okCount + ' из ' + total + ' позиций совпадают</div>' +
+      '<div class="row"><span>✓ Совпадают</span><b class="green">' + okCount + '</b></div>' +
+      '<div class="row"><span>⚠ Количество отличается</span><b class="orange">' + warnCount + '</b></div>' +
+      '<div class="row"><span>✗ Есть только в одном результате</span><b class="red">' + errCount + '</b></div>' +
+      (normalized ? '<div class="row"><span>↔ Название нормализовано</span><b>' + normalized + '</b></div>' : '') +
+      '<div style="margin-top:8px;color:var(--text-secondary);font-size:11.5px">Разное число строк само по себе не является ошибкой. Важны позиции и их количества.</div>';
   }
   if (!out) return;
   if (!rows.length) { out.innerHTML = '<div class="cmp-empty">Оба CSV пусты.</div>'; return; }
@@ -10574,9 +10585,10 @@ function cmpRenderResults() {
       const shown = edited ? r.edits.sales : `${sa} / ${sb}`;
       vals.push(`<span class="cmp-val ${cls}" data-key="${escapeHtml(r.key)}" data-dk="sales" data-kind="sales">Прод: ${shown}</span>`);
     }
+    const reason = cmpDisplayReason(r);
     return `<div class="cmp-row ${r.status}" data-key="${escapeHtml(r.key)}">
       <span class="cmp-icon">${icon}</span>
-      <span class="cmp-name">${escapeHtml(r.name)}</span>
+      <span class="cmp-name">${escapeHtml(r.name)}${reason ? '<small style="display:block;color:var(--text-secondary);font-weight:500;margin-top:3px">' + escapeHtml(reason) + '</small>' : ''}</span>
       <span class="cmp-vals">${vals.join('')}</span>
     </div>`;
   }).join('');
