@@ -2615,7 +2615,7 @@ function computeFIFO(row) {
   const moment = getCheckMoment(row._checkDate);
 
   const checkDayKey = parseDateRu(row._checkDate || '', moment)
-    || [moment.getFullYear(), String(moment.getMonth() + 1).padStart(2, '0'), String(moment.getDate()).padStart(2, '0')].join('-');
+    || new Date(moment.getFullYear(), moment.getMonth(), moment.getDate());
 
   const parties = mergeIncomingByDate(row.incoming)
     .map(p => {
