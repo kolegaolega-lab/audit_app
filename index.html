@@ -1857,7 +1857,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.24.11';
+const APP_VERSION = 'v9.24.12';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -8323,6 +8323,42 @@ function cmpSplitLine(line, sep) {
   }
   out.push(cur); return out;
 }
+function cmpNameTokens(name) {
+  return normalizeName(String(name || ''))
+    .replace(/[^a-zа-яё0-9]+/gi, ' ')
+    .split(/\s+/).filter(Boolean);
+}
+function cmpNameSimilarity(a, b) {
+  const aa = cmpNameTokens(a), bb = cmpNameTokens(b);
+  if (!aa.length || !bb.length) return 0;
+  const sa = new Set(aa), sb = new Set(bb);
+  let common = 0;
+  sa.forEach(x => { if (sb.has(x)) common++; });
+  const tokenScore = (2 * common) / (sa.size + sb.size);
+  const na = normalizeName(a), nb = normalizeName(b);
+  const max = Math.max(na.length, nb.length);
+  let i = 0;
+  while (i < Math.min(na.length, nb.length) && na[i] === nb[i]) i++;
+  const prefixScore = max ? i / max : 0;
+  return Math.max(tokenScore, prefixScore);
+}
+function cmpFindPossibleNameMatches(rows, sourceSide, targetSide) {
+  const unmatched = rows.filter(r => !r[sourceSide] && r[targetSide]);
+  const candidates = rows.filter(r => r[sourceSide] && !r[targetSide]);
+  const out = [];
+  unmatched.forEach(r => {
+    let best = null, second = null;
+    candidates.forEach(c => {
+      const score = cmpNameSimilarity(r.name, c.name);
+      if (!best || score > best.score) { second = best; best = { row: c, score }; }
+      else if (!second || score > second.score) second = { row: c, score };
+    });
+    if (best && best.score >= 0.72 && (!second || best.score - second.score >= 0.08)) {
+      out.push({ row: r, candidate: best.row, score: best.score });
+    }
+  });
+  return out;
+}
 function cmpParseJSON(text, applyCategory = true){
   let d;
   try {
@@ -8518,6 +8554,17 @@ function cmpRunCompare() {
     }
     if (status === 'ok') okCount++; else if (status === 'warn') warnCount++; else errCount++;
     rows.push({ key: k, name, a, b, dates: [...dates], status, details, edits: { incoming: {}, sales: null } });
+  });
+  // После точного нормализованного сопоставления ищем очевидные OCR-варианты
+  // только для отображения. Это НЕ объединяет строки и не меняет FIFO-данные.
+  const possibleNameMatches = [
+    ...cmpFindPossibleNameMatches(rows, 'a', 'b'),
+    ...cmpFindPossibleNameMatches(rows, 'b', 'a')
+  ];
+  possibleNameMatches.forEach(m => {
+    const target = m.row;
+    if (!target.details) target.details = [];
+    target.details.push('Возможный OCR-вариант: «' + String(m.candidate.name || '') + '»');
   });
   const order = { err: 0, warn: 1, ok: 2 };
   rows.sort((x, y) => {
