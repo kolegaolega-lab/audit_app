@@ -238,3 +238,19 @@ test('manual JSON import invokes the same OCR safety gate before parsing rows', 
   assert.match(html, /const safetyIssues = getOCRSafetyIssues\(text, safetyReport/);
   assert.match(html, /if \(safetyIssues\.length\) throw new Error\(formatOCRSafetyMessage\(safetyIssues\)\)/);
 });
+
+
+test('OCR safety blocks future audit and invoice dates', () => {
+  const futureAudit = validJson({ check_date: '2026-10-08' });
+  const futureAuditCodes = context.getOCRSafetyIssues(futureAudit, reportFor(futureAudit), 2).map(x => x.code);
+  assert.ok(futureAuditCodes.includes('future-check-date'));
+
+  const futureInvoice = validJson({
+    invoices: [{
+      number: '123', date: '2026-10-07', continuation: false, last_line_number: 1,
+      items: [{ line: 1, name: 'Пончик с фисташкой', quantity: 2, quantity_status: 'confirmed' }]
+    }]
+  });
+  const futureInvoiceCodes = context.getOCRSafetyIssues(futureInvoice, reportFor(futureInvoice), 2).map(x => x.code);
+  assert.ok(futureInvoiceCodes.includes('future-invoice-date'));
+});
