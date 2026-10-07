@@ -6279,8 +6279,35 @@ async function exportExcel() {
 /* ═══════════════════════════════════════════
    TOAST
    ═══════════════════════════════════════════ */
-function repositionToast() { }
-function showToast(text) { }
+function repositionToast() {
+  const el = _currentToast;
+  if (!el) return;
+  const header = $('appHeader');
+  const h = header ? header.getBoundingClientRect().height : 58;
+  el.style.top = (h + 12) + 'px';
+}
+function showToast(text) {
+  const msg = String(text == null ? '' : text).trim();
+  if (!msg) return;
+  if (_currentToast) {
+    try { _currentToast.remove(); } catch (e) {}
+    _currentToast = null;
+  }
+  const el = document.createElement('div');
+  el.className = 'toast show';
+  el.setAttribute('role', 'status');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  _currentToast = el;
+  repositionToast();
+  const hide = () => {
+    if (_currentToast !== el) return;
+    el.classList.remove('show');
+    setTimeout(() => { try { el.remove(); } catch (e) {} if (_currentToast === el) _currentToast = null; }, 260);
+  };
+  el.addEventListener('click', hide, { once: true });
+  setTimeout(hide, 4200);
+}
 
 /* ═══════════════════════════════════════════
    ПРОМПТЫ
@@ -7182,7 +7209,23 @@ function getOCRSafetyIssues(text,report,count){
   });
   if (missingInvoiceDates.length) out.push({code:"invoice-date-review",title:"Есть накладные без подтверждённой даты"});
   if (isoDate(d.check_date)) {
-    const futureInvoices = invoices.filter(inv => isoDate(inv?.date) && String(inv.date).trim() > String(d.check_date).trim());
+    const toIsoComparable = value => {
+      const parsed = parseDateRu(String(value || ''), new Date());
+      if (!parsed) return '';
+      if (parsed instanceof Date) {
+        if (isNaN(parsed.getTime())) return '';
+        return [parsed.getFullYear(), String(parsed.getMonth() + 1).padStart(2, '0'), String(parsed.getDate()).padStart(2, '0')].join('-');
+      }
+      const normalized = String(parsed).trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return normalized;
+      const m = normalized.match(/^(\d{4})[-.](\d{1,2})[-.](\d{1,2})$/);
+      return m ? safeDate(Number(m[1]), Number(m[2]), Number(m[3])) || '' : '';
+    };
+    const checkIso = toIsoComparable(d.check_date);
+    const futureInvoices = invoices.filter(inv => {
+      const invIso = toIsoComparable(inv?.date);
+      return invIso && checkIso && invIso > checkIso;
+    });
     if (futureInvoices.length) out.push({code:"future-invoice-date",title:"Есть накладные с датой позже даты проверки"});
   }
 
@@ -7421,7 +7464,14 @@ async function recognizeWithGemini(){
     const p1 = parseAIReport(a), p2 = b ? parseAIReport(b) : null;
     if (p1) p1.validation = validateAIResponse(a, b, p1, items.length);
     if (p2) p2.validation = validateAIResponse(b, a, p2, items.length);
-    const s = [...getOCRSafetyIssues(a, p1, items.length), ...(b ? getOCRSafetyIssues(b, p2, items.length) : [])];
+    const rawSafety = [...getOCRSafetyIssues(a, p1, items.length), ...(b ? getOCRSafetyIssues(b, p2, items.length) : [])];
+    const safetySeen = new Set();
+    const s = rawSafety.filter(issue => {
+      const key = String(issue?.code || '') + '|' + String(issue?.detail || issue?.title || '');
+      if (safetySeen.has(key)) return false;
+      safetySeen.add(key);
+      return true;
+    });
     _lastAIReport = p1 || p2;
     if (_lastAIReport) {
       _lastAIReport.safety = { blocked: s.length > 0, issues: s, doubleRun: !!b };
@@ -8513,7 +8563,7 @@ function cmpRunCompare() {
     const name = d1full.rows[key].name;
     const allValues = Object.values(d1full.rows[key].incoming);
     const totalQty = allValues.reduce((a, b) => a + b, 0);
-    if (totalQty === 0 && d1.rows[key].sales === 0) continue;
+    if (totalQty === 0 && (d1.rows[key]?.sales || 0) === 0) continue;
     if (!catalogSet.has(normalizeName(name))) notFound.push(name);
   }
   checks.push({
