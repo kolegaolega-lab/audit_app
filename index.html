@@ -7095,10 +7095,10 @@ async function recognizeWithGemini(){
   setOCRProgress("Распознавание запущено", "Подготавливаю " + items.length + " фото…", 12);
   try {
     const parts = await buildGeminiFileParts();
+    const two = $("geminiDoubleRunCheck")?.checked;
     setOCRProgress("Отправляю фото в ИИ", two ? "Первый из двух прогонов…" : "Ожидаю ответ Gemini…", 32);
     const model = getGeminiModel();
     const url = `${GEMINI_API}/${model}:generateContent?key=${encodeURIComponent(key)}`;
-    const two = $("geminiDoubleRunCheck")?.checked;
     const run = async (n) => {
       const res = await fetch(url, {
         method: "POST",
