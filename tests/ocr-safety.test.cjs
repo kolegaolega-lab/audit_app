@@ -311,3 +311,11 @@ test('double-run comparison exposes concrete row-level differences', () => {
   assert.match(html, /Продажи: .*↔/);
   assert.match(html, /cmp-detail/);
 });
+
+
+test('double-run comparison detects likely OCR name variants without merging rows', () => {
+  assert.match(html, /function cmpNameSimilarity\(a, b\)/);
+  assert.match(html, /Возможный OCR-вариант/);
+  assert.match(html, /score >= 0\.72/);
+  assert.match(html, /Это НЕ объединяет строки и не меняет FIFO-данные/);
+});
