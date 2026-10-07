@@ -7338,14 +7338,14 @@ function getOCRSafetyIssues(text,report,count){
   if (badStatus.length) {
     out.push({
       code:"quantity-status-review",
-      title:"Есть количества без корректного статуса",
+      title:"Количество не подтверждено",
       detail:"Проверьте: " + statusDetails.slice(0, 10).join("; ") + (statusDetails.length > 10 ? " и ещё " + (statusDetails.length - 10) + "." : ".")
     });
   } else if (unconfirmed.length) {
     out.push({
       code:"quantity-status-review",
-      title:"Нужно подтвердить количество",
-      detail:"Нажмите на строку в сверке и выберите правильное количество. После подтверждения сверка будет разблокирована. Не подтверждённые количества: " + statusDetails.join("; ") + "."
+      title:"Количество не подтверждено",
+      detail:"Откройте отмеченные строки и выберите правильное количество. Найдено: " + statusDetails.join("; ") + "."
     });
   }
   // handwritten уже входит в общее сообщение quantity-status-review.
@@ -7353,7 +7353,7 @@ function getOCRSafetyIssues(text,report,count){
   if ((r.handwritten_confirmation||[]).length && !unconfirmed.length) {
     out.push({
       code:"handwritten-confirmation",
-      title:"Есть значения, которые нужно проверить вручную",
+      title:"Есть значения для ручной проверки",
       detail:"Указано в review: " + r.handwritten_confirmation.slice(0, 8).join("; ") + (r.handwritten_confirmation.length > 8 ? " и ещё " + (r.handwritten_confirmation.length - 8) + "." : ".")
     });
   }
@@ -7363,7 +7363,7 @@ function getOCRSafetyIssues(text,report,count){
     const q = Number(x.quantity);
     return !Number.isFinite(q) || q < 0 || !Number.isInteger(q) || q > MAX_NUM;
   });
-  if (invalidQty.length) out.push({code:"invalid-quantity",title:"Есть некорректные подтверждённые количества"});
+  if (invalidQty.length) out.push({code:"invalid-quantity",title:"Есть некорректные количества"});
 
   if (report.validation && Array.isArray(report.validation.issues)) {
     const errors = report.validation.issues.filter(x => x && x.level === "error");
