@@ -244,10 +244,12 @@ test('OCR safety rejects invalid document structure and check date', () => {
   assert.ok(codes.includes('invalid-document-arrays'));
 });
 
-test('OCR compare does not fall back to audit date and ignores unconfirmed quantities', () => {
+test('OCR comparison does not fall back to audit date and can retain unconfirmed quantities for explicit confirmation', () => {
   assert.match(html, /const iso = String\(invDate \|\| ""\)\.trim\(\);/);
   assert.doesNotMatch(html, /String\(inv\.date\|\|d\.check_date\|\|""\)/);
-  assert.match(html, /it\.quantity_status !== "confirmed"/);
+  assert.match(html, /const status = String\(it\.quantity_status \|\| 'confirmed'\)/);
+  assert.match(html, /status !== "confirmed" && !includeUnconfirmed/);
+  assert.match(html, /incomingStatus/);
 });
 
 
