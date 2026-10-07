@@ -104,6 +104,33 @@ test('stock beyond known receipts is not treated as fresh', () => {
     { freshOnShelf:1, expiredOnShelf:2, freshSold:0, soldExpired:0 });
 });
 
+test('future receipts are ignored for the audit date', () => {
+  assert.deepEqual(computeFIFO(row(24, [{date:'2026-10-04', qty:5}], 3, 0)), {
+    freshOnShelf:0, expiredOnShelf:3, freshSold:0, soldExpired:0
+  });
+});
+
+test('future receipts do not make sales fresh', () => {
+  assert.deepEqual(computeFIFO(row(24, [{date:'2026-10-04', qty:5}], 0, 2)), {
+    freshOnShelf:0, expiredOnShelf:0, freshSold:0, soldExpired:2
+  });
+});
+
+test('future receipt plus valid receipt uses only valid receipt', () => {
+  assert.deepEqual(computeFIFO(row(24, [
+    {date:'2026-10-03', qty:2},
+    {date:'2026-10-04', qty:5}
+  ], 3, 0)), {
+    freshOnShelf:2, expiredOnShelf:1, freshSold:0, soldExpired:0
+  });
+});
+
+test('future receipt is ignored even when it has a larger quantity than stock', () => {
+  assert.deepEqual(computeFIFO(row(48, [{date:'2026-10-05', qty:100}], 1, 1)), {
+    freshOnShelf:0, expiredOnShelf:1, freshSold:0, soldExpired:1
+  });
+});
+
 test('no receipts means stock and sales are flagged as unconfirmed/expired', () => {
   assert.deepEqual(computeFIFO(row(24, [], 1, 2)),
     { freshOnShelf:0, expiredOnShelf:1, freshSold:0, soldExpired:2 });
