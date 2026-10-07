@@ -296,6 +296,43 @@ test('finish check guard requires every auditable stock value', async ({page}) =
   expect(source).toContain('btn.disabled = !rows.length || missingStock.length > 0');
 });
 
+test('finish check button updates from blocked to ready after all stocks are entered', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [
+      {name:'Товар A', salesOnly:false, stock:null},
+      {name:'Продажи B', salesOnly:true, stock:null}
+    ];
+    updateFinishCheckBtn();
+    const first = {disabled: $('finishCheckBtn').disabled, text: $('finishCheckBtn').textContent};
+    tableRows[0].stock = 3;
+    updateFinishCheckBtn();
+    const second = {disabled: $('finishCheckBtn').disabled, text: $('finishCheckBtn').textContent};
+    return {first, second};
+  });
+  expect(result.first.disabled).toBe(true);
+  expect(result.first.text).toContain('Введите остаток: 1');
+  expect(result.second.disabled).toBe(false);
+  expect(result.second.text).toBe('Завершить проверку');
+});
+
+test('report treats missing usable incoming as an expiry risk', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const calc = window.computeFIFO({
+      name:'Товар без прихода', shelfLife:24, stock:3, sales:2,
+      incoming:[], _checkDate:'2026-10-06'
+    });
+    const usable = window.hasUsableIncomingForAudit({
+      shelfLife:24, stock:3, sales:2, incoming:[], _checkDate:'2026-10-06'
+    });
+    return {calc, usable};
+  });
+  expect(result.usable).toBe(false);
+  expect(result.calc).toEqual({soldExpired:2, expiredOnShelf:3, freshOnShelf:0, freshSold:0});
+});
+
 
 test('history filename preserves seconds for duplicate-audit matching', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
