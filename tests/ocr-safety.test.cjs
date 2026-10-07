@@ -302,7 +302,7 @@ test('double-run comparison ignores audit check_date and compares invoice data',
   assert.doesNotMatch(html, /const checkDateMismatch/);
   assert.doesNotMatch(html, /Дата проверки отличается/);
   assert.match(html, /\[d1full, 'Первый результат'\], \[d2full, 'Второй результат'\]/);
-  assert.match(html, /Все позиции обоих JSON есть в справочнике/);
+  assert.match(html, /Все позиции из обоих результатов есть в справочнике/);
   assert.match(html, /Первый результат.*Второй результат/);
 });
 
@@ -316,16 +316,16 @@ test('double-run comparison remains valid when only audit check_date differs', (
 
 test('double-run comparison exposes concrete row-level differences', () => {
   assert.match(html, /const details = \[\];/);
-  assert.match(html, /Название: «/);
-  assert.match(html, /Приход .*↔/);
-  assert.match(html, /Продажи: .*↔/);
+  assert.match(html, /Название отличается: «/);
+  assert.match(html, /Приход отличается — .*↔/);
+  assert.match(html, /Продажи отличаются: .*↔/);
   assert.match(html, /cmp-detail/);
 });
 
 
 test('double-run comparison detects likely OCR name variants without merging rows', () => {
   assert.match(html, /function cmpNameSimilarity\(a, b\)/);
-  assert.match(html, /Возможный OCR-вариант/);
+  assert.match(html, /Возможно, название прочитано иначе/);
   assert.match(html, /score >= 0\.72/);
   assert.match(html, /Это НЕ объединяет строки и не меняет FIFO-данные/);
 });
