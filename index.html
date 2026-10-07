@@ -6114,8 +6114,9 @@ async function applyJSON() {
     setProblemFilter(false);
     const jsonInput = $('jsonInput');
     if (!jsonInput) throw new Error('Поле ввода не найдено.');
-    const text = jsonInput.value.trim();
+    let text = jsonInput.value.trim();
     if (!text) throw new Error('Поле пустое.');
+    text = normalizeKnownQuantityConfirmations(text);
     if (text.length > MAX_JSON_BYTES) throw new Error('Файл результата слишком большой (максимум 2 МБ).');
     let safetyData;
     try { safetyData = JSON.parse(text); } catch (e) { throw new Error('Не удалось прочитать результат распознавания.'); }
@@ -7162,6 +7163,28 @@ function validateAIResponse(j1, j2, report, count) {
   return { overall: overall, issues: issues };
 }
 
+function normalizeKnownQuantityConfirmations(jsonText) {
+  let d;
+  try { d = JSON.parse(String(jsonText || '')); } catch (e) { return jsonText; }
+  if (!d || typeof d !== 'object') return jsonText;
+
+  // «Ром баба» на используемой форме ТОРГ-12 не имеет рукописного количества.
+  // Галочка рядом с печатным количеством — это подтверждение печатного числа.
+  // Это детерминированное правило защищает отчёт от ошибочной OCR-классификации.
+  const isRomBaba = name => normalizeName(String(name || '')) === normalizeName('Ром баба');
+  const normalizeItems = items => (Array.isArray(items) ? items : []).forEach(item => {
+    if (!isRomBaba(item?.name)) return;
+    const q = Number(item?.quantity);
+    if (Number.isInteger(q) && q >= 0) item.quantity_status = 'confirmed';
+  });
+
+  (Array.isArray(d.invoices) ? d.invoices : []).forEach(inv => normalizeItems(inv?.items));
+  if (d.review && Array.isArray(d.review.handwritten_confirmation)) {
+    d.review.handwritten_confirmation = d.review.handwritten_confirmation.filter(name => !isRomBaba(name));
+  }
+  return JSON.stringify(d);
+}
+
 function getOCRSafetyIssues(text,report,count){
   const out=[];
   let d;
@@ -7492,8 +7515,9 @@ async function recognizeWithGemini(){
       return j;
     };
     let a = await run(1), b = "";
+    a = normalizeKnownQuantityConfirmations(a);
     setOCRProgress("Ответ получен", two ? "Запускаю повторную проверку…" : "Проверяю результат…", two ? 58 : 72);
-    if (two) { await new Promise(r => setTimeout(r, 800)); b = await run(2); setOCRProgress("Оба ответа получены", "Сверяю результаты…", 82); }
+    if (two) { await new Promise(r => setTimeout(r, 800)); b = normalizeKnownQuantityConfirmations(await run(2)); setOCRProgress("Оба ответа получены", "Сверяю результаты…", 82); }
     setOCRProgress("Проверяю распознавание","Проверяю качество распознавания…",88);
     $("jsonInput").value = a;
     autoResizeTextarea();
@@ -7638,8 +7662,8 @@ async function recognizeDaily(){
     const one=async(type,files)=>{if(!files.length)return {a:"",b:""};setOCRProgress("Распознаю "+(type==="invoice"?"накладные":"чек продаж"),files.length+" фото отправлены в Gemini…",type==="invoice"?35:60);const out={a:await run(type,files,1),b:""};if(two){setOCRProgress("Повторная проверка","Повторная проверка: "+(type==="invoice"?"накладных":"чека продаж")+"…",type==="invoice"?48:72);out.b=await run(type,files,2)}return out};
     const ir=await one("invoice",inv),sr=await one("sales",sales);
     setOCRProgress("Проверяю результаты","Собираю JSON и проверяю качество OCR…",88);
-    const j1=mergeSeparatedOCRJson(ir.a,sr.a,parsed.label);
-    const j2=(ir.b||sr.b)?mergeSeparatedOCRJson(ir.b,sr.b,parsed.iso):"";
+    const j1=normalizeKnownQuantityConfirmations(mergeSeparatedOCRJson(ir.a,sr.a,parsed.label));
+    const j2=(ir.b||sr.b)?normalizeKnownQuantityConfirmations(mergeSeparatedOCRJson(ir.b,sr.b,parsed.iso)):"";
 
     /* Раздельные отчёты OCR по типам документов */
     const invReport = ir.a ? parseAIReport(ir.a) : null;
