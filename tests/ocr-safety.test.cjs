@@ -329,3 +329,11 @@ test('double-run comparison detects likely OCR name variants without merging row
   assert.match(html, /score >= 0\.72/);
   assert.match(html, /Это НЕ объединяет строки и не меняет FIFO-данные/);
 });
+
+test('OCR fuzzy name warnings are deduplicated and quantity statuses use plain language', () => {
+  assert.match(html, /const fuzzySeen = new Set\(\)/);
+  assert.match(html, /const issueKey = n \+ '\\|' \+ c/);
+  assert.match(html, /количество записано от руки/);
+  assert.match(html, /количество нужно уточнить/);
+  assert.match(html, /Использование заблокировано\. Сначала исправьте ошибки распознавания/);
+});
