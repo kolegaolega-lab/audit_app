@@ -2614,12 +2614,18 @@ function computeFIFO(row) {
   const shelfLife = clampNum(row.shelfLife, 1, 10000, 72);
   const moment = getCheckMoment(row._checkDate);
 
+  const checkDayKey = parseDateRu(row._checkDate || '', moment)
+    || [moment.getFullYear(), String(moment.getMonth() + 1).padStart(2, '0'), String(moment.getDate()).padStart(2, '0')].join('-');
+
   const parties = mergeIncomingByDate(row.incoming)
     .map(p => {
-      const writeOff = getWriteOffMoment(p.date, shelfLife);
-      return { date: p.date, qty: clampNum(p.qty, 0, MAX_NUM, 0), writeOff };
+      const partyDateKey = parseDateRu(p.date, moment);
+      const writeOff = partyDateKey ? getWriteOffMoment(partyDateKey, shelfLife) : null;
+      return { date: p.date, partyDateKey, qty: clampNum(p.qty, 0, MAX_NUM, 0), writeOff };
     })
-    .filter(p => p.qty > 0 && p.writeOff);
+    // Приход с датой позже даты аудита физически ещё не может быть доступен.
+    // Не позволяем ошибке OCR/даты сделать такой остаток свежим.
+    .filter(p => p.qty > 0 && p.partyDateKey && p.partyDateKey <= checkDayKey && p.writeOff);
 
   if (!parties.length) {
     return { soldExpired: sales, expiredOnShelf: stock, freshOnShelf: 0, freshSold: 0 };
