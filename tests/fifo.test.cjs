@@ -34,7 +34,7 @@ const context = {
 vm.createContext(context);
 vm.runInContext(extractFunction(html, 'getWriteOffMoment', 'function parseDateRu('), context);
 vm.runInContext(extractFunction(html, 'computeFIFO', 'function emptyResult('), context);
-vm.runInContext(extractFunction(html, 'hasUsableIncomingForAudit', 'function getRowStatus('), context);
+vm.runInContext(extractFunction(html, 'hasUsableIncomingForAudit', 'function formatOCRSafetyMessage('), context);
 
 const computeFIFO = (...args) => JSON.parse(JSON.stringify(context.computeFIFO(...args)));
 const expiry = (date, hours) => context.getWriteOffMoment(date, hours);
