@@ -1857,7 +1857,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.24.6';
+const APP_VERSION = 'v9.24.7';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -1880,9 +1880,13 @@ const GEMINI_KEY = 'fbAuditGeminiKey';
 const GEMINI_MODEL_KEY = 'fbAuditGeminiModel';
 const GEMINI_MODEL_DEFAULT = 'gemini-3.1-flash-lite';
 const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta/models';
-const GEMINI_IMG_MAX_SIDE = 2800;
-const GEMINI_IMG_QUALITY = 0.90;
-const GEMINI_MAX_B64_BYTES = 18 * 1024 * 1024;
+const GEMINI_IMG_MAX_SIDE = 2400;
+const GEMINI_IMG_QUALITY = 0.84;
+// Safari/iOS is much less tolerant of large inline POST bodies. Keep a safe
+// margin below Gemini's documented ~20 MB inline-image request limit.
+const GEMINI_MAX_B64_BYTES = 12 * 1024 * 1024;
+const GEMINI_MAX_REQUEST_BYTES = 18 * 1024 * 1024;
+const GEMINI_FETCH_TIMEOUT_MS = 120000;
 const GEMINI_MODELS_CACHE_KEY = 'fbAuditModelsCache';
 const GEMINI_MODELS_CACHE_TTL = 24 * 60 * 60 * 1000;
 const GEMINI_MAX_OUTPUT_TOKENS = 16384;
@@ -7241,15 +7245,30 @@ async function recognizeWithGemini(){
     const model = getGeminiModel();
     const url = `${GEMINI_API}/${model}:generateContent?key=${encodeURIComponent(key)}`;
     const run = async (n) => {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: buildSystemInstructionForGemini() }] },
-          contents: [{ parts: [...parts, { text: buildPrompt() }] }],
-          generationConfig: getGeminiJSONConfig(n)
-        })
-      });
+      const requestBody = {
+        systemInstruction: { parts: [{ text: buildSystemInstructionForGemini() }] },
+        contents: [{ parts: [...parts, { text: buildPrompt() }] }],
+        generationConfig: getGeminiJSONConfig(n)
+      };
+      const serialized = JSON.stringify(requestBody);
+      const requestBytes = new Blob([serialized]).size;
+      if (requestBytes > GEMINI_MAX_REQUEST_BYTES) {
+        throw Error("Слишком большой запрос для Safari/Gemini. Уменьшите количество фото или отправьте их по одной дате.");
+      }
+      let res;
+      try {
+        res = await fetchWithTimeout(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: serialized
+        }, GEMINI_FETCH_TIMEOUT_MS);
+      } catch (e) {
+        const msg = String(e?.message || e || "");
+        if (/load failed|failed to fetch|networkerror|network request failed|abort/i.test(msg)) {
+          throw Error("Не удалось получить ответ от Gemini: соединение было прервано Safari или сетью. Проверьте интернет и повторите.");
+        }
+        throw e;
+      }
       if (!res.ok) {
         let detail = "";
         try { const ej = await res.json(); detail = ej?.error?.message || ""; } catch (e) {}
@@ -7292,7 +7311,11 @@ async function recognizeWithGemini(){
       set("ok", "JSON применён.");
     }
   } catch (e) {
-    set("err", "Ошибка: " + (e.message || e));
+    const raw=String(e?.message||e||"");
+    const friendly=/load failed|failed to fetch|networkerror/i.test(raw)
+      ? "Не удалось получить ответ от Gemini: Safari/сеть разорвали соединение. Проверьте интернет и повторите."
+      : "Ошибка: " + raw;
+    set("err", friendly);
     finishOCRProgress(false);
   } finally {
     shareBusy = false;
@@ -7368,12 +7391,22 @@ async function recognizeDaily(){
     const run=async(type,files,no)=>{
       if(!files.length)return null;
       const parts=await buildGeminiFileParts(type);
-      const res=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          systemInstruction:{parts:[{text:buildSystemInstructionForGemini()}]},
-          contents:[{parts:[...parts,{text:buildSeparatedOCRPrompt(parsed.iso,type)}]}],
-          generationConfig:getGeminiJSONConfig(no)
-        })});
+      const requestBody={
+        systemInstruction:{parts:[{text:buildSystemInstructionForGemini()}]},
+        contents:[{parts:[...parts,{text:buildSeparatedOCRPrompt(parsed.iso,type)}]}],
+        generationConfig:getGeminiJSONConfig(no)
+      };
+      const serialized=JSON.stringify(requestBody);
+      const requestBytes=new Blob([serialized]).size;
+      if(requestBytes>GEMINI_MAX_REQUEST_BYTES)throw Error("Слишком большой запрос для Safari/Gemini. Уменьшите количество фото или отправьте их по одной дате.");
+      let res;
+      try{
+        res=await fetchWithTimeout(url,{method:"POST",headers:{"Content-Type":"application/json"},body:serialized},GEMINI_FETCH_TIMEOUT_MS);
+      }catch(e){
+        const msg=String(e?.message||e||"");
+        if(/load failed|failed to fetch|networkerror|network request failed|abort/i.test(msg))throw Error("Не удалось получить ответ от Gemini: соединение было прервано Safari или сетью. Проверьте интернет и повторите.");
+        throw e;
+      }
       if(!res.ok)throw Error("Gemini HTTP "+res.status);
       const d=await res.json();
       const raw=(d?.candidates?.[0]?.content?.parts||[]).map(p=>p.text||"").join("");
