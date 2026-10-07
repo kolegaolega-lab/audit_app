@@ -378,6 +378,13 @@ test('comparison issue review flow exposes filter, next-issue navigation, and li
   assert.match(html, /Осталось проверить/);
 });
 
+test('OCR name mismatch can be explicitly confirmed and then stops blocking the row', () => {
+  assert.match(html, /!row\.edits\?\.nameAccepted/);
+  assert.match(html, /class="cmp-name-confirm"/);
+  assert.match(html, /row\.edits\.nameAccepted = true/);
+  assert.match(html, /Это одно и то же название/);
+});
+
 test('double-run comparison merges likely OCR name variants into one row', () => {
   assert.match(html, /function cmpNameSimilarity\(a, b\)/);
   assert.match(html, /Возможное совпадение: «/);
