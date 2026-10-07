@@ -381,7 +381,7 @@ test('OCR fuzzy name warnings are deduplicated and quantity statuses use plain l
   assert.match(html, /const issueKey = n \+ '\\|' \+ c/);
   assert.match(html, /количество записано от руки/);
   assert.match(html, /количество нужно уточнить/);
-  assert.match(html, /Нельзя использовать эти данные, пока не исправлены отмеченные ошибки/);
+  assert.match(html, /Исправьте отмеченные строки перед применением/);
 });
 
 
