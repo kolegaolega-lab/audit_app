@@ -3771,7 +3771,8 @@ async function findRecentTwin(login, pointId, tsMs) {
     const fileTime = new Date(
       ref.getFullYear(), ref.getMonth(), p.day,
       parseInt(p.timeHH, 10) || 0,
-      parseInt(p.timeMM, 10) || 0, 0
+      parseInt(p.timeMM, 10) || 0,
+      parseInt(p.timeSS, 10) || 0
     ).getTime();
     const delta = Math.abs(fileTime - tsMs);
     if (delta <= TWIN_WINDOW_MS && delta < bestDelta) {
@@ -3945,6 +3946,7 @@ function parseHistoryFilename(fname) {
     day: parseInt(dayStr, 10),
     timeHH: timeStr.slice(0, 2),
     timeMM: timeStr.slice(2, 4),
+    timeSS: timeStr.slice(4, 6),
     pointId: parts[2],
     login: parts.slice(3).join('-')
   };
@@ -3977,7 +3979,7 @@ async function fetchAndCacheMonth(yearMonth) {
     if (!p) continue;
     parsed.push({
       filename: p.filename, day: p.day,
-      timeHH: p.timeHH, timeMM: p.timeMM,
+      timeHH: p.timeHH, timeMM: p.timeMM, timeSS: p.timeSS,
       pointId: p.pointId, login: p.login,
       sha: f.sha || '', size: typeof f.size === 'number' ? f.size : 0
     });
