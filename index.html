@@ -7101,6 +7101,7 @@ function validateAIResponse(j1, j2, report, count) {
       _ocrSafetyCatalogCache = { catalogByLen, exactNames };
     }
     const { catalogByLen, exactNames } = _ocrSafetyCatalogCache;
+    const fuzzySeen = new Set();
     let fuzzyTimedOut = false;
     const checkName = (name) => {
       if (fuzzyTimedOut) return;
@@ -7111,9 +7112,13 @@ function validateAIResponse(j1, j2, report, count) {
       for (const c of cands) {
         if (Math.abs(c.length - n.length) > 2) continue;
         if (_levenshtein(c, n) <= 2) {
-          issues.push({ level: 'warn', code: 'name-fuzzy',
-            title: 'Возможная опечатка в названии',
-            detail: '«' + name + '» похоже на «' + c + '»' });
+          const issueKey = n + '|' + c;
+          if (!fuzzySeen.has(issueKey)) {
+            fuzzySeen.add(issueKey);
+            issues.push({ level: 'warn', code: 'name-fuzzy',
+              title: 'Возможная опечатка в названии',
+              detail: '«' + name + '» похоже на «' + c + '»' });
+          }
           return;
         }
         const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
@@ -7300,7 +7305,11 @@ function getOCRSafetyIssues(text,report,count){
   const statusDetails = unconfirmed.slice(0, 10).map(x => {
     const name = String(x?.name || "Без названия").trim();
     const line = Number.isInteger(Number(x?.line)) ? " · строка " + Number(x.line) : "";
-    return name + line + " · " + String(x.quantity_status || "нет статуса");
+    const statusLabel = x.quantity_status === "handwritten" ? "количество записано от руки" :
+      x.quantity_status === "uncertain" ? "количество нужно уточнить" :
+      x.quantity_status === "unreadable" ? "количество не читается" :
+      String(x.quantity_status || "нет статуса");
+    return name + line + " · " + statusLabel;
   });
   if (badStatus.length) {
     out.push({
