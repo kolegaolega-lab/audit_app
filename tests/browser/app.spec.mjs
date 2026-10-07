@@ -273,7 +273,7 @@ test('point management rejects duplicate numbers and keeps active point valid', 
     const b = window.addPoint('001','Дубликат','');
     const c = window.addPoint('002','Точка 2','');
     const activeOk = window.setActivePointId(c.id);
-    return {a:!!a,b,points:[a,c].filter(Boolean).map(x=>x.num),activeOk,active:window.getActivePoint()?.num};
+    return {a:!!a,b,points:window._points.map(x=>x.num),activeOk,active:window.getActivePoint()?.num};
   });
   expect(result).toEqual({a:true,b:null,points:['001','002'],activeOk:true,active:'002'});
 });
