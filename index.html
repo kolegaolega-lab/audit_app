@@ -118,7 +118,7 @@ button.busy::before{content:'';position:absolute;inset:0;background:linear-gradi
 @keyframes pulseAnim{0%{box-shadow:0 0 0 0 rgba(10,132,255,.5)}70%{box-shadow:0 0 0 8px rgba(10,132,255,0)}100%{box-shadow:0 0 0 0 rgba(10,132,255,0)}}
 .meta b{color:var(--text);font-weight:600}
 .meta .label{color:var(--text-tertiary);min-width:130px;display:inline-block}
-.status{padding:11px 13px;border-radius:var(--r-sm);font-size:12.5px;font-weight:500;line-height:1.45;display:none;margin-top:10px}
+.status{padding:11px 13px;border-radius:var(--r-sm);font-size:12.5px;font-weight:500;line-height:1.45;display:none;margin-top:10px}.ocr-progress{display:none;margin-top:10px;padding:12px;border:1px solid var(--separator);border-radius:12px;background:var(--bg-input)}.ocr-progress.show{display:block}.ocr-progress-top{display:flex;align-items:center;gap:10px}.ocr-spinner{width:20px;height:20px;border:2.5px solid var(--separator-opaque);border-top-color:var(--accent);border-radius:50%;animation:ocrSpin .8s linear infinite;flex:0 0 auto}@keyframes ocrSpin{to{transform:rotate(360deg)}}.ocr-progress-title{font-size:13px;font-weight:700;line-height:1.25}.ocr-progress-detail{font-size:11.5px;color:var(--text-secondary);margin-top:2px}.ocr-progress-bar{height:5px;background:var(--separator);border-radius:99px;overflow:hidden;margin-top:10px}.ocr-progress-fill{height:100%;width:8%;background:var(--accent);border-radius:99px;transition:width .25s ease}.ocr-progress-time{font-size:10.5px;color:var(--text-tertiary);margin-top:6px}
 .status.show{display:block}
 .status.ok{background:var(--green-soft);color:var(--green);font-weight:600}
 .status.err{background:var(--red-soft);color:var(--red);font-weight:600}
@@ -986,6 +986,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
         </div>
       </div>
 
+<div id="ocrProgress" class="ocr-progress" aria-live="polite" aria-busy="true"><div class="ocr-progress-top"><span class="ocr-spinner" aria-hidden="true"></span><div><div id="ocrProgressTitle" class="ocr-progress-title">Распознавание запущено…</div><div id="ocrProgressDetail" class="ocr-progress-detail">Подготавливаю фотографии</div></div></div><div class="ocr-progress-bar"><div id="ocrProgressFill" class="ocr-progress-fill"></div></div><div id="ocrProgressTime" class="ocr-progress-time">Прошло 0 сек.</div></div>
       <div id="allModeBlock" style="display:none">
         <button id="recognizeGeminiBtn" class="success block">Распознать все</button>
         <p class="hint" style="margin-top:10px">Все загруженные фото уйдут одним запросом. Результат сразу попадёт в таблицу, и откроется <b>Сверка</b>.</p>
@@ -7080,6 +7081,7 @@ function summarizeAIReport(report) {
 /* ═══════════════════════════════════════════
    GEMINI — распознаватель «Всё сразу»
    ═══════════════════════════════════════════ */
+function setOCRProgress(title, detail, percent){const box=$("ocrProgress");if(!box)return;box.classList.add("show");box.setAttribute("aria-busy","true");const t=$("ocrProgressTitle"),d=$("ocrProgressDetail"),f=$("ocrProgressFill");if(t)t.textContent=title||"Распознавание…";if(d)d.textContent=detail||"";if(f)f.style.width=Math.max(5,Math.min(100,Number(percent)||5))+"%";if(!window._ocrProgressStarted)window._ocrProgressStarted=Date.now();const tm=$("ocrProgressTime");if(tm){const sec=Math.max(0,Math.floor((Date.now()-window._ocrProgressStarted)/1000));tm.textContent="Прошло "+sec+" сек."}}function finishOCRProgress(ok=true){const box=$("ocrProgress");if(!box)return;if(ok){setOCRProgress("Распознавание завершено","Результат получен, проверяю JSON…",100)}else{box.classList.remove("show");box.setAttribute("aria-busy","false")}window._ocrProgressStarted=null}
 async function recognizeWithGemini(){
   if (shareBusy) return;
   const st = $("shareStatus");
@@ -7090,8 +7092,10 @@ async function recognizeWithGemini(){
   const items = await getPhotos();
   if (!items.length) { set("info", "Сначала загрузите материалы."); return; }
   shareBusy = true;
+  setOCRProgress("Распознавание запущено", "Подготавливаю " + items.length + " фото…", 12);
   try {
     const parts = await buildGeminiFileParts();
+    setOCRProgress("Отправляю фото в ИИ", two ? "Первый из двух прогонов…" : "Ожидаю ответ Gemini…", 32);
     const model = getGeminiModel();
     const url = `${GEMINI_API}/${model}:generateContent?key=${encodeURIComponent(key)}`;
     const two = $("geminiDoubleRunCheck")?.checked;
@@ -7117,7 +7121,9 @@ async function recognizeWithGemini(){
       return j;
     };
     let a = await run(1), b = "";
-    if (two) { await new Promise(r => setTimeout(r, 800)); b = await run(2); }
+    setOCRProgress("Ответ получен", two ? "Запускаю второй прогон для сверки…" : "Проверяю структуру JSON…", two ? 58 : 72);
+    if (two) { await new Promise(r => setTimeout(r, 800)); b = await run(2); setOCRProgress("Оба ответа получены", "Сверяю результаты…", 82); }
+    setOCRProgress("Проверяю распознавание","Анализирую JSON и качество OCR…",88);
     $("jsonInput").value = a;
     autoResizeTextarea();
     updateJsonCounter();
@@ -7146,6 +7152,7 @@ async function recognizeWithGemini(){
     }
   } catch (e) {
     set("err", "Ошибка: " + (e.message || e));
+    finishOCRProgress(false);
   } finally {
     shareBusy = false;
   }
@@ -7196,6 +7203,7 @@ async function recognizeDaily(){
   const all=await getPhotos(),inv=all.filter(x=>x.type==="invoice"),sales=all.filter(x=>x.type==="sales");
   if(!inv.length&&!sales.length){set("info","Сначала загрузите фото накладных и чек продаж.");return}
   shareBusy=true;
+  setOCRProgress("Распознавание запущено","Подготавливаю накладные и чек продаж…",10);
   try{
     const model=getGeminiModel();
     const url=`${GEMINI_API}/${model}:generateContent?key=${encodeURIComponent(key)}`;
@@ -7216,8 +7224,9 @@ async function recognizeDaily(){
       if(!j)throw Error("Невалидный JSON "+type);
       return j;
     };
-    const one=async(type,files)=>files.length?{a:await run(type,files,1),b:two?await run(type,files,2):""}:{a:"",b:""};
+    const one=async(type,files)=>{if(!files.length)return {a:"",b:""};setOCRProgress("Распознаю "+(type==="invoice"?"накладные":"чек продаж"),files.length+" фото отправлены в Gemini…",type==="invoice"?35:60);const out={a:await run(type,files,1),b:""};if(two){setOCRProgress("Повторная сверка","Второй прогон: "+(type==="invoice"?"накладных":"чека продаж")+"…",type==="invoice"?48:72);out.b=await run(type,files,2)}return out};
     const ir=await one("invoice",inv),sr=await one("sales",sales);
+    setOCRProgress("Проверяю результаты","Собираю JSON и проверяю качество OCR…",88);
     const j1=mergeSeparatedOCRJson(ir.a,sr.a,parsed.label);
     const j2=(ir.b||sr.b)?mergeSeparatedOCRJson(ir.b,sr.b,parsed.iso):"";
 
@@ -7271,6 +7280,7 @@ async function recognizeDaily(){
     persistAIReport(_lastAIReport);
     updateAIReportBtnVisibility();
 
+    finishOCRProgress(true);
     if(entry.blocked||entry.needsCheck){
       _lastGeminiJsons={first:j1,second:j2||j1};
       _dailyEditing=parsed.iso;
