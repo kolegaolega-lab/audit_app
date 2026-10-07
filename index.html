@@ -6989,14 +6989,24 @@ function validateAIResponse(j1, j2, report, count) {
     }
   });
 
-  /* 9. Дата накладной обязательна. Неизвестная дата не превращается в дату аудита. */
+  /* 9. Дата накладной обязательна.
+     Продолжение многостраничной накладной может физически не содержать дату.
+     Если у той же накладной уже есть дата на первой странице, наследуем её
+     для проверки и не считаем это ошибкой OCR. */
+  const knownInvoiceDates = new Map();
   (d.invoices || []).forEach(inv => {
-    const ds = String(inv.date || '').trim();
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(ds)) {
-      issues.push({ level: 'error', code: inv.continuation ? 'continuation-date-unresolved' : 'invoice-date-missing',
-        title: inv.continuation ? 'Не удалось определить дату продолжения накладной' : 'Не удалось определить дату накладной',
-        detail: (inv.number ? ('№' + inv.number + ' · ') : '') + 'требуется ручная сверка' });
-    }
+    const num = String(inv?.number || '').trim();
+    const ds = String(inv?.date || '').trim();
+    if (num && /^\d{4}-\d{2}-\d{2}$/.test(ds) && !inv?.continuation) knownInvoiceDates.set(num, ds);
+  });
+  (d.invoices || []).forEach(inv => {
+    const ds = String(inv?.date || '').trim();
+    const num = String(inv?.number || '').trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(ds)) return;
+    if (inv?.continuation && num && knownInvoiceDates.has(num)) return;
+    issues.push({ level: 'error', code: inv?.continuation ? 'continuation-date-unresolved' : 'invoice-date-missing',
+      title: inv?.continuation ? 'Не удалось определить дату продолжения накладной' : 'Не удалось определить дату накладной',
+      detail: (num ? ('№' + num + ' · ') : '') + 'требуется ручная сверка' });
   });
 
   /* 10. Даты накладных: ±30 дней */
@@ -7098,7 +7108,16 @@ function getOCRSafetyIssues(text,report,count){
 
   const invoices = Array.isArray(d.invoices) ? d.invoices : [];
   const sales = Array.isArray(d.sales) ? d.sales : [];
-  const missingInvoiceDates = invoices.filter(inv => !isoDate(inv?.date));
+  const knownInvoiceDates = new Map();
+  invoices.forEach(inv => {
+    const num = String(inv?.number || '').trim();
+    if (num && !inv?.continuation && isoDate(inv?.date)) knownInvoiceDates.set(num, String(inv.date).trim());
+  });
+  const missingInvoiceDates = invoices.filter(inv => {
+    if (isoDate(inv?.date)) return false;
+    const num = String(inv?.number || '').trim();
+    return !(inv?.continuation && num && knownInvoiceDates.has(num));
+  });
   if (missingInvoiceDates.length) out.push({code:"invoice-date-review",title:"Есть накладные без подтверждённой даты"});
   if (isoDate(d.check_date)) {
     const futureInvoices = invoices.filter(inv => isoDate(inv?.date) && String(inv.date).trim() > String(d.check_date).trim());
