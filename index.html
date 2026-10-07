@@ -1858,7 +1858,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.24.15';
+const APP_VERSION = 'v9.24.16';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -7345,7 +7345,7 @@ function getOCRSafetyIssues(text,report,count){
     out.push({
       code:"quantity-status-review",
       title:"Нужно подтвердить количество",
-      detail:"Нажмите на строку в сверке и выберите правильное количество. После подтверждения сверка будет разблокирована. " + statusDetails.join("; ") + "."
+      detail:"Нажмите на строку в сверке и выберите правильное количество. После подтверждения сверка будет разблокирована. Не подтверждённые количества: " + statusDetails.join("; ") + "."
     });
   }
   // handwritten уже входит в общее сообщение quantity-status-review.
@@ -8681,7 +8681,7 @@ function cmpRunCompare() {
     checks.push({
       ok: false,
       title: 'Нужно подтвердить количество',
-      detail: 'В распознавании есть количества, записанные от руки. Откройте отмеченные строки ниже, выберите правильное значение и сохраните.',
+      detail: (() => { const parts = quantityIssues.map(x => (x.title ? x.title + ': ' : '') + (x.detail || 'Нужно проверить отмеченные количества.')); return 'Есть количества, которые ещё нельзя использовать без проверки. ' + parts.join(' | '); })(),
       _safetyCode: 'quantity-status-review',
       _safetyLabel: 'Нужно подтвердить количество',
       _originalDetail: 'В распознавании есть количества, записанные от руки. Откройте отмеченные строки ниже, выберите правильное значение и сохраните.'
