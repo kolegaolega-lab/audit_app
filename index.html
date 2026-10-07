@@ -8582,17 +8582,10 @@ function cmpRunCompare() {
     }
     return /^\d{4}-\d{2}-\d{2}$/.test(String(parsed)) ? String(parsed) : '';
   };
-  const checkDate1 = cmpDateToIso(d1full.document?.check_date);
-  const checkDate2 = cmpDateToIso(d2full.document?.check_date);
-  const checkDateMismatch = !!(checkDate1 && checkDate2 && checkDate1 !== checkDate2);
-  if (checkDateMismatch) {
-    checks.push({
-      ok: false,
-      code: 'check-date-mismatch',
-      title: 'Дата проверки отличается',
-      detail: 'Первый результат: <b>' + escapeHtml(checkDate1) + '</b> · Второй результат: <b>' + escapeHtml(checkDate2) + '</b>. Для одних и тех же фотографий дата должна совпадать. Проверьте дату аудита перед использованием результата.'
-    });
-  }
+  // Дата аудита (check_date) не участвует в сравнении двух результатов.
+  // Два результата могут быть получены в разные дни или содержать разную дату аудита,
+  // но при одинаковых фотографиях накладных должны сравниваться по самим накладным,
+  // их датам, товарам, количествам и продажам.
   // Сверка — это отдельный путь к применению OCR-данных, поэтому она
   // обязана проходить ту же OCR safety gate, что и обычный Apply JSON.
   const cmpSafety = [];
@@ -8700,8 +8693,8 @@ function cmpRunCompare() {
   _cmpData = {
     rows, dateLabels, okCount, warnCount, errCount,
     json1: d1, json2: d2, json1Full: d1full, json2Full: d2full,
-    checks, safetyIssues: cmpSafety, checkDateMismatch,
-    comparisonValid: !checkDateMismatch && cmpSafety.length === 0
+    checks, safetyIssues: cmpSafety,
+    comparisonValid: cmpSafety.length === 0
   };
   cmpRenderChecks(checks);
   cmpRenderResults();
