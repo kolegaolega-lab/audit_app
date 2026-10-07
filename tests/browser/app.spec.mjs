@@ -413,6 +413,31 @@ test('comparison blocks applying OCR runs with unresolved invoice date', async (
 });
 
 
+test('OCR safety accepts Russian invoice dates used by JSON parser', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const json = JSON.stringify({
+      schema_version:'1.0',
+      document_type:'combined',
+      check_date:'2026-10-07',
+      source:{photo_count:2,processed_photo_count:2,duplicate_photo_count:0},
+      invoices:[
+        {number:'221511',date:'01.10.2026',continuation:false,last_line_number:1,
+         items:[{line:1,name:'Т Сочник',quantity:4,quantity_status:'confirmed'}]},
+        {number:'220646',date:'30.09.2026',continuation:false,last_line_number:1,
+         items:[{line:1,name:'Т Сочник',quantity:4,quantity_status:'confirmed'}]}
+      ],
+      sales:[],
+      review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+    });
+    const report = parseAIReport(json);
+    const issues = getOCRSafetyIssues(json, report, 2);
+    return issues.map(x => x.code);
+  });
+  expect(result).not.toContain('invoice-date-review');
+  expect(result).not.toContain('invoice-date-missing');
+});
+
 test('OCR validation does not freeze on large reference catalog', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
