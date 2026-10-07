@@ -133,6 +133,54 @@ test('multi-page invoice continuation inherits date and handwritten quantity is 
   expect(result.safetyCodes).toContain('quantity-status-review');
 });
 
+test('OCR safety blocks missing invoice line 29 across continuation pages', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const payload = {
+      schema_version:'1.0', document_type:'combined', check_date:'2026-10-07',
+      source:{photo_count:5,processed_photo_count:5,duplicate_photo_count:0},
+      invoices:[
+        {number:'221511',date:'2026-10-01',continuation:false,last_line_number:11,items:[
+          {line:1,name:'Товар 1',quantity:1,quantity_status:'confirmed'},
+          {line:2,name:'Товар 2',quantity:1,quantity_status:'confirmed'}
+        ]},
+        {number:'221511',date:'2026-10-01',continuation:true,last_line_number:29,items:[
+          {line:12,name:'Товар 12',quantity:1,quantity_status:'confirmed'},
+          {line:28,name:'Товар 28',quantity:1,quantity_status:'confirmed'}
+        ]}
+      ],
+      sales:[], review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+    };
+    const json=JSON.stringify(payload);
+    const report={hasBlocks:true,validation:{issues:[]}};
+    const issues=window.getOCRSafetyIssues(json,report,5);
+    return {codes:issues.map(x=>x.code),details:issues.filter(x=>x.code==='invoice-line-gap').map(x=>x.detail)};
+  });
+  expect(result.codes).toContain('invoice-line-gap');
+  expect(result.details.join(' ')).toContain('29');
+});
+
+test('OCR safety accepts complete invoice line numbering across continuation pages', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const items=[];
+    for(let line=1;line<=29;line++) items.push({line,name:'Товар '+line,quantity:1,quantity_status:'confirmed'});
+    const payload={
+      schema_version:'1.0',document_type:'combined',check_date:'2026-10-07',
+      source:{photo_count:2,processed_photo_count:2,duplicate_photo_count:0},
+      invoices:[
+        {number:'221511',date:'2026-10-01',continuation:false,last_line_number:11,items:items.slice(0,11)},
+        {number:'221511',date:'2026-10-01',continuation:true,last_line_number:29,items:items.slice(11)}
+      ],
+      sales:[],review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+    };
+    const issues=window.getOCRSafetyIssues(JSON.stringify(payload),{hasBlocks:true,validation:{issues:[]}},2);
+    return issues.map(x=>x.code);
+  });
+  expect(result).not.toContain('invoice-line-gap');
+  expect(result).not.toContain('invoice-last-line-inconsistent');
+});
+
 test('product cards do not render duplicate incoming summary', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
