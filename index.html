@@ -8369,6 +8369,28 @@ function cmpRunCompare() {
   });
 
   const checks = [];
+  // Сверка — это отдельный путь к применению OCR-данных, поэтому она
+  // обязана проходить ту же OCR safety gate, что и обычный Apply JSON.
+  const cmpSafety = [];
+  const buildCmpSafety = (raw, data, label, otherRaw) => {
+    try {
+      const report = parseAIReport(raw);
+      if (!report) return [{ code:'empty-json', title:label + ': некорректный JSON', detail:'Не удалось разобрать JSON.' }];
+      const photoCount = Number(data?.document?.source?.photo_count);
+      report.validation = validateAIResponse(raw, otherRaw || '', report, Number.isInteger(photoCount) ? photoCount : 0);
+      return getOCRSafetyIssues(raw, report, Number.isInteger(photoCount) ? photoCount : 0)
+        .map(x => ({ ...x, title: label + ': ' + x.title }));
+    } catch (e) {
+      return [{ code:'comparison-safety-error', title:label + ': ошибка safety-проверки', detail:String(e?.message || e || 'Неизвестная ошибка') }];
+    }
+  };
+  cmpSafety.push(...buildCmpSafety(t1, d1full, 'Прогон 1', t2));
+  cmpSafety.push(...buildCmpSafety(t2, d2full, 'Прогон 2', t1));
+  cmpSafety.forEach(issue => checks.push({
+    ok: false,
+    title: issue.title,
+    detail: issue.detail || 'Требуется исправление OCR-данных.'
+  }));
   _cmpNakls.filter(n => n.date).forEach(n => {
     const dateKey = (() => {
       const parsed = parseDateRu(n.date, new Date());
@@ -8436,7 +8458,7 @@ function cmpRunCompare() {
   _cmpEditDk = null;
   _cmpEditKind = null;
   _cmpAppliedForDaily = false;
-  _cmpData = { rows, dateLabels, okCount, warnCount, errCount, json1: d1, json2: d2, json1Full: d1full, json2Full: d2full, checks };
+  _cmpData = { rows, dateLabels, okCount, warnCount, errCount, json1: d1, json2: d2, json1Full: d1full, json2Full: d2full, checks, safetyIssues: cmpSafety };
   cmpRenderChecks(checks);
   cmpRenderResults();
     setTimeout(() => {
@@ -8662,7 +8684,8 @@ function cmpRenderResults() {
   }
   const applyBtn = $('cmpApplyBtn');
   const hasEdits = rows.some(r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null));
-  if (applyBtn) applyBtn.style.display = (okCount || hasEdits) ? 'block' : 'none';
+  const safetyBlocked = Array.isArray(_cmpData.safetyIssues) && _cmpData.safetyIssues.length > 0;
+  if (applyBtn) applyBtn.style.display = (!safetyBlocked && (okCount || hasEdits)) ? 'block' : 'none';
 }
 function cmpApplyMatched() {
   if (!_cmpData) return;
