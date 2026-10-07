@@ -8584,9 +8584,11 @@ function cmpRunCompare() {
   };
   const checkDate1 = cmpDateToIso(d1full.document?.check_date);
   const checkDate2 = cmpDateToIso(d2full.document?.check_date);
-  if (checkDate1 && checkDate2 && checkDate1 !== checkDate2) {
+  const checkDateMismatch = !!(checkDate1 && checkDate2 && checkDate1 !== checkDate2);
+  if (checkDateMismatch) {
     checks.push({
       ok: false,
+      code: 'check-date-mismatch',
       title: 'Дата проверки отличается между прогонами',
       detail: 'Прогон 1: <b>' + escapeHtml(checkDate1) + '</b> · Прогон 2: <b>' + escapeHtml(checkDate2) + '</b>. Для одного и того же набора фото дата должна совпадать; перед применением проверьте дату аудита.'
     });
@@ -8695,7 +8697,12 @@ function cmpRunCompare() {
   _cmpEditDk = null;
   _cmpEditKind = null;
   _cmpAppliedForDaily = false;
-  _cmpData = { rows, dateLabels, okCount, warnCount, errCount, json1: d1, json2: d2, json1Full: d1full, json2Full: d2full, checks, safetyIssues: cmpSafety };
+  _cmpData = {
+    rows, dateLabels, okCount, warnCount, errCount,
+    json1: d1, json2: d2, json1Full: d1full, json2Full: d2full,
+    checks, safetyIssues: cmpSafety, checkDateMismatch,
+    comparisonValid: !checkDateMismatch && cmpSafety.length === 0
+  };
   cmpRenderChecks(checks);
   cmpRenderResults();
     setTimeout(() => {
@@ -8860,8 +8867,13 @@ function cmpRenderResults() {
   if (resultsSection) resultsSection.style.display = 'block';
   if (stats) {
     const total = okCount + warnCount + errCount;
+    const comparisonValid = _cmpData.comparisonValid !== false;
     stats.innerHTML =
-      '<span class="big">' + okCount + ' из ' + total + ' совпало</span>' +
+      (comparisonValid
+        ? '<span class="big">' + okCount + ' из ' + total + ' совпало</span>'
+        : '<span class="big" style="color:var(--red)">Сверка невалидна</span>' +
+          '<div class="cmp-detail" style="margin:4px 0 8px">Результаты ниже показаны только для диагностики. Применение заблокировано.</div>' +
+          '<div class="cmp-detail">Диагностически: ' + okCount + ' из ' + total + ' совпало</div>') +
       '<div class="row"><span>✓ Совпало</span><b class="green">' + okCount + '</b></div>' +
       '<div class="row"><span>⚠ Расхождения</span><b class="orange">' + warnCount + '</b></div>' +
       '<div class="row"><span>✗ Только в одном</span><b class="red">' + errCount + '</b></div>';
@@ -8925,10 +8937,18 @@ function cmpRenderResults() {
   const applyBtn = $('cmpApplyBtn');
   const hasEdits = rows.some(r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null));
   const safetyBlocked = Array.isArray(_cmpData.safetyIssues) && _cmpData.safetyIssues.length > 0;
-  if (applyBtn) applyBtn.style.display = (!safetyBlocked && (okCount || hasEdits)) ? 'block' : 'none';
+  const comparisonBlocked = _cmpData.comparisonValid === false;
+  if (applyBtn) {
+    applyBtn.style.display = (!safetyBlocked && !comparisonBlocked && (okCount || hasEdits)) ? 'block' : 'none';
+    if (comparisonBlocked) applyBtn.title = 'Сначала исправьте причину невалидной сверки';
+  }
 }
 function cmpApplyMatched() {
   if (!_cmpData) return;
+  if (_cmpData.comparisonValid === false) {
+    showToast('Применение заблокировано: сверка невалидна. Проверьте дату и критичные ошибки OCR.');
+    return;
+  }
   const hasEdits = r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null);
   const okRows = _cmpData.rows.filter(r => r.status === 'ok' && r.a);
   const editedRows = _cmpData.rows.filter(r => r.status !== 'ok' && hasEdits(r));
