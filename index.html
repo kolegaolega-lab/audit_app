@@ -2626,8 +2626,11 @@ function computeFIFO(row) {
   const parties = mergeIncomingByDate(row.incoming)
     .map(p => {
       const partyDate = parseDateRu(p.date, checkDate);
-      const writeOff = partyDate ? getWriteOffMoment(partyDate, shelfLife) : null;
-      return { date: p.date, partyDate, qty: clampNum(p.qty, 0, MAX_NUM, 0), writeOff };
+      const partyDateKey = partyDate
+        ? [partyDate.getFullYear(), String(partyDate.getMonth() + 1).padStart(2, '0'), String(partyDate.getDate()).padStart(2, '0')].join('-')
+        : '';
+      const writeOff = partyDateKey ? getWriteOffMoment(partyDateKey, shelfLife) : null;
+      return { date: p.date, partyDate, partyDateKey, qty: clampNum(p.qty, 0, MAX_NUM, 0), writeOff };
     })
     // A receipt dated after the audit date cannot physically be available yet.
     // Never let a future OCR/date error create fresh stock.
