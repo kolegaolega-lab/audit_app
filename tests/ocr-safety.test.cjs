@@ -119,6 +119,14 @@ test('OCR prompt enforces column 8 piece count and never derives quantity from m
   assert.match(html, /Дубликаты фото не суммировать/);
 });
 
+test('OCR treats a confirmation checkbox as confirmed printed quantity, not handwritten quantity', () => {
+  assert.match(html, /Галочка рядом с печатным количеством означает ПОДТВЕРЖДЕНИЕ/);
+  assert.match(html, /quantity_status=\\\"confirmed\\\"/);
+  assert.match(html, /НЕ добавляй строку в review\.handwritten_confirmation/);
+  assert.match(html, /Рукописным считается только реально вписанное от руки ЧИСЛО количества/);
+  assert.match(html, /Галочка, крестик, подчёркивание или иная отметка о проверке печатного числа не являются рукописным количеством/);
+});
+
 test('OCR prompt keeps the full document and applies category only after OCR', () => {
   assert.match(html, /OCR обязан распознать все товарные позиции документа/);
   assert.match(html, /распознай ВЕСЬ раздел продаж/);
