@@ -369,11 +369,14 @@ test('double-run comparison exposes concrete row-level differences', () => {
 });
 
 
-test('double-run comparison detects likely OCR name variants without merging rows', () => {
+test('double-run comparison merges likely OCR name variants into one row', () => {
   assert.match(html, /function cmpNameSimilarity\(a, b\)/);
-  assert.match(html, /Возможно, название прочитано иначе/);
+  assert.match(html, /Возможное совпадение: «/);
   assert.match(html, /score >= 0\.72/);
-  assert.match(html, /Это НЕ объединяет строки и не меняет FIFO-данные/);
+  assert.match(html, /rows\.push\(\.\.\.mergedRows\)/);
+  assert.match(html, /<div class="cmp-name"><div class="cmp-name-title">/);
+  assert.match(html, /<div class="cmp-detail">/);
+  assert.doesNotMatch(html, /Возможно, название прочитано иначе/);
 });
 
 test('OCR fuzzy name warnings are deduplicated and quantity statuses use plain language', () => {
