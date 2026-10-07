@@ -232,3 +232,9 @@ test('OCR compare does not fall back to audit date and ignores unconfirmed quant
   assert.doesNotMatch(html, /String\(inv\.date\|\|d\.check_date\|\|""\)/);
   assert.match(html, /it\.quantity_status !== "confirmed"/);
 });
+
+
+test('manual JSON import invokes the same OCR safety gate before parsing rows', () => {
+  assert.match(html, /const safetyIssues = getOCRSafetyIssues\(text, safetyReport/);
+  assert.match(html, /if \(safetyIssues\.length\) throw new Error\(formatOCRSafetyMessage\(safetyIssues\)\)/);
+});
