@@ -1606,7 +1606,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 
     <div class="modal-footer">
       <button id="cmpApplyBtn" class="success block" style="display:none;margin-bottom:8px">Применить в таблицу</button>
-      <button id="cmpRunBtn" class="primary block">Проверить всё</button>
+      <button type="button" id="cmpRunBtn" class="primary block">Проверить всё</button>
       <button id="cmpCloseBtn" class="secondary block" style="margin-top:8px">Закрыть</button>
     </div>
   </div>
@@ -8187,7 +8187,20 @@ function cmpSplitLine(line, sep) {
 }
 function cmpParseJSON(text, applyCategory = true){
   let d;
-  try { d = typeof text === "string" ? JSON.parse(text) : text; } catch(e) { return null; }
+  try {
+    if (typeof text === "string") {
+      const raw = text.replace(/^\uFEFF/, '').trim();
+      try {
+        d = JSON.parse(raw);
+      } catch (e1) {
+        const extracted = (typeof extractJsonFromGeminiText === 'function') ? extractJsonFromGeminiText(raw) : '';
+        if (!extracted) return null;
+        d = JSON.parse(extracted);
+      }
+    } else {
+      d = text;
+    }
+  } catch(e) { return null; }
   if (!d || typeof d !== "object" || Array.isArray(d)) return null;
   const rows = {}, order = [], dateCols = [];
   const add = n => {
@@ -8312,8 +8325,11 @@ function closeCompareModal() {
   _cmpAppliedForDaily = false;
 }
 function cmpRunCompare() {
-  const t1 = $('cmpJson1') ? $('cmpJson1').value : '';
-  const t2 = $('cmpJson2') ? $('cmpJson2').value : '';
+  const runBtn = $('cmpRunBtn');
+  if (runBtn) { runBtn.disabled = true; runBtn.classList.add('busy'); }
+  try {
+    const t1 = $('cmpJson1') ? $('cmpJson1').value : '';
+    const t2 = $('cmpJson2') ? $('cmpJson2').value : '';
   if (!t1.trim() || !t2.trim()) { showToast('Заполни оба JSON'); return; }
   // Два представления одного JSON:
   // 1) full — весь документ, независимо от выбранной категории, для контроля полноты;
@@ -8419,13 +8435,19 @@ function cmpRunCompare() {
   _cmpData = { rows, dateLabels, okCount, warnCount, errCount, json1: d1, json2: d2, json1Full: d1full, json2Full: d2full, checks };
   cmpRenderChecks(checks);
   cmpRenderResults();
-  setTimeout(() => {
-    const section = $('cmpChecksSection');
-    if (section) {
-      try { section.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-      catch (e) { section.scrollIntoView(); }
-    }
-  }, 80);
+    setTimeout(() => {
+      const section = $('cmpChecksSection');
+      if (section) {
+        try { section.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        catch (e) { section.scrollIntoView(); }
+      }
+    }, 80);
+  } catch (e) {
+    console.error('cmpRunCompare failed:', e);
+    showToast('Ошибка сверки: ' + (e && e.message ? e.message : 'неизвестная ошибка'));
+  } finally {
+    if (runBtn) { runBtn.disabled = false; runBtn.classList.remove('busy'); }
+  }
 }
 function cmpRenderChecks(checks) {
   const el = $('cmpCheckResults'); if (!el) return;
