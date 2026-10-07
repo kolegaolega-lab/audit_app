@@ -6108,8 +6108,9 @@ async function applyJSON() {
     if (text.length > MAX_JSON_BYTES) throw new Error('JSON слишком большой (макс. 2 МБ).');
     let safetyData;
     try { safetyData = JSON.parse(text); } catch (e) { throw new Error('JSON имеет неверный формат.'); }
-    const safetyReport = { hasBlocks: true, validation: { issues: [] } };
     const safetyCount = Number(safetyData?.source?.photo_count);
+    const safetyReport = { hasBlocks: true, validation: { issues: [] } };
+    safetyReport.validation = validateAIResponse(text, text, safetyReport, Number.isFinite(safetyCount) ? safetyCount : -1);
     const safetyIssues = getOCRSafetyIssues(text, safetyReport, Number.isFinite(safetyCount) ? safetyCount : -1);
     if (safetyIssues.length) throw new Error(formatOCRSafetyMessage(safetyIssues));
     const reference = new Date();
@@ -7267,9 +7268,9 @@ async function recognizeWithGemini(){
     updateJsonCounter();
     _lastGeminiJsons = { first: a, second: b };
     const p1 = parseAIReport(a), p2 = b ? parseAIReport(b) : null;
-    const s = [...getOCRSafetyIssues(a, p1, items.length), ...(b ? getOCRSafetyIssues(b, p2, items.length) : [])];
     if (p1) p1.validation = validateAIResponse(a, b, p1, items.length);
     if (p2) p2.validation = validateAIResponse(b, a, p2, items.length);
+    const s = [...getOCRSafetyIssues(a, p1, items.length), ...(b ? getOCRSafetyIssues(b, p2, items.length) : [])];
     _lastAIReport = p1 || p2;
     if (_lastAIReport) {
       _lastAIReport.safety = { blocked: s.length > 0, issues: s, doubleRun: !!b };
