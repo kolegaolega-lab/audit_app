@@ -7320,8 +7320,8 @@ function getOCRSafetyIssues(text,report,count){
   } else if (unconfirmed.length) {
     out.push({
       code:"quantity-status-review",
-      title:"Есть количества, которые нужно проверить",
-      detail:"Проверьте: " + statusDetails.join("; ") + "."
+      title:"Нужно подтвердить количество",
+      detail:"Нажмите на строку в сверке и выберите правильное количество. После подтверждения сверка будет разблокирована. " + statusDetails.join("; ") + "."
     });
   }
   // handwritten уже входит в общее сообщение quantity-status-review.
@@ -8380,7 +8380,7 @@ function cmpFindPossibleNameMatches(rows, sourceSide, targetSide) {
   });
   return out;
 }
-function cmpParseJSON(text, applyCategory = true){
+function cmpParseJSON(text, applyCategory = true, includeUnconfirmed = false){
   let d;
   try {
     if (typeof text === "string") {
@@ -8410,7 +8410,7 @@ function cmpParseJSON(text, applyCategory = true){
     const p = _cmpProductIndexCache.get(k);
     if (applyCategory && p && _activeCategory && p.category && p.category !== _activeCategory) return null;
     if (!rows[k]) {
-      rows[k] = { name: a, incoming: {}, sales: 0, category: p ? (p.category || null) : null };
+      rows[k] = { name: a, incoming: {}, incomingStatus: {}, sales: 0, salesStatus: 'confirmed', category: p ? (p.category || null) : null };
       order.push(k);
     }
     return rows[k];
@@ -8426,15 +8426,25 @@ function cmpParseJSON(text, applyCategory = true){
   (Array.isArray(d.invoices) ? d.invoices : []).forEach(inv => {
     const dk = addDateCol(inv && inv.date);
     (Array.isArray(inv?.items) ? inv.items : []).forEach(it => {
-      if (!it || it.quantity == null || it.quantity_status !== "confirmed") return;
+      if (!it || it.quantity == null) return;
+      const status = String(it.quantity_status || 'confirmed');
+      if (status !== "confirmed" && !includeUnconfirmed) return;
       const row = add(it.name);
-      if (row) row.incoming[dk] = (row.incoming[dk] || 0) + clampNum(it.quantity, 0, MAX_NUM, 0);
+      if (row) {
+        row.incoming[dk] = (row.incoming[dk] || 0) + clampNum(it.quantity, 0, MAX_NUM, 0);
+        if (status !== 'confirmed') row.incomingStatus[dk] = status;
+      }
     });
   });
   (Array.isArray(d.sales) ? d.sales : []).forEach(it => {
-    if (!it || it.quantity == null || it.quantity_status !== "confirmed") return;
+    if (!it || it.quantity == null) return;
+    const status = String(it.quantity_status || 'confirmed');
+    if (status !== "confirmed" && !includeUnconfirmed) return;
     const row = add(it.name);
-    if (row) row.sales += clampNum(it.quantity, 0, MAX_NUM, 0);
+    if (row) {
+      row.sales += clampNum(it.quantity, 0, MAX_NUM, 0);
+      if (status !== 'confirmed') row.salesStatus = status;
+    }
   });
   return order.length ? { rows, order, dateCols, document: d } : null;
 }
@@ -8537,8 +8547,8 @@ function cmpRunCompare() {
   // 2) filtered — только выбранная категория для рабочего сравнения FIFO.
   const d1full = cmpParseJSON(t1, false);
   const d2full = cmpParseJSON(t2, false);
-  const d1 = cmpParseJSON(t1, true);
-  const d2 = cmpParseJSON(t2, true);
+  const d1 = cmpParseJSON(t1, true, true);
+  const d2 = cmpParseJSON(t2, true, true);
   if (!d1 || !d2 || !d1full || !d2full) { showToast('Не удалось прочитать один из результатов распознавания.'); return; }
 
   const allKeys = new Set([...Object.keys(d1.rows), ...Object.keys(d2.rows)]);
@@ -8565,13 +8575,21 @@ function cmpRunCompare() {
           status = 'warn';
           details.push('Приход отличается — ' + (dateLabels[dk] || dk) + ': ' + (a.incoming[dk] || 0) + ' ↔ ' + (b.incoming[dk] || 0));
         }
+        if (a.incomingStatus?.[dk] && b.incomingStatus?.[dk]) {
+          if (a.incomingStatus[dk] === b.incomingStatus[dk]) {
+            details.push('Количество требует подтверждения — ' + (dateLabels[dk] || dk) + ': ' + a.incoming[dk]);
+          }
+        } else if (a.incomingStatus?.[dk] || b.incomingStatus?.[dk]) {
+          details.push('Количество требует подтверждения — ' + (dateLabels[dk] || dk) + ': ' + (a.incomingStatus?.[dk] ? 'первый результат' : 'второй результат'));
+        }
       }
       if (a.sales !== b.sales) {
         status = 'warn';
         details.push('Продажи отличаются: ' + a.sales + ' ↔ ' + b.sales);
       }
-      // Различие только в написании названия не является расхождением количества.
-      if (status === 'ok' && details.length) status = 'ok';
+      if (a.salesStatus !== 'confirmed' || b.salesStatus !== 'confirmed') {
+        details.push('Количество продаж требует подтверждения');
+      }
     }
     if (status === 'ok') okCount++; else if (status === 'warn') warnCount++; else errCount++;
     rows.push({ key: k, name, a, b, dates: [...dates], status, details, edits: { incoming: {}, sales: null } });
@@ -8632,7 +8650,10 @@ function cmpRunCompare() {
   cmpSafety.forEach(issue => checks.push({
     ok: false,
     title: issue.title,
-    detail: issue.detail || 'Нужно исправить отмеченную проблему.'
+    detail: issue.detail || 'Нужно исправить отмеченную проблему.',
+    _safetyCode: issue.code,
+    _safetyLabel: issue.title,
+    _originalDetail: issue.detail || 'Нужно исправить отмеченную проблему.'
   }));
   _cmpNakls.filter(n => n.date).forEach(n => {
     const dateKey = (() => {
@@ -8748,6 +8769,55 @@ function cmpRenderChecks(checks) {
     </div>`;
   }).join('');
 }
+function cmpRefreshSafetyGate() {
+  if (!_cmpData) return;
+  const unresolved = [];
+  const rowsByKey = new Map((_cmpData.rows || []).map(r => [r.key, r]));
+  const hasEdit = (row, dk, kind) => {
+    if (!row || !row.edits) return false;
+    if (kind === 'sales') return row.edits.sales != null;
+    return row.edits.incoming && row.edits.incoming[dk] != null;
+  };
+
+  (_cmpData.safetyIssues || []).forEach(issue => {
+    if (!issue || !['quantity-status-review','handwritten-confirmation'].includes(issue.code)) {
+      unresolved.push(issue);
+      return;
+    }
+    // A quantity-review issue is considered resolved only when every non-confirmed
+    // quantity in the affected comparison rows has an explicit user choice.
+    let allResolved = true;
+    (_cmpData.rows || []).forEach(row => {
+      const incomingStatuses = row.a?.incomingStatus || {};
+      Object.keys(incomingStatuses).forEach(dk => {
+        if (!hasEdit(row, dk, 'incoming')) allResolved = false;
+      });
+      if (row.a?.salesStatus !== 'confirmed' && !hasEdit(row, 'sales', 'sales')) allResolved = false;
+      const incomingStatusesB = row.b?.incomingStatus || {};
+      Object.keys(incomingStatusesB).forEach(dk => {
+        if (!hasEdit(row, dk, 'incoming')) allResolved = false;
+      });
+      if (row.b?.salesStatus !== 'confirmed' && !hasEdit(row, 'sales', 'sales')) allResolved = false;
+    });
+    if (!allResolved) unresolved.push(issue);
+  });
+
+  _cmpData.safetyIssues = unresolved;
+  _cmpData.comparisonValid = unresolved.length === 0;
+  if (Array.isArray(_cmpData.checks)) {
+    _cmpData.checks.forEach(c => {
+      if (!c || !c._safetyCode) return;
+      const stillBad = unresolved.some(i => i && i.code === c._safetyCode && c._safetyLabel === i.title);
+      c.ok = !stillBad;
+      c.detail = c.ok
+        ? 'Все количества в этой проверке подтверждены в сверке.'
+        : (c._originalDetail || 'Нужно проверить отмеченные количества.');
+    });
+  }
+  cmpRenderChecks(_cmpData.checks || []);
+  cmpRenderResults();
+}
+
 function cmpOpenEdit(key, dk, kind) {
   _cmpEditKey = key; _cmpEditDk = dk; _cmpEditKind = kind;
   cmpRenderResults();
@@ -8777,7 +8847,8 @@ function cmpSaveEdit() {
   if (!row.edits) row.edits = { incoming: {}, sales: null };
   if (_cmpEditKind === 'sales') row.edits.sales = val;
   else row.edits.incoming[_cmpEditDk] = val;
-  cmpCloseEdit();
+  _cmpEditKey = null; _cmpEditDk = null; _cmpEditKind = null;
+  cmpRefreshSafetyGate();
 }
 function cmpRenderEditCard(row) {
   const isSales = _cmpEditKind === 'sales';
@@ -8886,7 +8957,7 @@ function cmpRenderResults() {
       (comparisonValid
         ? '<span class="big">' + okCount + ' из ' + total + ' совпало</span>'
         : '<span class="big" style="color:var(--red)">Пока нельзя использовать результат</span>' +
-          '<div class="cmp-detail" style="margin:4px 0 8px">Ниже показано, где результаты отличаются. Сначала исправьте отмеченные места.</div>' +
+          '<div class="cmp-detail" style="margin:4px 0 8px">Ниже показаны отличия и места, где нужно подтвердить количество. Нажмите на значение строки, выберите правильный вариант и сохраните.</div>' +
           '<div class="cmp-detail">Для справки: ' + okCount + ' из ' + total + ' совпало</div>') +
       '<div class="row"><span>✓ Совпадает</span><b class="green">' + okCount + '</b></div>' +
       '<div class="row"><span>⚠ Отличия</span><b class="orange">' + warnCount + '</b></div>' +
@@ -8973,9 +9044,16 @@ function cmpApplyMatched() {
   if (!applyRows.length && !diffRows.length) { showToast('Нет данных'); return; }
   const byKey = new Map();
   applyRows.forEach(r => {
-    const incoming = { ...(r.a ? r.a.incoming : {}) };
-    if (r.edits && r.edits.incoming) Object.assign(incoming, r.edits.incoming);
-    const sales = (r.edits && r.edits.sales != null) ? r.edits.sales : (r.a ? r.a.sales : 0);
+    const incoming = {};
+    if (r.a) {
+      Object.keys(r.a.incoming || {}).forEach(dk => {
+        const edited = r.edits && r.edits.incoming && r.edits.incoming[dk] != null;
+        const unconfirmed = r.a.incomingStatus && r.a.incomingStatus[dk];
+        if (!unconfirmed || edited) incoming[dk] = edited ? r.edits.incoming[dk] : r.a.incoming[dk];
+      });
+    }
+    const salesEdited = r.edits && r.edits.sales != null;
+    const sales = salesEdited ? r.edits.sales : (r.a && r.a.salesStatus === 'confirmed' ? r.a.sales : 0);
     byKey.set(cmpCanonicalName(r.name), { incoming, sales });
   });
   let applied = 0;
