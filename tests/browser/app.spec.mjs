@@ -175,4 +175,16 @@ test('OCR recognition shows visible processing progress UI', async ({page}) => {
   expect(result).toEqual({
     exists: true, spinner: true, fill: true, visible: true, width: '42%', title: 'Распознавание'
   });
+  const layout = await page.evaluate(() => {
+    const box = document.querySelector('#ocrProgress');
+    const all = document.querySelector('#allModeBlock');
+    const btn = document.querySelector('#recognizeGeminiBtn');
+    all.style.display = 'block';
+    const b = box.getBoundingClientRect();
+    const r = btn.getBoundingClientRect();
+    return { height: b.height, gap: r.top - b.bottom, overlaps: b.bottom > r.top };
+  });
+  expect(layout.height).toBeLessThanOrEqual(60);
+  expect(layout.overlaps).toBe(false);
+  expect(layout.gap).toBeGreaterThanOrEqual(0);
 });
