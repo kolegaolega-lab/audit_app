@@ -7440,6 +7440,7 @@ async function recognizeWithGemini(){
     } else {
       set("info", "Применяю JSON…");
       await applyJSON();
+      finishOCRProgress(true);
       set("ok", "JSON применён.");
     }
   } catch (e) {
