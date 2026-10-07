@@ -440,6 +440,8 @@ pre.code{background:#0f172a;color:#a5f3fc;padding:14px;border-radius:var(--r-sm)
 .cmp-row.warn .cmp-icon{color:var(--orange)}
 .cmp-row.err .cmp-icon{color:var(--red)}
 .cmp-name{flex:1 1 auto;min-width:120px;font-weight:600;word-break:break-word;font-size:13.5px;line-height:1.3}
+.cmp-name-title{font-weight:600;color:var(--text);line-height:1.3}
+.cmp-detail{display:block;margin-top:3px;font-size:11.5px;font-weight:500;color:var(--text-secondary);line-height:1.35;word-break:break-word}
 .cmp-vals{flex:1 1 100%;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-start;padding-left:28px}
 .cmp-val{background:var(--bg-card);padding:3px 7px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap;cursor:pointer}
 .cmp-val.diff{background:var(--orange);color:#fff}
@@ -8630,17 +8632,53 @@ function cmpRunCompare() {
     if (status === 'ok') okCount++; else if (status === 'warn') warnCount++; else errCount++;
     rows.push({ key: k, name, a, b, dates: [...dates], status, details, edits: { incoming: {}, sales: null } });
   });
-  // После точного нормализованного сопоставления ищем очевидные OCR-варианты
-  // только для отображения. Это НЕ объединяет строки и не меняет FIFO-данные.
+  // Если две строки выглядят как одно и то же название, показываем одну строку
+  // с обоими результатами. Не дублируем одну проблему двумя карточками.
   const possibleNameMatches = [
     ...cmpFindPossibleNameMatches(rows, 'a', 'b'),
     ...cmpFindPossibleNameMatches(rows, 'b', 'a')
   ];
-  possibleNameMatches.forEach(m => {
-    const target = m.row;
-    if (!target.details) target.details = [];
-    target.details.push('Возможно, название прочитано иначе: «' + String(m.candidate.name || '') + '»');
-  });
+  if (possibleNameMatches.length) {
+    const mergedRows = [];
+    const consumed = new Set();
+    possibleNameMatches.forEach(m => {
+      const left = m.row;
+      const right = m.candidate;
+      if (!left || !right || consumed.has(left.key) || consumed.has(right.key)) return;
+      const rowA = left.a || right.a;
+      const rowB = left.b || right.b;
+      const nameA = String(left.a?.name || right.a?.name || left.name || '').trim();
+      const nameB = String(left.b?.name || right.b?.name || right.name || '').trim();
+      const merged = {
+        key: rowA ? left.key : right.key,
+        name: nameA || nameB,
+        a: rowA || null,
+        b: rowB || null,
+        dates: [...new Set([
+          ...(rowA ? Object.keys(rowA.incoming || {}) : []),
+          ...(rowB ? Object.keys(rowB.incoming || {}) : [])
+        ])],
+        status: 'warn',
+        details: ['Возможное совпадение: «' + nameA + '» ↔ «' + nameB + '»'],
+        edits: { incoming: {}, sales: null }
+      };
+      // Для пары из двух исходных строк сохраняем исходный статус расхождения,
+      // но не создаём вторую карточку с тем же смыслом.
+      const hasQtyDiff = merged.dates.some(dk =>
+        (merged.a?.incoming?.[dk] || 0) !== (merged.b?.incoming?.[dk] || 0)
+      );
+      const hasSalesDiff = (merged.a?.sales ?? 0) !== (merged.b?.sales ?? 0);
+      if (hasQtyDiff || hasSalesDiff) merged.status = 'err';
+      consumed.add(left.key);
+      consumed.add(right.key);
+      mergedRows.push(merged);
+    });
+    rows.forEach(r => {
+      if (!consumed.has(r.key)) mergedRows.push(r);
+    });
+    rows.length = 0;
+    rows.push(...mergedRows);
+  }
   const order = { err: 0, warn: 1, ok: 2 };
   rows.sort((x, y) => {
     if (order[x.status] !== order[y.status]) return order[x.status] - order[y.status];
@@ -9077,11 +9115,11 @@ function cmpRenderResults() {
       vals.push(`<span class="cmp-val ${cls}" data-key="${escapeHtml(r.key)}" data-dk="sales" data-kind="sales">Прод: ${shown}</span>`);
     }
     const detailHtml = r.details && r.details.length
-      ? '<span class="cmp-detail">' + r.details.map(x => escapeHtml(x)).join(' · ') + '</span>'
+      ? '<div class="cmp-detail">' + r.details.map(x => escapeHtml(x)).join('<br>') + '</div>'
       : '';
     return `<div class="cmp-row ${r.status}" data-key="${escapeHtml(r.key)}">
       <span class="cmp-icon">${icon}</span>
-      <span class="cmp-name">${escapeHtml(r.name)}${detailHtml}</span>
+      <div class="cmp-name"><div class="cmp-name-title">${escapeHtml(r.name)}</div>${detailHtml}</div>
       <span class="cmp-vals">${vals.join('')}</span>
     </div>`;
   }).join('');
