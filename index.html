@@ -4001,17 +4001,12 @@ function loadHistoryCache() {
           entry.fetchedAt > Date.now() || !Array.isArray(entry.files)) continue;
       const files = [];
       for (const f of entry.files.slice(0, 10000)) {
-        if (!f || typeof f !== 'object' || Array.isArray(f) ||
-            typeof f.filename !== 'string' || !f.filename.endsWith('.json') ||
-            !Number.isInteger(f.day) || f.day < 1 || f.day > 31 ||
-            !/^[0-9]{2}$/.test(f.timeHH) || !/^[0-9]{2}$/.test(f.timeMM) ||
-            !/^[0-9]{2}$/.test(f.timeSS) ||
-            Number(f.timeHH) > 23 || Number(f.timeMM) > 59 || Number(f.timeSS) > 59 ||
-            typeof f.pointId !== 'string' || !f.pointId ||
-            typeof f.login !== 'string') continue;
+        if (!f || typeof f !== 'object' || Array.isArray(f)) continue;
+        const parsed = typeof f.filename === 'string' ? parseHistoryFilename(f.filename) : null;
+        if (!parsed) continue;
         files.push({
-          filename: f.filename, day: f.day, timeHH: f.timeHH, timeMM: f.timeMM,
-          timeSS: f.timeSS, pointId: f.pointId, login: f.login,
+          filename: parsed.filename, day: parsed.day, timeHH: parsed.timeHH, timeMM: parsed.timeMM,
+          timeSS: parsed.timeSS, pointId: parsed.pointId, login: parsed.login,
           sha: typeof f.sha === 'string' ? f.sha : '',
           size: Number.isFinite(f.size) && f.size >= 0 ? f.size : 0
         });
@@ -4073,17 +4068,22 @@ function parseHistoryFilename(fname) {
   if (parts.length < 4) return null;
   const dayStr = parts[0];
   const timeStr = parts[1];
-  if (!/^\d{1,2}$/.test(dayStr)) return null;
-  if (!/^\d{6}$/.test(timeStr)) return null;
+  if (!/^[0-9]{1,2}$/.test(dayStr)) return null;
+  if (!/^[0-9]{6}$/.test(timeStr)) return null;
+  const day = parseInt(dayStr, 10);
+  const timeHH = timeStr.slice(0, 2);
+  const timeMM = timeStr.slice(2, 4);
+  const timeSS = timeStr.slice(4, 6);
+  if (day < 1 || day > 31 || Number(timeHH) > 23 || Number(timeMM) > 59 || Number(timeSS) > 59) return null;
   const pointToken = parts[2];
   const pointId = pointToken.split('~', 1)[0];
   if (!pointId) return null;
   return {
     filename: fname,
-    day: parseInt(dayStr, 10),
-    timeHH: timeStr.slice(0, 2),
-    timeMM: timeStr.slice(2, 4),
-    timeSS: timeStr.slice(4, 6),
+    day,
+    timeHH,
+    timeMM,
+    timeSS,
     pointId,
     login: parts.slice(3).join('-')
   };
