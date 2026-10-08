@@ -1779,6 +1779,44 @@ test('final report does not call sales-only OCR rows fresh', async ({page}) => {
   expect(result).toContain('Только продажи');
 });
 
+test('history send path writes the same snapshot used by the final report', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-08T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(async () => {
+    tableRows = [
+      {name:'Свежий',salesOnly:false,stock:1,sales:0,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-08',qty:1}],_checkDate:'2026-10-08'},
+      {name:'Проблемный',salesOnly:false,stock:2,sales:1,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-07',qty:1}],_checkDate:'2026-10-08'},
+      {name:'Только продажа',salesOnly:true,stock:null,sales:3,shelfLife:null,category:'pastry',incoming:[],_checkDate:'2026-10-08'}
+    ];
+    unknownRows=[]; noCategoryRows=[]; _dailyAccum=[]; _cmpData=null;
+    _profile={login:'test',name:'Test',token:'x'};
+    _points=[{id:'p1',num:'1',name:'Point 1',address:'Addr'}];
+    _activePointId='p1';
+    renderReport();
+    const expected=buildCheckSnapshot();
+    let pushed=null;
+    const originalPush=pushHistoryFile;
+    const originalTwin=findRecentTwin;
+    pushHistoryFile=async (path,data)=>{ pushed={path,data}; };
+    findRecentTwin=async ()=>null;
+    await sendReportToHistory();
+    pushHistoryFile=originalPush;
+    findRecentTwin=originalTwin;
+    return {
+      pushed,
+      expected:{
+        date:expected.date, pointId:expected.pointId,
+        totals:expected.totals, categories:expected.categories
+      }
+    };
+  });
+  expect(result.pushed).not.toBeNull();
+  expect(result.pushed.data.date).toBe(result.expected.date);
+  expect(result.pushed.data.pointId).toBe(result.expected.pointId);
+  expect(result.pushed.data.totals).toEqual(result.expected.totals);
+  expect(result.pushed.data.categories).toEqual(result.expected.categories);
+});
+
 test('history send path rechecks completion gate instead of bypassing unresolved data', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(async () => {
