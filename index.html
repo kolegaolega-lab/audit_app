@@ -4779,10 +4779,11 @@ function updateFinishCheckBtn() {
   const btn = $('finishCheckBtn');
   const issues = getFinishCheckIssues();
   const rows = Array.isArray(tableRows) ? tableRows : [];
-  const { missingStock, missingShelfLife, unresolvedReference } = issues;
+  const { missingStock, missingShelfLife, unresolvedReference, comparisonPending, dailyPending } = issues;
   wrap.style.display = rows.length ? 'block' : 'none';
   if (btn) {
     const blocked = !canFinishCheck();
+    const blockReason = getFinishCheckBlockReason(issues);
     btn.disabled = blocked;
     if (missingStock.length) {
       btn.textContent = 'Введите остаток: ' + missingStock.length;
@@ -4793,6 +4794,12 @@ function updateFinishCheckBtn() {
     } else if (unresolvedReference) {
       btn.textContent = 'Проверьте позиции: ' + unresolvedReference;
       btn.title = 'Добавьте позиции в справочник и назначьте категорию';
+    } else if (comparisonPending) {
+      btn.textContent = 'Завершите сверку результатов';
+      btn.title = blockReason;
+    } else if (dailyPending.length) {
+      btn.textContent = 'Проверьте распознавание: ' + dailyPending.length;
+      btn.title = blockReason;
     } else {
       btn.textContent = 'Завершить проверку';
       btn.title = '';
