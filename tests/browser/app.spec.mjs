@@ -417,6 +417,7 @@ test('FIFO marks everything expired when there is no usable incoming', async ({p
 });
 
 test('22:00 cutoff is strict: exactly 22:00 is expired', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-17T21:59:00'));
   await page.goto('file://' + path.join(root,'index.html'));
   const before = await page.evaluate(() => window.computeFIFO({
     stock:1,sales:0,shelfLife:24,
@@ -1989,6 +1990,7 @@ test('history snapshot is independent of active category filter and keeps sales-
 });
 
 test('final report explicitly separates sales-only rows from auditable positions', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-08T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
     tableRows = [{
