@@ -369,6 +369,12 @@ test('double-run comparison exposes concrete row-level differences', () => {
 });
 
 
+test('comparison safety gate clears resolved blocking issues', () => {
+  assert.match(html, /_cmpData\.safetyIssues = unresolved;/);
+  assert.match(html, /_cmpData\.comparisonValid = unresolved\.length === 0;/);
+});
+
+
 test('comparison issue review flow exposes filter, next-issue navigation, and live status recount', () => {
   assert.match(html, /id="cmpNextIssueBtn"/);
   assert.match(html, /data-filter="issues"/);
