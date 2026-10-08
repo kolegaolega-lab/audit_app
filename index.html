@@ -7907,11 +7907,22 @@ function getFinishCheckIssues() {
   const missingShelfLife = auditable.filter(r => r.shelfLife == null);
   const unknownCount = Array.isArray(unknownRows) ? unknownRows.length : 0;
   const noCategoryCount = Array.isArray(noCategoryRows) ? noCategoryRows.length : 0;
+
+  // Нельзя завершать аудит, пока OCR/двойная сверка оставили данные
+  // неподтверждёнными. Иначе кнопка может завершить проверку по старому
+  // состоянию tableRows, хотя новый результат ещё не применён.
+  const comparisonPending = !!(_cmpData && _cmpData.comparisonValid === false);
+  const dailyPending = Array.isArray(_dailyAccum)
+    ? _dailyAccum.filter(e => e && (e.blocked || e.needsCheck))
+    : [];
+
   return {
     empty: rows.length === 0,
     missingStock,
     missingShelfLife,
-    unresolvedReference: unknownCount + noCategoryCount
+    unresolvedReference: unknownCount + noCategoryCount,
+    comparisonPending,
+    dailyPending
   };
 }
 function getFinishCheckBlockReason(issues) {
@@ -7919,6 +7930,8 @@ function getFinishCheckBlockReason(issues) {
   if (issues.missingStock.length) return 'Введите остаток по всем позициям (' + issues.missingStock.length + ').';
   if (issues.missingShelfLife.length) return 'Укажите срок годности для всех проверяемых товаров (' + issues.missingShelfLife.length + ').';
   if (issues.unresolvedReference) return 'Проверьте позиции, не сопоставленные со справочником (' + issues.unresolvedReference + ').';
+  if (issues.comparisonPending) return 'Завершите проверку двух результатов распознавания перед окончанием аудита.';
+  if (issues.dailyPending.length) return 'Проверьте результаты распознавания: есть даты, требующие подтверждения (' + issues.dailyPending.length + ').';
   return '';
 }
 function canFinishCheck() {
