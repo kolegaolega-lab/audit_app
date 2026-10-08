@@ -7994,7 +7994,10 @@ function renderReport() {
 
     let bigText, bigCls;
     if (totalProblems === 0) {
-      bigText = totalAuditablePositions + ' ' + pluralize(totalAuditablePositions, 'проверенная позиция', 'проверенные позиции', 'проверенных позиций') + ' · всё свежее' + (totalSalesOnly ? ' · ещё ' + totalSalesOnly + ' ' + pluralize(totalSalesOnly, 'строка', 'строки', 'строк') + ' только с продажами' : '');
+      bigText = totalAuditablePositions > 0
+        ? totalAuditablePositions + ' ' + pluralize(totalAuditablePositions, 'проверенная позиция', 'проверенные позиции', 'проверенных позиций') + ' · всё свежее'
+        : 'Нет проверяемых позиций';
+      if (totalSalesOnly) bigText += ' · ещё ' + totalSalesOnly + ' ' + pluralize(totalSalesOnly, 'строка', 'строки', 'строк') + ' только с продажами';
       bigCls = '';
     } else {
       bigText = totalAuditablePositions + ' ' + pluralize(totalAuditablePositions, 'проверенная позиция', 'проверенные позиции', 'проверенных позиций') + ' · ' + totalProblems + ' ' + pluralize(totalProblems, 'проблема', 'проблемы', 'проблем') + (totalSalesOnly ? ' · ещё ' + totalSalesOnly + ' ' + pluralize(totalSalesOnly, 'строка', 'строки', 'строк') + ' только с продажами' : '');
