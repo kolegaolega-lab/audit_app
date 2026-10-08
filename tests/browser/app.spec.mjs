@@ -657,19 +657,12 @@ test('comparison applies selected values from second run for one-sided rows and 
     cmpApplyMatched();
     return {
       b: tableRows.find(r => r.name === 'Товар B'),
-      row: {a:row.a?.incoming?.['05.10'] ?? null,b:row.b?.incoming?.['05.10'] ?? null},
-      debug: {
-        valid:_cmpData?.comparisonValid,
-        safety:_cmpData?.safetyIssues,
-        status:row.status,
-        edits:row.edits
-      }
+      row: {a:row.a?.incoming?.['05.10'] ?? null,b:row.b?.incoming?.['05.10'] ?? null}
     };
   }, {a:payload([{line:1,name:'Товар A',quantity:1,price:10,amount:10,quantity_status:'confirmed'}],null),
       b:payload([{line:1,name:'Товар A',quantity:1,price:10,amount:10,quantity_status:'confirmed'},
                  {line:2,name:'Товар B',quantity:5,price:10,amount:50,quantity_status:'confirmed'}],2)});
   expect(result.row).toEqual({a:null,b:5});
-  expect(result.debug).toEqual({});
   expect(result.b.incoming.map(x => [x.date, x.qty])).toEqual([['2026-10-05', 7]]);
   expect(result.b.sales).toBe(3);
 });
