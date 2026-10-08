@@ -362,6 +362,50 @@ test('report treats missing usable incoming as an expiry risk', async ({page}) =
 });
 
 
+test('unfinished audit session survives reload with stock and incoming data', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const saved = await page.evaluate(() => {
+    localStorage.clear();
+    tableRows = [{
+      name:'Товар восстановления',
+      stock:3,
+      sales:2,
+      shelfLife:48,
+      category:'Десерты',
+      incoming:[{date:'2026-10-06',qty:4,_originalQty:4}],
+      salesOnly:false,
+      _originalSales:2,
+      _checkDate:'2026-10-06'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    _needsCheckNames = new Set(['Товар восстановления']);
+    const input = document.querySelector('#jsonInput');
+    if (input) input.value = '{"check_date":"2026-10-06"}';
+    saveSession();
+    return JSON.parse(localStorage.getItem(SESSION_KEY));
+  });
+  expect(saved.checkDate).toBe('2026-10-06');
+  expect(saved.rows[0].stock).toBe(3);
+  expect(saved.rows[0].incoming[0].qty).toBe(4);
+
+  await page.reload();
+  const restored = await page.evaluate(() => ({
+    row: tableRows.find(r => r.name === 'Товар восстановления'),
+    needsCheck: [..._needsCheckNames]
+  }));
+  expect(restored.row).toMatchObject({
+    stock:3,
+    sales:2,
+    shelfLife:48,
+    category:'Десерты',
+    _checkDate:'2026-10-06'
+  });
+  expect(restored.row.incoming).toEqual([{date:'2026-10-06',qty:4,_originalQty:4}]);
+  expect(restored.needsCheck).toContain('Товар восстановления');
+});
+
+
 test('history filename preserves seconds for duplicate-audit matching', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => window.parseHistoryFilename('07-123456-pabc-user.json'));
