@@ -3414,12 +3414,18 @@ function removePoint(id) {
   _points = _points.filter(p => p.id !== id);
   savePoints();
   updatePointsCount();
+  if (_route && Array.isArray(_route.pointIds) && _route.pointIds.includes(id)) {
+    _route.pointIds = _route.pointIds.filter(pointId => pointId !== id);
+    saveRoute();
+  }
   if (_activePointId === id) {
     _activePointId = _points.length ? _points[0].id : null;
     try {
       if (_activePointId) localStorage.setItem(ACTIVE_POINT_KEY, _activePointId);
       else localStorage.removeItem(ACTIVE_POINT_KEY);
     } catch (e) {}
+    updateHeaderPoint();
+    syncActivePointToInput();
   }
   if (typeof renderToday === 'function') renderToday();
 }
