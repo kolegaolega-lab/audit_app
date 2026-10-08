@@ -7691,7 +7691,7 @@ async function getDailySourceMissing(checkIso, invoiceFiles, salesFiles){
   return missing;
 }
 
-function recognizeDaily(){
+async function recognizeDaily(){
   if(shareBusy)return;
   const inp=$("dailyDate"),st=$("dailyStatus");
   const set=(c,t)=>{if(st){st.className="status show "+c;st.textContent=t}};
