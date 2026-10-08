@@ -395,3 +395,42 @@ test('remote and silent point sync reject numbers that normalize to empty', () =
     assert.match(source,/!numKey/, startMarker+' must reject empty normalized numbers');
   }
 });
+
+test('history folder fetch rejects a successful but malformed API response', async () => {
+  const start=html.indexOf('function fetchHistoryMonthFolder(');
+  const end=html.indexOf('function fetchAndCacheMonth(',start);
+  assert.notEqual(start,-1);
+  assert.notEqual(end,-1);
+  const context={
+    GITHUB_API:'https://api.github.com',
+    GITHUB_REPO:'owner/repo',
+    HISTORY_DIR:'history',
+    getSyncToken(){return 'token';},
+    async fetchWithTimeout(){return {ok:true,status:200,async json(){return {message:'not a folder listing'};}};}
+  };
+  vm.createContext(context);
+  vm.runInContext(html.slice(start,end),context);
+  await assert.rejects(context.fetchHistoryMonthFolder('2026-10'),/Некорректный формат истории/);
+});
+
+test('history month cache with a non-array files field is refetched', async () => {
+  const start=html.indexOf('function fetchAndCacheMonth(');
+  const end=html.indexOf('function syncHistoryForCurrentMonth(',start);
+  assert.notEqual(start,-1);
+  assert.notEqual(end,-1);
+  let fetched=0;
+  const context={
+    _historyCache:{'2026-10':{fetchedAt:1000,files:{bad:true}}},
+    HISTORY_FETCH_COOLDOWN_MS:60000,
+    Date:{now(){return 2000;}},
+    async fetchHistoryMonthFolder(){fetched++;return [{type:'file',name:'09-101112-p1-auditor.json',sha:'abc',size:123}];},
+    parseHistoryFilename(name){return {filename:name,day:9,timeHH:'10',timeMM:'11',timeSS:'12',pointId:'p1',login:'auditor'};},
+    saveHistoryCache(){}
+  };
+  vm.createContext(context);
+  vm.runInContext(html.slice(start,end),context);
+  const files=JSON.parse(JSON.stringify(await context.fetchAndCacheMonth('2026-10')));
+  assert.equal(fetched,1);
+  assert.equal(files.length,1);
+  assert.equal(files[0].pointId,'p1');
+});
