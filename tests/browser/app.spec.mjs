@@ -1335,7 +1335,7 @@ test('completion gate reopens after pending OCR comparison is cleared', async ({
       disabled: $('finishCheckBtn')?.disabled ?? null
     };
   });
-  expect(result.blocked).toBe(false === true);
+  expect(result.blocked).toBe(false);
   expect(result.reopened).toBe(true);
   expect(result.disabled).toBe(false);
 });
