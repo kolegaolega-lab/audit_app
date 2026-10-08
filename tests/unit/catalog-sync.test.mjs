@@ -221,6 +221,7 @@ test('history filenames are unique while the parser preserves point and login', 
   assert.equal(parsed.day, 9);
   assert.match(parsed.timeHH, /^[0-9]{2}$/, 'time must remain parseable across local time zones');
   assert.equal(context.parseHistoryFilename('09-101112-p1-auditor.json').pointId, 'p1', 'legacy history filenames remain supported');
+  assert.equal(context.parseHistoryFilename('99-991199-p1-auditor.json'), null, 'impossible dates and times are rejected');
 });
 
 test('history sending writes to the unique path and does not reuse a recent file by point alone', () => {
@@ -280,8 +281,8 @@ test('history cache ignores malformed months, entries and file records', () => {
   assert.notEqual(start, -1);
   assert.notEqual(end, -1);
   const validFile = {
-    filename:'09-101112-p1~abc-auditor.json',day:9,timeHH:'10',timeMM:'11',timeSS:'12',
-    pointId:'p1',login:'auditor',sha:'abc',size:123
+    filename:'09-101112-p1~abc-auditor.json',day:30,timeHH:'22',timeMM:'33',timeSS:'44',
+    pointId:'other-point',login:'wrong-user',sha:'abc',size:123
   };
   const stored = {
     '2026-10': {fetchedAt:900,files:[validFile,{filename:'bad.json',day:'9'},null,['array']]},
@@ -302,6 +303,9 @@ test('history cache ignores malformed months, entries and file records', () => {
   assert.deepEqual(Object.keys(cache),['2026-10']);
   assert.equal(cache['2026-10'].files.length,1);
   assert.equal(cache['2026-10'].files[0].pointId,'p1');
+  assert.equal(cache['2026-10'].files[0].login,'auditor');
+  assert.equal(cache['2026-10'].files[0].day,9);
+  assert.equal(cache['2026-10'].files[0].timeHH,'10');
   assert.equal(cache['2026-10'].files[0].size,123);
 });
 
