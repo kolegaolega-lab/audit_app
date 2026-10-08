@@ -2870,7 +2870,8 @@ function syncPullFromServer(opts) {
     PRICES = out; savePrices();
   }
   if (Array.isArray(remote.points)) {
-    const seen = new Set();
+    const seenIds = new Set();
+    const seenNums = new Set();
     const cleanedPoints = [];
     for (const p of remote.points.slice(0, 500)) {
       if (!p || typeof p !== 'object') continue;
@@ -2878,8 +2879,10 @@ function syncPullFromServer(opts) {
       const num = safeStr(p.num || '', 20);
       const name = safeStr(p.name || '', 80);
       const address = safeStr(p.address || '', 120);
-      if (!id || !num || seen.has(id)) continue;
-      seen.add(id);
+      const numKey = normalizeName(num);
+      if (!id || !num || seenIds.has(id) || seenNums.has(numKey)) continue;
+      seenIds.add(id);
+      seenNums.add(numKey);
       cleanedPoints.push({ id, num, name, address });
     }
     _points = cleanedPoints;
