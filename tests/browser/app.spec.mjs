@@ -1638,3 +1638,50 @@ test('history snapshot preserves explicit missing-incoming finding consistently 
   expect(result.snapshotTotals.noIncoming).toBe(1);
   expect(result.snapshotTotals.expiredOnShelf).toBe(3);
 });
+
+
+test('session restore preserves an unresolved double-run comparison blocker', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    localStorage.clear();
+    tableRows = [{
+      name:'Товар после незавершённой сверки', salesOnly:false, stock:2, sales:1,
+      shelfLife:24, category:'desserts', incoming:[{date:'2026-10-06',qty:2}],
+      _checkDate:'2026-10-06'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    _dailyAccum = [];
+    _cmpData = {
+      rows:[],
+      safetyIssues:[{code:'quantity-status-review'}],
+      comparisonValid:false
+    };
+    updateFinishCheckBtn();
+    const before = {
+      can:canFinishCheck(),
+      disabled:$('finishCheckBtn')?.disabled ?? null
+    };
+
+    saveSession();
+    const saved = JSON.parse(localStorage.getItem(SESSION_KEY));
+    _cmpData = null;
+    applySession(loadSession());
+    updateFinishCheckBtn();
+
+    return {
+      before,
+      savedPending:saved.comparisonPending,
+      restored:{
+        can:canFinishCheck(),
+        disabled:$('finishCheckBtn')?.disabled ?? null,
+        reason:getFinishCheckBlockReason(getFinishCheckIssues())
+      }
+    };
+  });
+  expect(result.before).toEqual({can:false,disabled:true});
+  expect(result.savedPending).toBe(true);
+  expect(result.restored.can).toBe(false);
+  expect(result.restored.disabled).toBe(true);
+  expect(result.restored.reason).toContain('двух результатов');
+});
