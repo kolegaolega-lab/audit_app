@@ -85,6 +85,7 @@ test('adding a point uses the same normalized number comparison as remote sync',
   assert.notEqual(end, -1, 'addPoint source section must be bounded');
   const source = html.slice(start, end);
   assert.match(source, /const numKey = normalizeName\(n\)/);
+  assert.match(source, /if \(!numKey\) return null/);
   assert.match(source, /_points\.some\(p => normalizeName\(p\.num\) === numKey\)/);
   assert.doesNotMatch(source, /p\.num\.toLowerCase\(\) === n\.toLowerCase\(\)/);
 });
@@ -368,4 +369,20 @@ test('service worker activation deletes only stale caches owned by this app', as
   assert.deepEqual(deleted, ['fb-audit-v87.64','fb-audit-runtime-v87.64']);
   assert.equal(deleted.includes('other-app-cache'), false);
   assert.equal(claimed, 1);
+});
+
+test('remote and silent point sync reject numbers that normalize to empty', () => {
+  const sections = [
+    ['function validateRemoteCatalog(', 'function syncPullFromServer('],
+    ['function syncPullFromServer(', 'function pullPointsSilently('],
+    ['function pullPointsSilently(', 'const MONTH_NAMES_RU']
+  ];
+  for (const [startMarker,endMarker] of sections) {
+    const start=html.indexOf(startMarker);
+    const end=html.indexOf(endMarker,start+1);
+    assert.notEqual(start,-1, startMarker+' must exist');
+    assert.notEqual(end,-1, endMarker+' must bound source');
+    const source=html.slice(start,end);
+    assert.match(source,/!numKey/, startMarker+' must reject empty normalized numbers');
+  }
 });
