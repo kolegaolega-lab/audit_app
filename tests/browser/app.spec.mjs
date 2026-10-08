@@ -1452,6 +1452,7 @@ test('finish gate blocks incomplete audit but allows legitimate FIFO findings', 
       unknownRows = extra.unknownRows || [];
       noCategoryRows = extra.noCategoryRows || [];
       _needsCheckNames = extra.needsCheckNames || new Set();
+      _dailyAccum = extra.dailyAccum || [];
       _cmpData = extra.cmpData || null;
       return { can: canFinishCheck(), reason: getFinishCheckBlockReason(getFinishCheckIssues()) };
     };
@@ -1464,7 +1465,7 @@ test('finish gate blocks incomplete audit but allows legitimate FIFO findings', 
       noIncoming: check([baseRow({incoming:[]})]),
       expiredFIFO: check([baseRow({stock:5,sales:4,incoming:[{date:'2026-10-05',qty:2,_originalQty:2}]})]),
       salesOnly: check([{name:'Только продажи',stock:null,sales:3,shelfLife:null,category:'desserts',incoming:[],salesOnly:true}]),
-      dailyPending: check([baseRow()], {needsCheckNames:new Set(['Тестовый товар'])}),
+      dailyPending: check([baseRow()], {dailyAccum:[{iso:'2026-10-06',label:'06.10',json:'{}',needsCheck:true,blocked:false}]}),
       comparisonPending: check([baseRow()], {cmpData:{comparisonValid:false}})
     };
   });
