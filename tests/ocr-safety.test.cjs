@@ -392,9 +392,9 @@ test('OCR name mismatch can be explicitly confirmed and then stops blocking the 
 });
 
 test('application version is consistent across runtime and visible UI', () => {
-  assert.match(html, /const APP_VERSION = ['"]v9\.24\.20['"]/);
-  assert.match(html, /id="moreAppVersion">v9\.24\.20</);
-  assert.match(html, /id="aboutVersion">[^<]*v9\.24\.20</);
+  assert.match(html, /const APP_VERSION = ['"]v9\.24\.21['"]/);
+  assert.match(html, /id="moreAppVersion">v9\.24\.21</);
+  assert.match(html, /id="aboutVersion">[^<]*v9\.24\.21</);
   assert.doesNotMatch(html, /v9\.24\.1[6-8]/);
 });
 
