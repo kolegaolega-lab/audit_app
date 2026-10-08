@@ -8032,7 +8032,8 @@ function renderReport() {
       const rows = tableRows.filter(r => r.category === cat);
       const problems = rows.filter(r => {
         const c = computeFIFO(r);
-        return (c.soldExpired != null && c.soldExpired > 0) || (c.expiredOnShelf != null && c.expiredOnShelf > 0);
+        const noIncoming = !r.salesOnly && r.stock != null && !hasUsableIncomingForAudit(r) && (r.stock > 0 || (Number(r.sales) || 0) > 0);
+        return noIncoming || (c.soldExpired != null && c.soldExpired > 0) || (c.expiredOnShelf != null && c.expiredOnShelf > 0);
       }).length;
       const hasData = rows.length > 0;
       let statusCls, statusText, subText;
