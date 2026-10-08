@@ -337,6 +337,24 @@ test('agreed 22:00 shelf-life cutoff and FIFO', async ({page}) => {
   expect(result.fifo).toEqual({soldExpired:0,expiredOnShelf:1,freshOnShelf:2,freshSold:0});
 });
 
+test('FIFO treats 22:00 cutoff as expired and 21:59 as fresh', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T21:59:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const before = await page.evaluate(() => window.computeFIFO({
+    stock:1, sales:0, shelfLife:24,
+    incoming:[{date:'2026-10-06',qty:1}],
+    _checkDate:'2026-10-06'
+  }));
+  await page.clock.setFixedTime(new Date('2026-10-06T22:00:00'));
+  const at = await page.evaluate(() => window.computeFIFO({
+    stock:1, sales:0, shelfLife:24,
+    incoming:[{date:'2026-10-06',qty:1}],
+    _checkDate:'2026-10-06'
+  }));
+  expect(before).toEqual({soldExpired:0,expiredOnShelf:0,freshOnShelf:1,freshSold:0});
+  expect(at).toEqual({soldExpired:0,expiredOnShelf:1,freshOnShelf:0,freshSold:0});
+});
+
 test('FIFO uses all received stock but flags shortage as expired', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-17T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
