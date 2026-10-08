@@ -8126,10 +8126,19 @@ function renderReport() {
         return String(a.row.name).localeCompare(String(b.row.name), 'ru');
       });
       problems.forEach(({ row, calc }) => {
+        const noIncoming = !row.salesOnly &&
+          row.stock != null &&
+          !hasUsableIncomingForAudit(row) &&
+          (row.stock > 0 || (Number(row.sales) || 0) > 0);
         const critical = (calc.soldExpired || 0) > 0;
-        const dotCls = critical ? 'red' : 'orange';
+        const dotCls = noIncoming || critical ? 'red' : 'orange';
         let reason;
-        if (critical && calc.expiredOnShelf > 0) reason = 'Продано просрочкой: ' + calc.soldExpired + ' · Просрочено на витрине: ' + calc.expiredOnShelf;
+        if (noIncoming) {
+          reason = 'Нет прихода за срок годности · проверить с персоналом';
+          if (critical || (calc.expiredOnShelf || 0) > 0) {
+            reason += ' · есть просроченный остаток/продажа';
+          }
+        } else if (critical && calc.expiredOnShelf > 0) reason = 'Продано просрочкой: ' + calc.soldExpired + ' · Просрочено на витрине: ' + calc.expiredOnShelf;
         else if (critical) reason = 'Продано просрочкой: ' + calc.soldExpired;
         else reason = 'Просрочено на витрине: ' + calc.expiredOnShelf;
         html +=
