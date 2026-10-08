@@ -1915,3 +1915,43 @@ test('final report explicitly separates sales-only rows from auditable positions
   expect(result).toContain('ещё 1 строка только с продажами');
 });
 
+test('session restore preserves unknown and no-category completion blockers', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-08T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    localStorage.clear();
+    tableRows = [{
+      name:'Нормальная позиция', salesOnly:false, stock:1, sales:0,
+      shelfLife:24, category:'desserts', incoming:[{date:'2026-10-08',qty:1}],
+      _checkDate:'2026-10-08'
+    }];
+    unknownRows = [{name:'Неизвестный после OCR', sales:2, category:null, incoming:[]}];
+    noCategoryRows = [{name:'Без категории после OCR'}];
+    _needsCheckNames = new Set();
+    _dailyAccum = [];
+    _cmpData = null;
+    const before = getFinishCheckBlockReason(getFinishCheckIssues());
+    saveSession();
+    const saved = JSON.parse(localStorage.getItem(SESSION_KEY));
+    unknownRows = [];
+    noCategoryRows = [];
+    applySession(loadSession());
+    const after = getFinishCheckBlockReason(getFinishCheckIssues());
+    return {
+      before, after,
+      savedUnknown:saved.unknown?.map(r => r.name),
+      savedNoCategory:saved.noCategory?.map(r => r.name),
+      restoredUnknown:unknownRows.map(r => r.name),
+      restoredNoCategory:noCategoryRows.map(r => r.name),
+      canFinish:canFinishCheck()
+    };
+  });
+  expect(result.before).toContain('не сопоставленные');
+  expect(result.after).toContain('не сопоставленные');
+  expect(result.savedUnknown).toEqual(['Неизвестный после OCR']);
+  expect(result.savedNoCategory).toEqual(['Без категории после OCR']);
+  expect(result.restoredUnknown).toEqual(['Неизвестный после OCR']);
+  expect(result.restoredNoCategory).toEqual(['Без категории после OCR']);
+  expect(result.canFinish).toBe(false);
+});
+
