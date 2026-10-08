@@ -1263,6 +1263,83 @@ test('report headline treats missing incoming as a problem', async ({page}) => {
   expect(result).toContain('Нет прихода');
 });
 
+test('completion gate blocks unresolved double-run comparison even when table inputs are complete', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Товар после старого результата', salesOnly:false, stock:1, sales:1,
+      shelfLife:24, category:'desserts', incoming:[{date:'2026-10-06',qty:2}],
+      _checkDate:'2026-10-06'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    _cmpData = { rows: [], safetyIssues: [{code:'quantity-status-review'}], comparisonValid:false };
+    updateFinishCheckBtn();
+    return {
+      canFinish: canFinishCheck(),
+      disabled: $('finishCheckBtn')?.disabled ?? null,
+      reason: getFinishCheckBlockReason(getFinishCheckIssues())
+    };
+  });
+  expect(result.canFinish).toBe(false);
+  expect(result.disabled).toBe(true);
+  expect(result.reason).toContain('двух результатов');
+});
+
+test('completion gate blocks dates with pending OCR safety review', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Товар после непроверенного OCR', salesOnly:false, stock:1, sales:0,
+      shelfLife:24, category:'desserts', incoming:[{date:'2026-10-06',qty:1}],
+      _checkDate:'2026-10-06'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    _cmpData = null;
+    _dailyAccum = [{
+      iso:'2026-10-06', label:'06.10', json:'{}', blocked:true, needsCheck:true,
+      sourceMissing:['чек продаж не загружен']
+    }];
+    updateFinishCheckBtn();
+    return {
+      canFinish: canFinishCheck(),
+      disabled: $('finishCheckBtn')?.disabled ?? null,
+      reason: getFinishCheckBlockReason(getFinishCheckIssues())
+    };
+  });
+  expect(result.canFinish).toBe(false);
+  expect(result.disabled).toBe(true);
+  expect(result.reason).toContain('результаты распознавания');
+});
+
+test('completion gate reopens after pending OCR comparison is cleared', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Товар после подтверждённой сверки', salesOnly:false, stock:1, sales:1,
+      shelfLife:24, category:'desserts', incoming:[{date:'2026-10-06',qty:2}],
+      _checkDate:'2026-10-06'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    _dailyAccum = [];
+    _cmpData = { rows: [], safetyIssues: [], comparisonValid:false };
+    updateFinishCheckBtn();
+    const blocked = canFinishCheck();
+    _cmpData = { rows: [], safetyIssues: [], comparisonValid:true };
+    updateFinishCheckBtn();
+    return {
+      blocked,
+      reopened: canFinishCheck(),
+      disabled: $('finishCheckBtn')?.disabled ?? null
+    };
+  });
+  expect(result.blocked).toBe(false === true);
+  expect(result.reopened).toBe(true);
+  expect(result.disabled).toBe(false);
+});
+
 test('completion gate allows missing incoming as an explicit audit finding', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
