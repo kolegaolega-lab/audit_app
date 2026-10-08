@@ -657,7 +657,13 @@ test('comparison applies selected values from second run for one-sided rows and 
     cmpApplyMatched();
     return {
       b: tableRows.find(r => r.name === 'Товар B'),
-      row: {a:row.a?.incoming?.['05.10'] ?? null,b:row.b?.incoming?.['05.10'] ?? null}
+      row: {a:row.a?.incoming?.['05.10'] ?? null,b:row.b?.incoming?.['05.10'] ?? null},
+      debug: {
+        valid:_cmpData?.comparisonValid,
+        safety:_cmpData?.safetyIssues,
+        status:row.status,
+        edits:row.edits
+      }
     };
   }, {a:payload([{line:1,name:'Товар A',quantity:1,price:10,amount:10,quantity_status:'confirmed'}],null),
       b:payload([{line:1,name:'Товар A',quantity:1,price:10,amount:10,quantity_status:'confirmed'},
