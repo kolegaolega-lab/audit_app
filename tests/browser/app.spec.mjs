@@ -919,6 +919,35 @@ test('point management rejects duplicate numbers and keeps active point valid', 
 // Regression suite: branch-level audit fixes are verified together in CI.
 
 
+test('server sync rejects duplicate point numbers before replacing local points', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    _points = [{id:'local-1',num:'101',name:'Локальная точка',address:'Адрес'}];
+    _activePointId = 'local-1';
+    const remote = {
+      products: [{name:'Товар',shelfLife:24,category:'desserts'}],
+      points: [
+        {id:'remote-1',num:'101',name:'Дубликат 1',address:'A'},
+        {id:'remote-2',num:'101',name:'Дубликат 2',address:'B'},
+        {id:'remote-3',num:'102',name:'Уникальная',address:'C'}
+      ]
+    };
+    const ok = syncPullFromServer({remote, silent:true});
+    return {
+      ok,
+      points:_points.map(p => ({id:p.id,num:p.num,name:p.name})),
+      active:_activePointId
+    };
+  });
+  expect(result.ok).toBe(true);
+  expect(result.points).toEqual([
+    {id:'remote-1',num:'101',name:'Дубликат 1'},
+    {id:'remote-3',num:'102',name:'Уникальная'}
+  ]);
+  expect(result.active).toBe('remote-1');
+});
+
+
 test('comparison normalizes ISO and Russian invoice dates and renders results', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const payload = (date) => JSON.stringify({
