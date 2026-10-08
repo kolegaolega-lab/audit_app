@@ -697,7 +697,7 @@ test('invoice continuation date does not leak into a new non-continuation invoic
       review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
     };
     const parsed = window.parseJSON(JSON.stringify(payload), new Date('2026-10-06T10:00:00'));
-    return Object.fromEntries(parsed.rows.map(r => [r.name, r.incoming]));
+    return Object.fromEntries(parsed.rows.map(r => [r.name, r.incoming.map(({date,qty}) => ({date,qty}))]));
   });
   expect(result['Товар A']).toEqual([{date:'2026-10-06',qty:1}]);
   expect(result['Товар B']).toEqual([{date:'2026-10-06',qty:2}]);
