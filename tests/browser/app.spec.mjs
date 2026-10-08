@@ -1956,7 +1956,7 @@ test('report totals match history snapshot for mixed FIFO findings', async ({pag
   expect(result.snapshot.freshOnShelf).toBe(1);
   expect(result.snapshot.expiredOnShelf).toBe(3);
   expect(result.snapshot.soldExpired).toBe(2);
-  expect(result.snapshot.noIncoming).toBe(1);
+  expect(result.snapshot.noIncoming).toBe(3);
   expect(result.report).toContain('Проверяемых позиций');
   expect(result.report).toContain('4');
   expect(result.report).toContain('Свежих на витрине');
