@@ -272,3 +272,34 @@ test('restoring a route rejects malformed dates and array-shaped envelopes', () 
   assert.equal(context.loadRoute(), null);
   assert.equal(context.loadRoute(), null);
 });
+
+test('history cache ignores malformed months, entries and file records', () => {
+  const start = html.indexOf('function loadHistoryCache(');
+  const end = html.indexOf('const HISTORY_CACHE_MONTHS_MAX', start);
+  assert.notEqual(start, -1);
+  assert.notEqual(end, -1);
+  const validFile = {
+    filename:'09-101112-p1~abc-auditor.json',day:9,timeHH:'10',timeMM:'11',timeSS:'12',
+    pointId:'p1',login:'auditor',sha:'abc',size:123
+  };
+  const stored = {
+    '2026-10': {fetchedAt:900,files:[validFile,{filename:'bad.json',day:'9'},null,['array']]},
+    '2026-09': {fetchedAt:2000,files:[validFile]},
+    '2026-08': {fetchedAt:800,files:{}},
+    '2026-13': {fetchedAt:800,files:[validFile]},
+    malformed: {fetchedAt:800,files:[validFile]}
+  };
+  const context = {
+    HISTORY_CACHE_KEY:'history-cache',
+    HISTORY_CACHE_MONTHS_MAX:24,
+    Date:{now(){return 1000;}},
+    localStorage:{getItem(){return JSON.stringify(stored);}}
+  };
+  vm.createContext(context);
+  vm.runInContext(html.slice(start,end),context);
+  const cache=JSON.parse(JSON.stringify(context.loadHistoryCache()));
+  assert.deepEqual(Object.keys(cache),['2026-10']);
+  assert.equal(cache['2026-10'].files.length,1);
+  assert.equal(cache['2026-10'].files[0].pointId,'p1');
+  assert.equal(cache['2026-10'].files[0].size,123);
+});
