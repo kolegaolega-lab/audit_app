@@ -1955,6 +1955,28 @@ test('session restore preserves unknown and no-category completion blockers', as
   expect(result.canFinish).toBe(false);
 });
 
+test('category report detail lists missing incoming as a problem', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Позиция без прихода в деталях', salesOnly:false, stock:2, sales:1,
+      shelfLife:24, category:'desserts', incoming:[], _checkDate:'2026-10-08'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    _dailyAccum = [];
+    _cmpData = null;
+    _reportView = null;
+    renderReport();
+    const card = document.querySelector('.report-cat-card[data-cat="desserts"]');
+    card?.click();
+    return $('reportBody')?.textContent || '';
+  });
+  expect(result).toContain('Позиция без прихода в деталях');
+  expect(result).toContain('Нет прихода');
+  expect(result).toContain('1 проблемная позиция');
+});
+
 test('category report counts missing incoming as a problem', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
