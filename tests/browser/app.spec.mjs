@@ -599,6 +599,33 @@ test('comparison normalizes safe OCR spelling variants without merging uncertain
   expect(result.uncertainKeysEqual).toBe(false);
 });
 
+test('comparison normalizes Rom baba quantity confirmation before safety gate', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const payload = JSON.stringify({
+    schema_version:'1.0', document_type:'invoice', check_date:'2026-10-06',
+    source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
+    invoices:[{number:'RB-1',date:'2026-10-06',continuation:false,last_line_number:1,
+      items:[{line:1,name:'Ром баба',quantity:4,quantity_status:'handwritten'}]}],
+    sales:[],
+    review:{unreadable:[],handwritten_confirmation:['Ром баба'],uncertain_rows:[],notes:[]}
+  });
+  const result = await page.evaluate(json => {
+    $('cmpJson1').value = json;
+    $('cmpJson2').value = json;
+    cmpRunCompare();
+    return {
+      status: JSON.parse($('cmpJson1').value).invoices[0].items[0].quantity_status,
+      review: JSON.parse($('cmpJson1').value).review.handwritten_confirmation,
+      valid: _cmpData?.comparisonValid,
+      safety: _cmpData?.safetyIssues || []
+    };
+  }, payload);
+  expect(result.status).toBe('confirmed');
+  expect(result.review).toEqual([]);
+  expect(result.valid).toBe(true);
+  expect(result.safety).toEqual([]);
+});
+
 test('comparison applies selected values from second run for one-sided rows and dates', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const payload = (items, sales) => JSON.stringify({
