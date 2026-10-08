@@ -3189,6 +3189,7 @@ function saveSession() {
       })),
       noCategory: noCategoryRows.slice(0, MAX_ROWS).map(r => ({ name: r.name })),
       needsCheck: [..._needsCheckNames].slice(0, MAX_ROWS),
+      comparisonPending: !!(_cmpData && _cmpData.comparisonValid === false),
       checkDate: (() => {
         const r = tableRows.find(x => x && /^\d{4}-\d{2}-\d{2}$/.test(String(x._checkDate || '')));
         return r ? String(r._checkDate) : '';
@@ -3274,6 +3275,9 @@ function applySession(data) {
     } else {
       _needsCheckNames = new Set();
     }
+    _cmpData = data.comparisonPending === true
+      ? { rows: [], safetyIssues: [], comparisonValid: false }
+      : null;
     return true;
   } finally { isRestoring = false; }
 }
@@ -9010,6 +9014,7 @@ function cmpRunCompare() {
   };
   cmpRenderChecks(checks);
   cmpRenderResults();
+  scheduleSessionSave();
     setTimeout(() => {
       const section = $('cmpChecksSection');
       if (section) {
@@ -9076,6 +9081,7 @@ function cmpRefreshSafetyGate() {
   // после подтверждения количества старая ошибка не должна оставаться блокирующей.
   _cmpData.safetyIssues = unresolved;
   _cmpData.comparisonValid = unresolved.length === 0;
+  scheduleSessionSave();
 
   // После выбора значения пересчитываем статус строки.
   (_cmpData.rows || []).forEach(row => {
