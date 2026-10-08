@@ -22,7 +22,7 @@ const context = {
       .filter(p => { const key = p.name.toLowerCase(); if (seen.has(key)) return false; seen.add(key); return true; });
   }
 };
-const validate = new Function('sanitizeProducts', 'safeStr', 'normalizeName', `return (${validatorSource}; validateRemoteCatalog);`)(
+const validate = new Function('sanitizeProducts', 'safeStr', 'normalizeName', `${validatorSource}; return validateRemoteCatalog;`)(
   context.sanitizeProducts, context.safeStr, context.normalizeName
 );
 
