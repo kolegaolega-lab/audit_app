@@ -9307,7 +9307,10 @@ function cmpApplyMatched() {
     return;
   }
   const hasEdits = r => r.edits && (Object.keys(r.edits.incoming || {}).length > 0 || r.edits.sales != null);
-  const okRows = _cmpData.rows.filter(r => r.status === 'ok' && r.a);
+  // После ручного выбора односторонняя строка тоже может стать ok.
+  // Такой результат должен попасть в применение даже если значение было
+  // только во втором прогоне.
+  const okRows = _cmpData.rows.filter(r => r.status === 'ok' && (r.a || r.b));
   const editedRows = _cmpData.rows.filter(r => r.status !== 'ok' && hasEdits(r));
   const diffRows = _cmpData.rows.filter(r => r.status !== 'ok');
   const applyRows = [...okRows];
