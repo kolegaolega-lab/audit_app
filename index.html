@@ -10936,12 +10936,10 @@ function bindTabbar() {
    Индикатор шагов «Проверки»
    ═══════════════════════════════════════════ */
 function computeCheckStep() {
+  if (tableRows.length) return canFinishCheck() ? 5 : 4;
   if (!_activeCategory) return 1;
-  if (!_photoCount && !tableRows.length) return 2;
-  if (_photoCount && !tableRows.length) return 3;
-  if (tableRows.length) {
-    return canFinishCheck() ? 5 : 4;
-  }
+  if (!_photoCount) return 2;
+  if (_photoCount) return 3;
   return 3;
 }
 function renderCheckSteps() {
