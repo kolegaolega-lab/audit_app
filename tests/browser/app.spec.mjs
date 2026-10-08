@@ -1718,6 +1718,7 @@ test('history send path rechecks completion gate instead of bypassing unresolved
     _cmpData = null;
     _dailyAccum = [];
     let called = false;
+    const statusNode = document.createElement('div'); statusNode.id = 'sendReportStatus'; document.body.appendChild(statusNode);
     pushHistoryFile = async () => { called = true; };
     _profile = {login:'test', name:'Test', token:'x'};
     _activePointId = 'test-point';
