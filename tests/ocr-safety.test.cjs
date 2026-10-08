@@ -343,7 +343,8 @@ test('double-run comparison ignores audit check_date and compares invoice data',
 });
 
 test('double-run comparison remains valid when only audit check_date differs', () => {
-  assert.match(html, /comparisonValid: quantityIssues\.length === 0 && otherSafetyIssues\.length === 0/);
+  assert.match(html, /const blockingSafetyIssues = otherSafetyIssues\.filter/);
+  assert.match(html, /comparisonValid: quantityIssues\.length === 0 && blockingSafetyIssues\.length === 0/);
   assert.doesNotMatch(html, /comparisonValid: !checkDateMismatch/);
   assert.match(html, /const comparisonBlocked = _cmpData\.comparisonValid === false/);
   assert.match(html, /!safetyBlocked && !comparisonBlocked/);
