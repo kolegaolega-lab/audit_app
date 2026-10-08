@@ -608,6 +608,20 @@ test('OCR parser keeps all categories in full JSON even when an audit category i
   expect(result).toEqual(['Десерт Ореховый','Круассан']);
 });
 
+test('daily OCR requires sales only for the audit date', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => ({
+    todayWithoutSales: window.getDailySourceMissing(window.getTodayStr(), [{name:'invoice'}], []),
+    yesterdayWithoutSales: window.getDailySourceMissing('2026-10-07', [{name:'invoice'}], []),
+    yesterdayWithoutInvoice: window.getDailySourceMissing('2026-10-07', [], [{name:'sales'}]),
+    todayComplete: window.getDailySourceMissing(window.getTodayStr(), [{name:'invoice'}], [{name:'sales'}])
+  }));
+  expect(result.todayWithoutSales).toEqual(['чек продаж не загружен']);
+  expect(result.yesterdayWithoutSales).toEqual([]);
+  expect(result.yesterdayWithoutInvoice).toEqual(['накладные не загружены']);
+  expect(result.todayComplete).toEqual([]);
+});
+
 test('daily separated OCR keeps continuation invoice without its own date', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
