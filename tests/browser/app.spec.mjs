@@ -315,6 +315,33 @@ test('finish check stays blocked until unresolved catalog positions are resolved
 });
 
 
+test('missing shelf life in catalog never defaults to 48h and blocks audit completion', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const cleaned = window.sanitizeProducts([
+      {name:'Товар без срока', category:'desserts'},
+      {name:'Товар 48ч', shelfLife:48, category:'desserts'}
+    ]);
+    PRODUCTS = cleaned;
+    tableRows = [{name:'Товар без срока', stock:2, sales:1, shelfLife:cleaned[0].shelfLife, category:'desserts', salesOnly:false}];
+    unknownRows = [];
+    noCategoryRows = [];
+    updateFinishCheckBtn();
+    return {
+      missingShelf: cleaned[0].shelfLife,
+      validShelf: cleaned[1].shelfLife,
+      blocked: $('finishCheckBtn').disabled,
+      text: $('finishCheckBtn').textContent
+    };
+  });
+  expect(result).toEqual({
+    missingShelf: null,
+    validShelf: 48,
+    blocked: true,
+    text: 'Укажите срок годности: 1'
+  });
+});
+
 test('finish check guard requires every auditable stock value', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const source = await page.evaluate(() => window.updateFinishCheckBtn.toString());
