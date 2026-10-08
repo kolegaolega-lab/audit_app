@@ -1784,3 +1784,133 @@ test('history send path rechecks completion gate instead of bypassing unresolved
   expect(result.called).toBe(false);
   expect(result.status).toContain('Введите остаток');
 });
+
+test('completion gate blocks unknown and no-category rows before report or history', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(async () => {
+    tableRows = [{
+      name:'Нормальная позиция', salesOnly:false, stock:1, sales:0,
+      shelfLife:24, category:'desserts', incoming:[{date:'2026-10-08',qty:1}],
+      _checkDate:'2026-10-08'
+    }];
+    unknownRows = [{name:'Неизвестный товар'}];
+    noCategoryRows = [{name:'Товар без категории'}];
+    _dailyAccum = [];
+    _cmpData = null;
+    const reason = getFinishCheckBlockReason(getFinishCheckIssues());
+    let pushed = false;
+    const originalPush = pushHistoryFile;
+    pushHistoryFile = async () => { pushed = true; };
+    _profile = {login:'test', name:'Test', token:'x'};
+    _activePointId = 'test-point';
+    const modal = $('reportModal');
+    modal?.classList.add('hidden');
+    const originalToast = window.showToast;
+    let toast = '';
+    window.showToast = msg => { toast = String(msg || ''); };
+    openReport();
+    window.showToast = originalToast;
+    const reportOpened = !modal?.classList.contains('hidden');
+    const statusNode = document.createElement('div');
+    statusNode.id = 'sendReportStatus';
+    document.body.appendChild(statusNode);
+    await sendReportToHistory();
+    pushHistoryFile = originalPush;
+    return {reason, reportOpened, toast, pushed, status:statusNode.textContent};
+  });
+  expect(result.reason).toContain('не сопоставленные со справочником');
+  expect(result.reportOpened).toBe(false);
+  expect(result.toast).toContain('не сопоставленные');
+  expect(result.pushed).toBe(false);
+  expect(result.status).toContain('не сопоставленные');
+});
+
+test('completion gate blocks OCR safety state even when visible table rows are complete', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(async () => {
+    tableRows = [{
+      name:'Позиция после OCR', salesOnly:false, stock:2, sales:1,
+      shelfLife:24, category:'desserts', incoming:[{date:'2026-10-08',qty:2}],
+      _checkDate:'2026-10-08'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    _cmpData = null;
+    _dailyAccum = [{
+      iso:'2026-10-08', label:'08.10', json:'{}',
+      blocked:true, needsCheck:true, sourceMissing:['нужно подтвердить количество']
+    }];
+    const reason = getFinishCheckBlockReason(getFinishCheckIssues());
+    let pushed = false;
+    const originalPush = pushHistoryFile;
+    pushHistoryFile = async () => { pushed = true; };
+    _profile = {login:'test', name:'Test', token:'x'};
+    _activePointId = 'test-point';
+    const statusNode = document.createElement('div');
+    statusNode.id = 'sendReportStatus';
+    document.body.appendChild(statusNode);
+    await sendReportToHistory();
+    pushHistoryFile = originalPush;
+    return {can:canFinishCheck(), reason, pushed, status:statusNode.textContent};
+  });
+  expect(result.can).toBe(false);
+  expect(result.reason).toContain('результаты распознавания');
+  expect(result.pushed).toBe(false);
+  expect(result.status).toContain('результаты распознавания');
+});
+
+test('history snapshot is independent of active category filter and keeps sales-only rows', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [
+      {
+        name:'Десерт', salesOnly:false, stock:1, sales:0, shelfLife:24,
+        category:'desserts', incoming:[{date:'2026-10-08',qty:1}], _checkDate:'2026-10-08'
+      },
+      {
+        name:'Продажа из другой категории', salesOnly:true, stock:null, sales:4,
+        shelfLife:null, category:'pastry', incoming:[], _checkDate:'2026-10-08'
+      }
+    ];
+    unknownRows = [];
+    noCategoryRows = [];
+    _activeCategory = 'desserts';
+    const snapshot = buildCheckSnapshot();
+    return {
+      categories:Object.keys(snapshot.categories),
+      desserts:snapshot.categories.desserts?.map(r => r.name),
+      pastry:snapshot.categories.pastry?.map(r => ({name:r.name,salesOnly:r.salesOnly,sales:r.sales,stock:r.stock})),
+      totals:snapshot.totals
+    };
+  });
+  expect(result.categories).toEqual(['desserts','pastry']);
+  expect(result.desserts).toEqual(['Десерт']);
+  expect(result.pastry).toEqual([{name:'Продажа из другой категории',salesOnly:true,sales:4,stock:null}]);
+  expect(result.totals.positions).toBe(2);
+});
+
+test('final report explicitly separates sales-only rows from auditable positions', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Продажа без проверки остатка', salesOnly:true, stock:null, sales:3,
+      shelfLife:null, category:'desserts', incoming:[], _checkDate:'2026-10-08'
+    },{
+      name:'Обычная позиция', salesOnly:false, stock:1, sales:0,
+      shelfLife:24, category:'desserts', incoming:[{date:'2026-10-08',qty:1}],
+      _checkDate:'2026-10-08'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    _dailyAccum = [];
+    _cmpData = null;
+    renderReport();
+    return $('reportBody')?.textContent || '';
+  });
+  expect(result).toContain('Только продажи');
+  expect(result).toContain('без проверки остатка');
+  expect(result).toContain('1 проверенная позиция');
+  expect(result).not.toContain('2 проверенные позиции');
+  expect(result).not.toContain('всё свежее');
+});
+
