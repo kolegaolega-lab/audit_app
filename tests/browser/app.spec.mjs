@@ -289,6 +289,32 @@ test('daily separated OCR keeps continuation invoice without its own date', asyn
   ]);
 });
 
+test('finish check stays blocked until unresolved catalog positions are resolved', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{name:'Товар A', salesOnly:false, stock:3}];
+    unknownRows = [{name:'Новый товар', sales:1}];
+    noCategoryRows = [];
+    updateFinishCheckBtn();
+    const unknownBlocked = {disabled: $('finishCheckBtn').disabled, text: $('finishCheckBtn').textContent};
+    unknownRows = [];
+    noCategoryRows = [{name:'Товар без категории'}];
+    updateFinishCheckBtn();
+    const categoryBlocked = {disabled: $('finishCheckBtn').disabled, text: $('finishCheckBtn').textContent};
+    noCategoryRows = [];
+    updateFinishCheckBtn();
+    const ready = {disabled: $('finishCheckBtn').disabled, text: $('finishCheckBtn').textContent};
+    return {unknownBlocked, categoryBlocked, ready};
+  });
+  expect(result.unknownBlocked.disabled).toBe(true);
+  expect(result.unknownBlocked.text).toBe('Проверьте позиции: 1');
+  expect(result.categoryBlocked.disabled).toBe(true);
+  expect(result.categoryBlocked.text).toBe('Проверьте позиции: 1');
+  expect(result.ready.disabled).toBe(false);
+  expect(result.ready.text).toBe('Завершить проверку');
+});
+
+
 test('finish check guard requires every auditable stock value', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const source = await page.evaluate(() => window.updateFinishCheckBtn.toString());
