@@ -3518,7 +3518,7 @@ function loadRoute() {
     if (!raw) return null;
     const r = JSON.parse(raw);
     if (!r || typeof r !== 'object' || Array.isArray(r)) return null;
-    if (typeof r.date !== 'string' || !/^\\d{4}-\\d{2}-\\d{2}$/.test(r.date) || !Array.isArray(r.pointIds)) return null;
+    if (typeof r.date !== 'string' || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(r.date) || !Array.isArray(r.pointIds)) return null;
     const seen = new Set();
     const pointIds = [];
     for (const id of r.pointIds.slice(0, 500)) {
