@@ -2864,7 +2864,7 @@ function validateRemoteCatalog(remote) {
     }
     // A non-empty points list that contains no usable point is corruption, not a
     // request to erase the locally cached network of coffee shops.
-    if (remote.points.length > 0 && validPoints === 0) {
+    if (remote.points.length === 0 || validPoints === 0) {
       return { ok: false, reason: 'invalid-points' };
     }
   }
