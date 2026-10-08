@@ -2131,3 +2131,34 @@ test('category report counts missing incoming as a problem', async ({page}) => {
   expect(result.card).not.toContain('0 проблем');
 });
 
+
+test('restored complete session keeps ready step even when no category is selected', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-09T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    localStorage.clear();
+    const row = {
+      name:'Готовая позиция', salesOnly:false, stock:0, sales:0,
+      shelfLife:24, category:'desserts',
+      incoming:[{date:'2026-10-09',qty:1}], _checkDate:'2026-10-09'
+    };
+    _activeCategory='desserts';
+    _photoCount=1;
+    unknownRows=[]; noCategoryRows=[]; _dailyAccum=[]; _cmpData=null;
+    tableRows=[{...row}];
+    saveSession();
+    _activeCategory=null;
+    _photoCount=0;
+    tableRows=[];
+    applySession(loadSession());
+    updateFinishCheckBtn();
+    return {
+      activeCategory:_activeCategory,
+      canFinish:canFinishCheck(),
+      step:computeCheckStep(),
+      disabled:$('finishCheckBtn')?.disabled ?? null
+    };
+  });
+  expect(result.activeCategory).toBeNull();
+  expect(result).toMatchObject({canFinish:true,step:5,disabled:false});
+});
