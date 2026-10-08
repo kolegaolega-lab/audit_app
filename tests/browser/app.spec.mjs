@@ -663,7 +663,7 @@ test('comparison applies selected values from second run for one-sided rows and 
       b:payload([{line:1,name:'Товар A',quantity:1,price:10,amount:10,quantity_status:'confirmed'},
                  {line:2,name:'Товар B',quantity:5,price:10,amount:50,quantity_status:'confirmed'}],2)});
   expect(result.row).toEqual({a:null,b:5});
-  expect(result.b.incoming.find(x => x.date === '2026-10-05')?.qty).toBe(7);
+  expect(result.b.incoming.map(x => [x.date, x.qty])).toEqual([['2026-10-05', 7]]);
   expect(result.b.sales).toBe(3);
 });
 
