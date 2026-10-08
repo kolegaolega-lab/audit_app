@@ -1933,6 +1933,39 @@ test('final report explicitly separates sales-only rows from auditable positions
   expect(result).toContain('ещё 1 строка только с продажами');
 });
 
+test('report totals match history snapshot for mixed FIFO findings', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-08T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [
+      {name:'Свежий',salesOnly:false,stock:1,sales:0,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-08',qty:1}],_checkDate:'2026-10-08'},
+      {name:'Просроченный остаток',salesOnly:false,stock:2,sales:0,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-07',qty:2}],_checkDate:'2026-10-08'},
+      {name:'Продажа просрочкой',salesOnly:false,stock:0,sales:2,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-07',qty:1}],_checkDate:'2026-10-08'},
+      {name:'Нет прихода',salesOnly:false,stock:1,sales:0,shelfLife:24,category:'desserts',incoming:[],_checkDate:'2026-10-08'},
+      {name:'Только продажа',salesOnly:true,stock:null,sales:3,shelfLife:null,category:'pastry',incoming:[],_checkDate:'2026-10-08'}
+    ];
+    unknownRows=[]; noCategoryRows=[]; _dailyAccum=[]; _cmpData=null;
+    const snapshot=buildCheckSnapshot();
+    renderReport();
+    return {
+      snapshot:snapshot.totals,
+      report:$('reportBody')?.textContent || ''
+    };
+  });
+  expect(result.snapshot.positions).toBe(5);
+  expect(result.snapshot.freshOnShelf).toBe(1);
+  expect(result.snapshot.expiredOnShelf).toBe(3);
+  expect(result.snapshot.soldExpired).toBe(2);
+  expect(result.snapshot.noIncoming).toBe(1);
+  expect(result.report).toContain('Проверяемых позиций');
+  expect(result.report).toContain('4');
+  expect(result.report).toContain('Свежих на витрине');
+  expect(result.report).toContain('Просрочено на витрине');
+  expect(result.report).toContain('Продано просрочкой');
+  expect(result.report).toContain('Нет прихода за срок годности');
+  expect(result.report).toContain('Только продажи');
+});
+
 test('session restore preserves unknown and no-category completion blockers', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-08T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
