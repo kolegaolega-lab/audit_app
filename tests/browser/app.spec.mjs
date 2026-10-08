@@ -342,6 +342,44 @@ test('missing shelf life in catalog never defaults to 48h and blocks audit compl
   });
 });
 
+test('restored audit keeps missing shelf life as missing and blocks completion', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
+      version: 7,
+      checkDate: '2026-10-06',
+      rows: [{
+        name: 'Товар без срока',
+        stock: 2,
+        sales: 1,
+        shelfLife: null,
+        category: 'desserts',
+        incoming: [],
+        salesOnly: false
+      }],
+      unknown: [],
+      noCategory: [],
+      needsCheck: []
+    }));
+    const data = loadSession();
+    applySession(data);
+    updateFinishCheckBtn();
+    const row = tableRows[0];
+    const calc = computeFIFO(row);
+    return {
+      shelfLife: row.shelfLife,
+      fifo: calc,
+      blocked: $('finishCheckBtn').disabled,
+      text: $('finishCheckBtn').textContent
+    };
+  });
+  expect(result.shelfLife).toBeNull();
+  expect(result.fifo.soldExpired).toBeNull();
+  expect(result.fifo.expiredOnShelf).toBeNull();
+  expect(result.blocked).toBe(true);
+  expect(result.text).toBe('Укажите срок годности: 1');
+});
+
 test('finish check guard requires every auditable stock value', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const source = await page.evaluate(() => window.updateFinishCheckBtn.toString());
