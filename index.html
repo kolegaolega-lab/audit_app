@@ -2829,6 +2829,47 @@ function buildSyncPayload() {
     points: _points
   };
 }
+function validateRemoteCatalog(remote) {
+  if (!remote || typeof remote !== 'object' || Array.isArray(remote)) {
+    return { ok: false, reason: 'invalid-envelope' };
+  }
+  if (!Array.isArray(remote.products)) return { ok: false, reason: 'invalid-products' };
+  const products = sanitizeProducts(remote.products);
+  if (!products.length) return { ok: false, reason: 'empty-products' };
+  if (remote.ignored !== undefined && !Array.isArray(remote.ignored)) {
+    return { ok: false, reason: 'invalid-ignored' };
+  }
+  if (remote.aliases !== undefined && !Array.isArray(remote.aliases)) {
+    return { ok: false, reason: 'invalid-aliases' };
+  }
+  if (remote.prices !== undefined &&
+      (!remote.prices || typeof remote.prices !== 'object' || Array.isArray(remote.prices))) {
+    return { ok: false, reason: 'invalid-prices' };
+  }
+  if (remote.points !== undefined) {
+    if (!Array.isArray(remote.points)) return { ok: false, reason: 'invalid-points' };
+    const ids = new Set();
+    const nums = new Set();
+    let validPoints = 0;
+    for (const point of remote.points.slice(0, 500)) {
+      if (!point || typeof point !== 'object' || Array.isArray(point)) continue;
+      const id = safeStr(point.id || '', 30);
+      const num = safeStr(point.num || '', 20);
+      if (!id || !num) continue;
+      const numKey = normalizeName(num);
+      if (ids.has(id) || nums.has(numKey)) continue;
+      ids.add(id);
+      nums.add(numKey);
+      validPoints++;
+    }
+    // A non-empty points list that contains no usable point is corruption, not a
+    // request to erase the locally cached network of coffee shops.
+    if (remote.points.length > 0 && validPoints === 0) {
+      return { ok: false, reason: 'invalid-points' };
+    }
+  }
+  return { ok: true, products };
+}
 function syncPullFromServer(opts) {
   opts = opts || {};
   const silent = !!opts.silent;
@@ -2839,12 +2880,16 @@ function syncPullFromServer(opts) {
     if (!silent && statusEl) { statusEl.className = 'status show warn'; statusEl.textContent = 'На сервере нет данных.'; }
     return false;
   }
-  const cleaned = sanitizeProducts(remote.products);
-  if (!cleaned.length) {
+  const validation = validateRemoteCatalog(remote);
+  if (!validation.ok) {
     _pendingRemote = null;
-    if (!silent && statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Файл на сервере пустой или повреждён.'; }
+    if (!silent && statusEl) {
+      statusEl.className = 'status show err';
+      statusEl.textContent = 'Файл на сервере пустой, повреждён или имеет неверный формат. Локальные данные сохранены.';
+    }
     return false;
   }
+  const cleaned = validation.products;
   PRODUCTS = cleaned; saveCatalog();
   if (Array.isArray(remote.ignored)) {
     IGNORED = remote.ignored.filter(x => typeof x === 'string').map(x => x.trim()).filter(Boolean).slice(0, MAX_CATALOG);
