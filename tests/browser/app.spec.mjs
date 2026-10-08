@@ -319,7 +319,9 @@ test('finish check guard requires every auditable stock value', async ({page}) =
   await page.goto('file://' + path.join(root,'index.html'));
   const source = await page.evaluate(() => window.updateFinishCheckBtn.toString());
   expect(source).toContain('missingStock');
-  expect(source).toContain('btn.disabled = !rows.length || missingStock.length > 0');
+  expect(source).toContain('missingStock');
+  expect(source).toContain('unresolvedReference');
+  expect(source).toContain('btn.disabled = blocked');
 });
 
 test('finish check button updates from blocked to ready after all stocks are entered', async ({page}) => {
