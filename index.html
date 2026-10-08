@@ -8091,7 +8091,15 @@ function renderReport() {
     const cat = _reportView;
     const rows = tableRows.filter(r => r.category === cat);
     const problems = rows.map(r => ({ row: r, calc: computeFIFO(r) }))
-      .filter(x => (x.calc.soldExpired != null && x.calc.soldExpired > 0) || (x.calc.expiredOnShelf != null && x.calc.expiredOnShelf > 0));
+      .filter(x => {
+        const noIncoming = !x.row.salesOnly &&
+          x.row.stock != null &&
+          !hasUsableIncomingForAudit(x.row) &&
+          (x.row.stock > 0 || (Number(x.row.sales) || 0) > 0);
+        return noIncoming ||
+          (x.calc.soldExpired != null && x.calc.soldExpired > 0) ||
+          (x.calc.expiredOnShelf != null && x.calc.expiredOnShelf > 0);
+      });
 
     const descText = problems.length
       ? problems.length + ' ' + pluralize(problems.length, 'проблемная позиция', 'проблемные позиции', 'проблемных позиций')
