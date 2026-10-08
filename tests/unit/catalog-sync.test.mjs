@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import vm from 'node:vm';
 
 const html = fs.readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
 const start = html.indexOf('function validateRemoteCatalog(');
@@ -86,4 +87,70 @@ test('adding a point uses the same normalized number comparison as remote sync',
   assert.match(source, /const numKey = normalizeName\(n\)/);
   assert.match(source, /_points\.some\(p => normalizeName\(p\.num\) === numKey\)/);
   assert.doesNotMatch(source, /p\.num\.toLowerCase\(\) === n\.toLowerCase\(\)/);
+});
+
+test('removing the active point updates the active-point UI and removes it from today route', () => {
+  const start = html.indexOf('function removePoint(');
+  const end = html.indexOf('function getPointById(', start);
+  assert.notEqual(start, -1, 'removePoint must exist');
+  assert.notEqual(end, -1, 'removePoint source must be bounded');
+  const context = {
+    _points: [{id:'p1',num:'001'}, {id:'p2',num:'002'}],
+    _activePointId: 'p1',
+    _route: {date:'2026-10-09',pointIds:['p1','p2']},
+    POINTS_KEY: 'points',
+    ACTIVE_POINT_KEY: 'active',
+    localStorage: {
+      values: new Map([['active','p1']]),
+      setItem(key,value) { this.values.set(key,String(value)); },
+      removeItem(key) { this.values.delete(key); }
+    },
+    savePoints() {},
+    saveRoute() { this.routeSaved = true; },
+    updatePointsCount() {},
+    updateHeaderPoint() { this.headerUpdated = true; },
+    syncActivePointToInput() { this.inputSynced = true; },
+    renderToday() { this.routeRendered = true; }
+  };
+  vm.createContext(context);
+  vm.runInContext(html.slice(start, end), context);
+  context.removePoint('p1');
+  assert.deepEqual(Array.from(context._points, p => p.id), ['p2']);
+  assert.equal(context._activePointId, 'p2');
+  assert.equal(context.localStorage.values.get('active'), 'p2');
+  assert.deepEqual(Array.from(context._route.pointIds), ['p2']);
+  assert.equal(context.routeSaved, true);
+  assert.equal(context.headerUpdated, true);
+  assert.equal(context.inputSynced, true);
+  assert.equal(context.routeRendered, true);
+});
+
+test('removing the last active point clears persisted selection and synchronizes UI', () => {
+  const start = html.indexOf('function removePoint(');
+  const end = html.indexOf('function getPointById(', start);
+  const context = {
+    _points: [{id:'p1',num:'001'}],
+    _activePointId: 'p1',
+    _route: {date:'2026-10-09',pointIds:['p1']},
+    ACTIVE_POINT_KEY: 'active',
+    localStorage: {
+      values: new Map([['active','p1']]),
+      setItem(key,value) { this.values.set(key,String(value)); },
+      removeItem(key) { this.values.delete(key); }
+    },
+    savePoints() {},
+    saveRoute() {},
+    updatePointsCount() {},
+    updateHeaderPoint() { this.headerUpdated = true; },
+    syncActivePointToInput() { this.inputSynced = true; },
+    renderToday() {}
+  };
+  vm.createContext(context);
+  vm.runInContext(html.slice(start, end), context);
+  context.removePoint('p1');
+  assert.equal(context._activePointId, null);
+  assert.equal(context.localStorage.values.has('active'), false);
+  assert.deepEqual(Array.from(context._route.pointIds), []);
+  assert.equal(context.headerUpdated, true);
+  assert.equal(context.inputSynced, true);
 });
