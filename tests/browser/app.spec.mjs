@@ -208,6 +208,39 @@ test('manual edits recalculate FIFO and survive session restore', async ({page})
   });
 });
 
+test('restored session produces identical audit snapshot', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    localStorage.clear();
+    _points = [{id:'p1',num:'101',name:'Точка',address:'Адрес'}];
+    _activePointId = 'p1';
+    tableRows = [{
+      name:'Слойка', stock:3, sales:2, _originalSales:4,
+      shelfLife:48, category:'pastry',
+      incoming:[
+        {date:'2026-10-05',qty:1,_originalQty:2},
+        {date:'2026-10-06',qty:3,_originalQty:3}
+      ],
+      salesOnly:false, _checkDate:'2026-10-06'
+    },{
+      name:'Продажи без остатка', stock:null, sales:2, _originalSales:2,
+      shelfLife:null, category:'pastry', incoming:[], salesOnly:true,
+      _checkDate:'2026-10-06'
+    }];
+    unknownRows=[]; noCategoryRows=[]; _needsCheckNames=new Set();
+    const before = buildCheckSnapshot();
+    saveSession();
+    applySession(loadSession());
+    const after = buildCheckSnapshot();
+    return {
+      before:{date:before.date,pointId:before.pointId,categories:before.categories,totals:before.totals},
+      after:{date:after.date,pointId:after.pointId,categories:after.categories,totals:after.totals}
+    };
+  });
+  expect(result.after).toEqual(result.before);
+});
+
 test('restored edited row keeps the same danger status as before reload', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
