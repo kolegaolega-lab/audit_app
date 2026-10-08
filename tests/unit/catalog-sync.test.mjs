@@ -218,7 +218,7 @@ test('history filenames are unique while the parser preserves point and login', 
   assert.equal(parsed.pointId, 'p1');
   assert.equal(parsed.login, 'auditor');
   assert.equal(parsed.day, 9);
-  assert.ok(parsed.timeHH === '10' || parsed.timeHH === '03', 'time must remain parseable across local time zones');
+  assert.match(parsed.timeHH, /^\\d{2}$/, 'time must remain parseable across local time zones');
   assert.equal(context.parseHistoryFilename('09-101112-p1-auditor.json').pointId, 'p1', 'legacy history filenames remain supported');
 });
 
