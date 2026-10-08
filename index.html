@@ -8500,7 +8500,7 @@ function cmpParseJSON(text, applyCategory = true, includeUnconfirmed = false){
         activeInvoiceDate = copyDate;
       } else {
         const parsed = parseDateRu(copyDate, new Date());
-        effectiveDate = parsed ? [parsed.getFullYear(), String(parsed.getMonth() + 1).padStart(2, "0"), String(parsed.getDate()).padStart(2, "0")].join("-") : "";
+        effectiveDate = parsed instanceof Date ? [parsed.getFullYear(), String(parsed.getMonth() + 1).padStart(2, "0"), String(parsed.getDate()).padStart(2, "0")].join("-") : (/^\d{4}-\d{2}-\d{2}$/.test(String(parsed || "")) ? String(parsed) : "");
         if (effectiveDate) {
           if (number) invoiceDates[number] = effectiveDate;
           activeInvoiceDate = effectiveDate;
