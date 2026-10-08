@@ -144,6 +144,97 @@ test('end-to-end applyJSON routes category rows and preserves FIFO inputs', asyn
   });
 });
 
+test('manual edits recalculate FIFO and survive session restore', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(async () => {
+    localStorage.clear();
+    PRODUCTS = [{name:'Тестовый десерт',shelfLife:48,category:'desserts'}];
+    tableRows = [{
+      name:'Тестовый десерт', stock:3, sales:2, _originalSales:2,
+      shelfLife:48, category:'desserts',
+      incoming:[
+        {date:'2026-10-05',qty:2,_originalQty:2},
+        {date:'2026-10-06',qty:2,_originalQty:2}
+      ],
+      salesOnly:false, _checkDate:'2026-10-06'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    _needsCheckNames = new Set();
+
+    let before = computeFIFO(tableRows[0]);
+
+    tableRows[0].stock = 5;
+    tableRows[0].incoming[0].qty = 0;
+    tableRows[0].sales = 4;
+    refreshRow = refreshRow;
+    saveSession();
+    const saved = JSON.parse(localStorage.getItem(SESSION_KEY));
+
+    const restored = loadSession();
+    applySession(restored);
+    const after = computeFIFO(tableRows[0]);
+
+    return {
+      before,
+      savedRow: {
+        stock:saved.rows[0].stock,
+        sales:saved.rows[0].sales,
+        incoming:saved.rows[0].incoming.map(p => [p.date,p.qty,p._originalQty])
+      },
+      after,
+      restoredRow: {
+        stock:tableRows[0].stock,
+        sales:tableRows[0].sales,
+        incoming:tableRows[0].incoming.map(p => [p.date,p.qty,p._originalQty]),
+        checkDate:tableRows[0]._checkDate
+      }
+    };
+  });
+
+  expect(result.before).toEqual({soldExpired:0,expiredOnShelf:1,freshOnShelf:2,freshSold:2});
+  expect(result.savedRow).toEqual({
+    stock:5,
+    sales:4,
+    incoming:[['2026-10-05',0,2],['2026-10-06',2,2]]
+  });
+  expect(result.after).toEqual({soldExpired:2,expiredOnShelf:5,freshOnShelf:0,freshSold:2});
+  expect(result.restoredRow).toEqual({
+    stock:5,
+    sales:4,
+    incoming:[['2026-10-05',0,2],['2026-10-06',2,2]],
+    checkDate:'2026-10-06'
+  });
+});
+
+test('restored edited row keeps the same danger status as before reload', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    localStorage.clear();
+    tableRows = [{
+      name:'Тест без свежего прихода', stock:2, sales:1, _originalSales:1,
+      shelfLife:24, category:'desserts',
+      incoming:[{date:'2026-10-05',qty:1,_originalQty:1}],
+      salesOnly:false, _checkDate:'2026-10-06'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    saveSession();
+
+    const before = getRowStatus(computeFIFO(tableRows[0]), tableRows[0]);
+    applySession(loadSession());
+    const after = getRowStatus(computeFIFO(tableRows[0]), tableRows[0]);
+
+    return {before,after,calc:computeFIFO(tableRows[0])};
+  });
+
+  expect(result.before).toEqual({cls:'row-danger',label:'danger'});
+  expect(result.after).toEqual({cls:'row-danger',label:'danger'});
+  expect(result.calc).toEqual({soldExpired:1,expiredOnShelf:2,freshOnShelf:0,freshSold:0});
+});
+
 test('shelf-life window boundaries are correct for 24/48/72/96 hours', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-17T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
