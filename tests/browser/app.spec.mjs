@@ -48,7 +48,7 @@ test('end-to-end JSON audit pipeline: invoice + iiko sales + stock -> FIFO', asy
         {name:'Пончик с фисташкой',quantity:2,quantity_status:'confirmed'},
         {name:'Круассан',quantity:1,quantity_status:'confirmed'}
       ],
-      review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+      review:{unreadable:[],handwritten_confirmation:status === 'handwritten' ? ['строка 1'] : [],uncertain_rows:[],notes:[]}
     };
     const parsed = window.parseJSON(JSON.stringify(payload), new Date('2026-10-06T10:00:00'));
     const donut = parsed.rows.find(r => r.name === 'Пончик с фисташкой');
@@ -433,7 +433,7 @@ test('comparison safety gate unlocks after quantity confirmation', async ({page}
     source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
     invoices:[{
       number:'INV-1',date:'2026-10-06',continuation:false,last_line_number:1,
-      items:[{line:1,name:'Пончик с фисташкой',quantity:2,quantity_status:status}]
+      items:[{line:1,name:'Пончик с фисташкой',quantity:2,quantity_status:'confirmed'}]
     }],
     sales:[],
     review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
