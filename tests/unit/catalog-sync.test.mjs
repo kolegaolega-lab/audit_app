@@ -183,3 +183,51 @@ test('loading saved points removes duplicate normalized numbers and malformed re
   vm.runInContext(html.slice(start, end), context);
   assert.deepEqual(Array.from(context.loadPoints(), p => p.id), ['p1','p3','p5']);
 });
+
+test('history filenames are unique while the parser preserves point and login', () => {
+  const buildStart = html.indexOf('function buildHistoryFilename(');
+  const buildEnd = html.indexOf('function buildCheckSnapshot(', buildStart);
+  const parseStart = html.indexOf('function parseHistoryFilename(');
+  const parseEnd = html.indexOf('async function fetchHistoryMonthFolder(', parseStart);
+  assert.notEqual(buildStart, -1);
+  assert.notEqual(buildEnd, -1);
+  assert.notEqual(parseStart, -1);
+  assert.notEqual(parseEnd, -1);
+  let tick = 1791540672000;
+  let randomIndex = 0;
+  class FixedDate extends Date {
+    constructor() { super('2026-10-09T10:11:12Z'); }
+    static now() { return tick++; }
+  }
+  const randomValues = [0.123456789, 0.987654321];
+  const context = {
+    Date: FixedDate,
+    Math: { random() { return randomValues[randomIndex++ % randomValues.length]; } },
+    HISTORY_DIR: 'history',
+    getActivePoint() { return {id:'p1'}; },
+    _profile: {login:'auditor',name:'Auditor'}
+  };
+  vm.createContext(context);
+  vm.runInContext(html.slice(buildStart, buildEnd), context);
+  vm.runInContext(html.slice(parseStart, parseEnd), context);
+  const firstPath = context.buildHistoryFilename();
+  const secondPath = context.buildHistoryFilename();
+  assert.notEqual(firstPath, secondPath, 'two checks in the same second must not share a file path');
+  const firstName = firstPath.split('/').pop();
+  const parsed = JSON.parse(JSON.stringify(context.parseHistoryFilename(firstName)));
+  assert.equal(parsed.pointId, 'p1');
+  assert.equal(parsed.login, 'auditor');
+  assert.equal(parsed.day, 9);
+  assert.ok(parsed.timeHH === '10' || parsed.timeHH === '03', 'time must remain parseable across local time zones');
+  assert.equal(context.parseHistoryFilename('09-101112-p1-auditor.json').pointId, 'p1', 'legacy history filenames remain supported');
+});
+
+test('history sending writes to the unique path and does not reuse a recent file by point alone', () => {
+  const start = html.indexOf('async function sendReportToHistory(');
+  const end = html.indexOf('async function pullPointsSilently(', start);
+  assert.notEqual(start, -1);
+  assert.notEqual(end, -1);
+  const source = html.slice(start, end);
+  assert.match(source, /await pushHistoryFile\(defaultPath, snapshot\)/);
+  assert.doesNotMatch(source, /findRecentTwin/);
+});
