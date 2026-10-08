@@ -10782,9 +10782,7 @@ function computeCheckStep() {
   if (!_photoCount && !tableRows.length) return 2;
   if (_photoCount && !tableRows.length) return 3;
   if (tableRows.length) {
-    const hasStock = tableRows.some(r => r.stock != null && r.stock > 0);
-    if (!hasStock) return 4;
-    return 5;
+    return canFinishCheck() ? 5 : 4;
   }
   return 3;
 }
