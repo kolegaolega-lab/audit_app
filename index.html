@@ -3845,6 +3845,12 @@ async function sendReportToHistory() {
     setStatus('err', 'Сначала настройте профиль в разделе «Справочник → Мой профиль».');
     return;
   }
+  const finishReason = getFinishCheckBlockReason(getFinishCheckIssues());
+  if (finishReason) {
+    setStatus('err', finishReason);
+    updateFinishCheckBtn();
+    return;
+  }
   if (!tableRows.length) {
     setStatus('err', 'Нет данных для отправки.');
     return;
@@ -7971,11 +7977,13 @@ function renderReport() {
   if (!body) return;
 
   if (_reportView === null) {
-    let totalFreshOnShelf = 0, totalExpiredOnShelf = 0, totalSoldExpired = 0, totalNoIncoming = 0;
-    let totalPositions = 0, totalProblems = 0;
+    let totalFreshOnShelf = 0, totalExpiredOnShelf = 0, totalSoldExpired = 0, totalNoIncoming = 0, totalSalesOnly = 0;
+    let totalPositions = 0, totalAuditablePositions = 0, totalProblems = 0;
     tableRows.forEach(r => {
       const c = computeFIFO(r);
       totalPositions++;
+      if (r.salesOnly) totalSalesOnly++;
+      else totalAuditablePositions++;
       if (c.freshOnShelf != null) totalFreshOnShelf += c.freshOnShelf;
       if (c.expiredOnShelf != null) totalExpiredOnShelf += c.expiredOnShelf;
       if (c.soldExpired != null) totalSoldExpired += c.soldExpired;
@@ -7986,10 +7994,10 @@ function renderReport() {
 
     let bigText, bigCls;
     if (totalProblems === 0) {
-      bigText = totalPositions + ' ' + pluralize(totalPositions, 'позиция', 'позиции', 'позиций') + ' · всё свежее';
+      bigText = totalAuditablePositions + ' ' + pluralize(totalAuditablePositions, 'проверенная позиция', 'проверенные позиции', 'проверенных позиций') + ' · всё свежее' + (totalSalesOnly ? ' · ещё ' + totalSalesOnly + ' ' + pluralize(totalSalesOnly, 'строка', 'строки', 'строк') + ' только с продажами' : '');
       bigCls = '';
     } else {
-      bigText = totalPositions + ' ' + pluralize(totalPositions, 'позиция', 'позиции', 'позиций') + ' · ' + totalProblems + ' ' + pluralize(totalProblems, 'проблема', 'проблемы', 'проблем');
+      bigText = totalAuditablePositions + ' ' + pluralize(totalAuditablePositions, 'проверенная позиция', 'проверенные позиции', 'проверенных позиций') + ' · ' + totalProblems + ' ' + pluralize(totalProblems, 'проблема', 'проблемы', 'проблем') + (totalSalesOnly ? ' · ещё ' + totalSalesOnly + ' ' + pluralize(totalSalesOnly, 'строка', 'строки', 'строк') + ' только с продажами' : '');
       bigCls = totalProblems >= 3 ? ' danger' : ' warn';
     }
 
@@ -8006,7 +8014,8 @@ function renderReport() {
         '<div class="report-section-body">' +
           '<div class="report-summary-block">' +
             '<span class="big' + bigCls + '">' + escapeHtml(bigText) + '</span>' +
-            '<div class="row"><span>Позиций</span><b>' + totalPositions + '</b></div>' +
+            '<div class="row"><span>Проверяемых позиций</span><b>' + totalAuditablePositions + '</b></div>' +
+            (totalSalesOnly ? '<div class="row"><span>Только продажи · без проверки остатка</span><b>' + totalSalesOnly + '</b></div>' : '')' +
             '<div class="row"><span>Свежих на витрине</span><b>' + totalFreshOnShelf + '</b></div>' +
             '<div class="row"><span>Просрочено на витрине</span><b>' + totalExpiredOnShelf + '</b></div>' +
             '<div class="row"><span>Продано просрочкой</span><b' + (totalSoldExpired > 0 ? ' class="red"' : '') + '>' + totalSoldExpired + '</b></div>' +
