@@ -278,8 +278,12 @@ test('restoring a route rejects malformed dates and array-shaped envelopes', () 
 test('history cache ignores malformed months, entries and file records', () => {
   const start = html.indexOf('function loadHistoryCache(');
   const end = html.indexOf('const HISTORY_CACHE_MONTHS_MAX', start);
+  const parseStart = html.indexOf('function parseHistoryFilename(');
+  const parseEnd = html.indexOf('async function fetchHistoryMonthFolder(', parseStart);
   assert.notEqual(start, -1);
   assert.notEqual(end, -1);
+  assert.notEqual(parseStart, -1);
+  assert.notEqual(parseEnd, -1);
   const validFile = {
     filename:'09-101112-p1~abc-auditor.json',day:30,timeHH:'22',timeMM:'33',timeSS:'44',
     pointId:'other-point',login:'wrong-user',sha:'abc',size:123
@@ -298,6 +302,7 @@ test('history cache ignores malformed months, entries and file records', () => {
     localStorage:{getItem(){return JSON.stringify(stored);}}
   };
   vm.createContext(context);
+  vm.runInContext(html.slice(parseStart,parseEnd),context);
   vm.runInContext(html.slice(start,end),context);
   const cache=JSON.parse(JSON.stringify(context.loadHistoryCache()));
   assert.deepEqual(Object.keys(cache),['2026-10']);
