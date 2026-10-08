@@ -4777,15 +4777,12 @@ function createResetIcon() {
 function updateFinishCheckBtn() {
   const wrap = $('finishCheckWrap'); if (!wrap) return;
   const btn = $('finishCheckBtn');
+  const issues = getFinishCheckIssues();
   const rows = Array.isArray(tableRows) ? tableRows : [];
-  const auditable = rows.filter(r => !r.salesOnly);
-  const missingStock = auditable.filter(r => r.stock == null);
-  const missingShelfLife = auditable.filter(r => r.shelfLife == null);
-  const unresolvedReference = (Array.isArray(unknownRows) ? unknownRows.length : 0) +
-    (Array.isArray(noCategoryRows) ? noCategoryRows.length : 0);
+  const { missingStock, missingShelfLife, unresolvedReference } = issues;
   wrap.style.display = rows.length ? 'block' : 'none';
   if (btn) {
-    const blocked = !rows.length || missingStock.length > 0 || missingShelfLife.length > 0 || unresolvedReference > 0;
+    const blocked = !canFinishCheck();
     btn.disabled = blocked;
     if (missingStock.length) {
       btn.textContent = 'Введите остаток: ' + missingStock.length;
@@ -7903,10 +7900,33 @@ function pluralize(n, one, few, many) {
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return few;
   return many;
 }
-function openReport() {
+function getFinishCheckIssues() {
   const rows = Array.isArray(tableRows) ? tableRows : [];
-  const missing = rows.filter(r => !r.salesOnly && r.stock == null);
-  if (missing.length) { showToast('Введите остаток по всем позициям (' + missing.length + ').'); return; }
+  const auditable = rows.filter(r => !r.salesOnly);
+  const missingStock = auditable.filter(r => r.stock == null);
+  const missingShelfLife = auditable.filter(r => r.shelfLife == null);
+  const unknownCount = Array.isArray(unknownRows) ? unknownRows.length : 0;
+  const noCategoryCount = Array.isArray(noCategoryRows) ? noCategoryRows.length : 0;
+  return {
+    empty: rows.length === 0,
+    missingStock,
+    missingShelfLife,
+    unresolvedReference: unknownCount + noCategoryCount
+  };
+}
+function getFinishCheckBlockReason(issues) {
+  if (!issues || issues.empty) return 'Нет позиций для завершения проверки.';
+  if (issues.missingStock.length) return 'Введите остаток по всем позициям (' + issues.missingStock.length + ').';
+  if (issues.missingShelfLife.length) return 'Укажите срок годности для всех проверяемых товаров (' + issues.missingShelfLife.length + ').';
+  if (issues.unresolvedReference) return 'Проверьте позиции, не сопоставленные со справочником (' + issues.unresolvedReference + ').';
+  return '';
+}
+function canFinishCheck() {
+  return getFinishCheckBlockReason(getFinishCheckIssues()) === '';
+}
+function openReport() {
+  const reason = getFinishCheckBlockReason(getFinishCheckIssues());
+  if (reason) { showToast(reason); updateFinishCheckBtn(); return; }
   _reportView = null;
   renderReport();
   openModal('reportModal');
