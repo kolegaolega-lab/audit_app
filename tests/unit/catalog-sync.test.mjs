@@ -157,3 +157,26 @@ test('removing the last active point clears persisted selection and synchronizes
   assert.equal(context.pointInput.value, '');
   assert.equal(context.inputSynced, undefined);
 });
+
+test('loading saved points removes duplicate normalized numbers and malformed records', () => {
+  const start = html.indexOf('function loadPoints(');
+  const end = html.indexOf('function savePoints(', start);
+  assert.notEqual(start, -1, 'loadPoints must exist');
+  assert.notEqual(end, -1, 'loadPoints source must be bounded');
+  const context = {
+    POINTS_KEY: 'points',
+    localStorage: { getItem() { return JSON.stringify([
+      {id:'p1',num:'001',name:'First'},
+      {id:'p2',num:' 001 ',name:'Duplicate whitespace'},
+      {id:'p3',num:'00-2',name:'Normalized duplicate'},
+      {id:'p4',num:'00 2',name:'Normalized duplicate two'},
+      ['array-shaped'],
+      {id:'p5',num:'003',name:'Third'}
+    ]); } },
+    safeStr(value, max) { return typeof value === 'string' ? value.slice(0,max) : ''; },
+    normalizeName(value) { return String(value || '').trim().toLowerCase().replace(/[-\\s]+/g,' '); }
+  };
+  vm.createContext(context);
+  vm.runInContext(html.slice(start, end), context);
+  assert.deepEqual(Array.from(context.loadPoints(), p => p.id), ['p1','p3','p5']);
+});
