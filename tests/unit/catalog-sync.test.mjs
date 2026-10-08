@@ -398,7 +398,7 @@ test('remote and silent point sync reject numbers that normalize to empty', () =
 
 test('history folder fetch rejects a successful but malformed API response', async () => {
   const start=html.indexOf('async function fetchHistoryMonthFolder(');
-  const end=html.indexOf('function fetchAndCacheMonth(',start);
+  const end=html.indexOf('async function fetchAndCacheMonth(',start);
   assert.notEqual(start,-1);
   assert.notEqual(end,-1);
   const context={
@@ -415,7 +415,7 @@ test('history folder fetch rejects a successful but malformed API response', asy
 
 test('history month cache with a non-array files field is refetched', async () => {
   const start=html.indexOf('async function fetchAndCacheMonth(');
-  const end=html.indexOf('function syncHistoryForCurrentMonth(',start);
+  const end=html.indexOf('async function syncHistoryForCurrentMonth(',start);
   assert.notEqual(start,-1);
   assert.notEqual(end,-1);
   let fetched=0;
