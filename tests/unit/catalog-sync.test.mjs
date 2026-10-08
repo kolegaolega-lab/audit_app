@@ -303,3 +303,39 @@ test('history cache ignores malformed months, entries and file records', () => {
   assert.equal(cache['2026-10'].files[0].pointId,'p1');
   assert.equal(cache['2026-10'].files[0].size,123);
 });
+
+test('history queue preserves duplicate-path snapshots under distinct parseable filenames', () => {
+  const loadStart = html.indexOf('function loadHistoryQueue(');
+  const loadEnd = html.indexOf('function saveHistoryQueue(', loadStart);
+  const parseStart = html.indexOf('function parseHistoryFilename(');
+  const parseEnd = html.indexOf('async function fetchHistoryMonthFolder(', parseStart);
+  assert.notEqual(loadStart, -1);
+  assert.notEqual(loadEnd, -1);
+  assert.notEqual(parseStart, -1);
+  assert.notEqual(parseEnd, -1);
+  const legacyPath = 'history/2026-10/09-101112-p1-auditor.json';
+  const stored = [
+    {path:legacyPath,data:{date:'2026-10-09',pointId:'p1',marker:'first'},ts:1},
+    {path:legacyPath,data:{date:'2026-10-09',pointId:'p1',marker:'second'},ts:2},
+    {path:'../outside.json',data:{marker:'invalid'},ts:3},
+    {path:'history/2026-10/bad.json',data:{marker:'invalid'},ts:4},
+    {path:legacyPath,data:['not a snapshot'],ts:5}
+  ];
+  const context = {
+    HISTORY_DIR:'history',
+    HISTORY_QUEUE_KEY:'queue',
+    localStorage:{getItem(){return JSON.stringify(stored);}}
+  };
+  vm.createContext(context);
+  vm.runInContext(html.slice(parseStart,parseEnd),context);
+  vm.runInContext(html.slice(loadStart,loadEnd),context);
+  const queue=JSON.parse(JSON.stringify(context.loadHistoryQueue()));
+  assert.equal(queue.length,2);
+  assert.notEqual(queue[0].path,queue[1].path);
+  assert.deepEqual(queue.map(x=>x.data.marker),['first','second']);
+  for (const entry of queue) {
+    const parsed=context.parseHistoryFilename(entry.path.split('/').pop());
+    assert.equal(parsed.pointId,'p1');
+    assert.equal(parsed.login,'auditor');
+  }
+});
