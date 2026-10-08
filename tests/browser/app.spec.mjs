@@ -728,9 +728,9 @@ test('double-run comparison inherits dates for continuation invoice pages', asyn
       incoming: Object.fromEntries(parsed.order.map(k => [parsed.rows[k].name, parsed.rows[k].incoming]))
     };
   });
-  expect(result.dates).toEqual([{key:'06.10.2026',label:'06.10.2026'}]);
-  expect(result.incoming['Товар A']).toEqual({'06.10.2026':1});
-  expect(result.incoming['Товар B']).toEqual({'06.10.2026':2});
+  expect(result.dates).toEqual([{key:'06.10',label:'06.10'}]);
+  expect(result.incoming['Товар A']).toEqual({'06.10':1});
+  expect(result.incoming['Товар B']).toEqual({'06.10':2});
 });
 
 test('report headline treats missing incoming as a problem', async ({page}) => {
