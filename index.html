@@ -2740,7 +2740,7 @@ function parseShelfLife(str) {
   return clampNum(n, 1, 10000, null);
 }
 
-function parseJSON(text,referenceDate){let d;try{d=typeof text==="string"?JSON.parse(text):text}catch(e){throw Error("Не удалось прочитать результат распознавания.")}if(!d||typeof d!=="object"||Array.isArray(d))throw Error("Не удалось прочитать результат распознавания.");const parsedCheckDate=String(d.check_date||"").trim();const effectiveReference=parsedCheckDate?parseDateRu(parsedCheckDate,referenceDate):referenceDate;const rows={};const add=n=>{const c=cleanProductName(n);if(!c||isServiceLine(c)||isIgnored(c))return null;const a=applyAliases(c),k=normalizeName(a),p=PRODUCTS.find(x=>normalizeName(x.name)===k);/* OCR parser intentionally keeps all categories; category filtering is applied only when building the audit table. */if(!rows[k])rows[k]={name:a,stock:null,sales:0,_originalSales:0,shelfLife:p?p.shelfLife:null,category:p?(p.category||null):null,incoming:[],salesOnly:false};return rows[k]};(function(){const invoiceDates={};let lastInvoiceDate="";(d.invoices||[]).forEach(inv=>{const number=String(inv.number||"").trim();const rawDate=String(inv.date||"").trim();let date="";if(rawDate){date=/^\d{4}-\d{2}-\d{2}$/.test(rawDate)?rawDate:(parseDateRu(rawDate,effectiveReference)||"");if(date){if(number)invoiceDates[number]=date;lastInvoiceDate=date}}else if(inv.continuation){date=(number&&invoiceDates[number])||lastInvoiceDate||"" }else{date=""} (inv.items||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed"&&date)row.incoming.push({date,qty:clampNum(it.quantity,0,MAX_NUM,0)})})})})();(d.sales||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed")row.sales+=clampNum(it.quantity,0,MAX_NUM,0)});Object.values(rows).forEach(r=>r.incoming=mergeIncomingByDate(r.incoming));return{rows:Object.values(rows),truncated:false,json:d,effectiveReference}}
+function parseJSON(text,referenceDate){let d;try{d=typeof text==="string"?JSON.parse(text):text}catch(e){throw Error("Не удалось прочитать результат распознавания.")}if(!d||typeof d!=="object"||Array.isArray(d))throw Error("Не удалось прочитать результат распознавания.");const parsedCheckDate=String(d.check_date||"").trim();const effectiveReference=parsedCheckDate?parseDateRu(parsedCheckDate,referenceDate):referenceDate;const rows={};const add=n=>{const c=cleanProductName(n);if(!c||isServiceLine(c)||isIgnored(c))return null;const a=applyAliases(c),k=normalizeName(a),p=PRODUCTS.find(x=>normalizeName(x.name)===k);/* OCR parser intentionally keeps all categories; category filtering is applied only when building the audit table. */if(!rows[k])rows[k]={name:a,stock:null,sales:0,_originalSales:0,shelfLife:p?p.shelfLife:null,category:p?(p.category||null):null,incoming:[],salesOnly:false};return rows[k]};(function(){const invoiceDates={};let activeInvoiceDate="";(d.invoices||[]).forEach(inv=>{const number=String(inv.number||"").trim();const rawDate=String(inv.date||"").trim();let date="";if(rawDate){date=/^\d{4}-\d{2}-\d{2}$/.test(rawDate)?rawDate:(parseDateRu(rawDate,effectiveReference)||"");if(date){if(number)invoiceDates[number]=date;activeInvoiceDate=date}}else if(inv.continuation){date=(number&&invoiceDates[number])||activeInvoiceDate||""}else{activeInvoiceDate="";date=""} (inv.items||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed"&&date)row.incoming.push({date,qty:clampNum(it.quantity,0,MAX_NUM,0)})})})})();(d.sales||[]).forEach(it=>{const row=add(it?.name);if(row&&it.quantity!=null&&it.quantity_status==="confirmed")row.sales+=clampNum(it.quantity,0,MAX_NUM,0)});Object.values(rows).forEach(r=>r.incoming=mergeIncomingByDate(r.incoming));return{rows:Object.values(rows),truncated:false,json:d,effectiveReference}}
 function sortRowsAlphabetically(rows) {
   return [...rows].sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'ru', { sensitivity: 'base' }));
 }
@@ -7619,19 +7619,19 @@ function mergeSeparatedOCRJson(invoiceJson, salesJson, dateLabel) {
   }
   const iso = (dailyParseDateInput(dateLabel) || {}).iso || dateLabel;
   const invoiceDates = {};
-  let lastInvoiceDate = "";
-  (inv?.invoices || []).forEach(x => {
-    const number = String(x?.number || "").trim();
-    const raw = String(x?.date || "").trim();
-    if (raw && /^\d{4}-\d{2}-\d{2}$/.test(raw)) {
-      if (number) invoiceDates[number] = raw;
-      lastInvoiceDate = raw;
-    }
-  });
+  let activeInvoiceDate = "";
   const normalizedInvoices = (inv?.invoices || []).map(x => {
     const copy = { ...x };
     const number = String(copy.number || "").trim();
-    if (!copy.date && copy.continuation) copy.date = (number && invoiceDates[number]) || lastInvoiceDate || "";
+    const raw = String(copy.date || "").trim();
+    if (raw && /^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+      if (number) invoiceDates[number] = raw;
+      activeInvoiceDate = raw;
+    } else if (copy.continuation) {
+      copy.date = (number && invoiceDates[number]) || activeInvoiceDate || "";
+    } else {
+      activeInvoiceDate = "";
+    }
     return copy;
   });
   const review = {
@@ -7924,8 +7924,9 @@ function renderReport() {
       if (c.freshOnShelf != null) totalFreshOnShelf += c.freshOnShelf;
       if (c.expiredOnShelf != null) totalExpiredOnShelf += c.expiredOnShelf;
       if (c.soldExpired != null) totalSoldExpired += c.soldExpired;
-      if (!r.salesOnly && r.stock != null && !hasUsableIncomingForAudit(r) && (r.stock > 0 || r.sales > 0)) totalNoIncoming++;
-      if ((c.soldExpired || 0) > 0 || (c.expiredOnShelf || 0) > 0) totalProblems++;
+      const noIncoming = !r.salesOnly && r.stock != null && !hasUsableIncomingForAudit(r) && (r.stock > 0 || r.sales > 0);
+      if (noIncoming) totalNoIncoming++;
+      if (noIncoming || (c.soldExpired || 0) > 0 || (c.expiredOnShelf || 0) > 0) totalProblems++;
     });
 
     let bigText, bigCls;
