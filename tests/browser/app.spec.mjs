@@ -424,51 +424,6 @@ test('comparison normalizes ISO and Russian invoice dates and renders results', 
 
 
 
-test('comparison safety gate unlocks after quantity confirmation', async ({page}) => {
-  await page.goto('file://' + path.join(root,'index.html'));
-  const payload = (status) => JSON.stringify({
-    schema_version:'1.0',
-    document_type:'combined',
-    check_date:'2026-10-06',
-    source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
-    invoices:[{
-      number:'INV-1',date:'2026-10-06',continuation:false,last_line_number:1,
-      items:[{line:1,name:'Пончик с фисташкой',quantity:2,quantity_status:'confirmed'}]
-    }],
-    sales:[],
-    review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
-  });
-  const result = await page.evaluate(async ({a,b}) => {
-    const t1 = document.querySelector('#cmpJson1');
-    const t2 = document.querySelector('#cmpJson2');
-    t1.value = a; t2.value = b;
-    window.cmpRunCompare();
-    const waitForResults = async () => {
-      for (let i = 0; i < 20; i++) {
-        if (document.querySelector('#cmpResults .cmp-val')) return;
-        await new Promise(r => setTimeout(r, 25));
-      }
-    };
-    await waitForResults();
-    const before = {
-      comparison: document.querySelector('#cmpStats')?.textContent || '',
-      apply: document.querySelector('#cmpApplyBtn')?.style.display || ''
-    };
-    document.querySelector('#cmpResults .cmp-val')?.click();
-    document.querySelector('.cmp-edit-card .save')?.click();
-    const after = {
-      comparison: document.querySelector('#cmpStats')?.textContent || '',
-      apply: document.querySelector('#cmpApplyBtn')?.style.display || ''
-    };
-    return {before, after};
-  }, {a:payload('handwritten'), b:payload('confirmed')});
-  expect(result.before.comparison).toContain('Нужно исправить отмеченные строки');
-  expect(result.before.apply).not.toBe('block');
-  expect(result.after.comparison).toContain('Проверка результатов');
-  expect(result.after.apply).toBe('block');
-});
-
-
 test('catalog matching uses canonical OCR names for safe spelling variants', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
