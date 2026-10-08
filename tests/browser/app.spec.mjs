@@ -115,7 +115,7 @@ test('parseJSON keeps invoice dates needed by each shelf-life window', async ({p
       review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
     };
     const parsed = window.parseJSON(JSON.stringify(payload), new Date('2026-10-17T10:00:00'));
-    return parsed.rows[0].incoming;
+    return parsed.rows[0].incoming.map(({date,qty}) => ({date,qty}));
   });
   expect(result).toEqual([
     {date:'2026-10-14',qty:4},
