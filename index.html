@@ -2349,8 +2349,10 @@ function sanitizeProducts(arr) {
     if (seen.has(key)) continue;
     seen.add(key);
     let shelf;
-    if (p.shelfLife === 0) shelf = 0;
-    else shelf = clampNum(p.shelfLife, 1, MAX_SHELF_HOURS, 48);
+    const rawShelf = Number(p.shelfLife);
+    if (p.shelfLife === 0 || rawShelf === 0) shelf = 0;
+    else if (Number.isFinite(rawShelf) && rawShelf > 0) shelf = clampNum(rawShelf, 1, MAX_SHELF_HOURS, null);
+    else shelf = null;
     const category = isValidCategory(p.category) ? p.category : null;
     out.push({ name, shelfLife: shelf, category });
   }
@@ -4774,15 +4776,19 @@ function updateFinishCheckBtn() {
   const rows = Array.isArray(tableRows) ? tableRows : [];
   const auditable = rows.filter(r => !r.salesOnly);
   const missingStock = auditable.filter(r => r.stock == null);
+  const missingShelfLife = auditable.filter(r => r.shelfLife == null);
   const unresolvedReference = (Array.isArray(unknownRows) ? unknownRows.length : 0) +
     (Array.isArray(noCategoryRows) ? noCategoryRows.length : 0);
   wrap.style.display = rows.length ? 'block' : 'none';
   if (btn) {
-    const blocked = !rows.length || missingStock.length > 0 || unresolvedReference > 0;
+    const blocked = !rows.length || missingStock.length > 0 || missingShelfLife.length > 0 || unresolvedReference > 0;
     btn.disabled = blocked;
     if (missingStock.length) {
       btn.textContent = 'Введите остаток: ' + missingStock.length;
       btn.title = 'Заполните остаток по всем позициям';
+    } else if (missingShelfLife.length) {
+      btn.textContent = 'Укажите срок годности: ' + missingShelfLife.length;
+      btn.title = 'Для всех проверяемых товаров должен быть указан срок годности в справочнике';
     } else if (unresolvedReference) {
       btn.textContent = 'Проверьте позиции: ' + unresolvedReference;
       btn.title = 'Добавьте позиции в справочник и назначьте категорию';
