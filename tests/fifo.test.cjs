@@ -150,12 +150,12 @@ test('regression: OCR merge must preserve all invoice dates needed by FIFO', () 
 });
 
 test('regression: missing invoice date must never fall back to audit date', () => {
-  assert.match(html, /else\{date=""\}/);
+  assert.match(html, /else\{activeInvoiceDate="";date=""\}/);
   assert.doesNotMatch(html, /const fallback=String\(d\.check_date/);
 });
 
 test('regression: unresolved continuation date must remain unresolved', () => {
-  assert.match(html, /const activeInvoiceDate = ""/);
+  assert.match(html, /let activeInvoiceDate = ""/);
   assert.match(html, /copy\.date = \(number && invoiceDates\[number\]\) \|\| activeInvoiceDate \|\| ""/);
   assert.doesNotMatch(html, /lastInvoiceDate/);
 });
