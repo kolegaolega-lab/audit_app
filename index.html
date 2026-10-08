@@ -3720,7 +3720,8 @@ function buildHistoryFilename() {
   const p = getActivePoint();
   const pointId = p ? p.id : 'nopoint';
   const login = (_profile && _profile.login) ? _profile.login : ((_profile && _profile.name) ? _profile.name.toLowerCase().replace(/[^a-z0-9а-яё_-]/gi, '_').slice(0, 20) : 'anon');
-  const fname = `${d}-${hh}${mm}${ss}-${pointId}-${login}.json`;
+  const unique = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  const fname = `${d}-${hh}${mm}${ss}-${pointId}~${unique}-${login}.json`;
   return `${HISTORY_DIR}/${folder}/${fname}`;
 }
 function buildCheckSnapshot() {
@@ -3859,36 +3860,6 @@ async function flushHistoryQueue() {
   return { ok, fail };
 }
 
-async function findRecentTwin(login, pointId, tsMs) {
-  if (!login && !pointId) return null;
-  const ref = new Date(tsMs);
-  const ym = `${ref.getFullYear()}-${String(ref.getMonth() + 1).padStart(2, '0')}`;
-  let files;
-  try { files = await fetchHistoryMonthFolder(ym); } catch (e) { return null; }
-  const TWIN_WINDOW_MS = 5 * 60 * 1000;
-  let best = null;
-  let bestDelta = Infinity;
-  for (const f of files) {
-    const p = parseHistoryFilename(f.name);
-    if (!p) continue;
-    if (p.pointId !== pointId) continue;
-    if (p.login !== login) continue;
-    if (p.day !== ref.getDate()) continue;
-    const fileTime = new Date(
-      ref.getFullYear(), ref.getMonth(), p.day,
-      parseInt(p.timeHH, 10) || 0,
-      parseInt(p.timeMM, 10) || 0,
-      parseInt(p.timeSS, 10) || 0
-    ).getTime();
-    const delta = Math.abs(fileTime - tsMs);
-    if (delta <= TWIN_WINDOW_MS && delta < bestDelta) {
-      bestDelta = delta;
-      best = `${HISTORY_DIR}/${ym}/${f.name}`;
-    }
-  }
-  return best;
-}
-
 async function sendReportToHistory() {
   const btn = $('sendReportBtn');
   const statusEl = $('sendReportStatus');
@@ -3926,19 +3897,7 @@ async function sendReportToHistory() {
   setBtn('busy', 'Отправка…', true);
   updateSyncIndicator('syncing');
   try {
-    const myLogin = (_profile && _profile.login)
-      ? _profile.login
-      : ((_profile && _profile.name)
-          ? _profile.name.toLowerCase().replace(/[^a-z0-9а-яё_-]/gi, '_').slice(0, 20)
-          : 'anon');
-    const activePoint = getActivePoint();
-    const twinPath = await findRecentTwin(
-      myLogin,
-      activePoint ? activePoint.id : 'nopoint',
-      Date.now()
-    );
-    const path = twinPath || defaultPath;
-    await pushHistoryFile(path, snapshot);
+    await pushHistoryFile(defaultPath, snapshot);
     setBtn('ok', '✓ Отправлено', true);
     setStatus('ok', 'Проверка сохранена в общую историю.');
     updateSyncIndicator('');
@@ -4056,13 +4015,16 @@ function parseHistoryFilename(fname) {
   const timeStr = parts[1];
   if (!/^\d{1,2}$/.test(dayStr)) return null;
   if (!/^\d{6}$/.test(timeStr)) return null;
+  const pointToken = parts[2];
+  const pointId = pointToken.split('~', 1)[0];
+  if (!pointId) return null;
   return {
     filename: fname,
     day: parseInt(dayStr, 10),
     timeHH: timeStr.slice(0, 2),
     timeMM: timeStr.slice(2, 4),
     timeSS: timeStr.slice(4, 6),
-    pointId: parts[2],
+    pointId,
     login: parts.slice(3).join('-')
   };
 }
