@@ -4101,13 +4101,16 @@ async function fetchHistoryMonthFolder(yearMonth) {
   if (res.status === 403) throw new Error('Лимит GitHub');
   if (!res.ok) throw new Error('GitHub ответил ' + res.status);
   const data = await res.json();
-  if (!Array.isArray(data)) return [];
+  if (!Array.isArray(data)) throw new Error('Некорректный формат истории');
   return data.filter(f => f && f.type === 'file' && typeof f.name === 'string' && f.name.endsWith('.json'));
 }
 async function fetchAndCacheMonth(yearMonth) {
   const cached = _historyCache[yearMonth];
-  if (cached && cached.fetchedAt && (Date.now() - cached.fetchedAt) < HISTORY_FETCH_COOLDOWN_MS) {
-    return cached.files || [];
+  if (cached && Number.isFinite(cached.fetchedAt) && cached.fetchedAt > 0 &&
+      cached.fetchedAt <= Date.now() &&
+      (Date.now() - cached.fetchedAt) < HISTORY_FETCH_COOLDOWN_MS &&
+      Array.isArray(cached.files)) {
+    return cached.files;
   }
   const files = await fetchHistoryMonthFolder(yearMonth);
   const parsed = [];
