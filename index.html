@@ -8626,8 +8626,15 @@ function cmpRunCompare() {
   const runBtn = $('cmpRunBtn');
   if (runBtn) { runBtn.disabled = true; runBtn.classList.add('busy'); }
   try {
-    const t1 = $('cmpJson1') ? $('cmpJson1').value : '';
-    const t2 = $('cmpJson2') ? $('cmpJson2').value : '';
+    let t1 = $('cmpJson1') ? $('cmpJson1').value : '';
+    let t2 = $('cmpJson2') ? $('cmpJson2').value : '';
+    // Сверка должна использовать те же детерминированные правила нормализации,
+    // что и обычное применение OCR. В частности, «Ром баба» подтверждается
+    // галочкой печатного количества и не должна блокировать сверку как рукописная.
+    t1 = normalizeKnownQuantityConfirmations(t1);
+    t2 = normalizeKnownQuantityConfirmations(t2);
+    if ($('cmpJson1')) $('cmpJson1').value = t1;
+    if ($('cmpJson2')) $('cmpJson2').value = t2;
   if (!t1.trim() || !t2.trim()) { showToast('Вставьте оба результата распознавания.'); return; }
   // Два представления одного JSON:
   // 1) full — весь документ, независимо от выбранной категории, для контроля полноты;
