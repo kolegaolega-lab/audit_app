@@ -705,6 +705,34 @@ test('invoice continuation date does not leak into a new non-continuation invoic
   expect(result['Товар D']).toEqual([]);
 });
 
+test('double-run comparison inherits dates for continuation invoice pages', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const payload = {
+      schema_version:'1.0', document_type:'invoice', check_date:'2026-10-06',
+      source:{photo_count:2,processed_photo_count:2,duplicate_photo_count:0},
+      invoices:[
+        {number:'A',date:'2026-10-06',continuation:false,last_line_number:1,items:[
+          {line:1,name:'Товар A',quantity:1,quantity_status:'confirmed'}
+        ]},
+        {number:'A',date:null,continuation:true,last_line_number:2,items:[
+          {line:2,name:'Товар B',quantity:2,quantity_status:'confirmed'}
+        ]}
+      ],
+      sales:[],
+      review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+    };
+    const parsed = window.cmpParseJSON(JSON.stringify(payload), false, false);
+    return {
+      dates: parsed.dateCols,
+      incoming: Object.fromEntries(parsed.order.map(k => [parsed.rows[k].name, parsed.rows[k].incoming]))
+    };
+  });
+  expect(result.dates).toEqual([{key:'06.10.2026',label:'06.10.2026'}]);
+  expect(result.incoming['Товар A']).toEqual({'06.10.2026':1});
+  expect(result.incoming['Товар B']).toEqual({'06.10.2026':2});
+});
+
 test('report headline treats missing incoming as a problem', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
