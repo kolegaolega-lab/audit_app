@@ -759,6 +759,33 @@ test('unfinished audit session survives reload with stock and incoming data', as
 });
 
 
+test('history snapshot keeps the audit check date after restoring an older session', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-08T21:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    localStorage.clear();
+    _activePointId = null;
+    tableRows = [{
+      name:'Товар истории', stock:1, sales:0, _originalSales:0,
+      shelfLife:24, category:'desserts',
+      incoming:[{date:'2026-10-07',qty:2,_originalQty:2}],
+      salesOnly:false, _checkDate:'2026-10-07'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    _needsCheckNames = new Set();
+    saveSession();
+    applySession(loadSession());
+    return buildCheckSnapshot();
+  });
+  expect(result.date).toBe('2026-10-07');
+  expect(result.categories.desserts[0]).toMatchObject({
+    name:'Товар истории',
+    stock:1,
+    shelfLife:24
+  });
+});
+
 test('history filename preserves seconds for duplicate-audit matching', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => window.parseHistoryFilename('07-123456-pabc-user.json'));
