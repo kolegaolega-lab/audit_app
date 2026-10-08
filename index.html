@@ -2705,7 +2705,7 @@ function computeFIFO(row) {
 function emptyResult() { return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null }; }
 function getRowStatus(calc, row) {
   if (row && row.salesOnly) return { cls: 'row-info', label: 'info' };
-  if (row && row.stock != null && (!hasUsableIncomingForAudit(row))) return { cls: 'row-danger', label: 'danger' };
+  if (row && row.stock != null && (row.stock > 0 || (Number(row.sales) || 0) > 0) && (!hasUsableIncomingForAudit(row))) return { cls: 'row-danger', label: 'danger' };
   if (row && row.stock == null) return { cls: 'row-unknown', label: 'empty' };
   if (!calc || calc.soldExpired === null) return { cls: 'row-unknown', label: 'unknown' };
   if (calc.soldExpired > 0) return { cls: 'row-danger', label: 'danger' };
@@ -2714,7 +2714,7 @@ function getRowStatus(calc, row) {
 }
 function getCardStatus(calc, row) {
   if (row && row.salesOnly) return 'fresh';
-  if (row && row.stock != null && (!hasUsableIncomingForAudit(row))) return 'danger';
+  if (row && row.stock != null && (row.stock > 0 || (Number(row.sales) || 0) > 0) && (!hasUsableIncomingForAudit(row))) return 'danger';
   if (row && row.stock == null) return 'empty';
   if (!calc || calc.soldExpired === null) return 'fresh';
   if (calc.soldExpired > 0) return 'danger';
@@ -3663,6 +3663,7 @@ function buildCheckSnapshot() {
   const cats = {};
   let totalFreshOnShelf = 0, totalFreshSold = 0;
   let totalExpiredOnShelf = 0, totalSoldExpired = 0;
+  let totalNoIncoming = 0;
   let totalPositions = 0;
   CATEGORY_ORDER.forEach(cat => {
     const rows = tableRows.filter(r => r.category === cat);
@@ -3670,6 +3671,8 @@ function buildCheckSnapshot() {
     const items = rows.map(r => {
       const c = computeFIFO(r);
       const incoming = (r.incoming || []).map(p2 => ({ date: p2.date, qty: p2.qty }));
+      const noIncoming = !r.salesOnly && r.stock != null && !hasUsableIncomingForAudit(r) && (r.stock > 0 || (Number(r.sales) || 0) > 0);
+      if (noIncoming) totalNoIncoming++;
       totalPositions++;
       if (c.freshOnShelf != null) totalFreshOnShelf += c.freshOnShelf;
       if (c.freshSold != null) totalFreshSold += c.freshSold;
@@ -3677,7 +3680,7 @@ function buildCheckSnapshot() {
       if (c.soldExpired != null) totalSoldExpired += c.soldExpired;
       return {
         name: r.name, stock: r.stock, sales: r.sales || 0, shelfLife: r.shelfLife,
-        incoming,
+        incoming, noIncoming,
         freshOnShelf: c.freshOnShelf, freshSold: c.freshSold,
         expiredOnShelf: c.expiredOnShelf, soldExpired: c.soldExpired
       };
@@ -3697,7 +3700,8 @@ function buildCheckSnapshot() {
     totals: {
       positions: totalPositions,
       freshOnShelf: totalFreshOnShelf, freshSold: totalFreshSold,
-      expiredOnShelf: totalExpiredOnShelf, soldExpired: totalSoldExpired
+      expiredOnShelf: totalExpiredOnShelf, soldExpired: totalSoldExpired,
+      noIncoming: totalNoIncoming
     }
   };
 }
