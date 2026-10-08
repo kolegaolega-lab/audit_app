@@ -13,7 +13,7 @@ const context = {
   MAX_CATALOG: 5000,
   MAX_NAME: 120,
   safeStr(value, max) { return typeof value === 'string' ? value.trim().slice(0, max) : ''; },
-  normalizeName(value) { return String(value || '').trim().toLowerCase().replace(/\\s+/g, ' '); },
+  normalizeName(value) { return String(value || '').trim().toLowerCase().replace(/\s+/g, ' '); },
   sanitizeProducts(rows) {
     if (!Array.isArray(rows)) return [];
     const seen = new Set();
