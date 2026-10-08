@@ -631,7 +631,7 @@ test('comparison applies selected values from second run for one-sided rows and 
   const payload = (items, sales) => JSON.stringify({
     schema_version:'1.0', document_type:'combined', check_date:'2026-10-06',
     source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
-    invoices:[{number:'INV-1',date:'2026-10-05',continuation:false,last_line_number:1,
+    invoices:[{number:'INV-1',date:'2026-10-05',continuation:false,last_line_number:2,
       items}],
     sales:[{name:'Товар B',quantity:sales,quantity_status:'confirmed'}],
     review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
