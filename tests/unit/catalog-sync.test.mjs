@@ -130,13 +130,14 @@ test('removing the last active point clears persisted selection and synchronizes
   const start = html.indexOf('function removePoint(');
   const end = html.indexOf('function getPointById(', start);
   const calls = [];
+  const pointInput = {value:'001'};
   const context = {
     _points: [{id:'p1',num:'001'}],
     _activePointId: 'p1',
     _route: {date:'2026-10-09',pointIds:['p1']},
     ACTIVE_POINT_KEY: 'active',
-    pointInput: {value:'001'},
-    $ (id) { return id === 'point' ? this.pointInput : null; },
+    pointInput,
+    $ (id) { return id === 'point' ? pointInput : null; },
     localStorage: {
       values: new Map([['active','p1']]),
       setItem(key,value) { this.values.set(key,String(value)); },
