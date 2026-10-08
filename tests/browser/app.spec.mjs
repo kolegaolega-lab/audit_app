@@ -599,6 +599,47 @@ test('comparison normalizes safe OCR spelling variants without merging uncertain
   expect(result.uncertainKeysEqual).toBe(false);
 });
 
+test('comparison applies selected values from second run for one-sided rows and dates', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const payload = (items, sales) => JSON.stringify({
+    schema_version:'1.0', document_type:'invoice', check_date:'2026-10-06',
+    source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
+    invoices:[{number:'INV-1',date:'2026-10-05',continuation:false,last_line_number:1,
+      items}],
+    sales:[{name:'Товар B',quantity:sales,quantity_status:'confirmed'}],
+    review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+  });
+  const result = await page.evaluate(({a,b}) => {
+    PRODUCTS = [
+      {name:'Товар A',shelfLife:48,category:'desserts'},
+      {name:'Товар B',shelfLife:48,category:'desserts'}
+    ];
+    tableRows = [
+      {name:'Товар A',stock:0,sales:0,shelfLife:48,category:'desserts',incoming:[],salesOnly:false},
+      {name:'Товар B',stock:0,sales:0,shelfLife:48,category:'desserts',incoming:[],salesOnly:false}
+    ];
+    unknownRows = [];
+    _activeCategory = 'desserts';
+    $('cmpJson1').value = a;
+    $('cmpJson2').value = b;
+    cmpRunCompare();
+    const row = _cmpData.rows.find(r => r.name === 'Товар B');
+    row.edits.incoming['05.10'] = 7;
+    row.edits.sales = 3;
+    cmpRefreshSafetyGate();
+    cmpApplyMatched();
+    return {
+      b: tableRows.find(r => r.name === 'Товар B'),
+      row: {a:row.a?.incoming?.['05.10'] ?? null,b:row.b?.incoming?.['05.10'] ?? null}
+    };
+  }, {a:payload([{line:1,name:'Товар A',quantity:1,quantity_status:'confirmed'}],0),
+      b:payload([{line:1,name:'Товар A',quantity:1,quantity_status:'confirmed'},
+                 {line:2,name:'Товар B',quantity:5,quantity_status:'confirmed'}],2)});
+  expect(result.row).toEqual({a:null,b:5});
+  expect(result.b.incoming.find(x => x.date === '2026-10-05')?.qty).toBe(7);
+  expect(result.b.sales).toBe(3);
+});
+
 test('comparison blocks applying OCR runs with unresolved invoice date', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const payload = JSON.stringify({
