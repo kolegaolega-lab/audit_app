@@ -3695,7 +3695,34 @@ function loadHistoryQueue() {
     if (!raw) return [];
     const arr = JSON.parse(raw);
     if (!Array.isArray(arr)) return [];
-    return arr.filter(x => x && typeof x === 'object' && typeof x.path === 'string' && x.data);
+    const out = [];
+    const seenPaths = new Set();
+    for (const entry of arr) {
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry) ||
+          typeof entry.path !== 'string' || !entry.data ||
+          typeof entry.data !== 'object' || Array.isArray(entry.data)) continue;
+      const parts = entry.path.split('/');
+      if (parts.length !== 3 || parts[0] !== HISTORY_DIR ||
+          !/^[0-9]{4}-(0[1-9]|1[0-2])$/.test(parts[1]) ||
+          !parseHistoryFilename(parts[2])) continue;
+      let path = entry.path;
+      if (seenPaths.has(path)) {
+        const filenameParts = parts[2].slice(0, -5).split('-');
+        const unique = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+        filenameParts[2] = `${filenameParts[2]}~q${unique}`;
+        path = `${parts[0]}/${parts[1]}/${filenameParts.join('-')}.json`;
+        let attempt = 0;
+        while (seenPaths.has(path) && attempt < 5) {
+          filenameParts[2] = `${parts[2].slice(0, parts[2].indexOf('~') >= 0 ? parts[2].indexOf('~') : parts[2].indexOf('.json'))}~q${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+          path = `${parts[0]}/${parts[1]}/${filenameParts.join('-')}.json`;
+          attempt++;
+        }
+        if (seenPaths.has(path)) continue;
+      }
+      seenPaths.add(path);
+      out.push({ ...entry, path });
+    }
+    return out;
   } catch (e) { return []; }
 }
 function saveHistoryQueue() {
