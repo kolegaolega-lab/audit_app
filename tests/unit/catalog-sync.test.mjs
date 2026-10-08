@@ -339,3 +339,33 @@ test('history queue preserves duplicate-path snapshots under distinct parseable 
     assert.equal(parsed.login,'auditor');
   }
 });
+
+test('service worker activation deletes only stale caches owned by this app', async () => {
+  const sw = fs.readFileSync(new URL('../../sw.js', import.meta.url), 'utf8');
+  const handlers = {};
+  const deleted = [];
+  let claimed = 0;
+  const context = {
+    self: {
+      addEventListener(type, handler) { handlers[type] = handler; },
+      registration: { navigationPreload: { async disable() {} } },
+      clients: { async claim() { claimed++; } },
+      skipWaiting() {}
+    },
+    caches: {
+      async keys() {
+        return ['fb-audit-v87.64','fb-audit-runtime-v87.64','other-app-cache','fb-audit-v87.65','fb-audit-runtime-v87.65'];
+      },
+      async delete(name) { deleted.push(name); return true; }
+    },
+    console
+  };
+  vm.createContext(context);
+  vm.runInContext(sw, context);
+  let activation;
+  handlers.activate({waitUntil(promise) { activation = promise; }});
+  await activation;
+  assert.deepEqual(deleted, ['fb-audit-v87.64','fb-audit-runtime-v87.64']);
+  assert.equal(deleted.includes('other-app-cache'), false);
+  assert.equal(claimed, 1);
+});
