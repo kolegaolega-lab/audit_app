@@ -786,6 +786,28 @@ test('history snapshot keeps the audit check date after restoring an older sessi
   });
 });
 
+test('history snapshot preserves sales-only marker and category', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Продажи без остатка', salesOnly:true, stock:null, sales:3,
+      shelfLife:null, category:'desserts', incoming:[], _checkDate:'2026-10-08'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    _needsCheckNames = new Set();
+    _cmpData = null;
+    return buildCheckSnapshot().categories.desserts[0];
+  });
+  expect(result).toMatchObject({
+    name:'Продажи без остатка',
+    category:'desserts',
+    salesOnly:true,
+    stock:null,
+    sales:3
+  });
+});
+
 test('history filename preserves seconds for duplicate-audit matching', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => window.parseHistoryFilename('07-123456-pabc-user.json'));
