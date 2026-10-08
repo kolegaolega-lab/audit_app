@@ -63,3 +63,16 @@ test('sync validates the entire remote envelope before the first local mutation'
   assert.ok(mutationAt > validationAt, 'local products must not be changed before validation succeeds');
   assert.match(syncSource, /Локальные данные сохранены/);
 });
+
+test('silent point sync rejects duplicate IDs and normalized point numbers', () => {
+  const start = html.indexOf('async function pullPointsSilently()');
+  const end = html.indexOf('/* ═', start);
+  assert.notEqual(start, -1, 'silent point sync must exist');
+  assert.notEqual(end, -1, 'silent point sync must have a bounded source section');
+  const source = html.slice(start, end);
+  assert.match(source, /const seenIds = new Set\(\)/);
+  assert.match(source, /const seenNums = new Set\(\)/);
+  assert.match(source, /normalizeName\(num\)/);
+  assert.match(source, /seenIds\.has\(id\) \|\| seenNums\.has\(numKey\)/);
+  assert.match(source, /Array\.isArray\(p\)/, 'array-shaped records must be ignored');
+});
