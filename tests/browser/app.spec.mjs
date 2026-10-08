@@ -629,7 +629,7 @@ test('comparison normalizes Rom baba quantity confirmation before safety gate', 
 test('comparison applies selected values from second run for one-sided rows and dates', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const payload = (items, sales) => JSON.stringify({
-    schema_version:'1.0', document_type:'invoice', check_date:'2026-10-06',
+    schema_version:'1.0', document_type:'combined', check_date:'2026-10-06',
     source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
     invoices:[{number:'INV-1',date:'2026-10-05',continuation:false,last_line_number:1,
       items}],
@@ -659,9 +659,9 @@ test('comparison applies selected values from second run for one-sided rows and 
       b: tableRows.find(r => r.name === 'Товар B'),
       row: {a:row.a?.incoming?.['05.10'] ?? null,b:row.b?.incoming?.['05.10'] ?? null}
     };
-  }, {a:payload([{line:1,name:'Товар A',quantity:1,quantity_status:'confirmed'}],0),
-      b:payload([{line:1,name:'Товар A',quantity:1,quantity_status:'confirmed'},
-                 {line:2,name:'Товар B',quantity:5,quantity_status:'confirmed'}],2)});
+  }, {a:payload([{line:1,name:'Товар A',quantity:1,price:10,amount:10,quantity_status:'confirmed'}],0),
+      b:payload([{line:1,name:'Товар A',quantity:1,price:10,amount:10,quantity_status:'confirmed'},
+                 {line:2,name:'Товар B',quantity:5,price:10,amount:50,quantity_status:'confirmed'}],2)});
   expect(result.row).toEqual({a:null,b:5});
   expect(result.b.incoming.find(x => x.date === '2026-10-05')?.qty).toBe(7);
   expect(result.b.sales).toBe(3);
