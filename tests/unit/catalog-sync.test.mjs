@@ -76,3 +76,14 @@ test('silent point sync rejects duplicate IDs and normalized point numbers', () 
   assert.match(source, /seenIds\.has\(id\) \|\| seenNums\.has\(numKey\)/);
   assert.match(source, /Array\.isArray\(p\)/, 'array-shaped records must be ignored');
 });
+
+test('adding a point uses the same normalized number comparison as remote sync', () => {
+  const start = html.indexOf('function addPoint(');
+  const end = html.indexOf('function removePoint(', start);
+  assert.notEqual(start, -1, 'addPoint must exist');
+  assert.notEqual(end, -1, 'addPoint source section must be bounded');
+  const source = html.slice(start, end);
+  assert.match(source, /const numKey = normalizeName\(n\)/);
+  assert.match(source, /_points\.some\(p => normalizeName\(p\.num\) === numKey\)/);
+  assert.doesNotMatch(source, /p\.num\.toLowerCase\(\) === n\.toLowerCase\(\)/);
+});
