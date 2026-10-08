@@ -3425,7 +3425,11 @@ function removePoint(id) {
       else localStorage.removeItem(ACTIVE_POINT_KEY);
     } catch (e) {}
     updateHeaderPoint();
-    syncActivePointToInput();
+    if (_activePointId) syncActivePointToInput();
+    else {
+      const pointInput = $('point');
+      if (pointInput) pointInput.value = '';
+    }
   }
   if (typeof renderToday === 'function') renderToday();
 }
