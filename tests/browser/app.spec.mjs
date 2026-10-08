@@ -1219,6 +1219,50 @@ test('report headline treats missing incoming as a problem', async ({page}) => {
   expect(result).toContain('Нет прихода');
 });
 
+test('completion gate allows missing incoming as an explicit audit finding', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Товар без прихода', salesOnly:false, stock:3, sales:2,
+      shelfLife:48, category:'desserts', incoming:[], _checkDate:'2026-10-06'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    updateFinishCheckBtn();
+    const before = {canFinish:canFinishCheck(), disabled:$('finishCheckBtn')?.disabled ?? null};
+    openReport();
+    return {
+      before,
+      modalOpen: !$('reportModal')?.classList.contains('hidden'),
+      reportText: $('reportBody')?.textContent || ''
+    };
+  });
+  expect(result.before).toEqual({canFinish:true, disabled:false});
+  expect(result.modalOpen).toBe(true);
+  expect(result.reportText).toContain('Нет прихода');
+});
+
+test('completion gate allows expired FIFO findings after all required inputs are present', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Товар с просроченным остатком', salesOnly:false, stock:4, sales:0,
+      shelfLife:24, category:'desserts',
+      incoming:[{date:'2026-10-04',qty:4}], _checkDate:'2026-10-06'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    updateFinishCheckBtn();
+    const calc = computeFIFO(tableRows[0]);
+    return {calc, canFinish:canFinishCheck(), disabled:$('finishCheckBtn')?.disabled ?? null};
+  });
+  expect(result.calc.expiredOnShelf).toBe(4);
+  expect(result.canFinish).toBe(true);
+  expect(result.disabled).toBe(false);
+});
+
 test('OCR validation does not freeze on large reference catalog', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
