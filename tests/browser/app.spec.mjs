@@ -652,6 +652,75 @@ test('OCR safety accepts Russian invoice dates used by JSON parser', async ({pag
   expect(result).not.toContain('invoice-date-missing');
 });
 
+test('Ром баба uses printed quantity confirmation, not handwritten confirmation', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const input = {
+      schema_version:'1.0', document_type:'invoice', check_date:'2026-10-06',
+      source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
+      invoices:[{number:'RB-1',date:'2026-10-06',continuation:false,last_line_number:1,items:[
+        {line:1,name:'Ром баба',quantity:4,quantity_status:'handwritten'}
+      ]}],
+      sales:[],
+      review:{unreadable:[],handwritten_confirmation:['Ром баба'],uncertain_rows:[],notes:[]}
+    };
+    const normalized = JSON.parse(window.normalizeKnownQuantityConfirmations(JSON.stringify(input)));
+    return {
+      status: normalized.invoices[0].items[0].quantity_status,
+      review: normalized.review.handwritten_confirmation
+    };
+  });
+  expect(result).toEqual({status:'confirmed',review:[]});
+});
+
+test('invoice continuation date does not leak into a new non-continuation invoice', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const payload = {
+      schema_version:'1.0', document_type:'invoice', check_date:'2026-10-06',
+      source:{photo_count:4,processed_photo_count:4,duplicate_photo_count:0},
+      invoices:[
+        {number:'A',date:'2026-10-06',continuation:false,last_line_number:1,items:[
+          {line:1,name:'Товар A',quantity:1,quantity_status:'confirmed'}
+        ]},
+        {number:'A',date:null,continuation:true,last_line_number:2,items:[
+          {line:2,name:'Товар B',quantity:2,quantity_status:'confirmed'}
+        ]},
+        {number:'B',date:null,continuation:false,last_line_number:1,items:[
+          {line:1,name:'Товар C',quantity:3,quantity_status:'confirmed'}
+        ]},
+        {number:'B',date:null,continuation:true,last_line_number:2,items:[
+          {line:2,name:'Товар D',quantity:4,quantity_status:'confirmed'}
+        ]}
+      ],
+      sales:[],
+      review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+    };
+    const parsed = window.parseJSON(JSON.stringify(payload), new Date('2026-10-06T10:00:00'));
+    return Object.fromEntries(parsed.rows.map(r => [r.name, r.incoming]));
+  });
+  expect(result['Товар A']).toEqual([{date:'2026-10-06',qty:1}]);
+  expect(result['Товар B']).toEqual([{date:'2026-10-06',qty:2}]);
+  expect(result['Товар C']).toEqual([]);
+  expect(result['Товар D']).toEqual([]);
+});
+
+test('report headline treats missing incoming as a problem', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Товар без прихода', salesOnly:false, stock:3, sales:0,
+      shelfLife:24, category:'desserts', incoming:[], _checkDate:'2026-10-06'
+    }];
+    renderReport();
+    return document.querySelector('#reportBody')?.textContent || '';
+  });
+  expect(result).toContain('1 проблема');
+  expect(result).not.toContain('всё свежее');
+  expect(result).toContain('Нет прихода');
+});
+
 test('OCR validation does not freeze on large reference catalog', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
