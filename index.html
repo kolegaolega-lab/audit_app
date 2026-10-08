@@ -3684,8 +3684,11 @@ function buildCheckSnapshot() {
     });
     cats[cat] = items;
   });
+  const auditDate = (tableRows || [])
+    .map(r => String(r && r._checkDate || '').trim())
+    .find(v => /^\d{4}-\d{2}-\d{2}$/.test(v)) || getTodayStr();
   return {
-    version: 1, createdAt: now.toISOString(), date: getTodayStr(),
+    version: 1, createdAt: now.toISOString(), date: auditDate,
     pointId: p ? p.id : null, pointNum: p ? p.num : '',
     pointName: p ? p.name : '', pointAddress: p ? p.address : '',
     authorName: (_profile && _profile.name) ? _profile.name : '',
