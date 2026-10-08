@@ -1876,7 +1876,7 @@ const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.24.19';
+const APP_VERSION = 'v9.24.20';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -8948,6 +8948,11 @@ function cmpRefreshSafetyGate() {
     });
     if (!allResolved) unresolved.push(issue);
   });
+
+  // Сохраняем только ещё не устранённые safety-проблемы. Это важно для кнопки «Применить»:
+  // после подтверждения количества старая ошибка не должна оставаться блокирующей.
+  _cmpData.safetyIssues = unresolved;
+  _cmpData.comparisonValid = unresolved.length === 0;
 
   // После выбора значения пересчитываем статус строки.
   (_cmpData.rows || []).forEach(row => {
