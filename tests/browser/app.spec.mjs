@@ -1577,3 +1577,64 @@ test('finish gate stays correct after session restore', async ({page}) => {
   });
   expect(result).toEqual({can:true,reason:'',stock:2,shelfLife:24});
 });
+
+
+test('card status, report and history snapshot agree for zero stock with no incoming', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Товар без прихода и без остатка', salesOnly:false, stock:0, sales:0,
+      shelfLife:24, category:'desserts', incoming:[], _checkDate:'2026-10-06'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    const calc = computeFIFO(tableRows[0]);
+    const status = getRowStatus(calc, tableRows[0]);
+    const card = getCardStatus(calc, tableRows[0]);
+    renderReport();
+    const reportText = $('reportBody')?.textContent || '';
+    const snapshot = buildCheckSnapshot();
+    return {
+      calc, status, card,
+      reportText,
+      snapshotItem:snapshot.categories.desserts[0],
+      snapshotTotals:snapshot.totals
+    };
+  });
+  expect(result.calc).toEqual({soldExpired:0,expiredOnShelf:0,freshOnShelf:0,freshSold:0});
+  expect(result.status).toEqual({cls:'row-fresh',label:'fresh'});
+  expect(result.card).toBe('fresh');
+  expect(result.reportText).toContain('всё свежее');
+  expect(result.reportText).not.toContain('Нет прихода');
+  expect(result.snapshotItem.noIncoming).toBe(false);
+  expect(result.snapshotTotals.noIncoming).toBe(0);
+});
+
+test('history snapshot preserves explicit missing-incoming finding consistently with report', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Товар с остатком без прихода', salesOnly:false, stock:3, sales:0,
+      shelfLife:24, category:'desserts', incoming:[], _checkDate:'2026-10-06'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    const calc = computeFIFO(tableRows[0]);
+    const status = getRowStatus(calc, tableRows[0]);
+    renderReport();
+    const reportText = $('reportBody')?.textContent || '';
+    const snapshot = buildCheckSnapshot();
+    return {
+      calc, status, reportText,
+      snapshotItem:snapshot.categories.desserts[0],
+      snapshotTotals:snapshot.totals
+    };
+  });
+  expect(result.calc).toEqual({soldExpired:0,expiredOnShelf:3,freshOnShelf:0,freshSold:0});
+  expect(result.status).toEqual({cls:'row-danger',label:'danger'});
+  expect(result.reportText).toContain('Нет прихода');
+  expect(result.snapshotItem.noIncoming).toBe(true);
+  expect(result.snapshotTotals.noIncoming).toBe(1);
+  expect(result.snapshotTotals.expiredOnShelf).toBe(3);
+});
