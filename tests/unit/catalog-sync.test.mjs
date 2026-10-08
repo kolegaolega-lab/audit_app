@@ -133,6 +133,8 @@ test('removing the last active point clears persisted selection and synchronizes
     _activePointId: 'p1',
     _route: {date:'2026-10-09',pointIds:['p1']},
     ACTIVE_POINT_KEY: 'active',
+    pointInput: {value:'001'},
+    $ (id) { return id === 'point' ? this.pointInput : null; },
     localStorage: {
       values: new Map([['active','p1']]),
       setItem(key,value) { this.values.set(key,String(value)); },
@@ -152,5 +154,6 @@ test('removing the last active point clears persisted selection and synchronizes
   assert.equal(context.localStorage.values.has('active'), false);
   assert.deepEqual(Array.from(context._route.pointIds), []);
   assert.equal(context.headerUpdated, true);
-  assert.equal(context.inputSynced, true);
+  assert.equal(context.pointInput.value, '');
+  assert.equal(context.inputSynced, undefined);
 });
