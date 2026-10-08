@@ -292,7 +292,7 @@ test('daily separated OCR keeps continuation invoice without its own date', asyn
 test('finish check stays blocked until unresolved catalog positions are resolved', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
-    tableRows = [{name:'Товар A', salesOnly:false, stock:3}];
+    tableRows = [{name:'Товар A', salesOnly:false, stock:3, shelfLife:48, category:'desserts'}];
     unknownRows = [{name:'Новый товар', sales:1}];
     noCategoryRows = [];
     updateFinishCheckBtn();
@@ -355,8 +355,8 @@ test('finish check button updates from blocked to ready after all stocks are ent
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
     tableRows = [
-      {name:'Товар A', salesOnly:false, stock:null},
-      {name:'Продажи B', salesOnly:true, stock:null}
+      {name:'Товар A', salesOnly:false, stock:null, shelfLife:48, category:'desserts'},
+      {name:'Продажи B', salesOnly:true, stock:null, shelfLife:48, category:'desserts'}
     ];
     updateFinishCheckBtn();
     const first = {disabled: $('finishCheckBtn').disabled, text: $('finishCheckBtn').textContent};
