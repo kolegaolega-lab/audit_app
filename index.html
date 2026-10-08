@@ -9285,15 +9285,32 @@ function cmpApplyMatched() {
   const byKey = new Map();
   applyRows.forEach(r => {
     const incoming = {};
-    if (r.a) {
-      Object.keys(r.a.incoming || {}).forEach(dk => {
-        const edited = r.edits && r.edits.incoming && r.edits.incoming[dk] != null;
-        const unconfirmed = r.a.incomingStatus && r.a.incomingStatus[dk];
-        if (!unconfirmed || edited) incoming[dk] = edited ? r.edits.incoming[dk] : r.a.incoming[dk];
-      });
-    }
+    // Используем объединение дат обоих прогонов. Если аудитор выбрал значение
+    // вручную, оно имеет приоритет; иначе берём подтверждённое значение из
+    // результата 1, а если его нет — из результата 2.
+    const dateKeys = new Set([
+      ...(r.a ? Object.keys(r.a.incoming || {}) : []),
+      ...(r.b ? Object.keys(r.b.incoming || {}) : []),
+      ...Object.keys(r.edits?.incoming || {})
+    ]);
+    dateKeys.forEach(dk => {
+      const edited = r.edits?.incoming?.[dk] != null;
+      if (edited) {
+        incoming[dk] = r.edits.incoming[dk];
+        return;
+      }
+      const aStatus = r.a?.incomingStatus?.[dk];
+      const bStatus = r.b?.incomingStatus?.[dk];
+      const aHas = !!r.a && Object.prototype.hasOwnProperty.call(r.a.incoming || {}, dk);
+      const bHas = !!r.b && Object.prototype.hasOwnProperty.call(r.b.incoming || {}, dk);
+      if (aHas && !aStatus) incoming[dk] = r.a.incoming[dk];
+      else if (bHas && !bStatus) incoming[dk] = r.b.incoming[dk];
+    });
     const salesEdited = r.edits && r.edits.sales != null;
-    const sales = salesEdited ? r.edits.sales : (r.a && r.a.salesStatus === 'confirmed' ? r.a.sales : 0);
+    let sales = 0;
+    if (salesEdited) sales = r.edits.sales;
+    else if (r.a && r.a.salesStatus === 'confirmed') sales = r.a.sales;
+    else if (r.b && r.b.salesStatus === 'confirmed') sales = r.b.sales;
     byKey.set(cmpCanonicalName(r.name), { incoming, sales });
   });
   let applied = 0;
@@ -9335,9 +9352,20 @@ function cmpApplyMatched() {
     if (unknownKeys.has(key)) return;
     if (PRODUCTS.some(p => cmpCanonicalName(p.name) === key)) return;
     if (isIgnored(r.name)) return;
-    const incoming = { ...(r.a ? r.a.incoming : {}) };
-    if (r.edits && r.edits.incoming) Object.assign(incoming, r.edits.incoming);
-    const sales = (r.edits && r.edits.sales != null) ? r.edits.sales : (r.a ? r.a.sales : 0);
+    const incoming = {};
+    const dateKeys = new Set([
+      ...(r.a ? Object.keys(r.a.incoming || {}) : []),
+      ...(r.b ? Object.keys(r.b.incoming || {}) : []),
+      ...Object.keys(r.edits?.incoming || {})
+    ]);
+    dateKeys.forEach(dk => {
+      if (r.edits?.incoming?.[dk] != null) incoming[dk] = r.edits.incoming[dk];
+      else if (r.a?.incomingStatus?.[dk] == null && Object.prototype.hasOwnProperty.call(r.a?.incoming || {}, dk)) incoming[dk] = r.a.incoming[dk];
+      else if (r.b?.incomingStatus?.[dk] == null && Object.prototype.hasOwnProperty.call(r.b?.incoming || {}, dk)) incoming[dk] = r.b.incoming[dk];
+    });
+    const sales = (r.edits && r.edits.sales != null) ? r.edits.sales :
+      (r.a?.salesStatus === 'confirmed' ? r.a.sales :
+      (r.b?.salesStatus === 'confirmed' ? r.b.sales : 0));
     const incomingArr = [];
     Object.keys(incoming).forEach(dk => {
       const iso = inferIsoFromDdmm(dk, new Date());
