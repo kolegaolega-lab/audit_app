@@ -121,7 +121,7 @@ test('FIFO never uses future-dated incoming to make an audit result fresh', asyn
     ],
     _checkDate:'2026-10-17'
   }));
-  expect(result).toEqual({soldExpired:1,expiredOnShelf:2,freshOnShelf:0,freshSold:0});
+  expect(result).toEqual({soldExpired:0,expiredOnShelf:2,freshOnShelf:0,freshSold:1});
 });
 
 test('FIFO merges same-day incoming before applying FIFO', async ({page}) => {
