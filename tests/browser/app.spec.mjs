@@ -1685,3 +1685,46 @@ test('session restore preserves an unresolved double-run comparison blocker', as
   expect(result.restored.disabled).toBe(true);
   expect(result.restored.reason).toContain('двух результатов');
 });
+
+
+test('final report does not call sales-only OCR rows fresh', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Продажа без прихода', salesOnly:true, stock:null, sales:2,
+      shelfLife:null, category:'desserts', incoming:[], _checkDate:'2026-10-08'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    _cmpData = null;
+    _dailyAccum = [];
+    renderReport();
+    return $('reportBody')?.textContent || '';
+  });
+  expect(result).toContain('только с продажами');
+  expect(result).not.toContain('всё свежее');
+  expect(result).toContain('Только продажи');
+});
+
+test('history send path rechecks completion gate instead of bypassing unresolved data', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(async () => {
+    tableRows = [{
+      name:'Незавершённая позиция', salesOnly:false, stock:null, sales:1,
+      shelfLife:24, category:'desserts', incoming:[], _checkDate:'2026-10-08'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    _cmpData = null;
+    _dailyAccum = [];
+    let called = false;
+    pushHistoryFile = async () => { called = true; };
+    _profile = {login:'test', name:'Test', token:'x'};
+    _activePointId = 'test-point';
+    const old = $('sendReportStatus')?.textContent || '';
+    await sendReportToHistory();
+    return {called, status:$('sendReportStatus')?.textContent || old};
+  });
+  expect(result.called).toBe(false);
+  expect(result.status).toContain('Введите остаток');
+});
