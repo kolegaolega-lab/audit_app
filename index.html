@@ -3708,15 +3708,14 @@ function loadHistoryQueue() {
       let path = entry.path;
       if (seenPaths.has(path)) {
         const filenameParts = parts[2].slice(0, -5).split('-');
-        const unique = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
-        filenameParts[2] = `${filenameParts[2]}~q${unique}`;
-        path = `${parts[0]}/${parts[1]}/${filenameParts.join('-')}.json`;
+        const pointId = filenameParts[2].split('~', 1)[0];
         let attempt = 0;
-        while (seenPaths.has(path) && attempt < 5) {
-          filenameParts[2] = `${parts[2].slice(0, parts[2].indexOf('~') >= 0 ? parts[2].indexOf('~') : parts[2].indexOf('.json'))}~q${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+        do {
+          const unique = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}${attempt}`;
+          filenameParts[2] = `${pointId}~q${unique}`;
           path = `${parts[0]}/${parts[1]}/${filenameParts.join('-')}.json`;
           attempt++;
-        }
+        } while (seenPaths.has(path) && attempt < 5);
         if (seenPaths.has(path)) continue;
       }
       seenPaths.add(path);
