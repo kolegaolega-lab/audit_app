@@ -1840,12 +1840,9 @@ test('history send path writes the same snapshot used by the final report', asyn
     const expected=buildCheckSnapshot();
     let pushed=null;
     const originalPush=pushHistoryFile;
-    const originalTwin=findRecentTwin;
     pushHistoryFile=async (path,data)=>{ pushed={path,data}; };
-    findRecentTwin=async ()=>null;
     await sendReportToHistory();
     pushHistoryFile=originalPush;
-    findRecentTwin=originalTwin;
     return {
       pushed,
       expected:{
