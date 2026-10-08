@@ -8488,8 +8488,30 @@ function cmpParseJSON(text, applyCategory = true, includeUnconfirmed = false){
     if (!dateCols.some(x => x.key === dk)) dateCols.push({ key: dk, label: dk });
     return dk;
   };
+  const invoiceDates = {};
+  let activeInvoiceDate = "";
   (Array.isArray(d.invoices) ? d.invoices : []).forEach(inv => {
-    const dk = addDateCol(inv && inv.date);
+    const copyDate = String(inv?.date || "").trim();
+    const number = String(inv?.number || "").trim();
+    let effectiveDate = copyDate;
+    if (copyDate) {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(copyDate)) {
+        if (number) invoiceDates[number] = copyDate;
+        activeInvoiceDate = copyDate;
+      } else {
+        const parsed = parseDateRu(copyDate, new Date());
+        effectiveDate = parsed ? toDayKey(parsed) : "";
+        if (effectiveDate) {
+          if (number) invoiceDates[number] = effectiveDate;
+          activeInvoiceDate = effectiveDate;
+        }
+      }
+    } else if (inv?.continuation) {
+      effectiveDate = (number && invoiceDates[number]) || activeInvoiceDate || "";
+    } else {
+      activeInvoiceDate = "";
+    }
+    const dk = addDateCol(effectiveDate);
     (Array.isArray(inv?.items) ? inv.items : []).forEach(it => {
       if (!it || it.quantity == null) return;
       const status = String(it.quantity_status || 'confirmed');
