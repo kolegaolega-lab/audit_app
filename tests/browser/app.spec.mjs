@@ -92,6 +92,82 @@ test('agreed 22:00 shelf-life cutoff and FIFO', async ({page}) => {
   expect(result.fifo).toEqual({soldExpired:0,expiredOnShelf:1,freshOnShelf:2,freshSold:0});
 });
 
+test('FIFO uses all received stock but flags shortage as expired', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-17T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => window.computeFIFO({
+    stock:3,
+    sales:2,
+    shelfLife:48,
+    incoming:[
+      {date:'2026-10-16',qty:2},
+      {date:'2026-10-17',qty:2}
+    ],
+    _checkDate:'2026-10-17'
+  }));
+  expect(result).toEqual({soldExpired:0,expiredOnShelf:1,freshOnShelf:2,freshSold:2});
+});
+
+test('FIFO never uses future-dated incoming to make an audit result fresh', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-17T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => window.computeFIFO({
+    stock:2,
+    sales:1,
+    shelfLife:48,
+    incoming:[
+      {date:'2026-10-16',qty:1},
+      {date:'2026-10-18',qty:10}
+    ],
+    _checkDate:'2026-10-17'
+  }));
+  expect(result).toEqual({soldExpired:1,expiredOnShelf:2,freshOnShelf:0,freshSold:0});
+});
+
+test('FIFO merges same-day incoming before applying FIFO', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-17T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => window.computeFIFO({
+    stock:1,
+    sales:2,
+    shelfLife:24,
+    incoming:[
+      {date:'2026-10-17',qty:1},
+      {date:'2026-10-17',qty:2}
+    ],
+    _checkDate:'2026-10-17'
+  }));
+  expect(result).toEqual({soldExpired:0,expiredOnShelf:0,freshOnShelf:1,freshSold:2});
+});
+
+test('FIFO marks everything expired when there is no usable incoming', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-17T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => window.computeFIFO({
+    stock:3,
+    sales:2,
+    shelfLife:24,
+    incoming:[],
+    _checkDate:'2026-10-17'
+  }));
+  expect(result).toEqual({soldExpired:2,expiredOnShelf:3,freshOnShelf:0,freshSold:0});
+});
+
+test('22:00 cutoff is strict: exactly 22:00 is expired', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const before = await page.evaluate(() => window.computeFIFO({
+    stock:1,sales:0,shelfLife:24,
+    incoming:[{date:'2026-10-17',qty:1}],_checkDate:'2026-10-17'
+  }));
+  await page.clock.setFixedTime(new Date('2026-10-17T22:00:00'));
+  const at = await page.evaluate(() => window.computeFIFO({
+    stock:1,sales:0,shelfLife:24,
+    incoming:[{date:'2026-10-17',qty:1}],_checkDate:'2026-10-17'
+  }));
+  expect(before).toEqual({soldExpired:0,expiredOnShelf:0,freshOnShelf:1,freshSold:0});
+  expect(at).toEqual({soldExpired:0,expiredOnShelf:1,freshOnShelf:0,freshSold:0});
+});
+
 test('multi-page invoice continuation inherits date and handwritten quantity is blocked by OCR safety', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
