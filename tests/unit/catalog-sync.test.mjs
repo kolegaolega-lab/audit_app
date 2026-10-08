@@ -231,3 +231,44 @@ test('history sending writes to the unique path and does not reuse a recent file
   assert.match(source, /await pushHistoryFile\(defaultPath, snapshot\)/);
   assert.doesNotMatch(source, /findRecentTwin/);
 });
+
+test('restoring a daily route removes duplicate and malformed point IDs', () => {
+  const start = html.indexOf('function loadRoute(');
+  const end = html.indexOf('function saveRoute(', start);
+  assert.notEqual(start, -1);
+  assert.notEqual(end, -1);
+  const context = {
+    ROUTE_KEY: 'route',
+    localStorage: {
+      getItem() { return JSON.stringify({date:'2026-10-09',pointIds:[
+        'p1','p1',null,{},'','p2','p2', ...Array.from({length:25},(_,i)=>'p'+(i+3))
+      ]}); }
+    }
+  };
+  vm.createContext(context);
+  vm.runInContext(html.slice(start, end), context);
+  const route = JSON.parse(JSON.stringify(context.loadRoute()));
+  assert.equal(route.date, '2026-10-09');
+  assert.equal(route.pointIds.length, 20);
+  assert.deepEqual(route.pointIds.slice(0,2), ['p1','p2']);
+  assert.equal(new Set(route.pointIds).size, route.pointIds.length);
+});
+
+test('restoring a route rejects malformed dates and array-shaped envelopes', () => {
+  const start = html.indexOf('function loadRoute(');
+  const end = html.indexOf('function saveRoute(', start);
+  const values = [
+    JSON.stringify({date:'yesterday',pointIds:['p1']}),
+    JSON.stringify([{date:'2026-10-09',pointIds:['p1']}]),
+    JSON.stringify({date:'2026-10-09',pointIds:{}})
+  ];
+  const context = {
+    ROUTE_KEY: 'route',
+    localStorage: {getItem() { return values.shift(); }}
+  };
+  vm.createContext(context);
+  vm.runInContext(html.slice(start, end), context);
+  assert.equal(context.loadRoute(), null);
+  assert.equal(context.loadRoute(), null);
+  assert.equal(context.loadRoute(), null);
+});
