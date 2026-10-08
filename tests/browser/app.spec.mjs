@@ -1089,6 +1089,120 @@ test('double-run comparison inherits dates for continuation invoice pages', asyn
   expect(result.incoming['Товар B']).toEqual({'06.10':2});
 });
 
+test('completion gate blocks empty, missing stock, missing shelf life and unresolved reference states', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const base = {
+      name:'Тестовый товар', salesOnly:false, stock:0, sales:0,
+      shelfLife:24, category:'desserts', incoming:[{date:'2026-10-06',qty:1}],
+      _checkDate:'2026-10-06'
+    };
+    const snapshot = () => ({
+      canFinish: canFinishCheck(),
+      btnDisabled: document.querySelector('#finishCheckBtn')?.disabled ?? null
+    });
+
+    tableRows = [];
+    unknownRows = [];
+    noCategoryRows = [];
+    updateFinishCheckBtn();
+    const empty = snapshot();
+
+    tableRows = [{...base, stock:null}];
+    updateFinishCheckBtn();
+    const missingStock = snapshot();
+
+    tableRows = [{...base, shelfLife:null}];
+    updateFinishCheckBtn();
+    const missingShelf = snapshot();
+
+    tableRows = [{...base}];
+    unknownRows = [{name:'Неизвестный товар'}];
+    noCategoryRows = [];
+    updateFinishCheckBtn();
+    const unresolved = snapshot();
+
+    return {empty, missingStock, missingShelf, unresolved};
+  });
+  expect(result.empty.canFinish).toBe(false);
+  expect(result.empty.btnDisabled).toBe(true);
+  expect(result.missingStock.canFinish).toBe(false);
+  expect(result.missingStock.btnDisabled).toBe(true);
+  expect(result.missingShelf.canFinish).toBe(false);
+  expect(result.missingShelf.btnDisabled).toBe(true);
+  expect(result.unresolved.canFinish).toBe(false);
+  expect(result.unresolved.btnDisabled).toBe(true);
+});
+
+test('completion gate allows finished audit with confirmed stock even when findings exist', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Товар с просрочкой', salesOnly:false, stock:3, sales:2,
+      shelfLife:24, category:'desserts',
+      incoming:[{date:'2026-10-05',qty:1}],
+      _checkDate:'2026-10-06'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    updateFinishCheckBtn();
+    const before = {canFinish: canFinishCheck(), disabled: $('finishCheckBtn')?.disabled ?? null};
+    openReport();
+    const after = {
+      modalOpen: !$('reportModal')?.classList.contains('hidden'),
+      reportText: $('reportBody')?.textContent || ''
+    };
+    return {before, after};
+  });
+  expect(result.before.canFinish).toBe(true);
+  expect(result.before.disabled).toBe(false);
+  expect(result.after.modalOpen).toBe(true);
+  expect(result.after.reportText).toContain('Проверка завершена');
+  expect(result.after.reportText).toContain('1 проблема');
+});
+
+test('completion gate allows sales-only rows without stock or shelf life', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Продажи без прихода', salesOnly:true, stock:null, sales:3,
+      shelfLife:null, category:null, incoming:[], _checkDate:'2026-10-06'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    updateFinishCheckBtn();
+    return {canFinish: canFinishCheck(), disabled: $('finishCheckBtn')?.disabled ?? null};
+  });
+  expect(result.canFinish).toBe(true);
+  expect(result.disabled).toBe(false);
+});
+
+test('openReport enforces the same completion gate even if button state is stale', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Товар без срока', salesOnly:false, stock:2, sales:0,
+      shelfLife:null, category:'desserts', incoming:[], _checkDate:'2026-10-06'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    const modal = $('reportModal');
+    modal?.classList.add('hidden');
+    const originalToast = window.showToast;
+    let toast = '';
+    window.showToast = msg => { toast = String(msg || ''); };
+    openReport();
+    window.showToast = originalToast;
+    return {
+      modalOpen: !modal?.classList.contains('hidden'),
+      toast
+    };
+  });
+  expect(result.modalOpen).toBe(false);
+  expect(result.toast).toContain('срок годности');
+});
+
 test('report headline treats missing incoming as a problem', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
