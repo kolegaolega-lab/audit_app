@@ -633,7 +633,7 @@ test('comparison applies selected values from second run for one-sided rows and 
     source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
     invoices:[{number:'INV-1',date:'2026-10-05',continuation:false,last_line_number:items.length,
       items}],
-    sales:[{name:'Товар B',quantity:sales,quantity_status:'confirmed'}],
+    sales:sales == null ? [] : [{name:'Товар B',quantity:sales,quantity_status:'confirmed'}],
     review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
   });
   const result = await page.evaluate(({a,b}) => {
@@ -659,7 +659,7 @@ test('comparison applies selected values from second run for one-sided rows and 
       b: tableRows.find(r => r.name === 'Товар B'),
       row: {a:row.a?.incoming?.['05.10'] ?? null,b:row.b?.incoming?.['05.10'] ?? null}
     };
-  }, {a:payload([{line:1,name:'Товар A',quantity:1,price:10,amount:10,quantity_status:'confirmed'}],0),
+  }, {a:payload([{line:1,name:'Товар A',quantity:1,price:10,amount:10,quantity_status:'confirmed'}],null),
       b:payload([{line:1,name:'Товар A',quantity:1,price:10,amount:10,quantity_status:'confirmed'},
                  {line:2,name:'Товар B',quantity:5,price:10,amount:50,quantity_status:'confirmed'}],2)});
   expect(result.row).toEqual({a:null,b:5});
