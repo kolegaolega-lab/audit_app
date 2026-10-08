@@ -1436,3 +1436,68 @@ test('Gemini response schema uses proto-compatible nullable fields', async ({pag
   expect(result.hasNullableArrays).toBe(false);
   expect(result.schema).toBeTruthy();
 });
+
+
+test('finish gate blocks incomplete audit but allows legitimate FIFO findings', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const baseRow = (overrides = {}) => ({
+      name:'Тестовый товар', stock:2, sales:1, _originalSales:1,
+      shelfLife:24, category:'desserts',
+      incoming:[{date:'2026-10-05',qty:1,_originalQty:1}],
+      salesOnly:false, _checkDate:'2026-10-06', ...overrides
+    });
+    const check = (rows, extra = {}) => {
+      tableRows = rows;
+      unknownRows = extra.unknownRows || [];
+      noCategoryRows = extra.noCategoryRows || [];
+      _needsCheckNames = extra.needsCheckNames || new Set();
+      _cmpData = extra.cmpData || null;
+      return { can: canFinishCheck(), reason: getFinishCheckBlockReason(getFinishCheckIssues()) };
+    };
+    return {
+      complete: check([baseRow()]),
+      missingStock: check([baseRow({stock:null})]),
+      missingShelfLife: check([baseRow({shelfLife:null})]),
+      unknownReference: check([baseRow()], {unknownRows:[{name:'Неизвестный'}]}),
+      noCategory: check([baseRow()], {noCategoryRows:[{name:'Без категории'}]}),
+      noIncoming: check([baseRow({incoming:[]})]),
+      expiredFIFO: check([baseRow({stock:5,sales:4,incoming:[{date:'2026-10-05',qty:2,_originalQty:2}]})]),
+      salesOnly: check([{name:'Только продажи',stock:null,sales:3,shelfLife:null,category:'desserts',incoming:[],salesOnly:true}]),
+      dailyPending: check([baseRow()], {needsCheckNames:new Set(['Тестовый товар'])}),
+      comparisonPending: check([baseRow()], {cmpData:{comparisonValid:false}})
+    };
+  });
+  expect(result.complete.can).toBe(true);
+  expect(result.complete.reason).toBe('');
+  expect(result.missingStock.can).toBe(false);
+  expect(result.missingStock.reason).toContain('Введите остаток');
+  expect(result.missingShelfLife.can).toBe(false);
+  expect(result.missingShelfLife.reason).toContain('срок годности');
+  expect(result.unknownReference.can).toBe(false);
+  expect(result.noCategory.can).toBe(false);
+  expect(result.noIncoming.can).toBe(true);
+  expect(result.expiredFIFO.can).toBe(true);
+  expect(result.salesOnly.can).toBe(true);
+  expect(result.dailyPending.can).toBe(false);
+  expect(result.comparisonPending.can).toBe(false);
+});
+
+test('finish gate stays correct after session restore', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    localStorage.clear();
+    tableRows=[{
+      name:'Восстановленный товар', stock:2, sales:1, _originalSales:1,
+      shelfLife:24, category:'desserts',
+      incoming:[{date:'2026-10-05',qty:1,_originalQty:1}],
+      salesOnly:false, _checkDate:'2026-10-06'
+    }];
+    unknownRows=[]; noCategoryRows=[]; _needsCheckNames=new Set(); _cmpData=null;
+    saveSession();
+    applySession(loadSession());
+    return {can:canFinishCheck(),reason:getFinishCheckBlockReason(getFinishCheckIssues()),stock:tableRows[0].stock,shelfLife:tableRows[0].shelfLife};
+  });
+  expect(result).toEqual({can:true,reason:'',stock:2,shelfLife:24});
+});
