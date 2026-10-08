@@ -1484,6 +1484,54 @@ test('finish gate blocks incomplete audit but allows legitimate FIFO findings', 
   expect(result.comparisonPending.can).toBe(false);
 });
 
+test('finish gate button explains OCR and comparison blockers', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const row = {
+      name:'Тестовый товар', stock:2, sales:1, _originalSales:1,
+      shelfLife:24, category:'desserts',
+      incoming:[{date:'2026-10-05',qty:1,_originalQty:1}],
+      salesOnly:false, _checkDate:'2026-10-06'
+    };
+
+    tableRows = [row];
+    unknownRows = [];
+    noCategoryRows = [];
+    _needsCheckNames = new Set();
+    _dailyAccum = [{
+      iso:'2026-10-06', label:'06.10', json:'{}',
+      needsCheck:true, blocked:false
+    }];
+    _cmpData = null;
+    updateFinishCheckBtn();
+    const daily = {
+      disabled: $('finishCheckBtn')?.disabled ?? null,
+      text: $('finishCheckBtn')?.textContent || '',
+      title: $('finishCheckBtn')?.title || ''
+    };
+
+    _dailyAccum = [];
+    _cmpData = { rows:[], safetyIssues:[{code:'quantity-status-review'}], comparisonValid:false };
+    updateFinishCheckBtn();
+    const comparison = {
+      disabled: $('finishCheckBtn')?.disabled ?? null,
+      text: $('finishCheckBtn')?.textContent || '',
+      title: $('finishCheckBtn')?.title || ''
+    };
+
+    return {daily, comparison};
+  });
+
+  expect(result.daily.disabled).toBe(true);
+  expect(result.daily.text).toContain('Проверьте распознавание');
+  expect(result.daily.text).toContain('1');
+  expect(result.daily.title).toContain('результаты распознавания');
+
+  expect(result.comparison.disabled).toBe(true);
+  expect(result.comparison.text).toContain('Завершите сверку');
+  expect(result.comparison.title).toContain('двух результатов');
+});
+
 test('finish gate stays correct after session restore', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
