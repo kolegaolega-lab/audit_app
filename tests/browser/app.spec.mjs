@@ -74,6 +74,57 @@ test('end-to-end JSON audit pipeline: invoice + iiko sales + stock -> FIFO', asy
   expect(result.fifo).toEqual({soldExpired:2,expiredOnShelf:1,freshOnShelf:2,freshSold:0});
 });
 
+test('shelf-life window boundaries are correct for 24/48/72/96 hours', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-17T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const check = (shelfLife, date) => {
+      const w = window.getWriteOffMoment(date, shelfLife);
+      const checkMoment = new Date('2026-10-17T10:00:00');
+      return !!w && w > checkMoment;
+    };
+    return {
+      h24: ['2026-10-17','2026-10-16'].map(d => check(24,d)),
+      h48: ['2026-10-17','2026-10-16','2026-10-15'].map(d => check(48,d)),
+      h72: ['2026-10-17','2026-10-16','2026-10-15','2026-10-14'].map(d => check(72,d)),
+      h96: ['2026-10-17','2026-10-16','2026-10-15','2026-10-14','2026-10-13'].map(d => check(96,d))
+    };
+  });
+  expect(result).toEqual({
+    h24:[true,false],
+    h48:[true,true,false],
+    h72:[true,true,true,false],
+    h96:[true,true,true,true,false]
+  });
+});
+
+test('parseJSON keeps invoice dates needed by each shelf-life window', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    PRODUCTS = [{name:'Товар',shelfLife:72,category:'desserts'}];
+    const payload = {
+      schema_version:'1.0', document_type:'combined', check_date:'2026-10-17',
+      source:{photo_count:4,processed_photo_count:4,duplicate_photo_count:0},
+      invoices:[
+        {number:'1',date:'2026-10-17',continuation:false,last_line_number:1,items:[{line:1,name:'Товар',quantity:1,quantity_status:'confirmed'}]},
+        {number:'2',date:'2026-10-16',continuation:false,last_line_number:1,items:[{line:1,name:'Товар',quantity:2,quantity_status:'confirmed'}]},
+        {number:'3',date:'2026-10-15',continuation:false,last_line_number:1,items:[{line:1,name:'Товар',quantity:3,quantity_status:'confirmed'}]},
+        {number:'4',date:'2026-10-14',continuation:false,last_line_number:1,items:[{line:1,name:'Товар',quantity:4,quantity_status:'confirmed'}]}
+      ],
+      sales:[],
+      review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+    };
+    const parsed = window.parseJSON(JSON.stringify(payload), new Date('2026-10-17T10:00:00'));
+    return parsed.rows[0].incoming;
+  });
+  expect(result).toEqual([
+    {date:'2026-10-14',qty:4},
+    {date:'2026-10-15',qty:3},
+    {date:'2026-10-16',qty:2},
+    {date:'2026-10-17',qty:1}
+  ]);
+});
+
 test('agreed 22:00 shelf-life cutoff and FIFO', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
