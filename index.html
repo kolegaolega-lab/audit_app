@@ -2857,7 +2857,7 @@ function validateRemoteCatalog(remote) {
       const num = safeStr(point.num || '', 20);
       if (!id || !num) continue;
       const numKey = normalizeName(num);
-      if (ids.has(id) || nums.has(numKey)) continue;
+      if (!numKey || ids.has(id) || nums.has(numKey)) continue;
       ids.add(id);
       nums.add(numKey);
       validPoints++;
@@ -2919,13 +2919,13 @@ function syncPullFromServer(opts) {
     const seenNums = new Set();
     const cleanedPoints = [];
     for (const p of remote.points.slice(0, 500)) {
-      if (!p || typeof p !== 'object') continue;
+      if (!p || typeof p !== 'object' || Array.isArray(p)) continue;
       const id = safeStr(p.id || '', 30);
       const num = safeStr(p.num || '', 20);
       const name = safeStr(p.name || '', 80);
       const address = safeStr(p.address || '', 120);
       const numKey = normalizeName(num);
-      if (!id || !num || seenIds.has(id) || seenNums.has(numKey)) continue;
+      if (!id || !num || !numKey || seenIds.has(id) || seenNums.has(numKey)) continue;
       seenIds.add(id);
       seenNums.add(numKey);
       cleanedPoints.push({ id, num, name, address });
@@ -3405,6 +3405,7 @@ function addPoint(num, name, address) {
   const a = safeStr(address, 120).trim();
   if (!n) return null;
   const numKey = normalizeName(n);
+  if (!numKey) return null;
   if (_points.some(p => normalizeName(p.num) === numKey)) return null;
   const p = { id: generatePointId(), num: n, name: nm, address: a };
   _points.push(p);
@@ -3959,7 +3960,7 @@ async function pullPointsSilently() {
         const name = safeStr(p.name || '', 80);
         const address = safeStr(p.address || '', 120);
         const numKey = normalizeName(num);
-        if (!id || !num || seenIds.has(id) || seenNums.has(numKey)) continue;
+        if (!id || !num || !numKey || seenIds.has(id) || seenNums.has(numKey)) continue;
         seenIds.add(id);
         seenNums.add(numKey);
         cleanedPoints.push({ id, num, name, address });
