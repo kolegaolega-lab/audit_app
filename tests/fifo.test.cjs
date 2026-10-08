@@ -155,8 +155,9 @@ test('regression: missing invoice date must never fall back to audit date', () =
 });
 
 test('regression: unresolved continuation date must remain unresolved', () => {
-  assert.match(html, /copy\.date = \(number && invoiceDates\[number\]\) \|\| lastInvoiceDate \|\| ""/);
-  assert.doesNotMatch(html, /copy\.date = \(number && invoiceDates\[number\]\) \|\| lastInvoiceDate \|\| iso/);
+  assert.match(html, /const activeInvoiceDate = ""/);
+  assert.match(html, /copy\.date = \(number && invoiceDates\[number\]\) \|\| activeInvoiceDate \|\| ""/);
+  assert.doesNotMatch(html, /lastInvoiceDate/);
 });
 
 test('regression: missing invoice dates are blocking OCR safety issues', () => {
