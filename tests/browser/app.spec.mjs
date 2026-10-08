@@ -1089,6 +1089,50 @@ test('double-run comparison inherits dates for continuation invoice pages', asyn
   expect(result.incoming['Товар B']).toEqual({'06.10':2});
 });
 
+test('check-step indicator follows completion gate for zero stock and restored sessions', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const base = {
+      name:'Товар с нулевым остатком', salesOnly:false, stock:0, sales:0,
+      shelfLife:24, category:'desserts',
+      incoming:[{date:'2026-10-06',qty:1}], _checkDate:'2026-10-06'
+    };
+    _activeCategory = 'desserts';
+    _photoCount = 1;
+    unknownRows = [];
+    noCategoryRows = [];
+    tableRows = [{...base}];
+    updateFinishCheckBtn();
+    const ready = {
+      canFinish: canFinishCheck(),
+      step: computeCheckStep(),
+      disabled: $('finishCheckBtn')?.disabled ?? null
+    };
+
+    tableRows = [{...base, stock:null}];
+    updateFinishCheckBtn();
+    const incomplete = {
+      canFinish: canFinishCheck(),
+      step: computeCheckStep(),
+      disabled: $('finishCheckBtn')?.disabled ?? null
+    };
+
+    tableRows = [{...base}];
+    saveSession();
+    applySession(loadSession());
+    updateFinishCheckBtn();
+    const restored = {
+      canFinish: canFinishCheck(),
+      step: computeCheckStep(),
+      disabled: $('finishCheckBtn')?.disabled ?? null
+    };
+    return {ready,incomplete,restored};
+  });
+  expect(result.ready).toEqual({canFinish:true,step:5,disabled:false});
+  expect(result.incomplete).toEqual({canFinish:false,step:4,disabled:true});
+  expect(result.restored).toEqual({canFinish:true,step:5,disabled:false});
+});
+
 test('completion gate blocks empty, missing stock, missing shelf life and unresolved reference states', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
