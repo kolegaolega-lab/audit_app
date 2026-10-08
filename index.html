@@ -8792,6 +8792,20 @@ function cmpRunCompare() {
   ];
   const quantityIssues = rawCmpSafety.filter(x => x?.code === 'quantity-status-review' || x?.code === 'handwritten-confirmation');
   const otherSafetyIssues = rawCmpSafety.filter(x => x?.code !== 'quantity-status-review' && x?.code !== 'handwritten-confirmation');
+  // Не каждое предупреждение safety должно блокировать применение сверки.
+  // Например, разное число строк между прогонами — нормальный диагностический
+  // сигнал для OCR и как раз тот случай, который аудитор должен иметь возможность
+  // разрешить выбором значения из одного из результатов или своим значением.
+  const blockingSafetyCodes = new Set([
+    'empty-json','missing-ai-report','invalid-source','completeness-mismatch',
+    'invalid-check-date','future-check-date','invalid-document-arrays',
+    'invoice-date-review','invoice-date-missing','continuation-date-unresolved',
+    'future-invoice-date','invoice-line-gap','invoice-last-line-inconsistent',
+    'invoice-line-numbers-missing','invalid-invoice-items','unreadable',
+    'uncertain-rows','invalid-quantity','validation-errors'
+  ]);
+  const blockingSafetyIssues = otherSafetyIssues.filter(x => blockingSafetyCodes.has(x?.code));
+  const warningSafetyIssues = otherSafetyIssues.filter(x => !blockingSafetyCodes.has(x?.code));
 
   if (quantityIssues.length) {
     checks.push({
@@ -8803,13 +8817,20 @@ function cmpRunCompare() {
       _originalDetail: 'В распознавании есть количества, записанные от руки. Откройте отмеченные строки ниже, выберите правильное значение и сохраните.'
     });
   }
-  otherSafetyIssues.forEach(issue => checks.push({
+  blockingSafetyIssues.forEach(issue => checks.push({
     ok: false,
     title: issue.title,
     detail: issue.detail || 'Нужно исправить отмеченную проблему.',
     _safetyCode: issue.code,
     _safetyLabel: issue.title,
     _originalDetail: issue.detail || 'Нужно исправить отмеченную проблему.'
+  }));
+  warningSafetyIssues.forEach(issue => checks.push({
+    ok: false,
+    level: 'warn',
+    title: issue.title,
+    detail: issue.detail || 'Рекомендуется проверить результат.',
+    _safetyCode: null
   }));
   _cmpNakls.filter(n => n.date).forEach(n => {
     const dateKey = (() => {
@@ -8932,9 +8953,9 @@ function cmpRunCompare() {
         title: 'Нужно подтвердить количество',
         detail: 'В распознавании есть количества, записанные от руки. Откройте отмеченные строки ниже, выберите правильное значение и сохраните.'
       }] : []),
-      ...otherSafetyIssues
+      ...blockingSafetyIssues
     ],
-    comparisonValid: quantityIssues.length === 0 && otherSafetyIssues.length === 0
+    comparisonValid: quantityIssues.length === 0 && blockingSafetyIssues.length === 0
   };
   cmpRenderChecks(checks);
   cmpRenderResults();
