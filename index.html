@@ -8022,7 +8022,7 @@ function renderReport() {
             '<div class="row"><span>Свежих на витрине</span><b>' + totalFreshOnShelf + '</b></div>' +
             '<div class="row"><span>Просрочено на витрине</span><b>' + totalExpiredOnShelf + '</b></div>' +
             '<div class="row"><span>Продано просрочкой</span><b' + (totalSoldExpired > 0 ? ' class="red"' : '') + '>' + totalSoldExpired + '</b></div>' +
-            (totalNoIncoming ? '<div class="row"><span>Нет прихода · проверить с персоналом</span><b class="red">' + totalNoIncoming + '</b></div>' : '') +
+            (totalNoIncoming ? '<div class="row"><span>Нет прихода за срок годности · проверить с персоналом</span><b class="red">' + totalNoIncoming + '</b></div>' : '') +
           '</div>' +
         '</div>' +
       '</div>';
