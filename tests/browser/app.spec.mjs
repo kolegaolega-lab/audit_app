@@ -1342,7 +1342,7 @@ test('report headline treats missing incoming as a problem', async ({page}) => {
   });
   expect(result).toContain('1 проблема');
   expect(result).not.toContain('всё свежее');
-  expect(result).toContain('Нет прихода');
+  expect(result).toContain('Нет прихода за срок годности');
 });
 
 test('completion gate blocks unresolved double-run comparison even when table inputs are complete', async ({page}) => {
