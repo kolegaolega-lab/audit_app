@@ -57,7 +57,7 @@ self.addEventListener('activate', event => {
     const names = await caches.keys();
     await Promise.all(
       names
-        .filter(n => n !== CACHE_SHELL && n !== CACHE_RUNTIME)
+        .filter(n => n.startsWith('fb-audit-') && n !== CACHE_SHELL && n !== CACHE_RUNTIME)
         .map(n => caches.delete(n))
     );
 
