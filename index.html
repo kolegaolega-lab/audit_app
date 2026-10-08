@@ -3684,7 +3684,7 @@ function buildCheckSnapshot() {
       if (c.soldExpired != null) totalSoldExpired += c.soldExpired;
       return {
         name: r.name, stock: r.stock, sales: r.sales || 0, shelfLife: r.shelfLife,
-        incoming, noIncoming,
+        category: r.category || null, salesOnly: !!r.salesOnly, incoming, noIncoming,
         freshOnShelf: c.freshOnShelf, freshSold: c.freshSold,
         expiredOnShelf: c.expiredOnShelf, soldExpired: c.soldExpired
       };
