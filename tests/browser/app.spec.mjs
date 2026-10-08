@@ -371,7 +371,7 @@ test('unfinished audit session survives reload with stock and incoming data', as
       stock:3,
       sales:2,
       shelfLife:48,
-      category:'Десерты',
+      category:'desserts',
       incoming:[{date:'2026-10-06',qty:4,_originalQty:4}],
       salesOnly:false,
       _originalSales:2,
@@ -398,7 +398,7 @@ test('unfinished audit session survives reload with stock and incoming data', as
     stock:3,
     sales:2,
     shelfLife:48,
-    category:'Десерты',
+    category:'desserts',
     _checkDate:'2026-10-06'
   });
   expect(restored.row.incoming).toEqual([{date:'2026-10-06',qty:4,_originalQty:4}]);
