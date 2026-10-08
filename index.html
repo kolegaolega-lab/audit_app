@@ -7680,7 +7680,18 @@ function mergeSeparatedOCRJson(invoiceJson, salesJson, dateLabel) {
   });
 }
 
-async function recognizeDaily(){
+async function getDailySourceMissing(checkIso, invoiceFiles, salesFiles){
+  const missing=[];
+  if(!Array.isArray(invoiceFiles) || !invoiceFiles.length) missing.push("накладные не загружены");
+  // Продажи нужны только для даты самой проверки. Исторические даты
+  // используются для прихода и не должны блокироваться отсутствием чека продаж.
+  if(String(checkIso||'')===getTodayStr() && (!Array.isArray(salesFiles) || !salesFiles.length)) {
+    missing.push("чек продаж не загружен");
+  }
+  return missing;
+}
+
+function recognizeDaily(){
   if(shareBusy)return;
   const inp=$("dailyDate"),st=$("dailyStatus");
   const set=(c,t)=>{if(st){st.className="status show "+c;st.textContent=t}};
@@ -7744,10 +7755,7 @@ async function recognizeDaily(){
       ...getOCRSafetyIssues(j1,p1,all.length),
       ...(j2?getOCRSafetyIssues(j2,p2,all.length):[])
     ];
-    const missing=[
-      ...(!inv.length?["накладные не загружены"]:[]),
-      ...(!sales.length?["чек продаж не загружен"]:[])
-    ];
+    const missing=getDailySourceMissing(parsed.iso,inv,sales);
 
     const entry={
       iso:parsed.iso,label:parsed.label,json:j1,ts:Date.now(),
