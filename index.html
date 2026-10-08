@@ -7680,7 +7680,7 @@ function mergeSeparatedOCRJson(invoiceJson, salesJson, dateLabel) {
   });
 }
 
-async function getDailySourceMissing(checkIso, invoiceFiles, salesFiles){
+function getDailySourceMissing(checkIso, invoiceFiles, salesFiles){
   const missing=[];
   if(!Array.isArray(invoiceFiles) || !invoiceFiles.length) missing.push("накладные не загружены");
   // Продажи нужны только для даты самой проверки. Исторические даты
