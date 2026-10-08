@@ -74,6 +74,76 @@ test('end-to-end JSON audit pipeline: invoice + iiko sales + stock -> FIFO', asy
   expect(result.fifo).toEqual({soldExpired:2,expiredOnShelf:1,freshOnShelf:2,freshSold:0});
 });
 
+test('end-to-end applyJSON routes category rows and preserves FIFO inputs', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(async () => {
+    localStorage.clear();
+    PRODUCTS = [
+      {name:'Товар десерт',shelfLife:48,category:'desserts'},
+      {name:'Товар выпечка',shelfLife:24,category:'pastry'}
+    ];
+    tableRows = [];
+    unknownRows = [];
+    noCategoryRows = [];
+    _needsCheckNames = new Set();
+    _activeCategory = 'desserts';
+
+    const payload = {
+      schema_version:'1.0',
+      document_type:'combined',
+      check_date:'2026-10-06',
+      source:{photo_count:2,processed_photo_count:2,duplicate_photo_count:0},
+      invoices:[
+        {number:'INV-1',date:'2026-10-06',continuation:false,last_line_number:1,items:[
+          {line:1,name:'Товар десерт',quantity:2,quantity_status:'confirmed'}
+        ]},
+        {number:'INV-2',date:'2026-10-05',continuation:false,last_line_number:1,items:[
+          {line:1,name:'Товар десерт',quantity:2,quantity_status:'confirmed'}
+        ]}
+      ],
+      sales:[
+        {name:'Товар десерт',quantity:2,quantity_status:'confirmed'},
+        {name:'Товар выпечка',quantity:1,quantity_status:'confirmed'}
+      ],
+      review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+    };
+
+    document.querySelector('#jsonInput').value = JSON.stringify(payload);
+    await window.applyJSON();
+
+    const dessert = tableRows.find(r => r.name === 'Товар десерт');
+    const pastry = tableRows.find(r => r.name === 'Товар выпечка');
+    const calc = dessert ? window.computeFIFO({
+      ...dessert, stock:3, _checkDate:'2026-10-06'
+    }) : null;
+
+    return {
+      tableRows: tableRows.map(r => ({
+        name:r.name, category:r.category, shelfLife:r.shelfLife,
+        sales:r.sales, incoming:r.incoming.map(({date,qty}) => ({date,qty}))
+      })),
+      unknownRows: unknownRows.map(r => r.name),
+      noCategoryRows: noCategoryRows.map(r => r.name),
+      dessertCalc: calc,
+      pastryPresent: !!pastry
+    };
+  });
+
+  expect(result.tableRows).toEqual([
+    {
+      name:'Товар десерт', category:'desserts', shelfLife:48, sales:2,
+      incoming:[{date:'2026-10-05',qty:2},{date:'2026-10-06',qty:2}]
+    }
+  ]);
+  expect(result.unknownRows).toEqual([]);
+  expect(result.noCategoryRows).toEqual([]);
+  expect(result.pastryPresent).toBe(false);
+  expect(result.dessertCalc).toEqual({
+    soldExpired:0, expiredOnShelf:1, freshOnShelf:2, freshSold:2
+  });
+});
+
 test('shelf-life window boundaries are correct for 24/48/72/96 hours', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-17T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
