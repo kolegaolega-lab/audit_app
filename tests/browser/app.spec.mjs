@@ -1911,6 +1911,7 @@ test('final report explicitly separates sales-only rows from auditable positions
   expect(result).toContain('без проверки остатка');
   expect(result).toContain('1 проверенная позиция');
   expect(result).not.toContain('2 проверенные позиции');
-  expect(result).not.toContain('всё свежее');
+  expect(result).toContain('всё свежее');
+  expect(result).toContain('ещё 1 строка только с продажами');
 });
 
