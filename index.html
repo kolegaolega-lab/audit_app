@@ -3401,7 +3401,8 @@ function addPoint(num, name, address) {
   const nm = safeStr(name, 80).trim();
   const a = safeStr(address, 120).trim();
   if (!n) return null;
-  if (_points.some(p => p.num.toLowerCase() === n.toLowerCase())) return null;
+  const numKey = normalizeName(n);
+  if (_points.some(p => normalizeName(p.num) === numKey)) return null;
   const p = { id: generatePointId(), num: n, name: nm, address: a };
   _points.push(p);
   savePoints();
