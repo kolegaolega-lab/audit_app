@@ -2187,3 +2187,29 @@ test('daily JSON builder preserves accumulated dates when applyJSON fails', asyn
   expect(result.savedCount).toBe(1);
   expect(result.status).toContain('накопленные даты сохранены');
 });
+
+test('cross-tab point changes synchronize active ID, header and input', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result=await page.evaluate(() => {
+    const first={id:'p1',num:'001',name:'First',address:''};
+    const second={id:'p2',num:'002',name:'Second',address:''};
+    _points=[first,second];
+    _activePointId='p1';
+    localStorage.setItem(POINTS_KEY,JSON.stringify(_points));
+    localStorage.setItem(ACTIVE_POINT_KEY,'p1');
+    updateHeaderPoint(); syncActivePointToInput();
+
+    localStorage.setItem(ACTIVE_POINT_KEY,'p2');
+    window.dispatchEvent(new StorageEvent('storage',{key:ACTIVE_POINT_KEY,newValue:'p2'}));
+    const selected={id:_activePointId,input:$('point').value,header:$('headerPointChip').textContent.trim()};
+
+    localStorage.setItem(POINTS_KEY,JSON.stringify([first]));
+    window.dispatchEvent(new StorageEvent('storage',{key:POINTS_KEY,newValue:JSON.stringify([first])}));
+    return {
+      selected,
+      afterRemoval:{id:_activePointId,input:$('point').value,header:$('headerPointChip').textContent.trim(),stored:localStorage.getItem(ACTIVE_POINT_KEY)}
+    };
+  });
+  expect(result.selected).toEqual({id:'p2',input:'002',header:'002'});
+  expect(result.afterRemoval).toEqual({id:'p1',input:'001',header:'001',stored:'p1'});
+});
