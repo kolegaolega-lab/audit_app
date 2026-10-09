@@ -434,3 +434,40 @@ test('history month cache with a non-array files field is refetched', async () =
   assert.equal(files.length,1);
   assert.equal(files[0].pointId,'p1');
 });
+
+test('daily accumulator restore deduplicates dates and blocks malformed JSON without dropping the entry', () => {
+  const start=html.indexOf('function loadDailyAccum(');
+  const end=html.indexOf('function saveDailyAccum(',start);
+  assert.notEqual(start,-1);
+  assert.notEqual(end,-1);
+  const valid = marker => ({
+    iso:'2026-10-08',label:'08.10',ts:marker,
+    json:JSON.stringify({invoices:[{marker}],sales:[]}),
+    category:'desserts',blocked:false,needsCheck:false
+  });
+  const stored=[
+    valid(1),valid(2),
+    {iso:'2026-10-09',label:'09.10',ts:3,json:'{broken',category:'desserts'},
+    {iso:'2026-02-30',label:'30.02',ts:4,json:JSON.stringify({invoices:[],sales:[]})},
+    ['malformed']
+  ];
+  const context={
+    DAILY_KEY:'daily',
+    localStorage:{getItem(){return JSON.stringify(stored);}},
+    safeDate(y,m,d){
+      const date=new Date(y,m-1,d);
+      return date.getFullYear()===y&&date.getMonth()===m-1&&date.getDate()===d
+        ? String(y).padStart(4,'0')+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0') : null;
+    },
+    safeStr(value,max){return String(value??'').slice(0,max);},
+    isValidCategory(value){return value==='desserts';}
+  };
+  vm.createContext(context);
+  vm.runInContext(html.slice(start,end),context);
+  const result=JSON.parse(JSON.stringify(context.loadDailyAccum()));
+  assert.equal(result.length,2);
+  assert.equal(JSON.parse(result[0].json).invoices[0].marker,2);
+  assert.equal(result[1].iso,'2026-10-09');
+  assert.equal(result[1].blocked,true);
+  assert.equal(result[1].needsCheck,true);
+});
