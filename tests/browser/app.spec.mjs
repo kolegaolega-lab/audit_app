@@ -2254,9 +2254,9 @@ test('session restore skips malformed rows and nested incoming records without a
       rows:[
         null,['array-row'],
         {name:'Валидная строка',stock:0,sales:1,shelfLife:24,category:'desserts',
-         incoming:[null,[],{date:'2026-10-08',qty:1}],_originalSales:1}
+         incoming:[null,[],{date:'2026-10-08',qty:1},{date:'2026-99-99',qty:5}],_originalSales:1}
       ],
-      unknown:[null,{name:'Неизвестный товар',sales:0,incoming:[null,{date:'2026-10-08',qty:2}]}],
+      unknown:[null,{name:'Неизвестный товар',sales:0,incoming:[null,{date:'2026-10-08',qty:2},{date:'2026-99-99',qty:9}]}],
       noCategory:[null,{name:'Без категории'}],
       needsCheck:['Валидная строка']
     }));
