@@ -2219,3 +2219,28 @@ test('cross-tab point changes synchronize active ID, header and input', async ({
   expect(result.afterRemoval).toEqual({id:'p1',input:'001',header:'001',stored:'p1'});
   expect(result.afterLastRemoval).toEqual({id:null,input:'',header:'',stored:null});
 });
+
+test('daily table rebuild keeps missing receipts distinct from confirmed zero quantities', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result=await page.evaluate(() => {
+    const iso='2026-10-08';
+    _dailyAccum=[{iso,label:'08.10',json:'{}',category:'desserts',sourceMissing:[],needsCheck:true,blocked:true}];
+    tableRows=[
+      {name:'Нет записи прихода',category:'desserts',incoming:[]},
+      {name:'Подтверждённый ноль',category:'desserts',incoming:[{date:iso,qty:0}]},
+      {name:'Другая категория',category:'pastries',incoming:[{date:iso,qty:4}]}
+    ];
+    const updated=rebuildDailyJsonFromTable(iso);
+    const rebuilt=JSON.parse(_dailyAccum[0].json);
+    const first={updated,names:rebuilt.invoices[0].items.map(x=>x.name),quantity:rebuilt.invoices[0].items[0]?.quantity,status:rebuilt.invoices[0].items[0]?.quantity_status};
+
+    _dailyAccum=[{iso,label:'08.10',json:'original-json',category:'desserts',sourceMissing:[],needsCheck:true,blocked:true}];
+    tableRows=[{name:'Нет записи прихода',category:'desserts',incoming:[]}];
+    const missingUpdate=rebuildDailyJsonFromTable(iso);
+    return {first,missingUpdate,unchangedJson:_dailyAccum[0].json,blocked:_dailyAccum[0].blocked};
+  });
+  expect(result.first).toEqual({updated:true,names:['Подтверждённый ноль'],quantity:0,status:'confirmed'});
+  expect(result.missingUpdate).toBe(false);
+  expect(result.unchangedJson).toBe('original-json');
+  expect(result.blocked).toBe(true);
+});
