@@ -2244,3 +2244,39 @@ test('daily table rebuild keeps missing receipts distinct from confirmed zero qu
   expect(result.unchangedJson).toBe('original-json');
   expect(result.blocked).toBe(true);
 });
+
+test('session restore skips malformed rows and nested incoming records without aborting', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result=await page.evaluate(() => {
+    localStorage.setItem(SESSION_KEY,JSON.stringify({
+      version:SESSION_VERSION,savedAt:Date.now(),checkDate:'2026-10-09',
+      point:'001',jsonText:'',
+      rows:[
+        null,['array-row'],
+        {name:'Валидная строка',stock:0,sales:1,shelfLife:24,category:'desserts',
+         incoming:[null,[],{date:'2026-10-08',qty:1}],_originalSales:1}
+      ],
+      unknown:[null,{name:'Неизвестный товар',sales:0,incoming:[null,{date:'2026-10-08',qty:2}]}],
+      noCategory:[null,{name:'Без категории'}],
+      needsCheck:['Валидная строка']
+    }));
+    const loaded=loadSession();
+    const applied=applySession(loaded);
+    return {
+      applied,
+      rows:tableRows.map(r=>r.name),
+      incoming:tableRows[0]?.incoming.map(p=>p.qty),
+      unknown:unknownRows.map(r=>r.name),
+      unknownIncoming:unknownRows[0]?.incoming.map(p=>p.qty),
+      noCategory:noCategoryRows.map(r=>r.name)
+    };
+  });
+  expect(result).toEqual({
+    applied:true,
+    rows:['Валидная строка'],
+    incoming:[1],
+    unknown:['Неизвестный товар'],
+    unknownIncoming:[2],
+    noCategory:['Без категории']
+  });
+});
