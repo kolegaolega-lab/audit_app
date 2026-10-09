@@ -3726,14 +3726,21 @@ function loadHistoryQueue() {
   } catch (e) { return []; }
 }
 function saveHistoryQueue() {
-  try { localStorage.setItem(HISTORY_QUEUE_KEY, JSON.stringify(_historyQueue)); } catch (e) {}
+  try {
+    localStorage.setItem(HISTORY_QUEUE_KEY, JSON.stringify(_historyQueue));
+  } catch (e) {
+    console.warn('saveHistoryQueue:', e);
+    updateSyncIndicator('wait');
+    return false;
+  }
   updateSyncIndicator(_historyQueue.length ? 'wait' : '');
+  return true;
 }
 function enqueueHistoryEntry(path, data) {
-  if (!path || !data) return;
-  if (_historyQueue.some(x => x.path === path)) return;
+  if (!path || !data) return false;
+  if (_historyQueue.some(x => x.path === path)) return true;
   _historyQueue.push({ path, data, ts: Date.now() });
-  saveHistoryQueue();
+  return saveHistoryQueue();
 }
 function removeFromQueue(path) {
   _historyQueue = _historyQueue.filter(x => x.path !== path);
@@ -3936,11 +3943,16 @@ async function sendReportToHistory() {
     showToast('Проверка отправлена');
   } catch (e) {
     const msg = e.message || 'Ошибка';
-    enqueueHistoryEntry(defaultPath, snapshot);
+    const queued = enqueueHistoryEntry(defaultPath, snapshot);
     setBtn('err', 'Не отправлено', true);
-    setStatus('warn', 'Нет связи — проверка в очереди. Уйдёт автоматически при следующем подключении. (' + msg + ')');
-    updateSyncIndicator('wait');
-    showToast('В очереди, попробуем позже');
+    if (queued) {
+      setStatus('warn', 'Нет связи — проверка сохранена в локальной очереди и уйдёт автоматически при следующем подключении. (' + msg + ')');
+      updateSyncIndicator('wait');
+      showToast('В очереди, попробуем позже');
+    } else {
+      setStatus('err', 'Нет связи, и браузер не смог сохранить проверку в локальную очередь. Не закрывайте вкладку — восстановите подключение и отправьте проверку повторно. (' + msg + ')');
+      showToast('Не удалось сохранить очередь');
+    }
   }
 }
 
