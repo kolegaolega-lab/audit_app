@@ -6250,7 +6250,7 @@ function deletePriceEdit() {
    APPLY JSON
    ═══════════════════════════════════════════ */
 async function applyJSON() {
-  if (applyBusy) return;
+  if (applyBusy) return false;
   applyBusy = true;
   const btn = $('applyJsonBtn');
   if (btn) btn.classList.add('busy');
@@ -6280,7 +6280,7 @@ async function applyJSON() {
     const checkDate = String(json?.check_date || '').trim();
     rows.forEach(r => { r._checkDate = checkDate; });
     if (!rows.length) throw new Error('Не удалось распознать строки.');
-    if (myToken !== resetToken) return;
+    if (myToken !== resetToken) return false;
 
     const inCategory = [], notInCategory = [], noCategory = [], notInCatalog = [];
     for (const r of rows) {
@@ -6301,7 +6301,7 @@ async function applyJSON() {
         notInCatalog.push(r);
       }
     }
-    if (myToken !== resetToken) return;
+    if (myToken !== resetToken) return false;
 
     const otherRows = tableRows.filter(r => r.category !== _activeCategory);
     const alreadyKeys = new Set(inCategory.map(r => cmpCanonicalName(r.name)));
@@ -6352,8 +6352,10 @@ async function applyJSON() {
     } else if (noCategory.length) {
       setTimeout(() => { if (noCategoryRows.length && $('noCategoryModal').classList.contains('hidden')) openNoCategoryModal(); }, 300);
     }
+    return true;
   } catch (e) {
     if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = e.message || 'Ошибка'; }
+    return false;
   }
 }
 
@@ -7905,7 +7907,7 @@ function finalizeDailyEditing() {
     if (entry) showToast(`Дата ${entry.label} обновлена из таблицы`);
   }
 }
-async function buildDailyJson(){const st=$("dailyStatus");if(!_dailyAccum.length){if(st){st.className="status show err";st.textContent="Накопитель пуст."}return}if(!isValidCategory(_activeCategory)){if(st){st.className="status show err";st.textContent="Сначала выберите категорию."}return}_dailyAccum.sort((a,b)=>a.iso.localeCompare(b.iso));const bad=_dailyAccum.filter(x=>x.blocked||x.needsCheck);if(bad.length){if(st){st.className="status show err";st.textContent="Нельзя собрать итог: есть даты с непроверенным JSON — "+bad.map(x=>x.label).join(", ")}return}const inv=[],sales=[];for(const e of _dailyAccum){const d=JSON.parse(e.json);inv.push(...(d.invoices||[]));if(e.iso===_dailyAccum[_dailyAccum.length-1].iso)sales.push(...(d.sales||[]))}const final={schema_version:"1.0",document_type:"combined",check_date:_dailyAccum[_dailyAccum.length-1].iso,source:{photo_count:0,processed_photo_count:0,duplicate_photo_count:0},invoices:inv,sales,review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}};const field=$("jsonInput");if(field){field.value=JSON.stringify(final,null,2);autoResizeTextarea();updateJsonCounter()}await applyJSON();_dailyAccum=[];saveDailyAccum();dailyRender();if(st){st.className="status show ok";st.textContent="Итоговый Результат применён."}}
+async function buildDailyJson(){const st=$("dailyStatus");if(!_dailyAccum.length){if(st){st.className="status show err";st.textContent="Накопитель пуст."}return}if(!isValidCategory(_activeCategory)){if(st){st.className="status show err";st.textContent="Сначала выберите категорию."}return}_dailyAccum.sort((a,b)=>a.iso.localeCompare(b.iso));const bad=_dailyAccum.filter(x=>x.blocked||x.needsCheck);if(bad.length){if(st){st.className="status show err";st.textContent="Нельзя собрать итог: есть даты с непроверенным JSON — "+bad.map(x=>x.label).join(", ")}return}const inv=[],sales=[];for(const e of _dailyAccum){const d=JSON.parse(e.json);inv.push(...(d.invoices||[]));if(e.iso===_dailyAccum[_dailyAccum.length-1].iso)sales.push(...(d.sales||[]))}const final={schema_version:"1.0",document_type:"combined",check_date:_dailyAccum[_dailyAccum.length-1].iso,source:{photo_count:0,processed_photo_count:0,duplicate_photo_count:0},invoices:inv,sales,review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}};const field=$("jsonInput");if(field){field.value=JSON.stringify(final,null,2);autoResizeTextarea();updateJsonCounter()}const applied=await applyJSON();if(applied!==true){if(st){st.className="status show err";st.textContent="Итог не применён — накопленные даты сохранены. Исправьте ошибку и попробуйте снова."}return}_dailyAccum=[];saveDailyAccum();dailyRender();if(st){st.className="status show ok";st.textContent="Итоговый Результат применён."}}
 
 function dailyClear() {
   if (!_dailyAccum.length) return;
