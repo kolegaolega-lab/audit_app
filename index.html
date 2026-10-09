@@ -10909,10 +10909,12 @@ function init() {
       }
       updatePointsCount();
       updateHeaderPoint();
-      syncActivePointToInput();
+      if (_activePointId) syncActivePointToInput();
+      else if (previousActive) { const input = $('point'); if (input) input.value = ''; }
       renderToday();
     }
     if (e.key === ACTIVE_POINT_KEY) {
+      const previousActive = _activePointId;
       const requested = loadActivePointId();
       _activePointId = requested && getPointById(requested)
         ? requested
@@ -10924,7 +10926,8 @@ function init() {
         } catch (e) {}
       }
       updateHeaderPoint();
-      syncActivePointToInput();
+      if (_activePointId) syncActivePointToInput();
+      else if (previousActive) { const input = $('point'); if (input) input.value = ''; }
       renderToday();
     }
     if (e.key === PROFILE_KEY) { _profile = loadProfile(); updateHeaderProfile(); updateProfileInfoBlock(); renderToday(); }
