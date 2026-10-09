@@ -10896,8 +10896,37 @@ function init() {
     if (e.key === IGNORED_KEY) { IGNORED = loadIgnored(); updateIgnoredCount(); updateUnknownBanner(); }
     if (e.key === ALIASES_KEY) { ALIASES = loadAliases(); updateAliasesCount(); }
     if (e.key === PRICES_KEY) { PRICES = loadPrices(); rebuildPriceIndex(); }
-    if (e.key === POINTS_KEY) { _points = loadPoints();  updatePointsCount(); renderToday(); }
-    if (e.key === ACTIVE_POINT_KEY) { _activePointId = loadActivePointId();  syncActivePointToInput(); renderToday(); }
+    if (e.key === POINTS_KEY) {
+      const previousActive = _activePointId;
+      _points = loadPoints();
+      if (_activePointId && !getPointById(_activePointId)) _activePointId = null;
+      if (!_activePointId && _points.length) _activePointId = _points[0].id;
+      if (previousActive !== _activePointId) {
+        try {
+          if (_activePointId) localStorage.setItem(ACTIVE_POINT_KEY, _activePointId);
+          else localStorage.removeItem(ACTIVE_POINT_KEY);
+        } catch (e) {}
+      }
+      updatePointsCount();
+      updateHeaderPoint();
+      syncActivePointToInput();
+      renderToday();
+    }
+    if (e.key === ACTIVE_POINT_KEY) {
+      const requested = loadActivePointId();
+      _activePointId = requested && getPointById(requested)
+        ? requested
+        : (_points.length ? _points[0].id : null);
+      if (requested !== _activePointId) {
+        try {
+          if (_activePointId) localStorage.setItem(ACTIVE_POINT_KEY, _activePointId);
+          else localStorage.removeItem(ACTIVE_POINT_KEY);
+        } catch (e) {}
+      }
+      updateHeaderPoint();
+      syncActivePointToInput();
+      renderToday();
+    }
     if (e.key === PROFILE_KEY) { _profile = loadProfile(); updateHeaderProfile(); updateProfileInfoBlock(); renderToday(); }
     if (e.key === ROUTE_KEY) { _route = loadRoute(); renderToday(); }
   });
