@@ -2162,3 +2162,28 @@ test('restored complete session keeps ready step even when no category is select
   expect(result.activeCategory).toBeNull();
   expect(result).toMatchObject({canFinish:true,step:5,disabled:false});
 });
+
+test('daily JSON builder preserves accumulated dates when applyJSON fails', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(async () => {
+    _activeCategory='desserts';
+    _dailyAccum=[{
+      iso:'2026-10-08',label:'08.10',
+      json:JSON.stringify({invoices:[{number:'1',date:'2026-10-08',items:[]}],sales:[]}),
+      blocked:false,needsCheck:false
+    }];
+    saveDailyAccum();
+    const originalApply=applyJSON;
+    applyJSON=async()=>false;
+    await buildDailyJson();
+    applyJSON=originalApply;
+    return {
+      count:_dailyAccum.length,
+      savedCount:JSON.parse(localStorage.getItem(DAILY_KEY)||'[]').length,
+      status:$('dailyStatus')?.textContent||''
+    };
+  });
+  expect(result.count).toBe(1);
+  expect(result.savedCount).toBe(1);
+  expect(result.status).toContain('накопленные даты сохранены');
+});
