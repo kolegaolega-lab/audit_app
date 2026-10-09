@@ -2205,11 +2205,17 @@ test('cross-tab point changes synchronize active ID, header and input', async ({
 
     localStorage.setItem(POINTS_KEY,JSON.stringify([first]));
     window.dispatchEvent(new StorageEvent('storage',{key:POINTS_KEY,newValue:JSON.stringify([first])}));
+    const afterRemoval={id:_activePointId,input:$('point').value,header:$('headerPointChip').textContent.trim(),stored:localStorage.getItem(ACTIVE_POINT_KEY)};
+
+    localStorage.setItem(POINTS_KEY,JSON.stringify([]));
+    window.dispatchEvent(new StorageEvent('storage',{key:POINTS_KEY,newValue:'[]'}));
     return {
       selected,
-      afterRemoval:{id:_activePointId,input:$('point').value,header:$('headerPointChip').textContent.trim(),stored:localStorage.getItem(ACTIVE_POINT_KEY)}
+      afterRemoval,
+      afterLastRemoval:{id:_activePointId,input:$('point').value,header:$('headerPointChip').textContent.trim(),stored:localStorage.getItem(ACTIVE_POINT_KEY)}
     };
   });
   expect(result.selected).toEqual({id:'p2',input:'002',header:'002'});
   expect(result.afterRemoval).toEqual({id:'p1',input:'001',header:'001',stored:'p1'});
+  expect(result.afterLastRemoval).toEqual({id:null,input:'',header:'',stored:null});
 });
