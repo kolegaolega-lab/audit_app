@@ -6569,7 +6569,38 @@ function loadDailyAccum() {
     if (!raw) return [];
     const arr = JSON.parse(raw);
     if (!Array.isArray(arr)) return [];
-    return arr.filter(x => x && typeof x.label === 'string' && typeof x.iso === 'string' && typeof x.json === 'string');
+    const byIso = new Map();
+    for (const item of arr) {
+      if (!item || typeof item !== 'object' || Array.isArray(item) ||
+          typeof item.label !== 'string' || typeof item.iso !== 'string' ||
+          typeof item.json !== 'string') continue;
+      const iso = item.iso.trim();
+      const match = iso.match(/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/);
+      if (!match || safeDate(Number(match[1]), Number(match[2]), Number(match[3])) !== iso) continue;
+      let invalidJson = false;
+      try {
+        const parsed = JSON.parse(item.json);
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) ||
+            (parsed.invoices !== undefined && !Array.isArray(parsed.invoices)) ||
+            (parsed.sales !== undefined && !Array.isArray(parsed.sales))) invalidJson = true;
+      } catch (e) { invalidJson = true; }
+      const entry = {
+        ...item,
+        iso,
+        label: safeStr(item.label, 20).trim() || `${iso.slice(8, 10)}.${iso.slice(5, 7)}`,
+        ts: Number.isFinite(item.ts) && item.ts >= 0 ? item.ts : 0,
+        blocked: !!item.blocked || invalidJson,
+        needsCheck: !!item.needsCheck || invalidJson,
+        sourceMissing: Array.isArray(item.sourceMissing)
+          ? item.sourceMissing.filter(x => typeof x === 'string').slice(0, 50) : [],
+        safetyIssues: Array.isArray(item.safetyIssues)
+          ? item.safetyIssues.filter(x => x && typeof x === 'object' && typeof x.title === 'string').slice(0, 50) : [],
+        category: isValidCategory(item.category) ? item.category : null
+      };
+      const previous = byIso.get(iso);
+      if (!previous || entry.ts >= previous.ts) byIso.set(iso, entry);
+    }
+    return Array.from(byIso.values()).sort((a, b) => a.iso.localeCompare(b.iso));
   } catch (e) { return []; }
 }
 function saveDailyAccum() {
