@@ -3273,13 +3273,13 @@ function loadSession() {
   } catch (e) { return null; }
 }
 function applySession(data) {
-  if (!data) return false;
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
   isRestoring = true;
   try {
     if ($('point') && typeof data.point === 'string') $('point').value = data.point.slice(0, 50);
     if ($('jsonInput') && typeof data.jsonText === 'string') $('jsonInput').value = data.jsonText.slice(0, 500000);
     if (Array.isArray(data.rows) && data.rows.length) {
-      tableRows = data.rows.slice(0, MAX_ROWS).map(r => {
+      tableRows = data.rows.slice(0, MAX_ROWS).filter(r => r && typeof r === 'object' && !Array.isArray(r)).map(r => {
         let stock = null;
         if (r.stock != null && r.stock !== '') stock = clampNum(r.stock, 0, MAX_NUM, 0);
         let shelf;
@@ -3291,7 +3291,7 @@ function applySession(data) {
         return {
           name: safeStr(r.name, MAX_NAME), stock, sales: salesVal, _originalSales: origSales, shelfLife: shelf,
           category: isValidCategory(r.category) ? r.category : null,
-          incoming: Array.isArray(r.incoming) ? r.incoming.slice(0, MAX_DATES).map(p => {
+          incoming: Array.isArray(r.incoming) ? r.incoming.slice(0, MAX_DATES).filter(p => p && typeof p === 'object' && !Array.isArray(p)).map(p => {
             const qty = clampNum(p.qty, 0, MAX_NUM, 0);
             const orig = p._originalQty != null ? clampNum(p._originalQty, 0, MAX_NUM, qty) : qty;
             return { date: typeof p.date === 'string' ? p.date : '', qty, _originalQty: orig };
@@ -3302,7 +3302,7 @@ function applySession(data) {
       }).filter(r => r.name);
     } else tableRows = [];
     if (Array.isArray(data.unknown) && data.unknown.length) {
-      unknownRows = data.unknown.slice(0, MAX_ROWS).map(r => {
+      unknownRows = data.unknown.slice(0, MAX_ROWS).filter(r => r && typeof r === 'object' && !Array.isArray(r)).map(r => {
         let shelf;
         if (r.shelfLife === 0) shelf = 0;
         else if (r.shelfLife == null || !Number.isFinite(Number(r.shelfLife)) || Number(r.shelfLife) <= 0) shelf = null;
@@ -3310,13 +3310,13 @@ function applySession(data) {
         return {
           name: safeStr(r.name, MAX_NAME), sales: clampNum(r.sales, 0, MAX_NUM, 0), shelfLife: shelf,
           category: isValidCategory(r.category) ? r.category : null,
-          incoming: Array.isArray(r.incoming) ? r.incoming.slice(0, MAX_DATES).map(p => ({ date: typeof p.date === 'string' ? p.date : '', qty: clampNum(p.qty, 0, MAX_NUM, 0) })).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date)) : [],
+          incoming: Array.isArray(r.incoming) ? r.incoming.slice(0, MAX_DATES).filter(p => p && typeof p === 'object' && !Array.isArray(p)).map(p => ({ date: typeof p.date === 'string' ? p.date : '', qty: clampNum(p.qty, 0, MAX_NUM, 0) })).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date)) : [],
           salesOnly: !!r.salesOnly
         };
       }).filter(r => r.name);
     } else unknownRows = [];
     if (Array.isArray(data.noCategory) && data.noCategory.length) {
-      noCategoryRows = data.noCategory.slice(0, MAX_ROWS).map(r => ({ name: safeStr(r.name, MAX_NAME) })).filter(r => r.name);
+      noCategoryRows = data.noCategory.slice(0, MAX_ROWS).filter(r => r && typeof r === 'object' && !Array.isArray(r)).map(r => ({ name: safeStr(r.name, MAX_NAME) })).filter(r => r.name);
     } else noCategoryRows = [];
     if (Array.isArray(data.needsCheck)) {
       _needsCheckNames = new Set(data.needsCheck.filter(x => typeof x === 'string' && x).slice(0, MAX_ROWS));
