@@ -2280,3 +2280,36 @@ test('session restore skips malformed rows and nested incoming records without a
     noCategory:['Без категории']
   });
 });
+
+test('offline send reports failure when local queue cannot be persisted', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result=await page.evaluate(async () => {
+    _profile={token:'test-token',login:'auditor',name:'Auditor'};
+    _points=[{id:'p1',num:'001',name:'Shop',address:''}];
+    _activePointId='p1';
+    $('point').value='001';
+    $('checkDate').value='2026-10-09';
+    _photoCount=1;
+    _dailyAccum=[]; _cmpData=null; unknownRows=[]; noCategoryRows=[];
+    _needsCheckNames=new Set();
+    tableRows=[{
+      name:'Product',salesOnly:false,stock:0,sales:0,shelfLife:24,category:'desserts',
+      incoming:[{date:'2026-10-08',qty:1}],_originalSales:0
+    }];
+    const originalPush=pushHistoryFile;
+    const originalSet=Storage.prototype.setItem;
+    pushHistoryFile=async()=>{throw new Error('offline');};
+    Storage.prototype.setItem=function(key,value){
+      if(key===HISTORY_QUEUE_KEY) throw new Error('quota exceeded');
+      return originalSet.call(this,key,value);
+    };
+    try { await sendReportToHistory(); }
+    finally {
+      pushHistoryFile=originalPush;
+      Storage.prototype.setItem=originalSet;
+    }
+    return {status:$('sendReportStatus').textContent,queued:_historyQueue.length};
+  });
+  expect(result.queued).toBe(1);
+  expect(result.status).toContain('не смог сохранить проверку в локальную очередь');
+});
