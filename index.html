@@ -3295,7 +3295,7 @@ function applySession(data) {
             const qty = clampNum(p.qty, 0, MAX_NUM, 0);
             const orig = p._originalQty != null ? clampNum(p._originalQty, 0, MAX_NUM, qty) : qty;
             return { date: typeof p.date === 'string' ? p.date : '', qty, _originalQty: orig };
-          }).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date)) : [],
+          }).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date) && parseDateRu(p.date, new Date()) === p.date) : [],
           salesOnly: !!r.salesOnly,
           _checkDate: data.checkDate
         };
@@ -3310,7 +3310,7 @@ function applySession(data) {
         return {
           name: safeStr(r.name, MAX_NAME), sales: clampNum(r.sales, 0, MAX_NUM, 0), shelfLife: shelf,
           category: isValidCategory(r.category) ? r.category : null,
-          incoming: Array.isArray(r.incoming) ? r.incoming.slice(0, MAX_DATES).filter(p => p && typeof p === 'object' && !Array.isArray(p)).map(p => ({ date: typeof p.date === 'string' ? p.date : '', qty: clampNum(p.qty, 0, MAX_NUM, 0) })).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date)) : [],
+          incoming: Array.isArray(r.incoming) ? r.incoming.slice(0, MAX_DATES).filter(p => p && typeof p === 'object' && !Array.isArray(p)).map(p => ({ date: typeof p.date === 'string' ? p.date : '', qty: clampNum(p.qty, 0, MAX_NUM, 0) })).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date) && parseDateRu(p.date, new Date()) === p.date) : [],
           salesOnly: !!r.salesOnly
         };
       }).filter(r => r.name);
