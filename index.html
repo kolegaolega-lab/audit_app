@@ -9472,6 +9472,25 @@ function cmpSaveEdit() {
   _cmpEditKey = null; _cmpEditDk = null; _cmpEditKind = null;
   cmpRefreshSafetyGate();
 }
+function cmpConfirmSameName(row) {
+  if (!row) return false;
+  if (!row.edits) row.edits = { incoming: {}, sales: null };
+  // Сохраняем подтверждённый вариант названия в постоянный справочник алиасов.
+  const nameA = String(row.a?.name || '').trim();
+  const nameB = String(row.b?.name || '').trim();
+  if (nameA && nameB && normalizeName(nameA) !== normalizeName(nameB)) {
+    const catalogProduct = PRODUCTS.find(p =>
+      p && p.name &&
+      (cmpCanonicalName(p.name) === cmpCanonicalName(nameA) ||
+       cmpCanonicalName(p.name) === cmpCanonicalName(nameB))
+    );
+    const target = String(catalogProduct?.name || nameA).trim();
+    const alias = normalizeName(nameA) === normalizeName(target) ? nameB : nameA;
+    if (normalizeName(alias) !== normalizeName(target)) addOrUpdateAlias(alias, target);
+  }
+  row.edits.nameAccepted = true;
+  return true;
+}
 function cmpRenderEditCard(row) {
   const isSales = _cmpEditKind === 'sales';
   const label = (_cmpData && _cmpData.dateLabels) ? (_cmpData.dateLabels[_cmpEditDk] || _cmpEditDk) : _cmpEditDk;
@@ -9561,24 +9580,7 @@ function cmpRenderEditCard(row) {
   }
   const nameConfirmBtn = card.querySelector('.cmp-name-confirm');
   if (nameConfirmBtn) nameConfirmBtn.addEventListener('click', () => {
-    if (!row.edits) row.edits = { incoming: {}, sales: null };
-    // Подтверждение «это одно и то же название» должно сохранять решение
-    // в справочнике алиасов, а не только в текущей сессии сверки.
-    const nameA = String(row.a?.name || '').trim();
-    const nameB = String(row.b?.name || '').trim();
-    if (nameA && nameB && normalizeName(nameA) !== normalizeName(nameB)) {
-      const catalogProduct = PRODUCTS.find(p =>
-        p && p.name &&
-        (cmpCanonicalName(p.name) === cmpCanonicalName(nameA) ||
-         cmpCanonicalName(p.name) === cmpCanonicalName(nameB))
-      );
-      const target = String(catalogProduct?.name || nameA).trim();
-      const alias = normalizeName(nameA) === normalizeName(target) ? nameB : nameA;
-      if (normalizeName(alias) !== normalizeName(target)) {
-        addOrUpdateAlias(alias, target);
-      }
-    }
-    row.edits.nameAccepted = true;
+    cmpConfirmSameName(row);
     _cmpEditKey = null; _cmpEditDk = null; _cmpEditKind = null;
     cmpRefreshSafetyGate();
   });
