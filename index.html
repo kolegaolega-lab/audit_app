@@ -867,6 +867,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     scroll-behavior:auto !important;
   }
 }
+.card-incoming-warning{color:var(--red);font-weight:600;}
 </style>
 </head>
 <body>
@@ -5493,11 +5494,14 @@ function updateCardResults() {
     const sxp = calc.soldExpired;
     const freshStock = calc.freshOnShelf;
     const freshSales = calc.freshSold;
+    const missingIncomingWarning = !row.salesOnly && row.stock != null && (Number(row.stock) > 0 || Number(row.sales) > 0) && !hasUsableIncomingForAudit(row)
+      ? '<span class="card-incoming-warning">нет — просрочка, проверить с персоналом</span>' : '';
     res.innerHTML = `
       <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
       <span>Продано свежих: <span class="rv">${freshSales === null ? '—' : freshSales}</span></span>
       <span>Просрочено на витрине: <span class="rv ${exp === null ? 'zero' : (exp > 0 ? 'positive' : '')}">${exp === null ? '—' : exp}</span></span>
       <span>Продано просроченным: <span class="rv ${sxp === null ? 'zero' : (sxp > 0 ? 'positive' : '')}">${sxp === null ? '—' : sxp}</span></span>
+      ${missingIncomingWarning}
     `;
   });
 }
@@ -5512,11 +5516,14 @@ function refreshCardRow(row, card) {
     const sxp = calc.soldExpired;
     const freshStock = calc.freshOnShelf;
     const freshSales = calc.freshSold;
+    const missingIncomingWarning = !row.salesOnly && row.stock != null && (Number(row.stock) > 0 || Number(row.sales) > 0) && !hasUsableIncomingForAudit(row)
+      ? '<span class="card-incoming-warning">нет — просрочка, проверить с персоналом</span>' : '';
     res.innerHTML = `
       <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
       <span>Продано свежих: <span class="rv">${freshSales === null ? '—' : freshSales}</span></span>
       <span>Просрочено на витрине: <span class="rv ${exp === null ? 'zero' : (exp > 0 ? 'positive' : '')}">${exp === null ? '—' : exp}</span></span>
       <span>Продано просроченным: <span class="rv ${sxp === null ? 'zero' : (sxp > 0 ? 'positive' : '')}">${sxp === null ? '—' : sxp}</span></span>
+      ${missingIncomingWarning}
     `;
   }
   scheduleTotalsUpdate();
