@@ -1875,6 +1875,9 @@ const SYNC_LAST_CHECK = 'fbAuditSyncLastCheck';
 const ACCESS_KEY = 'fbAuditAccessKey';
 const GITHUB_REPO = 'kolegaolega-lab/audit_app';
 const GITHUB_FILE = 'sync.json';
+// Catalog synchronization must read and write only the active development branch.
+// Never rely on the repository default branch (main) for catalog writes.
+const GITHUB_BRANCH = 'fix/fifo-shelf-life';
 const GITHUB_API = 'https://api.github.com';
 const APP_VERSION = 'v9.24.29';
 const PHOTO_DB = 'fbAuditPhotoDB';
@@ -2828,7 +2831,9 @@ async function fetchGeminiWithRetry(url, opts, onRetry) {
 }
 async function fetchRemoteCatalog() {
   try {
-    const url = `./${GITHUB_FILE}?t=${Date.now()}`;
+    // Read from the same explicit branch used for writes, not the Pages URL
+    // (which may still be published from main).
+    const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${encodeURIComponent(GITHUB_BRANCH).replace('%2F', '/')}/${GITHUB_FILE}?t=${Date.now()}`;
     const res = await fetchWithTimeout(url, { cache: 'no-store' }, 15000);
     if (!res.ok) return null;
     const data = await res.json();
@@ -2847,7 +2852,7 @@ async function verifyToken(token) {
 }
 async function pushToGitHub(token, data) {
   const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-  const url = `${GITHUB_API}/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
+  const url = `${GITHUB_API}/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}?ref=${encodeURIComponent(GITHUB_BRANCH)}`;
   let sha = null;
   try {
     const getRes = await fetchWithTimeout(url, {
@@ -2864,6 +2869,7 @@ async function pushToGitHub(token, data) {
   const body = {
     message: `sync: обновление справочника от ${data.updatedAt}`,
     content,
+    branch: GITHUB_BRANCH,
     ...(sha ? { sha } : {})
   };
   try {
