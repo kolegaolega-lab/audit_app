@@ -110,3 +110,31 @@ test('mobile card edits immediately refresh the problem filter and counters',()=
   assert.match(body,/applyTableFilter\(\)/);
   assert.match(body,/updateFinishCheckBtn\(\)/);
 });
+
+
+test('comparison corrections restore only for the exact same OCR documents',()=>{
+  const start=html.indexOf('function cmpRestorePersistedEdits(');
+  const end=html.indexOf('\nfunction cmpSaveEdit(',start);
+  assert.ok(start>=0 && end>start,'cmpRestorePersistedEdits must exist');
+  const body=html.slice(start,end);
+  assert.match(body,/saved\.json1 === json1 && saved\.json2 === json2/);
+  assert.match(body,/if \(!exactSource\)\s*\{\s*localStorage\.removeItem\(CMP_EDITS_KEY\);\s*return false;/);
+  assert.doesNotMatch(body,/byIdentity|get\(cmpEditIdentity\(row\)\)/);
+});
+test('fresh OCR recognition replaces comparison documents and clears saved quantity edits',()=>{
+  const start=html.indexOf('_lastGeminiJsons = { first: a, second: b };',html.indexOf('async function recognizeWithGemini'));
+  assert.ok(start>=0,'recognition result assignment must exist');
+  const body=html.slice(start,start+650);
+  assert.match(body,/\$\('cmpJson1'\)\)\s*\$\('cmpJson1'\)\.value = a/);
+  assert.match(body,/\$\('cmpJson2'\)\)\s*\$\('cmpJson2'\)\.value = b \|\| ''/);
+  assert.match(body,/localStorage\.removeItem\(CMP_EDITS_KEY\)/);
+});
+test('editing stock or sales in a mobile card does not mutate invoice arrivals',()=>{
+  const start=html.indexOf('function renderCards(');
+  const end=html.indexOf('function updateCardResults(',start);
+  assert.ok(start>=0 && end>start,'renderCards must exist');
+  const body=html.slice(start,end);
+  assert.match(body,/onChange: v => \{ row\.stock =/);
+  assert.match(body,/onChange: v => \{ row\.sales =/);
+  assert.doesNotMatch(body,/onChange: v => \{[^}]*row\.incoming\s*=/s);
+});
