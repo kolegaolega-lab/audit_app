@@ -468,6 +468,9 @@ test('applying OCR comparison edits synchronizes corrected quantities into resul
   assert.match(sync, /_lastGeminiJsons = \{ first, second \}/);
   assert.match(sync, /jsonInput\.value = first/);
   assert.match(sync, /report\.invoiceJson = updateJson\(report\.invoiceJson\)/);
+  assert.match(sync, /report\.json = first/);
+  assert.match(sync, /report\.fullRaw = first/);
+  assert.doesNotMatch(sync, /Object\.assign\(report, refreshed\)/);
   assert.match(sync, /persistAIReport\(report\)/);
   const applyStart = html.indexOf('function cmpApplyMatched()');
   const syncCall = html.indexOf('cmpSyncAppliedCorrectionsToOCR();', applyStart);
