@@ -392,6 +392,17 @@ test('OCR name mismatch can be explicitly confirmed and then stops blocking the 
   assert.match(html, /Это одно и то же название/);
 });
 
+test('comparison application initializes catalog cards when no prior JSON import populated the table', () => {
+  const applyStart = html.indexOf('function cmpApplyMatched()');
+  const initPos = html.indexOf('getCategoryProducts(_activeCategory).forEach(product => {', applyStart);
+  const applyPos = html.indexOf('let applied = 0;', applyStart);
+  const tableLoopPos = html.indexOf('tableRows.forEach(row => {', applyPos);
+  assert.ok(applyStart >= 0 && initPos > applyStart && applyPos > initPos && tableLoopPos > applyPos);
+  assert.match(html.slice(initPos, applyPos), /stock: null/);
+  assert.match(html.slice(initPos, applyPos), /shelfLife: product\.shelfLife/);
+  assert.match(html.slice(initPos, applyPos), /incoming: \[\]/);
+});
+
 test('application version is consistent across runtime and visible UI', () => {
   assert.match(html, /const APP_VERSION = ['"]v9\.24\.25['"]/);
   assert.match(html, /id="moreAppVersion">v9\.24\.25</);
