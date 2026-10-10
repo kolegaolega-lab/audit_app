@@ -1899,8 +1899,8 @@ const GEMINI_KEY = 'fbAuditGeminiKey';
 const GEMINI_MODEL_KEY = 'fbAuditGeminiModel';
 const GEMINI_MODEL_DEFAULT = 'gemini-3.1-flash-lite';
 const GEMINI_API = 'https://generativelanguage.googleapis.com/v1beta/models';
-const GEMINI_IMG_MAX_SIDE = 2400;
-const GEMINI_IMG_QUALITY = 0.84;
+const GEMINI_IMG_MAX_SIDE = 1800;
+const GEMINI_IMG_QUALITY = 0.72;
 // Safari/iOS is much less tolerant of large inline POST bodies. Keep a safe
 // margin below Gemini's documented ~20 MB inline-image request limit.
 const GEMINI_MAX_B64_BYTES = 12 * 1024 * 1024;
@@ -6984,14 +6984,14 @@ async function buildGeminiFileParts(filterType) {
       imgIndex++;
       let b64 = await compressImageForGemini(item.blob, GEMINI_IMG_MAX_SIDE, GEMINI_IMG_QUALITY);
       let mime = 'image/jpeg';
+      // Do not silently fall back to the original full-resolution photo: that defeats compression and can overflow Safari request limits.
       if (!b64) {
-        b64 = await blobToBase64(item.blob);
-        mime = kind;
+        throw new Error(`Не удалось уменьшить размер фото «${item.name}». Переснимите его или загрузите изображение в формате JPG.`);
       }
       if (b64) {
         totalB64 += b64.length;
         if (totalB64 > GEMINI_MAX_B64_BYTES) {
-          throw new Error(`Суммарный размер файлов превышает лимит. Уменьшите количество фото.`);
+          throw new Error(`После сжатия общий размер фото превышает лимит распознавания. Загрузите документы меньшими группами (например, отдельно накладные и чек продаж).`);
         }
         parts.push({ text: `--- ${item.type === 'sales' ? 'ЧЕК ПРОДАЖ' : 'НАКЛАДНАЯ'} · изображение ${imgIndex} · файл: ${item.name} ---` });
         parts.push({ inline_data: { mime_type: mime, data: b64 } });
@@ -7002,7 +7002,7 @@ async function buildGeminiFileParts(filterType) {
       if (raw) {
         totalB64 += raw.length;
         if (totalB64 > GEMINI_MAX_B64_BYTES) {
-          throw new Error(`Суммарный размер файлов превышает лимит.`);
+          throw new Error(`Размер PDF-документов превышает лимит распознавания. Загрузите PDF меньшими группами или используйте фотографии страниц.`);
         }
         parts.push({ text: `--- ${item.type === 'sales' ? 'ЧЕК ПРОДАЖ' : 'НАКЛАДНАЯ'} · документ ${imgIndex} · файл: ${item.name} ---` });
         parts.push({ inline_data: { mime_type: 'application/pdf', data: raw } });
