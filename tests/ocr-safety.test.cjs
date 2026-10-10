@@ -18,6 +18,7 @@ function extract(start, end) {
 const context = { MAX_NUM: 100000, getTodayStr() { return '2026-10-07'; }, safeDate(y,m,d) { const x=new Date(y,m-1,d); return x.getFullYear()===y && x.getMonth()===m-1 && x.getDate()===d ? `${String(y).padStart(4,'0')}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}` : null; } };
 vm.createContext(context);
 vm.runInContext(extract('function normalizeName(', 'function cleanProductName'), context);
+vm.runInContext(extract('function cmpCanonicalName(', 'function cmpNameSimilarity'), context);
 vm.runInContext(extract('function normalizeKnownQuantityConfirmations(', 'function getOCRSafetyIssues'), context);
 vm.runInContext(extract('function parseDateRu(', 'function inferIsoFromDdmm'), context);
 vm.runInContext(extract('function getOCRSafetyIssues(', 'function formatOCRSafetyMessage'), context);
@@ -62,6 +63,13 @@ function validJson(overrides = {}) {
 function reportFor(json) {
   return { hasBlocks: true, json: JSON.parse(json) };
 }
+
+test('OCR comparison treats slash and hyphen product-name variants as the same item', () => {
+  assert.equal(
+    context.cmpCanonicalName('Т Макарун фисташка/малина'),
+    context.cmpCanonicalName('Т Макарун фисташка-малина')
+  );
+});
 
 test('OCR safety rejects empty or invalid JSON', () => {
   assert.ok(context.getOCRSafetyIssues('', null, 2).some(x => x.code === 'empty-json'));
