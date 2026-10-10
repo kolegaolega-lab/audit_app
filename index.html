@@ -2852,10 +2852,13 @@ async function verifyToken(token) {
 }
 async function pushToGitHub(token, data) {
   const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-  const url = `${GITHUB_API}/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}?ref=${encodeURIComponent(GITHUB_BRANCH)}`;
+  // The Contents API uses ref on GET to read the blob SHA, but branch belongs
+  // in the PUT body. Keep the write URL free of read-only query parameters.
+  const readUrl = `${GITHUB_API}/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}?ref=${encodeURIComponent(GITHUB_BRANCH)}`;
+  const writeUrl = `${GITHUB_API}/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
   let sha = null;
   try {
-    const getRes = await fetchWithTimeout(url, {
+    const getRes = await fetchWithTimeout(readUrl, {
       headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' },
       cache: 'no-store'
     }, 30000);
@@ -2873,7 +2876,7 @@ async function pushToGitHub(token, data) {
     ...(sha ? { sha } : {})
   };
   try {
-    const putRes = await fetchWithTimeout(url, {
+    const putRes = await fetchWithTimeout(writeUrl, {
       method: 'PUT',
       headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
