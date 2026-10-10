@@ -7437,7 +7437,8 @@ function validateAIResponse(j1, j2, report, count) {
       if (fuzzyTimedOut) return;
       const cleanedName = cleanProductName(name || '');
       const n = normalizeName(cleanedName);
-      if (!n || exactNames.has(n)) return;
+      // A confirmed alias is an intentional equivalence, not a new typo warning.
+      if (!n || exactNames.has(n) || (typeof findAlias === 'function' && findAlias(cleanedName))) return;
       const cands = catalogByLen.get(n.length) || [];
       for (const c of cands) {
         if (Math.abs(c.length - n.length) > 2) continue;
