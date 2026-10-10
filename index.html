@@ -6743,11 +6743,11 @@ async function testGeminiModel(apiKey, id) {
     generationConfig: { maxOutputTokens: 3, temperature: 0 }
   };
   try {
-    const res = await fetch(url, {
+    const res = await fetchWithTimeout(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
-    });
+    }, 15000);
     if (res.ok) {
       const data = await res.json();
       return !!(data && data.candidates && data.candidates.length);
@@ -6771,7 +6771,7 @@ async function testGeminiModel(apiKey, id) {
   }
 }
 async function discoverGeminiModels(apiKey, onProgress) {
-  const listRes = await fetch(`${GEMINI_API}?key=${encodeURIComponent(apiKey)}`);
+  const listRes = await fetchWithTimeout(`${GEMINI_API}?key=${encodeURIComponent(apiKey)}`, { cache: 'no-store' }, 15000);
   if (!listRes.ok) throw new Error('Не удалось получить список моделей');
   const listData = await listRes.json();
   const all = (listData.models || [])
