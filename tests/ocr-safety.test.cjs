@@ -646,3 +646,54 @@ test('comparison edits are persisted and restored only for the same two OCR JSON
   assert.match(html, /const restoredEdits = cmpRestorePersistedEdits\(t1, t2\)/);
   assert.match(html, /cmpPersistEdits\(\);\s*cmpRefreshSafetyGate\(\)/);
 });
+
+test('comparison edits restore after a confirmed alias changes the row key', () => {
+  const stored = new Map();
+  const fields = {
+    cmpJson1: { value: 'first-json' },
+    cmpJson2: { value: 'second-json' }
+  };
+  const aliasMap = new Map();
+  const aliasKey = name => context.normalizeName(name);
+  aliasMap.set(aliasKey('Чизкейк тыква'), 'Чизкейк тыквенный');
+  aliasMap.set(aliasKey('Чизкейк тыквенный торт'), 'Чизкейк тыквенный');
+  context.applyAliases = name => aliasMap.get(aliasKey(name)) || name;
+  context.$ = id => fields[id] || null;
+  context.localStorage = {
+    getItem(key) { return stored.has(key) ? stored.get(key) : null; },
+    setItem(key, value) { stored.set(key, String(value)); }
+  };
+  vm.runInContext(extract('const CMP_EDITS_KEY', 'function cmpConfirmSameName'), context);
+
+  context._cmpData = {
+    rows: [{
+      key: 'old-ocr-name-key',
+      name: 'Чизкейк тыква',
+      a: { name: 'Чизкейк тыква' },
+      b: { name: 'Чизкейк тыквенный торт' },
+      edits: { incoming: { '06.10': 5 }, sales: 2, nameAccepted: true }
+    }]
+  };
+  context.cmpPersistEdits();
+
+  // On the next opening, alias normalization merges both OCR names under the
+  // catalog name, so the row's aggregation key is no longer the saved old key.
+  context._cmpData = {
+    rows: [{
+      key: context.cmpCanonicalName('Чизкейк тыквенный'),
+      name: 'Чизкейк тыквенный',
+      a: { name: 'Чизкейк тыквенный' },
+      b: { name: 'Чизкейк тыквенный' },
+      edits: { incoming: {}, sales: null, nameAccepted: false }
+    }]
+  };
+  assert.equal(context.cmpRestorePersistedEdits('first-json', 'second-json'), true);
+  assert.deepEqual(JSON.parse(JSON.stringify(context._cmpData.rows[0].edits)), {
+    incoming: { '06.10': 5 }, sales: 2, nameAccepted: true
+  });
+
+  delete context.applyAliases;
+  delete context.$;
+  delete context.localStorage;
+  delete context._cmpData;
+});
