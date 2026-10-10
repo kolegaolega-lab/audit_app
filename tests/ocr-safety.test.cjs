@@ -496,18 +496,12 @@ test('comparison application initializes catalog cards when no prior JSON import
 test('application version is consistent across package, runtime, and visible UI', () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
   const version = 'v' + packageJson.version;
-  const escapedVersion = version.replace(/[.*+?^${}()|[\]\\]/g, '\\test('application version is consistent across runtime and visible UI', () => {
-  assert.match(html, /const APP_VERSION = ['"]v9\.24\.31['"]/);
-  assert.match(html, /id="moreAppVersion">v9\.24\.31</);
-  assert.match(html, /id="aboutVersion">[^<]*v9\.24\.31</);
-  assert.doesNotMatch(html, /v9\.24\.1[6-8]/);
-});');
+  const escapedVersion = version.replaceAll('.', '\\.');
   assert.match(html, new RegExp("const APP_VERSION = ['\"]" + escapedVersion + "['\"]"));
   assert.match(html, new RegExp('id="moreAppVersion">' + escapedVersion + '<'));
   assert.match(html, new RegExp('id="aboutVersion">[^<]*' + escapedVersion + '<'));
   assert.doesNotMatch(html, /v9\.24\.1[6-8]/);
 });
-
 test('double-run comparison merges likely OCR name variants into one row', () => {
   assert.match(html, /function cmpNameSimilarity\(a, b\)/);
   assert.match(html, /Возможное совпадение: «/);
