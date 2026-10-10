@@ -5435,8 +5435,9 @@ function refreshCardRow(row, card) {
     const freshStock = calc.freshOnShelf;
     const freshSales = calc.freshSold;
     const incoming = getIncomingSummary(row);
+    const noIncoming = !row.salesOnly && row.stock != null && !hasUsableIncomingForAudit(row);
     res.innerHTML = `
-      <div class="card-result-source">Приходы: <b>${escapeHtml(incoming.text)}</b></div>
+      <div class="card-result-source">Приходы: <b>${escapeHtml(noIncoming ? "нет — просрочка, проверить с персоналом" : incoming.text)}</b></div>
       <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
       <span>Продано свежих: <span class="rv">${freshSales === null ? '—' : freshSales}</span></span>
       <span>Просрочено на витрине: <span class="rv ${exp === null ? 'zero' : (exp > 0 ? 'positive' : '')}">${exp === null ? '—' : exp}</span></span>
