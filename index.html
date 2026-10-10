@@ -9502,7 +9502,7 @@ function cmpRenderChecks(checks) {
       <span class="cmp-check-icon">${icon}</span>
       <div class="cmp-check-body">
         <div class="cmp-check-title">${escapeHtml(c.title)}</div>
-        <div class="cmp-check-detail">${c.detail}</div>
+        <div class="cmp-check-detail">${escapeHtml(c.detail)}</div>
       </div>
     </div>`;
   }).join('');
