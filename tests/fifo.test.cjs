@@ -165,9 +165,9 @@ test('regression: missing invoice dates are blocking OCR safety issues', () => {
   assert.match(html, /level:\s*['"]error['"][\s\S]{0,120}code:\s*inv\?\.continuation\s*\?\s*['"]continuation-date-unresolved['"]\s*:\s*['"]invoice-date-missing['"]/);
 });
 
-test('regression: UI missing-receipt guard uses the FIFO incoming helper', () => {
-  assert.match(html, /!hasUsableIncomingForAudit\(row\)/);
-  assert.match(html, /const noIncoming = !row\.salesOnly && row\.stock != null && !hasUsableIncomingForAudit\(row\)/);
+test('regression: duplicate incoming summary is removed from product cards', () => {
+  assert.doesNotMatch(html, /card-result-source/);
+  assert.doesNotMatch(html, /getIncomingSummary\(/);
 });
 
 
