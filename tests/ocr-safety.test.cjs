@@ -19,6 +19,8 @@ const context = { MAX_NUM: 100000, getTodayStr() { return '2026-10-07'; }, safeD
 vm.createContext(context);
 vm.runInContext(extract('function normalizeName(', 'function cleanProductName'), context);
 vm.runInContext(extract('function cmpCanonicalName(', 'function cmpNameSimilarity'), context);
+vm.runInContext(extract('function cmpNameTokens(', 'function cmpCanonicalName'), context);
+vm.runInContext(extract('function cmpNameSimilarity(', 'function cmpFindPossibleNameMatches'), context);
 vm.runInContext(extract('function cmpConfirmSameName(', 'function cmpRenderEditCard'), context);
 vm.runInContext(extract('function normalizeKnownQuantityConfirmations(', 'function getOCRSafetyIssues'), context);
 vm.runInContext(extract('function fmtDateRuShort(', 'function getTodayStr'), context);
@@ -616,4 +618,28 @@ test('applying OCR comparison edits synchronizes corrected incoming and sales qu
 
 test('catalog fallback uses canonical names when deduplicating OCR rows', () => {
   assert.match(html, /const alreadyKeys = new Set\(inCategory\.map\(r => cmpCanonicalName\(r\.name\)\)\);\s*const catProducts = getCategoryProducts\(_activeCategory\);\s*for \(const p of catProducts\) \{\s*const key = cmpCanonicalName\(p\.name\);/);
+});
+
+
+test('confirming equivalent OCR variants aliases them to the closest catalog product when both OCR names are misspelled', () => {
+  const aliases = [];
+  context.PRODUCTS = [
+    { name: 'Чизкейк черная смородина' },
+    { name: 'Чизкейк тыквенный' },
+    { name: 'Чизкейк Орео' }
+  ];
+  context.addOrUpdateAlias = (alias, target) => { aliases.push({ alias, target }); return true; };
+  const row = { a: { name: 'Чизкейк тыква' }, b: { name: 'Чизкейк тыквенный торт' } };
+  assert.equal(context.cmpConfirmSameName(row), true);
+  assert.deepEqual(aliases, [{ alias: 'Чизкейк тыква', target: 'Чизкейк тыквенный' }]);
+  delete context.PRODUCTS;
+  delete context.addOrUpdateAlias;
+});
+
+test('comparison edits are persisted and restored only for the same two OCR JSON inputs', () => {
+  assert.match(html, /const CMP_EDITS_KEY = 'audit_app_compare_edits_v1'/);
+  assert.match(html, /function cmpPersistEdits\(\)/);
+  assert.match(html, /function cmpRestorePersistedEdits\(json1, json2\)/);
+  assert.match(html, /const restoredEdits = cmpRestorePersistedEdits\(t1, t2\)/);
+  assert.match(html, /cmpPersistEdits\(\);\s*cmpRefreshSafetyGate\(\)/);
 });
