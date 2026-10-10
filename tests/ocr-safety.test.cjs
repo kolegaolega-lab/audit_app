@@ -509,8 +509,8 @@ test('OCR comparison applies one confirmed choice to both differently named OCR 
 });
 
 test('comparison refresh removes stale discrepancy text after a quantity is selected', () => {
-  assert.match(html, /if \(\/^Приход не совпадает\/\.test\(detail\)\)/);
-  assert.match(html, /if \(\/^Продажи не совпадают\/\.test\(detail\)\)/);
+  assert.ok(html.includes("if (/^Приход не совпадает/.test(detail))"));
+  assert.ok(html.includes("if (/^Продажи не совпадают/.test(detail))"));
   assert.match(html, /row\.details = \(row\.details \|\| \[\]\)\.filter/);
 });
 
