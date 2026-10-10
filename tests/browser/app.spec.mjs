@@ -1277,6 +1277,36 @@ test('check-step indicator follows completion gate for zero stock and restored s
   expect(result.restored).toEqual({canFinish:true,step:5,disabled:false});
 });
 
+test('completion gate blocks restored rows missing a category before history can omit them', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    localStorage.clear();
+    tableRows = [{
+      name:'Товар без категории', stock:1, sales:0, shelfLife:24,
+      category:null, incoming:[{date:'2026-10-06',qty:1}],
+      salesOnly:false, _checkDate:'2026-10-06'
+    }];
+    unknownRows = [];
+    noCategoryRows = [];
+    _dailyAccum = [];
+    _cmpData = null;
+    saveSession();
+    applySession(loadSession());
+    updateFinishCheckBtn();
+    return {
+      category: tableRows[0]?.category ?? null,
+      canFinish: canFinishCheck(),
+      disabled: $('finishCheckBtn')?.disabled ?? null,
+      reason: getFinishCheckBlockReason(getFinishCheckIssues())
+    };
+  });
+  expect(result.category).toBeNull();
+  expect(result.canFinish).toBe(false);
+  expect(result.disabled).toBe(true);
+  expect(result.reason).toContain('категорию');
+});
+
 test('completion gate blocks empty, missing stock, missing shelf life and unresolved reference states', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
