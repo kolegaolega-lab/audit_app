@@ -5284,6 +5284,10 @@ function refreshRow(row, tr) {
   setCell('expiredOnShelf', calc.expiredOnShelf, true);
   setCell('soldExpired', calc.soldExpired, true);
   scheduleTotalsUpdate();
+  // Обновляем фильтр и счётчики немедленно: проблемная позиция должна
+  // появляться/исчезать во вкладке «Проблемные» без переключения вкладок.
+  updateSegmentedCounters();
+  applyTableFilter();
 }
 function scheduleTotalsUpdate() {
   if (_totalsTimer) clearTimeout(_totalsTimer);
