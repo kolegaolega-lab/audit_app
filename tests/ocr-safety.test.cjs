@@ -631,7 +631,10 @@ test('confirming equivalent OCR variants aliases them to the closest catalog pro
   context.addOrUpdateAlias = (alias, target) => { aliases.push({ alias, target }); return true; };
   const row = { a: { name: 'Чизкейк тыква' }, b: { name: 'Чизкейк тыквенный торт' } };
   assert.equal(context.cmpConfirmSameName(row), true);
-  assert.deepEqual(aliases, [{ alias: 'Чизкейк тыква', target: 'Чизкейк тыквенный' }]);
+  assert.deepEqual(aliases, [
+    { alias: 'Чизкейк тыква', target: 'Чизкейк тыквенный' },
+    { alias: 'Чизкейк тыквенный торт', target: 'Чизкейк тыквенный' }
+  ]);
   delete context.PRODUCTS;
   delete context.addOrUpdateAlias;
 });
