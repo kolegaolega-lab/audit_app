@@ -6979,7 +6979,7 @@ async function refreshModelSelect(force) {
   if (sel) sel.innerHTML = '<option value="">Обновление списка моделей…</option>';
   try {
     const working = await discoverGeminiModels(apiKey, (i, n, id) => {
-      if (sel) sel.innerHTML = `<option value="">Проверка моделей (${i}/${n}): ${id}…</option>`;
+      if (sel) sel.innerHTML = `<option value="">Проверка моделей (${i}/${n}): ${escapeHtml(id)}…</option>`;
     });
     saveModelsCache(working);
     fillModelSelect(working);
