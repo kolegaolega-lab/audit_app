@@ -49,6 +49,33 @@ test('empty or wholly invalid remote point list is rejected to protect local poi
   assert.equal(validate({ products: [product], points: [{ id: '', num: '' }] }).reason, 'invalid-points');
 });
 
+test('remote catalog rejects malformed rows in every section before local mutation', () => {
+  assert.equal(validate({ products: [product, null] }).reason, 'invalid-product-row');
+  assert.equal(validate({ products: [product], ignored: ['valid', 7] }).reason, 'invalid-ignored');
+  assert.equal(validate({ products: [product], aliases: [{ alias: 'ok', target: 'Пончик' }, { alias: '', target: 'x' }] }).reason, 'invalid-aliases');
+  assert.equal(validate({ products: [product], prices: { 'Пончик': 50, 'Круассан': 'NaN' } }).reason, 'invalid-price-entry');
+  assert.equal(validate({ products: [product], points: [{ id: 'p1', num: '001' }, { id: '', num: '002' }] }).reason, 'invalid-points');
+});
+
+test('remote catalog accepts duplicate valid records for deterministic deduplication', () => {
+  assert.equal(validate({
+    products: [product, {...product, name:' пончик '}],
+    aliases: [{alias:'пончик',target:'Пончик'}, {alias:' ПОНЧИК ',target:'Другое'}],
+    prices: {'Пончик':50, ' пончик ':55},
+    points: [point, {...point, id:'shop-2', num:' 001 '}]
+  }).ok, true);
+});
+
+test('sync application deduplicates ignored names, aliases and normalized price keys', () => {
+  const syncStart = html.indexOf('function syncPullFromServer(');
+  const syncEnd = html.indexOf('async function syncPushToServer(', syncStart);
+  const source = html.slice(syncStart, syncEnd);
+  assert.match(source, /const seenIgnored = new Set\(\)/);
+  assert.match(source, /const seenAliases = new Set\(\)/);
+  assert.match(source, /const seenPriceNames = new Set\(\)/);
+  assert.match(source, /if \(!key \|\| !target \|\| seenAliases\.has\(key\)\) continue/);
+});
+
 test('valid payload and legacy payload without optional sections remain accepted', () => {
   assert.equal(validate({ products: [product], points: [point], ignored: [], aliases: [], prices: {} }).ok, true);
   assert.equal(validate({ products: [product] }).ok, true);
