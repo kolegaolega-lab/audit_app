@@ -2287,8 +2287,6 @@ test('offline send reports failure when local queue cannot be persisted', async 
     _profile={token:'test-token',login:'auditor',name:'Auditor'};
     _points=[{id:'p1',num:'001',name:'Shop',address:''}];
     _activePointId='p1';
-    $('point').value='001';
-    $('checkDate').value='2026-10-09';
     _photoCount=1;
     _dailyAccum=[]; _cmpData=null; unknownRows=[]; noCategoryRows=[];
     _needsCheckNames=new Set();
