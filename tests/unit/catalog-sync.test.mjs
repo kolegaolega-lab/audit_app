@@ -375,7 +375,7 @@ test('service worker activation deletes only stale caches owned by this app', as
   let activation;
   handlers.activate({waitUntil(promise) { activation = promise; }});
   await activation;
-  assert.deepEqual(deleted, ['fb-audit-v87.64','fb-audit-runtime-v87.64','fb-audit-v87.65','fb-audit-runtime-v87.65','fb-audit-v87.66','fb-audit-runtime-v87.66']);
+  assert.deepEqual(deleted, ['fb-audit-v87.64','fb-audit-runtime-v87.64','fb-audit-v87.65','fb-audit-runtime-v87.65','fb-audit-v87.66','fb-audit-runtime-v87.66','fb-audit-v87.67','fb-audit-runtime-v87.67']);
   assert.equal(deleted.includes('other-app-cache'), false);
   assert.equal(claimed, 1);
 });
