@@ -1174,7 +1174,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
           <span class="sq" style="background:var(--bg-elev-2);color:var(--text-secondary)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
           О приложении
         </span>
-        <span class="lval" id="moreAppVersion">v9.24.33</span>
+        <span class="lval" id="moreAppVersion">v9.24.34</span>
         <span class="chev">›</span>
       </button>
     </div>
@@ -1809,7 +1809,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
   <div class="modal-content">
     <div class="modal-header">
       <h3>О приложении</h3>
-      <p class="hint" id="aboutVersion">French Bakery Аудит · v9.24.33</p>
+      <p class="hint" id="aboutVersion">French Bakery Аудит · v9.24.34</p>
     </div>
     <div class="modal-body">
       <p class="hint" style="margin:0 0 12px">PWA для аудита сроков годности в кондитерской French Bakery.</p>
@@ -1888,7 +1888,7 @@ const GITHUB_FILE = 'sync.json';
 // Never rely on the repository default branch (main) for catalog writes.
 const GITHUB_BRANCH = 'fix/fifo-shelf-life';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.24.33';
+const APP_VERSION = 'v9.24.34';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -1948,6 +1948,7 @@ let isRestoring = false;
 let saveTimer = null;
 let isRendering = false;
 let pendingSessionReset = false;
+let _sessionLocallyEdited = false;
 let resetToken = 0;
 const _activeDeletes = new Set();
 let _fileBusy = false;
@@ -3309,6 +3310,8 @@ async function renderPhotoQueue() {
    ═══════════════════════════════════════════ */
 function scheduleSessionSave() {
   if (isRestoring || pendingSessionReset) return;
+  // Do not let a stale session from another tab overwrite edits in this tab.
+  _sessionLocallyEdited = true;
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(() => { saveTimer = null; saveSession(); }, 400);
 }
@@ -5495,7 +5498,7 @@ function updateCardResults() {
     const freshStock = calc.freshOnShelf;
     const freshSales = calc.freshSold;
     const missingIncomingWarning = !row.salesOnly && row.stock != null && (Number(row.stock) > 0 || Number(row.sales) > 0) && !hasUsableIncomingForAudit(row)
-      ? '<span class="card-incoming-warning">Поступление не найдено — уточните у сотрудника, не просрочен ли товар</span>' : '';
+      ? '<span class="card-incoming-warning">Нет подтверждённого поступления за срок годности — проверьте накладные и уточните у сотрудника, не просрочен ли товар</span>' : '';
     res.innerHTML = `
       <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
       <span>Продано свежих: <span class="rv">${freshSales === null ? '—' : freshSales}</span></span>
@@ -5517,7 +5520,7 @@ function refreshCardRow(row, card) {
     const freshStock = calc.freshOnShelf;
     const freshSales = calc.freshSold;
     const missingIncomingWarning = !row.salesOnly && row.stock != null && (Number(row.stock) > 0 || Number(row.sales) > 0) && !hasUsableIncomingForAudit(row)
-      ? '<span class="card-incoming-warning">Поступление не найдено — уточните у сотрудника, не просрочен ли товар</span>' : '';
+      ? '<span class="card-incoming-warning">Нет подтверждённого поступления за срок годности — проверьте накладные и уточните у сотрудника, не просрочен ли товар</span>' : '';
     res.innerHTML = `
       <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
       <span>Продано свежих: <span class="rv">${freshSales === null ? '—' : freshSales}</span></span>
@@ -8462,7 +8465,7 @@ function renderReport() {
             '<div class="row"><span>Свежих на витрине</span><b>' + totalFreshOnShelf + '</b></div>' +
             '<div class="row"><span>Просрочено на витрине</span><b>' + totalExpiredOnShelf + '</b></div>' +
             '<div class="row"><span>Продано просрочкой</span><b' + (totalSoldExpired > 0 ? ' class="red"' : '') + '>' + totalSoldExpired + '</b></div>' +
-            (totalNoIncoming ? '<div class="row"><span>Нет прихода за срок годности · проверить с персоналом</span><b class="red">' + totalNoIncoming + '</b></div>' : '') +
+            (totalNoIncoming ? '<div class="row"><span>Нет подтверждённого поступления за срок годности — проверьте накладные и уточните у сотрудника, не просрочен ли товар</span><b class="red">' + totalNoIncoming + '</b></div>' : '') +
           '</div>' +
         '</div>' +
       '</div>';
@@ -8574,7 +8577,7 @@ function renderReport() {
         const dotCls = noIncoming || critical ? 'red' : 'orange';
         let reason;
         if (noIncoming) {
-          reason = 'Нет прихода за срок годности · проверить с персоналом';
+          reason = 'Нет подтверждённого поступления за срок годности — проверьте накладные и уточните у сотрудника, не просрочен ли товар';
           if (critical || (calc.expiredOnShelf || 0) > 0) {
             reason += ' · есть просроченный остаток/продажа';
           }
@@ -11584,7 +11587,7 @@ function init() {
   if (_profile && _profile.token) setTimeout(() => { syncHistoryForCurrentMonth(); }, 2500);
 
   window.addEventListener('storage', e => {
-    if (e.key === SESSION_KEY && !isRestoring) {
+    if (e.key === SESSION_KEY && !isRestoring && !_sessionLocallyEdited) {
       const data = loadSession();
       if (data) { applySession(data); setActiveCategory(_activeCategory); autoResizeTextarea(); updateJsonCounter(); renderTable(); updateUnknownBanner(); updateNoCategoryBanner(); }
     }
