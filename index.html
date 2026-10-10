@@ -9661,7 +9661,7 @@ function cmpUpdateOCRJsonWithCorrections(raw, edits) {
 
   const incomingEdits = edits.filter(edit => edit.kind === 'incoming');
   const salesEdits = edits.filter(edit => edit.kind === 'sales');
-  const changedNames = new Set();
+  const confirmedInvoiceNames = new Set();
   let activeDate = '';
 
   if (Array.isArray(data.invoices)) {
@@ -9679,7 +9679,7 @@ function cmpUpdateOCRJsonWithCorrections(raw, edits) {
         if (!edit) return;
         item.quantity = edit.quantity;
         item.quantity_status = 'confirmed';
-        changedNames.add(itemKey);
+        confirmedInvoiceNames.add(itemKey);
       });
     });
   }
@@ -9695,13 +9695,12 @@ function cmpUpdateOCRJsonWithCorrections(raw, edits) {
       if (!edit) return;
       item.quantity = edit.quantity;
       item.quantity_status = 'confirmed';
-      changedNames.add(itemKey);
     });
   }
 
-  if (changedNames.size && data.review && Array.isArray(data.review.handwritten_confirmation)) {
+  if (confirmedInvoiceNames.size && data.review && Array.isArray(data.review.handwritten_confirmation)) {
     data.review.handwritten_confirmation = data.review.handwritten_confirmation.filter(name =>
-      !changedNames.has(cmpCanonicalName(name || ''))
+      !confirmedInvoiceNames.has(cmpCanonicalName(name || ''))
     );
   }
   return JSON.stringify(data);
