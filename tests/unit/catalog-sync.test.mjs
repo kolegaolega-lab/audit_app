@@ -499,6 +499,24 @@ test('daily accumulator restore deduplicates dates and blocks malformed JSON wit
   assert.equal(result[1].needsCheck,true);
 });
 
+test('catalog sync retries transient reads and serializes concurrent publication', () => {
+  assert.match(html, /async function fetchWithRetry\(/);
+  const readerStart = html.indexOf('async function fetchRemoteCatalog(');
+  const readerEnd = html.indexOf('async function verifyToken(', readerStart);
+  const reader = html.slice(readerStart, readerEnd);
+  assert.match(reader, /fetchWithRetry\(url, \{ cache: 'no-store' \}, 15000, 2\)/);
+  const writerStart = html.indexOf('async function pushToGitHub(');
+  const writerEnd = html.indexOf('let _catalogPushInFlight', writerStart);
+  const writer = html.slice(writerStart, writerEnd);
+  assert.match(writer, /fetchWithRetry\(readUrl/);
+  assert.match(writer, /Справочник изменился параллельно/);
+  const syncStart = html.indexOf('async function syncPushToServer(');
+  const syncEnd = html.indexOf('function setLastCheckTime(', syncStart);
+  const sync = html.slice(syncStart, syncEnd);
+  assert.match(sync, /if \(_catalogPushInFlight\)/);
+  assert.match(sync, /finally\s*\{\s*_catalogPushInFlight = false;/);
+});
+
 test('catalog sync reads and writes only the explicit development branch', () => {
   assert.ok(html.includes("const GITHUB_BRANCH = 'fix/fifo-shelf-life';"));
 
