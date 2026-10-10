@@ -2353,6 +2353,8 @@ test('card warning matches report rule when no incoming and no stock or sales', 
       shelfLife:24, category:'desserts', incoming:[], _checkDate:'2026-10-10'
     };
     tableRows = [row];
+    const cardsView = document.querySelector('#cardsView');
+    if (cardsView) cardsView.innerHTML = '';
     const card = document.createElement('div');
     card.className = 'card';
     const resultNode = document.createElement('div');
