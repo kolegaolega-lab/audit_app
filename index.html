@@ -9448,6 +9448,8 @@ function cmpRunCompare() {
     ],
     comparisonValid: quantityIssues.length === 0 && blockingSafetyIssues.length === 0
   };
+  const restoredEdits = cmpRestorePersistedEdits(t1, t2);
+  if (restoredEdits) cmpRefreshSafetyGate();
   cmpRenderChecks(checks);
   cmpRenderResults();
   scheduleSessionSave();
@@ -9584,6 +9586,48 @@ function cmpCloseEdit() {
   _cmpEditKey = null; _cmpEditDk = null; _cmpEditKind = null;
   cmpRenderResults();
 }
+const CMP_EDITS_KEY = 'audit_app_compare_edits_v1';
+function cmpPersistEdits() {
+  try {
+    if (!_cmpData || !$('cmpJson1') || !$('cmpJson2')) return;
+    const edits = (_cmpData.rows || []).filter(r => r && r.edits).map(r => ({
+      key: r.key,
+      edits: {
+        incoming: { ...(r.edits.incoming || {}) },
+        sales: r.edits.sales == null ? null : r.edits.sales,
+        nameAccepted: !!r.edits.nameAccepted
+      }
+    }));
+    localStorage.setItem(CMP_EDITS_KEY, JSON.stringify({
+      json1: $('cmpJson1').value,
+      json2: $('cmpJson2').value,
+      edits
+    }));
+  } catch (e) { console.warn('cmpPersistEdits:', e); }
+}
+function cmpRestorePersistedEdits(json1, json2) {
+  try {
+    const raw = localStorage.getItem(CMP_EDITS_KEY);
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    if (!saved || saved.json1 !== json1 || saved.json2 !== json2 || !Array.isArray(saved.edits)) return false;
+    const byKey = new Map(saved.edits.map(x => [x.key, x.edits]));
+    let restored = false;
+    (_cmpData?.rows || []).forEach(row => {
+      const edits = byKey.get(row.key);
+      if (!edits) return;
+      row.edits = {
+        ...(row.edits || {}),
+        incoming: { ...(edits.incoming || {}) },
+        sales: edits.sales == null ? null : edits.sales,
+        nameAccepted: !!edits.nameAccepted
+      };
+      restored = true;
+    });
+    return restored;
+  } catch (e) { console.warn('cmpRestorePersistedEdits:', e); return false; }
+}
+
 function cmpSaveEdit() {
   if (!_cmpData || !_cmpEditKey) return;
   const row = _cmpData.rows.find(r => r.key === _cmpEditKey);
@@ -9606,25 +9650,38 @@ function cmpSaveEdit() {
   if (_cmpEditKind === 'sales') row.edits.sales = val;
   else row.edits.incoming[_cmpEditDk] = val;
   _cmpEditKey = null; _cmpEditDk = null; _cmpEditKind = null;
+  cmpPersistEdits();
   cmpRefreshSafetyGate();
 }
 function cmpConfirmSameName(row) {
   if (!row) return false;
   if (!row.edits) row.edits = { incoming: {}, sales: null };
-  // Сохраняем подтверждённый вариант названия в постоянный справочник алиасов.
   const nameA = String(row.a?.name || '').trim();
   const nameB = String(row.b?.name || '').trim();
   if (nameA && nameB && normalizeName(nameA) !== normalizeName(nameB)) {
-    const catalogProduct = PRODUCTS.find(p =>
-      p && p.name &&
-      (cmpCanonicalName(p.name) === cmpCanonicalName(nameA) ||
-       cmpCanonicalName(p.name) === cmpCanonicalName(nameB))
+    const products = Array.isArray(PRODUCTS) ? PRODUCTS.filter(p => p && p.name) : [];
+    // Prefer an exact canonical catalog match; if OCR misspelled both variants,
+    // choose the clearly closest catalog product instead of creating an alias to a typo.
+    let catalogProduct = products.find(p =>
+      cmpCanonicalName(p.name) === cmpCanonicalName(nameA) ||
+      cmpCanonicalName(p.name) === cmpCanonicalName(nameB)
     );
+    if (!catalogProduct && typeof cmpNameSimilarity === 'function') {
+      const ranked = products.map(p => ({
+        product: p,
+        score: Math.max(cmpNameSimilarity(p.name, nameA), cmpNameSimilarity(p.name, nameB))
+      })).sort((a, b) => b.score - a.score);
+      if (ranked.length && ranked[0].score >= 0.45 &&
+          (ranked.length === 1 || ranked[0].score - ranked[1].score >= 0.08)) {
+        catalogProduct = ranked[0].product;
+      }
+    }
     const target = String(catalogProduct?.name || nameA).trim();
     const alias = normalizeName(nameA) === normalizeName(target) ? nameB : nameA;
     if (normalizeName(alias) !== normalizeName(target)) addOrUpdateAlias(alias, target);
   }
   row.edits.nameAccepted = true;
+  if (typeof cmpPersistEdits === 'function') cmpPersistEdits();
   return true;
 }
 function cmpRenderEditCard(row) {
