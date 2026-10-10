@@ -201,6 +201,49 @@ test('editing a previously missing incoming date upserts one row in table and mo
   expect(result.cardAfterRender).toEqual([{date:'2026-10-06',qty:12}]);
 });
 
+test('catalog backup recovery restores a valid published snapshot and protects local data from a broken backup', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    localStorage.clear();
+    PRODUCTS = [{name:'Локальный товар',shelfLife:48,category:'desserts'}];
+    IGNORED=[]; ALIASES=[]; PRICES={};
+    _points=[{id:'local-point',num:'900',name:'Локальная точка',address:''}];
+    _activePointId='local-point';
+    const backup = {
+      version:1, savedAt:Date.now(),
+      products:[{name:'Товар из копии',shelfLife:24,category:'desserts'}],
+      ignored:['Не учитывать'], aliases:[{alias:'Старое имя',target:'Товар из копии'}],
+      prices:{'Товар из копии':12.5},
+      points:[{id:'backup-point',num:'001',name:'Точка из копии',address:'Адрес'}]
+    };
+    localStorage.setItem(CATALOG_BACKUP_KEY,JSON.stringify(backup));
+    const restored = restoreCatalogBackup();
+    const afterRestore = {
+      products:PRODUCTS.map(p=>p.name), ignored:[...IGNORED],
+      aliases:ALIASES.map(a=>[a.alias,a.target]), prices:{...PRICES},
+      points:_points.map(p=>[p.id,p.num]), active:_activePointId
+    };
+    PRODUCTS=[{name:'Не трогать',shelfLife:48,category:'desserts'}];
+    saveCatalog();
+    localStorage.setItem(CATALOG_BACKUP_KEY,JSON.stringify({version:1,products:[]}));
+    const rejected = restoreCatalogBackup();
+    return {
+      restored, afterRestore, rejected,
+      afterRejected:PRODUCTS.map(p=>p.name),
+      status:document.getElementById('syncStatus')?.textContent||''
+    };
+  });
+  expect(result.restored).toBe(true);
+  expect(result.afterRestore).toEqual({
+    products:['Товар из копии'], ignored:['Не учитывать'],
+    aliases:[['Старое имя','Товар из копии']], prices:{'Товар из копии':12.5},
+    points:[['backup-point','001']], active:'backup-point'
+  });
+  expect(result.rejected).toBe(false);
+  expect(result.afterRejected).toEqual(['Не трогать']);
+  expect(result.status).toContain('Текущие локальные данные не изменены');
+});
+
 test('manual edits recalculate FIFO and survive session restore', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
