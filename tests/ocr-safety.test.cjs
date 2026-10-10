@@ -67,6 +67,29 @@ function reportFor(json) {
   return { hasBlocks: true, json: JSON.parse(json) };
 }
 
+test('continuation pages with the same invoice number and date merge into one invoice', () => {
+  const input = JSON.stringify({
+    schema_version: '1.0', document_type: 'combined', check_date: '2026-10-10',
+    source: { photo_count: 2, processed_photo_count: 2, duplicate_photo_count: 0 },
+    invoices: [
+      { number: '220725', date: '01.10.2026', continuation: false, last_line_number: 9, printed_total: 100, items: [{ line: 1, name: 'Эклер малина', quantity: 1, quantity_status: 'confirmed' }] },
+      { number: '220725', date: '01.10.2026', continuation: true, last_line_number: 18, printed_total: 100, items: [{ line: 10, name: 'Эклер ванильный', quantity: 2, quantity_status: 'confirmed' }] },
+      { number: '219965', date: '30.09.2026', continuation: false, last_line_number: 1, items: [{ line: 1, name: 'Маффин', quantity: 1, quantity_status: 'confirmed' }] }
+    ],
+    sales: [], review: { unreadable: [], handwritten_confirmation: [], uncertain_rows: [], notes: [] }
+  });
+  const normalized = JSON.parse(context.normalizeKnownQuantityConfirmations(input));
+  assert.equal(normalized.invoices.length, 2);
+  assert.equal(normalized.invoices[0].items.length, 2);
+  assert.equal(normalized.invoices[0].last_line_number, 18);
+  assert.equal(normalized.invoices[0].printed_total, 100);
+  assert.equal(normalized.invoices[1].number, '219965');
+});
+
+test('slash and space variants normalize to the same alias key', () => {
+  assert.equal(context.normalizeName('Макарун фисташка/малина'), context.normalizeName('макарун фисташка малина'));
+});
+
 test('confirming equivalent OCR names persists an alias to the catalog product', () => {
   const aliases = [];
   context.PRODUCTS = [{ name: 'Лингвини с жареными креветками' }];
