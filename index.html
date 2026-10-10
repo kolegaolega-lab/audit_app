@@ -8230,6 +8230,10 @@ function getFinishCheckIssues() {
   const auditable = rows.filter(r => !r.salesOnly);
   const missingStock = auditable.filter(r => r.stock == null);
   const missingShelfLife = auditable.filter(r => r.shelfLife == null || !Number.isFinite(Number(r.shelfLife)) || Number(r.shelfLife) <= 0);
+  // Историческая/повреждённая сессия может содержать строку без категории,
+  // даже если отдельный список noCategoryRows пуст. Не разрешаем отправить
+  // такую проверку: buildCheckSnapshot группирует строки по категориям.
+  const missingCategory = rows.filter(r => !isValidCategory(r.category));
   const unknownCount = Array.isArray(unknownRows) ? unknownRows.length : 0;
   const noCategoryCount = Array.isArray(noCategoryRows) ? noCategoryRows.length : 0;
 
@@ -8245,6 +8249,7 @@ function getFinishCheckIssues() {
     empty: rows.length === 0,
     missingStock,
     missingShelfLife,
+    missingCategory,
     unresolvedReference: unknownCount + noCategoryCount,
     comparisonPending,
     dailyPending
@@ -8254,6 +8259,7 @@ function getFinishCheckBlockReason(issues) {
   if (!issues || issues.empty) return 'Нет позиций для завершения проверки.';
   if (issues.missingStock.length) return 'Введите остаток по всем позициям (' + issues.missingStock.length + ').';
   if (issues.missingShelfLife.length) return 'Укажите срок годности для всех проверяемых товаров (' + issues.missingShelfLife.length + ').';
+  if (issues.missingCategory && issues.missingCategory.length) return 'Укажите категорию для всех позиций (' + issues.missingCategory.length + ').';
   if (issues.unresolvedReference) return 'Проверьте позиции, не сопоставленные со справочником (' + issues.unresolvedReference + ').';
   if (issues.comparisonPending) return 'Завершите проверку двух результатов распознавания перед окончанием аудита.';
   if (issues.dailyPending.length) return 'Проверьте результаты распознавания: есть даты, требующие подтверждения (' + issues.dailyPending.length + ').';
