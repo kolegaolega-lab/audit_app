@@ -9653,51 +9653,75 @@ function cmpRenderResults() {
     if (comparisonBlocked) applyBtn.title = 'Исправьте отмеченные строки перед применением';
   }
 }
-function cmpSyncAppliedCorrectionsToOCR() {
-  if (!_cmpData || !_cmpData.rows) return;
-  const edits = [];
-  _cmpData.rows.forEach(row => {
-    Object.entries(row.edits?.incoming || {}).forEach(([dateKey, quantity]) => {
-      if (quantity == null || !Number.isFinite(Number(quantity))) return;
-      edits.push({ name: cmpCanonicalName(row.name), dateKey, quantity: Number(quantity), displayName: row.name });
-    });
-  });
-  if (!edits.length) return;
+function cmpUpdateOCRJsonWithCorrections(raw, edits) {
+  if (!raw || !Array.isArray(edits) || !edits.length) return raw;
+  let data;
+  try { data = JSON.parse(raw); } catch (e) { return raw; }
+  if (!data || typeof data !== 'object') return raw;
 
-  const updateJson = raw => {
-    if (!raw) return raw;
-    let data;
-    try { data = JSON.parse(raw); } catch (e) { return raw; }
-    if (!data || !Array.isArray(data.invoices)) return raw;
-    let activeDate = '';
-    const changedNames = new Set();
+  const incomingEdits = edits.filter(edit => edit.kind === 'incoming');
+  const salesEdits = edits.filter(edit => edit.kind === 'sales');
+  const changedNames = new Set();
+  let activeDate = '';
+
+  if (Array.isArray(data.invoices)) {
     data.invoices.forEach(invoice => {
       const rawDate = String(invoice?.date || '').trim();
       if (rawDate) activeDate = rawDate;
       else if (!invoice?.continuation) activeDate = '';
       const effectiveDate = rawDate || (invoice?.continuation ? activeDate : '');
-      const parsedDate = effectiveDate ? parseDateRu(effectiveDate, new Date()) : null;
-      // parseDateRu возвращает ISO-строку YYYY-MM-DD; преобразуем её
-      // в DD.MM, как представлены ключи дат в сравнении.
+      const parsedDate = effectiveDate ? parseDateRu(effectiveDate, new Date()) : '';
       const dateKey = parsedDate ? fmtDateRuShort(parsedDate) : '';
       (Array.isArray(invoice?.items) ? invoice.items : []).forEach(item => {
         const itemKey = cmpCanonicalName(item?.name || '');
         if (!itemKey || !dateKey) return;
-        const edit = edits.find(x => x.name === itemKey && x.dateKey === dateKey);
+        const edit = incomingEdits.find(x => x.name === itemKey && x.dateKey === dateKey);
         if (!edit) return;
         item.quantity = edit.quantity;
         item.quantity_status = 'confirmed';
         changedNames.add(itemKey);
       });
     });
-    if (data.review && Array.isArray(data.review.handwritten_confirmation)) {
-      data.review.handwritten_confirmation = data.review.handwritten_confirmation.filter(name =>
-        !changedNames.has(cmpCanonicalName(name || ''))
-      );
-    }
-    return JSON.stringify(data);
-  };
+  }
 
+  // Продажи хранятся в data.sales, отдельно от строк накладных. Раньше
+  // исправления продаж оставались только в карточках, поэтому JSON и отчёт ИИ
+  // продолжали показывать первоначальное распознавание.
+  if (Array.isArray(data.sales)) {
+    data.sales.forEach(item => {
+      const itemKey = cmpCanonicalName(item?.name || '');
+      if (!itemKey) return;
+      const edit = salesEdits.find(x => x.name === itemKey);
+      if (!edit) return;
+      item.quantity = edit.quantity;
+      item.quantity_status = 'confirmed';
+      changedNames.add(itemKey);
+    });
+  }
+
+  if (changedNames.size && data.review && Array.isArray(data.review.handwritten_confirmation)) {
+    data.review.handwritten_confirmation = data.review.handwritten_confirmation.filter(name =>
+      !changedNames.has(cmpCanonicalName(name || ''))
+    );
+  }
+  return JSON.stringify(data);
+}
+
+function cmpSyncAppliedCorrectionsToOCR() {
+  if (!_cmpData || !_cmpData.rows) return;
+  const edits = [];
+  _cmpData.rows.forEach(row => {
+    Object.entries(row.edits?.incoming || {}).forEach(([dateKey, quantity]) => {
+      if (quantity == null || !Number.isFinite(Number(quantity))) return;
+      edits.push({ name: cmpCanonicalName(row.name), dateKey, quantity: Number(quantity), kind: 'incoming' });
+    });
+    if (row.edits?.sales != null && Number.isFinite(Number(row.edits.sales))) {
+      edits.push({ name: cmpCanonicalName(row.name), quantity: Number(row.edits.sales), kind: 'sales' });
+    }
+  });
+  if (!edits.length) return;
+
+  const updateJson = raw => cmpUpdateOCRJsonWithCorrections(raw, edits);
   // Тексты в окне сверки — актуальный источник: пользователь мог открыть
   // сравнение из вручную вставленного JSON, не проходя обычный OCR-запуск.
   const sourceFirst = ($('cmpJson1') && $('cmpJson1').value) || _lastGeminiJsons.first;
@@ -9720,6 +9744,9 @@ function cmpSyncAppliedCorrectionsToOCR() {
     const report = _lastAIReport;
     if (report.fullRaw) report.fullRaw = first || report.fullRaw;
     if (report.json) report.json = first || report.json;
+
+    // В режиме с раздельным распознаванием обновляем обе части отчёта:
+    // приходные количества в invoiceJson и продажи в salesJson.
     if (report.invoiceJson) {
       report.invoiceJson = updateJson(report.invoiceJson);
       const refreshed = parseAIReport(report.invoiceJson);
@@ -9727,11 +9754,18 @@ function cmpSyncAppliedCorrectionsToOCR() {
         report.invoiceReport = refreshed;
         report.invoiceValidation = validateAIResponse(report.invoiceJson, report.invoiceJson, refreshed, Number(report.invoicePhotoCount) || -1);
       }
-    } else if (first) {
+    }
+    if (report.salesJson) {
+      report.salesJson = updateJson(report.salesJson);
+      const refreshedSales = parseAIReport(report.salesJson);
+      if (refreshedSales) {
+        report.salesReport = refreshedSales;
+        report.salesValidation = validateAIResponse(report.salesJson, report.salesJson, refreshedSales, Number(report.salesPhotoCount) || -1);
+      }
+    }
+    if (!report.invoiceJson && !report.salesJson && first) {
       const refreshed = parseAIReport(first);
       if (refreshed) {
-        // Обновляем поля отчёта, но сохраняем json/fullRaw как строки:
-        // рендер отчёта и кнопка «Проверка результата» ожидают именно текст JSON.
         ['blocks', 'checks', 'completeness', 'unreadable', 'handwrittenConfirmation',
           'postrochno', 'gaps'].forEach(key => { report[key] = refreshed[key]; });
         report.validation = validateAIResponse(first, first, report, Number(report.photoCount) || -1);
