@@ -9718,9 +9718,23 @@ function cmpRestorePersistedEdits(json1, json2) {
     }
     const byKey = new Map(saved.edits.filter(x => x && typeof x.key === 'string')
       .map(x => [x.key, x.edits]));
+    // При той же самой паре документов разрешаем восстановить правку после
+    // изменения ключа строки из-за подтверждённого алиаса.
+    const byIdentity = new Map();
+    const rememberIdentity = (identity, edits) => {
+      if (typeof identity === 'string' && identity && edits) byIdentity.set(identity, edits);
+    };
+    saved.edits.forEach(item => {
+      if (!item || !item.edits) return;
+      rememberIdentity(item.identity, item.edits);
+      const names = (Array.isArray(item.names) ? item.names : [])
+        .map(name => cmpCanonicalName(String(name || '').trim()))
+        .filter(Boolean).sort();
+      if (names.length) rememberIdentity(JSON.stringify(names), item.edits);
+    });
     let restored = false;
     (_cmpData?.rows || []).forEach(row => {
-      const edits = byKey.get(row.key);
+      const edits = byKey.get(row.key) || byIdentity.get(cmpEditIdentity(row));
       if (!edits) return;
       const incoming = {};
       Object.entries(edits.incoming || {}).forEach(([dateKey, quantity]) => {
