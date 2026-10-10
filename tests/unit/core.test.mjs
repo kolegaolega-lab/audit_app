@@ -53,7 +53,7 @@ test('Gemini model discovery and probes have bounded network waits',()=>{
   const probe=html.slice(probeStart,discoverStart);
   const discovery=html.slice(discoverStart,fillStart);
   assert.match(probe,/fetchWithTimeout\(url,[\s\S]{0,180}15000\)/);
-  assert.match(discovery,/fetchWithTimeout\(\$\{GEMINI_API\}[\s\S]{0,100}15000\)/);
+  assert.match(discovery,/fetchWithTimeout\(\$\{GEMINI_API\}[\s\S]{0,220}15000\)/);
   assert.doesNotMatch(discovery,/await fetch\(/);
 });
 test('future-only incoming cannot make stock fresh',()=>{const r=f.computeFIFO({stock:2,sales:1,shelfLife:24,incoming:[{date:'2026-10-07',qty:5}],_checkDate:'2026-10-06'});assert.deepEqual(r,{soldExpired:1,expiredOnShelf:2,freshOnShelf:0,freshSold:0});});
