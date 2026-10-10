@@ -8233,7 +8233,7 @@ function getFinishCheckIssues() {
   // Историческая/повреждённая сессия может содержать строку без категории,
   // даже если отдельный список noCategoryRows пуст. Не разрешаем отправить
   // такую проверку: buildCheckSnapshot группирует строки по категориям.
-  const missingCategory = rows.filter(r => !isValidCategory(r.category));
+  const missingCategory = auditable.filter(r => !isValidCategory(r.category));
   const unknownCount = Array.isArray(unknownRows) ? unknownRows.length : 0;
   const noCategoryCount = Array.isArray(noCategoryRows) ? noCategoryRows.length : 0;
 
