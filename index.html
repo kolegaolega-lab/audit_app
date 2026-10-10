@@ -3194,7 +3194,16 @@ async function clearAllPhotos() {
 async function renderPhotoQueue() {
   const box = $('photoQueue');
   if (!box) return;
-  const items = await getPhotos();
+  let items;
+  try {
+    items = await getPhotos();
+  } catch (e) {
+    console.warn('renderPhotoQueue: unable to read photo storage', e);
+    _photoCount = 0;
+    if (typeof renderCheckSteps === 'function') renderCheckSteps();
+    box.innerHTML = '<div class="hint error">Не удалось прочитать список файлов. Не загружайте материалы повторно, пока не перезагрузите приложение и не проверите список.</div>';
+    return;
+  }
   _photoCount = items.length;
   if (typeof renderCheckSteps === 'function') renderCheckSteps();
   if (!items.length) { box.innerHTML = '<div class="hint">Загружено: <b>0 файлов</b></div>'; return; }
@@ -7698,7 +7707,9 @@ async function recognizeWithGemini(){
   const key = getGeminiKey();
   if (!key) { set("err", "Введите API-ключ в настройках."); return; }
   if (!isValidCategory(_activeCategory)) { set("err", "Сначала выберите категорию."); return; }
-  const items = await getPhotos();
+  let items;
+  try { items = await getPhotos(); }
+  catch (e) { console.warn('recognizeWithGemini: photo storage read failed', e); set("err", "Не удалось прочитать загруженные файлы. Перезагрузите приложение и проверьте список файлов."); return; }
   if (!items.length) { set("info", "Сначала загрузите материалы."); return; }
   shareBusy = true;
   setOCRProgress("Распознавание запущено", "Подготавливаю " + items.length + " фото…", 12);
@@ -7866,7 +7877,10 @@ async function recognizeDaily(){
   if(!isValidCategory(_activeCategory)){set("err","Сначала выберите категорию.");return}
   const key=getGeminiKey();
   if(!key){set("err","Введите API-ключ в настройках.");return}
-  const all=await getPhotos(),inv=all.filter(x=>x.type==="invoice"),sales=all.filter(x=>x.type==="sales");
+  let all;
+  try { all = await getPhotos(); }
+  catch (e) { console.warn('recognizeDaily: photo storage read failed', e); set("err", "Не удалось прочитать загруженные файлы. Перезагрузите приложение и проверьте список файлов."); return; }
+  const inv=all.filter(x=>x.type==="invoice"),sales=all.filter(x=>x.type==="sales");
   if(!inv.length&&!sales.length){set("info","Сначала загрузите фото накладных и чек продаж.");return}
   shareBusy=true;
   setOCRProgress("Распознавание запущено","Подготавливаю накладные и чек продаж…",10);
@@ -7997,10 +8011,18 @@ function dailyClear() {
    ═══════════════════════════════════════════ */
 async function shareToAI() {
   if (shareBusy) return;
-  const items = (await getPhotos()).sort((a, b) => {
-    const cmp = naturalCompare(a.name, b.name);
-    return cmp !== 0 ? cmp : a.id - b.id;
-  });
+  let items;
+  try {
+    items = (await getPhotos()).sort((a, b) => {
+      const cmp = naturalCompare(a.name, b.name);
+      return cmp !== 0 ? cmp : a.id - b.id;
+    });
+  } catch (e) {
+    console.warn('shareToAI: photo storage read failed', e);
+    const el = $('shareStatus');
+    if (el) { el.className = 'status show err'; el.textContent = 'Не удалось прочитать загруженные файлы. Перезагрузите приложение и проверьте список файлов.'; }
+    return;
+  }
   if (!items.length) {
     const el = $('shareStatus');
     if (el) { el.className = 'status show info'; el.textContent = 'Сначала загрузите материалы.'; }
