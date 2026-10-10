@@ -3242,8 +3242,8 @@ function saveSession() {
       needsCheck: [..._needsCheckNames].slice(0, MAX_ROWS),
       comparisonPending: !!(_cmpData && _cmpData.comparisonValid === false),
       checkMoment: (() => {
-        const r = tableRows.find(x => x && Number.isFinite(Number(x._checkMoment)));
-        return r ? Number(r._checkMoment) : null;
+        const r = tableRows.find(x => x && typeof x._checkMoment === 'number' && Number.isFinite(x._checkMoment));
+        return r ? x._checkMoment : null;
       })(),
       checkDate: (() => {
         const r = tableRows.find(x => x && /^\d{4}-\d{2}-\d{2}$/.test(String(x._checkDate || '')));
@@ -3305,7 +3305,7 @@ function applySession(data) {
           }).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date) && parseDateRu(p.date, new Date()) === p.date) : [],
           salesOnly: !!r.salesOnly,
           _checkDate: data.checkDate,
-          _checkMoment: Number.isFinite(Number(data.checkMoment)) ? Number(data.checkMoment) : null
+          _checkMoment: typeof data.checkMoment === 'number' && Number.isFinite(data.checkMoment) ? data.checkMoment : null
         };
       }).filter(r => r.name);
     } else tableRows = [];
