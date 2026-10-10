@@ -8906,7 +8906,11 @@ function cmpNameTokens(name) {
 }
 function cmpCanonicalName(name) {
   // Confirmed aliases must be used by later OCR comparisons as well as stored.
-  return normalizeName(applyAliases(name))
+  // Keep the helper independently testable when the alias module is not loaded.
+  const aliasedName = typeof applyAliases === 'function'
+    ? applyAliases(name)
+    : (typeof findAlias === 'function' ? (findAlias(name)?.target || name) : name);
+  return normalizeName(aliasedName)
     // В OCR одна и та же позиция может выглядеть как «фисташка/малина»
     // или «фисташка-малина». Нормализуем оба разделителя одинаково,
     // чтобы подтверждение количества применялось к одной строке.
