@@ -144,6 +144,63 @@ test('end-to-end applyJSON routes category rows and preserves FIFO inputs', asyn
   });
 });
 
+test('editing a previously missing incoming date upserts one row in table and mobile cards', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    localStorage.clear();
+    const target = {
+      name:'Товар с новым приходом', stock:1, sales:0, _originalSales:0,
+      shelfLife:48, category:'desserts', incoming:[], salesOnly:false, _checkDate:'2026-10-06'
+    };
+    const dateSource = {
+      name:'Товар с датой прихода', stock:1, sales:0, _originalSales:0,
+      shelfLife:48, category:'desserts',
+      incoming:[{date:'2026-10-06',qty:3,_originalQty:3}],
+      salesOnly:false, _checkDate:'2026-10-06'
+    };
+    tableRows = [target, dateSource];
+    unknownRows=[]; noCategoryRows=[]; _needsCheckNames=new Set();
+    renderTable();
+    const tableRow = [...document.querySelectorAll('#resultTable tbody tr')]
+      .find(tr => tr.textContent.includes(target.name));
+    const tableInputs = tableRow ? [...tableRow.querySelectorAll('input.num')] : [];
+    const tableIncoming = tableInputs[tableInputs.length - 1];
+    if (!tableIncoming) throw new Error('table incoming input not found');
+    tableIncoming.value='1'; tableIncoming.dispatchEvent(new Event('input',{bubbles:true}));
+    tableIncoming.value='12'; tableIncoming.dispatchEvent(new Event('input',{bubbles:true}));
+    const tableState = target.incoming.map(p=>({date:p.date,qty:p.qty}));
+    renderTable();
+    const tableAfterRenderRow = [...document.querySelectorAll('#resultTable tbody tr')]
+      .find(tr => tr.textContent.includes(target.name));
+    const tableAfterRenderInputs = tableAfterRenderRow ? [...tableAfterRenderRow.querySelectorAll('input.num')] : [];
+    const tableInputAfterRender = tableAfterRenderInputs[tableAfterRenderInputs.length - 1]?.value;
+
+    target.incoming = [];
+    renderCards();
+    const card = [...document.querySelectorAll('#cardsView .card')]
+      .find(el => el.textContent.includes(target.name));
+    const cardInputs = card ? [...card.querySelectorAll('input.num')] : [];
+    const cardIncoming = cardInputs[cardInputs.length - 1];
+    if (!cardIncoming) throw new Error('card incoming input not found');
+    cardIncoming.focus();
+    cardIncoming.value='1'; cardIncoming.dispatchEvent(new Event('input',{bubbles:true}));
+    cardIncoming.value='12'; cardIncoming.dispatchEvent(new Event('input',{bubbles:true}));
+    const cardState = target.incoming.map(p=>({date:p.date,qty:p.qty}));
+    renderCards();
+    return {
+      tableState, tableAfterRender: tableRows[0].incoming.map(p=>({date:p.date,qty:p.qty})),
+      tableInputAfterRender, cardState,
+      cardAfterRender: tableRows[0].incoming.map(p=>({date:p.date,qty:p.qty}))
+    };
+  });
+  expect(result.tableState).toEqual([{date:'2026-10-06',qty:12}]);
+  expect(result.tableAfterRender).toEqual([{date:'2026-10-06',qty:12}]);
+  expect(result.tableInputAfterRender).toBe('12');
+  expect(result.cardState).toEqual([{date:'2026-10-06',qty:12}]);
+  expect(result.cardAfterRender).toEqual([{date:'2026-10-06',qty:12}]);
+});
+
 test('manual edits recalculate FIFO and survive session restore', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-06T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
