@@ -219,7 +219,7 @@ details.settings .content{margin-top:12px;display:flex;flex-direction:column;gap
 .card-row::-webkit-scrollbar{display:none;height:0}
 .card-cell{flex:0 0 auto;display:flex;flex-direction:column;gap:4px;width:62px}
 .card-cell .lbl{font-size:9px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;text-align:center;white-space:nowrap}
-.card-cell .num{width:100%;min-width:0;max-width:none;;margin:0 auto}
+.card-cell .num{width:100%;min-width:0;max-width:none;margin:0 auto;font-size:16px;line-height:1.2;touch-action:manipulation}
 .card-cell .inp-wrap{position:relative}
 .card-cell .inp-wrap.edited .num{background:var(--orange-soft);border-color:var(--orange)}
 .card-cell .inp-wrap .reset-btn{position:absolute;top:-7px;right:-7px;width:22px;height:22px;min-height:0;padding:0;border-radius:50%;background:var(--orange);color:#fff;font-size:11px;font-weight:800;display:none;z-index:3;line-height:1;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--bg-card);box-sizing:border-box;box-shadow:0 1px 3px rgba(255,149,0,.35);transition:transform .12s ease;-webkit-tap-highlight-color:transparent}
@@ -5389,6 +5389,8 @@ function buildCardCell(label, inputEl) {
   const lbl = document.createElement('div');
   lbl.className = 'lbl'; lbl.textContent = label;
   cell.appendChild(lbl);
+  const input = inputEl.querySelector ? inputEl.querySelector('input.num') : null;
+  if (input) input.setAttribute('aria-label', label);
   cell.appendChild(inputEl);
   return cell;
 }
