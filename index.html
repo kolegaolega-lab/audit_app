@@ -2139,6 +2139,8 @@ function normalizeName(s) {
     .replace(/\s+\(/g, '(')
     .replace(/[\u2010-\u2015\u2212]/g, '-')
     .replace(/-/g, ' ')
+    // OCR may use slash or spaces for the same product-name separator.
+    .replace(/\\s*\\/\\s*/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -7505,6 +7507,40 @@ function normalizeKnownQuantityConfirmations(jsonText) {
   });
 
   (Array.isArray(d.invoices) ? d.invoices : []).forEach(inv => normalizeItems(inv?.items));
+
+  // Объединяем страницы только при совпадении номера и даты и явном continuation.
+  // Страницы без надёжного ключа не присоединяем наугад.
+  if (Array.isArray(d.invoices)) {
+    const merged = [];
+    const byKey = new Map();
+    const dateKey = value => {
+      const raw = String(value || '').trim();
+      if (/^\\d{4}-\\d{2}-\\d{2}$/.test(raw)) return raw;
+      const parsed = parseDateRu(raw, new Date());
+      if (parsed instanceof Date && !isNaN(parsed.getTime())) {
+        return [parsed.getFullYear(), String(parsed.getMonth() + 1).padStart(2, '0'), String(parsed.getDate()).padStart(2, '0')].join('-');
+      }
+      return String(parsed || raw);
+    };
+    for (const inv of d.invoices) {
+      const number = String(inv?.number || '').trim();
+      const date = dateKey(inv?.date);
+      const key = number && date ? number + '|' + date : '';
+      const previous = key ? byKey.get(key) : null;
+      if (inv?.continuation && previous) {
+        previous.items = [...(Array.isArray(previous.items) ? previous.items : []), ...(Array.isArray(inv.items) ? inv.items : [])];
+        const lastLine = Number(inv.last_line_number);
+        if (Number.isFinite(lastLine)) previous.last_line_number = Math.max(Number(previous.last_line_number) || 0, lastLine);
+        if (inv.printed_total != null && inv.printed_total !== '') previous.printed_total = inv.printed_total;
+        if (inv.total != null && inv.total !== '') previous.total = inv.total;
+        continue;
+      }
+      merged.push(inv);
+      if (key && !inv?.continuation && !byKey.has(key)) byKey.set(key, inv);
+    }
+    d.invoices = merged;
+  }
+
   if (d.review && Array.isArray(d.review.handwritten_confirmation)) {
     d.review.handwritten_confirmation = d.review.handwritten_confirmation.filter(name => !isRomBaba(name));
   }
