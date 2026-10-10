@@ -99,3 +99,14 @@ test('FIFO old and fresh stock',()=>{assert.deepEqual(f.computeFIFO({stock:3,sal
 test('FIFO no incoming means expired',()=>{assert.deepEqual(f.computeFIFO({stock:2,sales:3,shelfLife:24,incoming:[],_checkDate:'2026-10-06'}),{soldExpired:3,expiredOnShelf:2,freshOnShelf:0,freshSold:0});});
 test('FIFO salesOnly',()=>{assert.equal(f.computeFIFO({salesOnly:true,stock:99,sales:5,shelfLife:24,incoming:[]}).isSalesOnly,true);});
 test('FIFO empty guards',()=>{assert.deepEqual(f.computeFIFO({stock:1,sales:1,shelfLife:0,incoming:[]}),f.emptyResult());assert.deepEqual(f.computeFIFO({stock:null,sales:1,shelfLife:24,incoming:[]}),f.emptyResult());});
+
+
+test('mobile card edits immediately refresh the problem filter and counters',()=>{
+  const start=html.indexOf('function refreshCardRow(');
+  const end=html.indexOf('\n/* ═',start);
+  assert.ok(start>=0 && end>start,'refreshCardRow must exist');
+  const body=html.slice(start,end);
+  assert.match(body,/updateSegmentedCounters\(\)/);
+  assert.match(body,/applyTableFilter\(\)/);
+  assert.match(body,/updateFinishCheckBtn\(\)/);
+});
