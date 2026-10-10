@@ -9685,9 +9685,11 @@ function cmpSyncAppliedCorrectionsToOCR() {
     } else if (first) {
       const refreshed = parseAIReport(first);
       if (refreshed) {
-        const priorValidation = report.validation;
-        Object.assign(report, refreshed);
-        if (priorValidation) report.validation = validateAIResponse(first, first, report, Number(report.photoCount) || -1);
+        // Обновляем поля отчёта, но сохраняем json/fullRaw как строки:
+        // рендер отчёта и кнопка «Проверка результата» ожидают именно текст JSON.
+        ['blocks', 'checks', 'completeness', 'unreadable', 'handwrittenConfirmation',
+          'postrochno', 'gaps'].forEach(key => { report[key] = refreshed[key]; });
+        report.validation = validateAIResponse(first, first, report, Number(report.photoCount) || -1);
       }
     }
     if (report.safety && first) {
