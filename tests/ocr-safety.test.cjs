@@ -19,6 +19,7 @@ const context = { MAX_NUM: 100000, getTodayStr() { return '2026-10-07'; }, safeD
 vm.createContext(context);
 vm.runInContext(extract('function normalizeName(', 'function cleanProductName'), context);
 vm.runInContext(extract('function cmpCanonicalName(', 'function cmpNameSimilarity'), context);
+vm.runInContext(extract('function cmpConfirmSameName(', 'function cmpRenderEditCard'), context);
 vm.runInContext(extract('function normalizeKnownQuantityConfirmations(', 'function getOCRSafetyIssues'), context);
 vm.runInContext(extract('function fmtDateRuShort(', 'function getTodayStr'), context);
 vm.runInContext(extract('function parseDateRu(', 'function inferIsoFromDdmm'), context);
@@ -65,6 +66,22 @@ function validJson(overrides = {}) {
 function reportFor(json) {
   return { hasBlocks: true, json: JSON.parse(json) };
 }
+
+test('confirming equivalent OCR names persists an alias to the catalog product', () => {
+  const aliases = [];
+  context.PRODUCTS = [{ name: 'Лингвини с жареными креветками' }];
+  context.addOrUpdateAlias = (alias, target) => { aliases.push({ alias, target }); return true; };
+  const row = {
+    a: { name: 'Лингвини с жаренными креветками' },
+    b: { name: 'Лингвини с жареными креветками' }
+  };
+  assert.equal(context.cmpConfirmSameName(row), true);
+  assert.equal(row.edits.nameAccepted, true);
+  assert.deepEqual(aliases, [{
+    alias: 'Лингвини с жаренными креветками',
+    target: 'Лингвини с жареными креветками'
+  }]);
+});
 
 test('OCR comparison treats slash and hyphen product-name variants as the same item', () => {
   assert.equal(
