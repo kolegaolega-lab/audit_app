@@ -61,7 +61,7 @@ test('alias chains resolve stale OCR names to canonical products and price looku
   const source = [
     extract('normalizeName'), extract('cleanProductName'), extract('findAlias'),
     extract('applyAliases'), extract('cmpCanonicalName'), extract('getPriceFor')
-  ].join('\\n') + '\\nreturn {applyAliases,getPriceFor};';
+  ].join('\n') + '\nreturn {applyAliases,getPriceFor};';
   const api = new Function('ALIASES','PRODUCTS','PRICES','_priceIndex',source)(
     aliases,products,prices,priceIndex
   );
