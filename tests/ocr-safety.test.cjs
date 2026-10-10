@@ -434,9 +434,9 @@ test('comparison application initializes catalog cards when no prior JSON import
 });
 
 test('application version is consistent across runtime and visible UI', () => {
-  assert.match(html, /const APP_VERSION = ['"]v9\.24\.28['"]/);
-  assert.match(html, /id="moreAppVersion">v9\.24\.27</);
-  assert.match(html, /id="aboutVersion">[^<]*v9\.24\.27</);
+  assert.match(html, /const APP_VERSION = ['"]v9\.24\.29['"]/);
+  assert.match(html, /id="moreAppVersion">v9\.24\.29</);
+  assert.match(html, /id="aboutVersion">[^<]*v9\.24\.29</);
   assert.doesNotMatch(html, /v9\.24\.1[6-8]/);
 });
 
