@@ -934,7 +934,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       </button>
       <button type="button" class="check-step" data-step="3">
         <span class="cs-dot">3</span>
-        <span class="cs-label">Данные</span>
+        <span class="cs-label">Проверка</span>
       </button>
       <button type="button" class="check-step" data-step="4">
         <span class="cs-dot">4</span>
@@ -11684,9 +11684,9 @@ function renderCheckSteps() {
   if (hintEl) {
     const hints = {
       1: 'Выберите категорию и загрузите фото накладных или чека.',
-      2: 'Отправьте материалы в ИИ — он вернёт результат с приходами и продажами.',
+      2: 'Загрузите накладные и чек продаж, затем запустите распознавание.',
       3: 'Вставьте результат от ИИ или загрузите его из файла.',
-      4: 'Введите фактический остаток — приложение посчитает просрочку.',
+      4: 'Заполните остатки и устраните замечания, которые блокируют завершение аудита.',
       5: 'Проверка готова. Нажмите «Завершить проверку» и отправьте в историю.'
     };
     const key = current <= 4 ? current : 5;
