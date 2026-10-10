@@ -23,8 +23,8 @@ const context = {
       .filter(p => { const key = p.name.toLowerCase(); if (seen.has(key)) return false; seen.add(key); return true; });
   }
 };
-const validate = new Function('sanitizeProducts', 'safeStr', 'normalizeName', `${validatorSource}; return validateRemoteCatalog;`)(
-  context.sanitizeProducts, context.safeStr, context.normalizeName
+const validate = new Function('sanitizeProducts', 'safeStr', 'normalizeName', 'MAX_CATALOG', 'MAX_NAME', `${validatorSource}; return validateRemoteCatalog;`)(
+  context.sanitizeProducts, context.safeStr, context.normalizeName, context.MAX_CATALOG, context.MAX_NAME
 );
 
 const product = { name: 'Пончик', shelfLife: 48, category: 'Десерты' };
