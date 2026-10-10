@@ -2414,8 +2414,8 @@ test('card refresh preserves missing-incoming warning after manual stock edit', 
     const salesOnlyText = resultNode.textContent;
     return {warningAfterEdit, salesOnlyText};
   });
-  expect(result.warningAfterEdit).toContain('нет — просрочка, проверить с персоналом');
-  expect(result.salesOnlyText).not.toContain('нет — просрочка, проверить с персоналом');
+  expect(result.warningAfterEdit).toContain('Нет подтверждённого поступления за срок годности');
+  expect(result.salesOnlyText).not.toContain('Нет подтверждённого поступления за срок годности');
 });
 
 
@@ -2443,8 +2443,8 @@ test('card warning matches report rule when no incoming and no stock or sales', 
     const refreshedText = resultNode.textContent;
     return {initialText, refreshedText};
   });
-  expect(result.initialText).not.toContain('нет — просрочка, проверить с персоналом');
-  expect(result.refreshedText).not.toContain('нет — просрочка, проверить с персоналом');
+  expect(result.initialText).not.toContain('Нет подтверждённого поступления за срок годности');
+  expect(result.refreshedText).not.toContain('Нет подтверждённого поступления за срок годности');
 });
 
 test('comparison safety details render OCR-provided HTML as text, not markup', async ({page}) => {
