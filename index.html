@@ -3243,7 +3243,7 @@ function saveSession() {
       comparisonPending: !!(_cmpData && _cmpData.comparisonValid === false),
       checkMoment: (() => {
         const r = tableRows.find(x => x && typeof x._checkMoment === 'number' && Number.isFinite(x._checkMoment));
-        return r ? x._checkMoment : null;
+        return r ? r._checkMoment : null;
       })(),
       checkDate: (() => {
         const r = tableRows.find(x => x && /^\d{4}-\d{2}-\d{2}$/.test(String(x._checkDate || '')));
