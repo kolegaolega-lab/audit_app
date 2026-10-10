@@ -9326,11 +9326,14 @@ function cmpRunCompare() {
   // Например, разное число строк между прогонами — нормальный диагностический
   // сигнал для OCR и как раз тот случай, который аудитор должен иметь возможность
   // разрешить выбором значения из одного из результатов или своим значением.
+  // Несовпадение last_line_number с номером фактически распознанной строки —
+  // диагностическое предупреждение, а не обязательное подтверждение: строка уже
+  // присутствует в данных. Пропуски строк (invoice-line-gap) по-прежнему блокируют.
   const blockingSafetyCodes = new Set([
     'empty-json','missing-ai-report','invalid-source','completeness-mismatch',
     'invalid-check-date','future-check-date','invalid-document-arrays',
     'invoice-date-review','invoice-date-missing','continuation-date-unresolved',
-    'future-invoice-date','invoice-line-gap','invoice-last-line-inconsistent',
+    'future-invoice-date','invoice-line-gap',
     'invoice-line-numbers-missing','invalid-invoice-items','unreadable',
     'uncertain-rows','invalid-quantity','validation-errors'
   ]);
