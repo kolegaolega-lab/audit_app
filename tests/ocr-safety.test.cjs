@@ -98,6 +98,34 @@ test('OCR safety rejects empty or invalid JSON', () => {
   assert.ok(context.getOCRSafetyIssues('{bad', null, 2).some(x => x.code === 'empty-json'));
 });
 
+test('OCR safety accepts an undated continuation page after a dated invoice', () => {
+  const json = validJson({
+    invoices: [
+      {
+        number: '123', date: '2026-10-06', continuation: false, last_line_number: 1,
+        items: [{ line: 1, name: 'Товар A', quantity: 2, quantity_status: 'confirmed' }]
+      },
+      {
+        number: '', date: '', continuation: true, last_line_number: 2,
+        items: [{ line: 2, name: 'Товар B', quantity: 3, quantity_status: 'confirmed' }]
+      }
+    ]
+  });
+  const issues = context.getOCRSafetyIssues(json, reportFor(json), 2);
+  assert.equal(issues.some(x => x.code === 'invoice-date-review'), false);
+});
+
+test('OCR safety still blocks a continuation page without any preceding invoice date', () => {
+  const json = validJson({
+    invoices: [{
+      number: '', date: '', continuation: true, last_line_number: 1,
+      items: [{ line: 1, name: 'Товар', quantity: 2, quantity_status: 'confirmed' }]
+    }]
+  });
+  const issues = context.getOCRSafetyIssues(json, reportFor(json), 2);
+  assert.equal(issues.some(x => x.code === 'invoice-date-review'), true);
+});
+
 test('OCR safety checks that every photo was processed', () => {
   const json = validJson({ source: { photo_count: 2, processed_photo_count: 1, duplicate_photo_count: 0 } });
   const issues = context.getOCRSafetyIssues(json, reportFor(json), 2);
