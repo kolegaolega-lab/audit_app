@@ -2767,6 +2767,32 @@ async function fetchWithTimeout(url, opts, ms) {
   try { return await fetch(url, { ...opts, signal: controller.signal }); }
   finally { clearTimeout(t); }
 }
+
+// Gemini может временно возвращать 429/5xx при перегрузке. Повторяем только
+// временные ошибки; ошибки запроса и авторизации сразу показываем пользователю.
+async function fetchGeminiWithRetry(url, opts, onRetry) {
+  const maxRetries = 3;
+  for (let attempt = 0; ; attempt++) {
+    let res;
+    try {
+      res = await fetchWithTimeout(url, opts, GEMINI_FETCH_TIMEOUT_MS);
+    } catch (e) {
+      // Сетевые ошибки/таймауты тоже могут быть временными; после лимита
+      // сохраняем исходную ошибку, чтобы вызывающий код дал понятное сообщение.
+      if (attempt >= maxRetries) throw e;
+      const delay = Math.min(8000, 1500 * (2 ** attempt));
+      if (typeof onRetry === 'function') onRetry(attempt + 1, maxRetries, delay, 'сбой соединения');
+      await new Promise(resolve => setTimeout(resolve, delay));
+      continue;
+    }
+    if (res.ok || ![429, 500, 502, 503, 504].includes(res.status) || attempt >= maxRetries) return res;
+    let delay = Math.min(8000, 1500 * (2 ** attempt));
+    const retryAfter = Number(res.headers?.get?.('Retry-After'));
+    if (Number.isFinite(retryAfter) && retryAfter > 0) delay = Math.min(15000, retryAfter * 1000);
+    if (typeof onRetry === 'function') onRetry(attempt + 1, maxRetries, delay, 'HTTP ' + res.status);
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
+}
 async function fetchRemoteCatalog() {
   try {
     const url = `./${GITHUB_FILE}?t=${Date.now()}`;
@@ -7745,11 +7771,13 @@ async function recognizeWithGemini(){
       }
       let res;
       try {
-        res = await fetchWithTimeout(url, {
+        res = await fetchGeminiWithRetry(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: serialized
-        }, GEMINI_FETCH_TIMEOUT_MS);
+        }, (attempt, max, delay, reason) => {
+          setOCRProgress("Gemini временно недоступен", reason + ". Повтор " + attempt + " из " + max + " через " + Math.ceil(delay / 1000) + " сек.", 35);
+        });
       } catch (e) {
         const msg = String(e?.message || e || "");
         if (/load failed|failed to fetch|networkerror|network request failed|abort/i.test(msg)) {
@@ -7811,9 +7839,13 @@ async function recognizeWithGemini(){
     }
   } catch (e) {
     const raw=String(e?.message||e||"");
-    const friendly=/load failed|failed to fetch|networkerror/i.test(raw)
-      ? "Не удалось получить ответ от Gemini: Safari/сеть разорвали соединение. Проверьте интернет и повторите."
-      : "Ошибка: " + raw;
+    const friendly = /Gemini HTTP 503|HTTP 503/i.test(raw)
+      ? "Gemini сейчас перегружен и не ответил даже после нескольких попыток. Загруженные фото и введённые данные сохранены; подождите немного и повторите распознавание."
+      : (/Gemini HTTP 429|HTTP 429/i.test(raw)
+        ? "Gemini временно ограничил число запросов. Подождите немного и повторите распознавание."
+        : (/load failed|failed to fetch|networkerror/i.test(raw)
+          ? "Не удалось получить ответ от Gemini: Safari/сеть разорвали соединение. Проверьте интернет и повторите."
+          : "Ошибка: " + raw));
     set("err", friendly);
     finishOCRProgress(false);
   } finally {
@@ -7920,7 +7952,7 @@ async function recognizeDaily(){
       if(requestBytes>GEMINI_MAX_REQUEST_BYTES)throw Error("Слишком большой запрос для Safari/Gemini. Уменьшите количество фото или отправьте их по одной дате.");
       let res;
       try{
-        res=await fetchWithTimeout(url,{method:"POST",headers:{"Content-Type":"application/json"},body:serialized},GEMINI_FETCH_TIMEOUT_MS);
+        res=await fetchGeminiWithRetry(url,{method:"POST",headers:{"Content-Type":"application/json"},body:serialized},(attempt,max,delay,reason)=>{setOCRProgress("Gemini временно недоступен",reason+". Повтор "+attempt+" из "+max+" через "+Math.ceil(delay/1000)+" сек.",type==="invoice"?35:60)});
       }catch(e){
         const msg=String(e?.message||e||"");
         if(/load failed|failed to fetch|networkerror|network request failed|abort/i.test(msg))throw Error("Не удалось получить ответ от Gemini: соединение было прервано Safari или сетью. Проверьте интернет и повторите.");
