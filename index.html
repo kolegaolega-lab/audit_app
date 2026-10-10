@@ -8894,7 +8894,8 @@ function cmpNameTokens(name) {
     .split(/\s+/).filter(Boolean);
 }
 function cmpCanonicalName(name) {
-  return normalizeName(name)
+  // Confirmed aliases must be used by later OCR comparisons as well as stored.
+  return normalizeName(applyAliases(name))
     // В OCR одна и та же позиция может выглядеть как «фисташка/малина»
     // или «фисташка-малина». Нормализуем оба разделителя одинаково,
     // чтобы подтверждение количества применялось к одной строке.
@@ -9610,20 +9611,33 @@ function cmpRestorePersistedEdits(json1, json2) {
     const raw = localStorage.getItem(CMP_EDITS_KEY);
     if (!raw) return false;
     const saved = JSON.parse(raw);
-    if (!saved || saved.json1 !== json1 || saved.json2 !== json2 || !Array.isArray(saved.edits)) return false;
-    const byKey = new Map(saved.edits.map(x => [x.key, x.edits]));
+    if (!saved || !Array.isArray(saved.edits)) return false;
+    // JSON в поле сверки может измениться после сохранения исправлений.
+    // Восстанавливаем их по устойчивому ключу товара и даты, а не отбрасываем
+    // все изменения из-за отличия исходного текста. Несовпавшие строки игнорируем.
+    const exactSource = saved.json1 === json1 && saved.json2 === json2;
+    const byKey = new Map(saved.edits.filter(x => x && typeof x.key === 'string')
+      .map(x => [x.key, x.edits]));
     let restored = false;
     (_cmpData?.rows || []).forEach(row => {
       const edits = byKey.get(row.key);
       if (!edits) return;
+      const incoming = {};
+      Object.entries(edits.incoming || {}).forEach(([dateKey, quantity]) => {
+        if (dateKey && quantity != null && Number.isFinite(Number(quantity)) && Number(quantity) >= 0)
+          incoming[dateKey] = Number(quantity);
+      });
       row.edits = {
         ...(row.edits || {}),
-        incoming: { ...(edits.incoming || {}) },
-        sales: edits.sales == null ? null : edits.sales,
+        incoming,
+        sales: edits.sales == null || !Number.isFinite(Number(edits.sales)) || Number(edits.sales) < 0
+          ? null : Number(edits.sales),
         nameAccepted: !!edits.nameAccepted
       };
       restored = true;
     });
+    // Keep the current JSON as the new snapshot after a successful key-based restore.
+    if (restored && !exactSource) cmpPersistEdits();
     return restored;
   } catch (e) { console.warn('cmpRestorePersistedEdits:', e); return false; }
 }
