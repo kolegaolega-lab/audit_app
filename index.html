@@ -859,6 +859,16 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
   -webkit-overflow-scrolling:touch;
   margin:0;
 }
+
+/* Accessibility: respect the operating system's reduced-motion preference. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
 </style>
 </head>
 <body>
