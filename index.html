@@ -3313,6 +3313,10 @@ function saveSession() {
       version: SESSION_VERSION, savedAt: Date.now(),
       point: $('point') ? $('point').value.slice(0, 50) : '',
       jsonText: ($('jsonInput') ? $('jsonInput').value : '').slice(0, 500000),
+      // Keep both OCR inputs with the audit session so an interrupted comparison
+      // can be reopened after refresh without asking the auditor to paste them again.
+      compareJson1: (($('cmpJson1') && $('cmpJson1').value) || _lastGeminiJsons.first || '').slice(0, 500000),
+      compareJson2: (($('cmpJson2') && $('cmpJson2').value) || _lastGeminiJsons.second || '').slice(0, 500000),
       rows: tableRows.slice(0, MAX_ROWS).map(r => ({
         name: r.name, stock: r.stock, sales: r.sales, shelfLife: r.shelfLife,
         _originalSales: r._originalSales != null ? r._originalSales : r.sales,
@@ -3373,6 +3377,13 @@ function applySession(data) {
   try {
     if ($('point') && typeof data.point === 'string') $('point').value = data.point.slice(0, 50);
     if ($('jsonInput') && typeof data.jsonText === 'string') $('jsonInput').value = data.jsonText.slice(0, 500000);
+    const compareFirst = typeof data.compareJson1 === 'string' ? data.compareJson1.slice(0, 500000) : '';
+    const compareSecond = typeof data.compareJson2 === 'string' ? data.compareJson2.slice(0, 500000) : '';
+    if (compareFirst || compareSecond) {
+      _lastGeminiJsons = { first: compareFirst, second: compareSecond };
+      if ($('cmpJson1')) $('cmpJson1').value = compareFirst;
+      if ($('cmpJson2')) $('cmpJson2').value = compareSecond;
+    }
     if (Array.isArray(data.rows) && data.rows.length) {
       tableRows = data.rows.slice(0, MAX_ROWS).filter(r => r && typeof r === 'object' && !Array.isArray(r)).map(r => {
         let stock = null;
