@@ -1756,6 +1756,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       <div class="stack">
         <button id="checkUpdatesBtn" class="secondary">Проверить обновления</button>
         <button id="publishBtn" class="purple" style="display:none">Опубликовать</button>
+        <button id="restoreCatalogBackupBtn" class="secondary" style="display:none">Восстановить резервную копию</button>
       </div>
       <div id="syncStatus" class="status"></div>
     </div>
@@ -3108,6 +3109,50 @@ async function syncPushToServer() {
     _catalogPushInFlight = false;
   }
 }
+function restoreCatalogBackup() {
+  const statusEl = $('syncStatus');
+  let backup;
+  try {
+    const raw = localStorage.getItem(CATALOG_BACKUP_KEY);
+    if (!raw) {
+      if (statusEl) { statusEl.className = 'status show warn'; statusEl.textContent = 'Резервной копии пока нет. Она создаётся после успешной публикации справочника.'; }
+      return false;
+    }
+    backup = JSON.parse(raw);
+  } catch (e) {
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Резервная копия повреждена. Текущие локальные данные не изменены.'; }
+    return false;
+  }
+  if (!backup || typeof backup !== 'object' || Array.isArray(backup)) {
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Резервная копия имеет неверный формат. Текущие локальные данные не изменены.'; }
+    return false;
+  }
+  const savedAt = Number(backup.savedAt);
+  const remote = {
+    version: backup.version,
+    updatedAt: Number.isFinite(savedAt) && savedAt > 0 ? new Date(savedAt).toISOString() : '',
+    products: backup.products,
+    ignored: backup.ignored,
+    aliases: backup.aliases,
+    prices: backup.prices,
+    points: backup.points
+  };
+  const validation = validateRemoteCatalog(remote);
+  if (!validation.ok) {
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Резервная копия повреждена или неполная. Текущие локальные данные не изменены.'; }
+    return false;
+  }
+  const ok = syncPullFromServer({ silent: true, remote });
+  if (!ok) {
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Не удалось восстановить копию. Текущие локальные данные не изменены.'; }
+    return false;
+  }
+  if (statusEl) {
+    statusEl.className = 'status show ok';
+    statusEl.textContent = `Восстановлена резервная копия от ${Number.isFinite(savedAt) && savedAt > 0 ? formatDateTimeRu(new Date(savedAt).toISOString()) : 'последней публикации'}. Проверьте справочник перед дальнейшей публикацией.`;
+  }
+  return true;
+}
 function setLastCheckTime() {
   const iso = new Date().toISOString();
   try { localStorage.setItem(SYNC_LAST_CHECK, iso); } catch (e) {}
@@ -3177,6 +3222,7 @@ function updateHeaderBadge() {
 function setOwnerMode(on) {
   _isOwner = !!on;
   const publishBtn = $('publishBtn');
+  const restoreBackupBtn = $('restoreCatalogBackupBtn');
   const activateBlock = $('ownerActivateBlock');
   const deactivateBtn = $('deactivateOwnerBtn');
   const editCatalogBtn = $('editCatalogBtn');
@@ -3184,6 +3230,7 @@ function setOwnerMode(on) {
   const statusEl = $('syncStatus');
   const badge = $('headerBadge');
   if (publishBtn) publishBtn.style.display = _isOwner ? 'inline-flex' : 'none';
+  if (restoreBackupBtn) restoreBackupBtn.style.display = _isOwner ? 'inline-flex' : 'none';
   if (activateBlock) activateBlock.style.display = _isOwner ? 'none' : 'block';
   if (deactivateBtn) deactivateBtn.style.display = _isOwner ? 'inline-flex' : 'none';
   if (editCatalogBtn) editCatalogBtn.style.display = _isOwner ? 'inline-flex' : 'none';
@@ -11288,10 +11335,20 @@ function bindUI() {
   const publishBtn = $('publishBtn');
   if (publishBtn) publishBtn.onclick = async () => {
     publishBtn.classList.add('busy');
-    const result = await syncPushToServer();
-    publishBtn.classList.remove('busy');
-    if (result && result.ok) showToast('Опубликовано');
-    else if (result && result.message) showToast(result.message);
+    publishBtn.disabled = true;
+    try {
+      const result = await syncPushToServer();
+      if (result && result.ok) showToast('Опубликовано');
+      else if (result && result.message) showToast(result.message);
+    } finally {
+      publishBtn.classList.remove('busy');
+      publishBtn.disabled = false;
+    }
+  };
+  const restoreBackupBtn = $('restoreCatalogBackupBtn');
+  if (restoreBackupBtn) restoreBackupBtn.onclick = () => {
+    if (!window.confirm('Заменить текущий справочник, алиасы, цены и список точек последней успешно опубликованной копией?')) return;
+    if (restoreCatalogBackup()) showToast('Резервная копия восстановлена');
   };
   const bannerApply = $('bannerApply'); if (bannerApply) bannerApply.onclick = () => applyPendingRemote();
   const bannerLater = $('bannerLater');
