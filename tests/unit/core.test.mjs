@@ -37,6 +37,7 @@ test('catalog sanitizer preserves missing shelf life as null and rejects zero as
   assert.equal(sanitizer([{name:'Без срока',shelfLife:null,category:null}])[0].shelfLife,null);
   assert.equal(sanitizer([{name:'Нулевой срок',shelfLife:0,category:null}])[0].shelfLife,null);
   assert.equal(sanitizer([{name:'Нормальный срок',shelfLife:48,category:null}])[0].shelfLife,48);
+  assert.doesNotMatch(html,/if \(r\.shelfLife === 0\) shelf = 0/);
   const gateStart=html.indexOf('function getFinishCheckIssues()');
   const gateEnd=html.indexOf('function getFinishCheckBlockReason(',gateStart);
   const gate=html.slice(gateStart,gateEnd);

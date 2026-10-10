@@ -3319,8 +3319,7 @@ function applySession(data) {
         let stock = null;
         if (r.stock != null && r.stock !== '') stock = clampNum(r.stock, 0, MAX_NUM, 0);
         let shelf;
-        if (r.shelfLife === 0) shelf = 0;
-        else if (r.shelfLife == null || !Number.isFinite(Number(r.shelfLife)) || Number(r.shelfLife) <= 0) shelf = null;
+        if (r.shelfLife == null || !Number.isFinite(Number(r.shelfLife)) || Number(r.shelfLife) <= 0) shelf = null;
         else shelf = clampNum(r.shelfLife, 1, 10000, null);
         const salesVal = clampNum(r.sales, 0, MAX_NUM, 0);
         const origSales = r._originalSales != null ? clampNum(r._originalSales, 0, MAX_NUM, salesVal) : salesVal;
@@ -3341,8 +3340,7 @@ function applySession(data) {
     if (Array.isArray(data.unknown) && data.unknown.length) {
       unknownRows = data.unknown.slice(0, MAX_ROWS).filter(r => r && typeof r === 'object' && !Array.isArray(r)).map(r => {
         let shelf;
-        if (r.shelfLife === 0) shelf = 0;
-        else if (r.shelfLife == null || !Number.isFinite(Number(r.shelfLife)) || Number(r.shelfLife) <= 0) shelf = null;
+        if (r.shelfLife == null || !Number.isFinite(Number(r.shelfLife)) || Number(r.shelfLife) <= 0) shelf = null;
         else shelf = clampNum(r.shelfLife, 1, 10000, null);
         return {
           name: safeStr(r.name, MAX_NAME), sales: clampNum(r.sales, 0, MAX_NUM, 0), shelfLife: shelf,
