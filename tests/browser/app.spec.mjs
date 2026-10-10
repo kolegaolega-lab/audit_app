@@ -2294,6 +2294,8 @@ test('offline send reports failure when local queue cannot be persisted', async 
       name:'Product',salesOnly:false,stock:0,sales:0,shelfLife:24,category:'desserts',
       incoming:[{date:'2026-10-08',qty:1}],_originalSales:0
     }];
+    openReport();
+    if (!$('sendReportStatus')) throw new Error('report view did not render send status');
     const originalPush=pushHistoryFile;
     const originalSet=Storage.prototype.setItem;
     pushHistoryFile=async()=>{throw new Error('offline');};
