@@ -2621,6 +2621,37 @@ function inferIsoFromDdmm(ddmm, refDate) {
   else if (refM - month > 6) year += 1;
   return safeDate(year, month, day);
 }
+function getComparisonReferenceDate() {
+  const sources = [
+    $('cmpJson1') ? $('cmpJson1').value : '',
+    $('cmpJson2') ? $('cmpJson2').value : '',
+    _lastGeminiJsons && _lastGeminiJsons.first,
+    _lastGeminiJsons && _lastGeminiJsons.second
+  ];
+  for (const raw of sources) {
+    if (!raw) continue;
+    try {
+      const value = JSON.parse(raw)?.check_date;
+      if (!value) continue;
+      const parsed = parseDateRu(String(value), new Date());
+      if (parsed instanceof Date && Number.isFinite(parsed.getTime())) return parsed;
+      const iso = String(parsed || '').trim();
+      const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (m) {
+        const date = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0, 0);
+        if (date.getFullYear() === Number(m[1]) && date.getMonth() === Number(m[2]) - 1 && date.getDate() === Number(m[3])) return date;
+      }
+    } catch (e) {}
+  }
+  const row = Array.isArray(tableRows) && tableRows.find(r => r && /^\d{4}-\d{2}-\d{2}$/.test(String(r._checkDate || '')));
+  if (row) {
+    const m = String(row._checkDate).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const date = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0, 0);
+    if (date.getFullYear() === Number(m[1]) && date.getMonth() === Number(m[2]) - 1 && date.getDate() === Number(m[3])) return date;
+  }
+  return new Date();
+}
+
 function mergeIncomingByDate(incoming) {
   const map = new Map();
   for (const p of incoming || []) {
@@ -9977,7 +10008,9 @@ function cmpApplyMatched() {
   });
 
   let applied = 0;
-  const _refDate = new Date();
+  // The comparison columns show DD.MM, so restore the year relative to
+  // the audit date from the OCR JSON, not today's date (important near New Year).
+  const _refDate = getComparisonReferenceDate();
   tableRows.forEach(row => {
     const key = cmpCanonicalName(row.name);
     const match = byKey.get(key);
@@ -10031,7 +10064,7 @@ function cmpApplyMatched() {
       (r.b?.salesStatus === 'confirmed' ? r.b.sales : 0));
     const incomingArr = [];
     Object.keys(incoming).forEach(dk => {
-      const iso = inferIsoFromDdmm(dk, new Date());
+      const iso = inferIsoFromDdmm(dk, _refDate);
       if (!iso) return;
       incomingArr.push({ date: iso, qty: incoming[dk] || 0 });
     });
