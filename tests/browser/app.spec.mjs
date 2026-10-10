@@ -2043,6 +2043,23 @@ test('history snapshot and details preserve sales-only rows without a category',
   expect(result.details).toContain('остаток не проверяется');
 });
 
+test('comparison restores invoice years relative to the audit date across New Year', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    $('cmpJson1').value = JSON.stringify({check_date:'2026-01-02'});
+    $('cmpJson2').value = JSON.stringify({check_date:'2026-01-02'});
+    const reference = getComparisonReferenceDate();
+    return {
+      reference:[reference.getFullYear(),reference.getMonth()+1,reference.getDate()],
+      previousYear:inferIsoFromDdmm('31.12',reference),
+      currentYear:inferIsoFromDdmm('01.01',reference)
+    };
+  });
+  expect(result.reference).toEqual([2026,1,2]);
+  expect(result.previousYear).toBe('2025-12-31');
+  expect(result.currentYear).toBe('2026-01-01');
+});
+
 test('final report explicitly separates sales-only rows from auditable positions', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-08T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
