@@ -9677,8 +9677,11 @@ function cmpConfirmSameName(row) {
       }
     }
     const target = String(catalogProduct?.name || nameA).trim();
-    const alias = normalizeName(nameA) === normalizeName(target) ? nameB : nameA;
-    if (normalizeName(alias) !== normalizeName(target)) addOrUpdateAlias(alias, target);
+    // Persist every confirmed OCR spelling that differs from the canonical catalog name.
+    // Saving only one side leaves the other OCR variant unmatched on the next comparison.
+    [nameA, nameB].forEach(alias => {
+      if (normalizeName(alias) !== normalizeName(target)) addOrUpdateAlias(alias, target);
+    });
   }
   row.edits.nameAccepted = true;
   if (typeof cmpPersistEdits === 'function') cmpPersistEdits();
@@ -10078,7 +10081,14 @@ function cmpApplyMatched() {
     if (salesEdited) sales = r.edits.sales;
     else if (r.a && r.a.salesStatus === 'confirmed') sales = r.a.sales;
     else if (r.b && r.b.salesStatus === 'confirmed') sales = r.b.sales;
-    byKey.set(cmpCanonicalName(r.name), { incoming, sales });
+    const rawKey = cmpCanonicalName(r.name);
+    const resolvedName = typeof applyAliases === 'function' ? applyAliases(r.name) : r.name;
+    const resolvedKey = cmpCanonicalName(resolvedName);
+    const result = { incoming, sales };
+    byKey.set(rawKey, result);
+    // Use the canonical alias target as well, so OCR corrections are applied to
+    // the catalog product row instead of being silently dropped under an OCR-only name.
+    if (resolvedKey && resolvedKey !== rawKey) byKey.set(resolvedKey, result);
   });
   // Двойная сверка может быть первым шагом аудита: в этом случае applyJSON()
   // ещё не создавал карточки и tableRows пуст. Создаём строки выбранной категории
