@@ -20,7 +20,9 @@ vm.createContext(context);
 vm.runInContext(extract('function normalizeName(', 'function cleanProductName'), context);
 vm.runInContext(extract('function cmpCanonicalName(', 'function cmpNameSimilarity'), context);
 vm.runInContext(extract('function normalizeKnownQuantityConfirmations(', 'function getOCRSafetyIssues'), context);
+vm.runInContext(extract('function fmtDateRuShort(', 'function getTodayStr'), context);
 vm.runInContext(extract('function parseDateRu(', 'function inferIsoFromDdmm'), context);
+vm.runInContext(extract('function cmpUpdateOCRJsonWithCorrections(', 'function cmpSyncAppliedCorrectionsToOCR'), context);
 vm.runInContext(extract('function getOCRSafetyIssues(', 'function formatOCRSafetyMessage'), context);
 vm.runInContext(extract('function validateAIResponse(', 'function getOCRSafetyIssues'), context);
 
@@ -457,22 +459,42 @@ test('OCR safety does not duplicate handwritten confirmation when quantity statu
 });
 
 
-test('applying OCR comparison edits synchronizes corrected quantities into result JSON and AI report', () => {
+test('OCR comparison correction helper updates invoice and sales JSON, including confirmation status', () => {
+  const source = JSON.stringify({
+    invoices: [{
+      date: '2026-10-06', continuation: false,
+      items: [{ name: 'Пончик с фисташкой', quantity: 2, quantity_status: 'uncertain' }]
+    }],
+    sales: [{ name: 'Пончик с фисташкой', quantity: 1, quantity_status: 'uncertain' }],
+    review: { handwritten_confirmation: ['Пончик с фисташкой'] }
+  });
+  const edits = [
+    { name: context.cmpCanonicalName('Пончик с фисташкой'), dateKey: '06.10', quantity: 4, kind: 'incoming' },
+    { name: context.cmpCanonicalName('Пончик с фисташкой'), quantity: 3, kind: 'sales' }
+  ];
+  const corrected = JSON.parse(context.cmpUpdateOCRJsonWithCorrections(source, edits));
+  assert.equal(corrected.invoices[0].items[0].quantity, 4);
+  assert.equal(corrected.invoices[0].items[0].quantity_status, 'confirmed');
+  assert.equal(corrected.sales[0].quantity, 3);
+  assert.equal(corrected.sales[0].quantity_status, 'confirmed');
+  assert.deepEqual(corrected.review.handwritten_confirmation, []);
+});
+
+test('applying OCR comparison edits synchronizes corrected incoming and sales quantities to the JSON fields and both AI report sections', () => {
   const syncStart = html.indexOf('function cmpSyncAppliedCorrectionsToOCR()');
   const syncEnd = html.indexOf('function cmpApplyMatched()', syncStart);
   assert.ok(syncStart >= 0 && syncEnd > syncStart);
   const sync = html.slice(syncStart, syncEnd);
-  assert.match(sync, /item\.quantity = edit\.quantity/);
-  assert.match(sync, /const dateKey = parsedDate \? fmtDateRuShort\(parsedDate\) : ''/);
-  assert.match(sync, /item\.quantity_status = 'confirmed'/);
-  assert.match(sync, /data\.review\.handwritten_confirmation = data\.review\.handwritten_confirmation\.filter/);
-  assert.match(sync, /_lastGeminiJsons = \{ first, second \}/);
-  assert.match(sync, /jsonInput\.value = first/);
-  assert.match(sync, /report\.invoiceJson = updateJson\(report\.invoiceJson\)/);
-  assert.match(sync, /report\.json = first/);
-  assert.match(sync, /report\.fullRaw = first/);
-  assert.doesNotMatch(sync, /Object\.assign\(report, refreshed\)/);
-  assert.match(sync, /persistAIReport\(report\)/);
+  assert.match(sync, /kind: 'incoming'/);
+  assert.match(sync, /kind: 'sales'/);
+  assert.match(sync, /_lastGeminiJsons = \\{ first, second \\}/);
+  assert.match(sync, /jsonInput\\.value = first/);
+  assert.match(sync, /report\\.invoiceJson = updateJson\\(report\\.invoiceJson\\)/);
+  assert.match(sync, /report\\.salesJson = updateJson\\(report\\.salesJson\\)/);
+  assert.match(sync, /report\\.salesReport = refreshedSales/);
+  assert.match(sync, /report\\.json = first/);
+  assert.match(sync, /report\\.fullRaw = first/);
+  assert.match(sync, /persistAIReport\\(report\\)/);
   const applyStart = html.indexOf('function cmpApplyMatched()');
   const syncCall = html.indexOf('cmpSyncAppliedCorrectionsToOCR();', applyStart);
   const renderCall = html.indexOf('renderTable();', applyStart);
