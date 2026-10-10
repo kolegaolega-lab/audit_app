@@ -536,7 +536,7 @@ test('catalog sync reads and writes only the explicit development branch', () =>
   assert.ok(writer.includes('const readUrl ='));
   assert.ok(writer.includes('const writeUrl ='));
   assert.ok(writer.includes('?ref=${encodeURIComponent(GITHUB_BRANCH)}'));
-  assert.ok(writer.includes('fetchWithTimeout(readUrl'));
+  assert.ok(writer.includes('fetchWithRetry(readUrl'));
   assert.ok(writer.includes('fetchWithTimeout(writeUrl'));
   assert.ok(writer.includes('branch: GITHUB_BRANCH'));
 });
