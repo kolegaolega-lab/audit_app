@@ -480,6 +480,40 @@ test('OCR comparison correction helper updates invoice and sales JSON, including
   assert.deepEqual(corrected.review.handwritten_confirmation, []);
 });
 
+test('OCR comparison applies one confirmed choice to both differently named OCR variants', () => {
+  const source = JSON.stringify({
+    invoices: [
+      { date: '2026-10-06', continuation: false,
+        items: [{ name: 'Т Макарун фисташка-малина', quantity: 2, quantity_status: 'handwritten' }] },
+      { date: '2026-10-06', continuation: false,
+        items: [{ name: 'Т Макарун фисташка/малина', quantity: 3, quantity_status: 'uncertain' }] }
+    ],
+    sales: [
+      { name: 'Т Макарун фисташка-малина', quantity: 1, quantity_status: 'confirmed' },
+      { name: 'Т Макарун фисташка/малина', quantity: 4, quantity_status: 'confirmed' }
+    ],
+    review: { handwritten_confirmation: ['Т Макарун фисташка-малина'] }
+  });
+  const canonical = context.cmpCanonicalName('Т Макарун фисташка-малина');
+  const variant = context.cmpCanonicalName('Т Макарун фисташка/малина');
+  const edits = [
+    { name: canonical, names: [canonical, variant], dateKey: '06.10', quantity: 5, kind: 'incoming' },
+    { name: canonical, names: [canonical, variant], quantity: 6, kind: 'sales' }
+  ];
+  const corrected = JSON.parse(context.cmpUpdateOCRJsonWithCorrections(source, edits));
+  assert.deepEqual(corrected.invoices.map(x => x.items[0].quantity), [5, 5]);
+  assert.deepEqual(corrected.invoices.map(x => x.items[0].quantity_status), ['confirmed', 'confirmed']);
+  assert.deepEqual(corrected.sales.map(x => x.quantity), [6, 6]);
+  assert.deepEqual(corrected.sales.map(x => x.quantity_status), ['confirmed', 'confirmed']);
+  assert.deepEqual(corrected.review.handwritten_confirmation, []);
+});
+
+test('comparison refresh removes stale discrepancy text after a quantity is selected', () => {
+  assert.match(html, /if \(\/^Приход не совпадает\/\.test\(detail\)\)/);
+  assert.match(html, /if \(\/^Продажи не совпадают\/\.test\(detail\)\)/);
+  assert.match(html, /row\.details = \(row\.details \|\| \[\]\)\.filter/);
+});
+
 test('applying OCR comparison edits synchronizes corrected incoming and sales quantities to the JSON fields and both AI report sections', () => {
   const syncStart = html.indexOf('function cmpSyncAppliedCorrectionsToOCR()');
   const syncEnd = html.indexOf('function cmpApplyMatched()', syncStart);
