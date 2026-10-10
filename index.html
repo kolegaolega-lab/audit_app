@@ -9610,6 +9610,94 @@ function cmpRenderResults() {
     if (comparisonBlocked) applyBtn.title = 'Исправьте отмеченные строки перед применением';
   }
 }
+function cmpSyncAppliedCorrectionsToOCR() {
+  if (!_cmpData || !_cmpData.rows) return;
+  const edits = [];
+  _cmpData.rows.forEach(row => {
+    Object.entries(row.edits?.incoming || {}).forEach(([dateKey, quantity]) => {
+      if (quantity == null || !Number.isFinite(Number(quantity))) return;
+      edits.push({ name: cmpCanonicalName(row.name), dateKey, quantity: Number(quantity), displayName: row.name });
+    });
+  });
+  if (!edits.length) return;
+
+  const updateJson = raw => {
+    if (!raw) return raw;
+    let data;
+    try { data = JSON.parse(raw); } catch (e) { return raw; }
+    if (!data || !Array.isArray(data.invoices)) return raw;
+    let activeDate = '';
+    const changedNames = new Set();
+    data.invoices.forEach(invoice => {
+      const rawDate = String(invoice?.date || '').trim();
+      if (rawDate) activeDate = rawDate;
+      else if (!invoice?.continuation) activeDate = '';
+      const effectiveDate = rawDate || (invoice?.continuation ? activeDate : '');
+      const parsedDate = effectiveDate ? parseDateRu(effectiveDate, new Date()) : null;
+      const dateKey = parsedDate ? fmtDateRuShort(parsedDate) : '';
+      (Array.isArray(invoice?.items) ? invoice.items : []).forEach(item => {
+        const itemKey = cmpCanonicalName(item?.name || '');
+        if (!itemKey || !dateKey) return;
+        const edit = edits.find(x => x.name === itemKey && x.dateKey === dateKey);
+        if (!edit) return;
+        item.quantity = edit.quantity;
+        item.quantity_status = 'confirmed';
+        changedNames.add(itemKey);
+      });
+    });
+    if (data.review && Array.isArray(data.review.handwritten_confirmation)) {
+      data.review.handwritten_confirmation = data.review.handwritten_confirmation.filter(name =>
+        !changedNames.has(cmpCanonicalName(name || ''))
+      );
+    }
+    return JSON.stringify(data);
+  };
+
+  const first = updateJson(_lastGeminiJsons.first);
+  const second = updateJson(_lastGeminiJsons.second);
+  _lastGeminiJsons = { first, second };
+  const jsonInput = $('jsonInput');
+  if (jsonInput && first) {
+    jsonInput.value = first;
+    autoResizeTextarea();
+    updateJsonCounter();
+  }
+  const cmpJson1 = $('cmpJson1');
+  const cmpJson2 = $('cmpJson2');
+  if (cmpJson1 && first) cmpJson1.value = first;
+  if (cmpJson2 && second) cmpJson2.value = second;
+
+  if (_lastAIReport) {
+    const report = _lastAIReport;
+    if (report.fullRaw) report.fullRaw = first || report.fullRaw;
+    if (report.json) report.json = first || report.json;
+    if (report.invoiceJson) {
+      report.invoiceJson = updateJson(report.invoiceJson);
+      const refreshed = parseAIReport(report.invoiceJson);
+      if (refreshed) {
+        report.invoiceReport = refreshed;
+        report.invoiceValidation = validateAIResponse(report.invoiceJson, report.invoiceJson, refreshed, Number(report.invoicePhotoCount) || -1);
+      }
+    } else if (first) {
+      const refreshed = parseAIReport(first);
+      if (refreshed) {
+        const priorValidation = report.validation;
+        Object.assign(report, refreshed);
+        if (priorValidation) report.validation = validateAIResponse(first, first, report, Number(report.photoCount) || -1);
+      }
+    }
+    if (report.safety && first) {
+      const refreshed = parseAIReport(first);
+      if (refreshed) {
+        const issues = getOCRSafetyIssues(first, refreshed, Number(report.photoCount) || Number(refreshed.photoCount) || -1);
+        report.safety = { ...report.safety, blocked: issues.length > 0, issues };
+      }
+    }
+    persistAIReport(report);
+    updateAIReportBtnVisibility();
+  }
+}
+
 function cmpApplyMatched() {
   if (!_cmpData) return;
   if (_cmpData.comparisonValid === false) {
@@ -9752,6 +9840,9 @@ function cmpApplyMatched() {
     }
   }
 
+  // Синхронизируем подтверждённые правки не только с карточками, но и с JSON,
+  // блоком «Проверка результата» и сохранённым отчётом ИИ.
+  cmpSyncAppliedCorrectionsToOCR();
   renderTable();
   updateSegmentedCounters();
   scheduleSessionSave();
