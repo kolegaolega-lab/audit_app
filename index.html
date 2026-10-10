@@ -5569,7 +5569,8 @@ function addSelectedUnknown() {
     if (PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) return;
     const hInp = item.querySelector('input[data-role="shelfHours"]');
     const rawHours = hInp ? Number(onlyDigits(hInp.value) || '0') : 0;
-    const hours = Number.isFinite(rawHours) && rawHours > 0 ? clampNum(rawHours, 1, MAX_SHELF_HOURS, null) : null;
+    if (rawHours > MAX_SHELF_HOURS) showToast(`Максимум ${MAX_SHELF_DAYS} суток (${MAX_SHELF_HOURS} часов). Укажите срок заново.`);
+    const hours = Number.isFinite(rawHours) && rawHours > 0 && rawHours <= MAX_SHELF_HOURS ? rawHours : null;
     toAdd.push({ name, hours });
   });
   if (!toAdd.length) { showToast('Ничего не выбрано'); return; }
@@ -5816,7 +5817,7 @@ function renderCatalogList() {
       if (hoursRaw > MAX_SHELF_HOURS) {
         showToast(`Максимум ${MAX_SHELF_DAYS} суток (${MAX_SHELF_HOURS} часов)`);
         const oldHours = PRODUCTS[p._idx].shelfLife;
-        hoursInput.value = String(oldHours);
+        hoursInput.value = oldHours == null ? '' : String(oldHours);
         daysInput.value = formatDays(oldHours);
         return;
       }
@@ -10311,7 +10312,8 @@ function bindUI() {
     const hoursVal = hoursEl ? Number(onlyDigits(hoursEl.value) || '0') : 0;
     let hours;
     if (daysVal > 0) hours = daysToHours(daysVal);
-    else if (hoursVal > 0) hours = clampNum(hoursVal, 1, MAX_SHELF_HOURS, 0);
+    else if (hoursVal > MAX_SHELF_HOURS) { showToast(`Максимум ${MAX_SHELF_DAYS} суток (${MAX_SHELF_HOURS} часов)`); return; }
+    else if (hoursVal > 0) hours = hoursVal;
     else hours = null;
     if (hours != null && hours > MAX_SHELF_HOURS) { showToast(`Максимум ${MAX_SHELF_DAYS} суток (${MAX_SHELF_HOURS} часов)`); return; }
     if (!name) { alert('Введите название.'); return; }
@@ -10342,7 +10344,7 @@ function bindUI() {
       const cleaned = String(newProdDays.value).replace(',', '.').replace(/[^\d.]/g, '');
       if (cleaned !== newProdDays.value) newProdDays.value = cleaned;
       const d = parseDaysInput(cleaned);
-      if (d > 0 && newProdHours) newProdHours.value = String(daysToHours(d));
+      if (newProdHours) newProdHours.value = d > 0 ? String(daysToHours(d)) : '';
     });
   }
   const resetCat = $('resetCatalogBtn'); if (resetCat) resetCat.onclick = resetToFactory;
