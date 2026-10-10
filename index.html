@@ -7733,8 +7733,8 @@ function getOCRSafetyIssues(text,report,count){
     if (beyondLast.length) {
       out.push({
         code:'invoice-last-line-inconsistent',
-        title:'Неверно определён номер последней строки накладной',
-        detail:(g.number ? '№' + g.number + ' · ' : '') + 'есть строка ' + Math.max(...beyondLast) + ', но last_line_number=' + g.lastLine
+        title:'Проверьте нумерацию строк накладной',
+        detail:(g.number ? 'Накладная №' + g.number + '. ' : 'Накладная. ') + 'Распознана строка №' + Math.max(...beyondLast) + ', но в поле «Последняя строка» указано №' + g.lastLine + '. Проверьте номер на фото накладной. Это предупреждение не блокирует применение данных.'
       });
     }
   });
