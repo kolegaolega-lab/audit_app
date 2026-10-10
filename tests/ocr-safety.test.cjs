@@ -554,3 +554,8 @@ test('applying OCR comparison edits synchronizes corrected incoming and sales qu
   const renderCall = html.indexOf('renderTable();', applyStart);
   assert.ok(syncCall > applyStart && renderCall > syncCall, 'sync must run when comparison is applied');
 });
+
+
+test('catalog fallback uses canonical names when deduplicating OCR rows', () => {
+  assert.match(html, /const alreadyKeys = new Set\(inCategory\.map\(r => cmpCanonicalName\(r\.name\)\)\);\s*const catProducts = getCategoryProducts\(_activeCategory\);\s*for \(const p of catProducts\) \{\s*const key = cmpCanonicalName\(p\.name\);/);
+});
