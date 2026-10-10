@@ -32,6 +32,19 @@ test('incoming merge',()=>{assert.deepEqual(f.mergeIncomingByDate([{date:'2026-1
 test('22:00 cutoff 24/48/72/96',()=>{for(const [h,e] of [[24,'2026-10-06T22:00'],[48,'2026-10-07T22:00'],[72,'2026-10-08T22:00'],[96,'2026-10-09T22:00']])assert.equal(f.getWriteOffMoment('2026-10-06',h).toISOString().slice(0,16),e);});
 test('non-24h shelf-life stays exact',()=>{assert.equal(f.getWriteOffMoment('2026-10-06',36).toISOString().slice(0,16),'2026-10-07T19:00');assert.equal(f.getWriteOffMoment('2026-10-06',60).toISOString().slice(0,16),'2026-10-08T19:00');});
 test('22:00 boundary is strict: item is fresh before cutoff',()=>{const r={stock:1,sales:0,shelfLife:24,incoming:[{date:'2026-10-06',qty:1}],_checkDate:'2026-10-06'};const writeOff=f.getWriteOffMoment('2026-10-06',24);assert.equal(writeOff.getHours(),22);assert.equal(writeOff.getMinutes(),0);const calc=f.computeFIFO(r);assert.equal(calc.expiredOnShelf,0);assert.equal(calc.freshOnShelf,1);});
+test('FIFO uses the original saved audit time after a later session restore',()=>{
+  const checkedAfterCutoff=Date.parse('2026-10-06T22:01:00');
+  const moment=f.getCheckMoment('2026-10-06',checkedAfterCutoff);
+  assert.equal(moment.toISOString().slice(0,16),'2026-10-06T22:01');
+  const calc=f.computeFIFO({stock:1,sales:0,shelfLife:24,incoming:[{date:'2026-10-06',qty:1}],_checkDate:'2026-10-06',_checkMoment:checkedAfterCutoff});
+  assert.equal(calc.expiredOnShelf,1);
+  assert.equal(calc.freshOnShelf,0);
+});
+test('session save and restore preserve the check moment used by FIFO',()=>{
+  assert.match(html,/checkMoment:\s*\(\(\)\s*=>/);
+  assert.match(html,/_checkMoment:\s*Number\.isFinite\(Number\(data\.checkMoment\)\)/);
+  assert.match(html,/r\._checkMoment\s*=\s*checkMoment/);
+});
 test('future-only incoming cannot make stock fresh',()=>{const r=f.computeFIFO({stock:2,sales:1,shelfLife:24,incoming:[{date:'2026-10-07',qty:5}],_checkDate:'2026-10-06'});assert.deepEqual(r,{soldExpired:1,expiredOnShelf:2,freshOnShelf:0,freshSold:0});});
 test('FIFO 24h stock',()=>{assert.deepEqual(f.computeFIFO({stock:3,sales:0,shelfLife:24,incoming:[{date:'2026-10-06',qty:2}],_checkDate:'2026-10-06'}),{soldExpired:0,expiredOnShelf:1,freshOnShelf:2,freshSold:0});});
 test('FIFO oldest sales first',()=>{const r=f.computeFIFO({stock:0,sales:3,shelfLife:24,incoming:[{date:'2026-10-05',qty:2},{date:'2026-10-06',qty:2}],_checkDate:'2026-10-06'});assert.equal(r.soldExpired,2);assert.equal(r.freshSold,1);});
