@@ -471,3 +471,27 @@ test('daily accumulator restore deduplicates dates and blocks malformed JSON wit
   assert.equal(result[1].blocked,true);
   assert.equal(result[1].needsCheck,true);
 });
+
+test('catalog sync reads and writes only the explicit development branch', () => {
+  assert.ok(html.includes("const GITHUB_BRANCH = 'fix/fifo-shelf-life';"));
+
+  const readStart = html.indexOf('async function fetchRemoteCatalog(');
+  const readEnd = html.indexOf('async function pushToGitHub(', readStart);
+  assert.notEqual(readStart, -1, 'remote catalog reader must exist');
+  assert.notEqual(readEnd, -1, 'remote catalog reader must be bounded');
+  const reader = html.slice(readStart, readEnd);
+  assert.ok(reader.includes('raw.githubusercontent.com'));
+  assert.ok(reader.includes('GITHUB_BRANCH'), 'reader must use the explicit branch');
+
+  const writeStart = html.indexOf('async function pushToGitHub(');
+  const writeEnd = html.indexOf('async function syncPushToServer(', writeStart);
+  assert.notEqual(writeStart, -1, 'remote catalog writer must exist');
+  assert.notEqual(writeEnd, -1, 'remote catalog writer must be bounded');
+  const writer = html.slice(writeStart, writeEnd);
+  assert.ok(writer.includes('const readUrl ='));
+  assert.ok(writer.includes('const writeUrl ='));
+  assert.ok(writer.includes('?ref=${encodeURIComponent(GITHUB_BRANCH)}'));
+  assert.ok(writer.includes('fetchWithTimeout(readUrl'));
+  assert.ok(writer.includes('fetchWithTimeout(writeUrl'));
+  assert.ok(writer.includes('branch: GITHUB_BRANCH'));
+});
