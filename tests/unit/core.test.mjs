@@ -45,6 +45,17 @@ test('session save and restore preserve the check moment used by FIFO',()=>{
   assert.match(html,/_checkMoment:\s*typeof data\.checkMoment === 'number'/);
   assert.match(html,/r\._checkMoment\s*=\s*checkMoment/);
 });
+test('Gemini model discovery and probes have bounded network waits',()=>{
+  const probeStart=html.indexOf('async function testGeminiModel(');
+  const discoverStart=html.indexOf('async function discoverGeminiModels(');
+  const fillStart=html.indexOf('function fillModelSelect(',discoverStart);
+  assert.ok(probeStart>=0 && discoverStart>probeStart && fillStart>discoverStart);
+  const probe=html.slice(probeStart,discoverStart);
+  const discovery=html.slice(discoverStart,fillStart);
+  assert.match(probe,/fetchWithTimeout\(url,[\s\S]{0,180}15000\)/);
+  assert.match(discovery,/fetchWithTimeout\(\$\{GEMINI_API\}[\s\S]{0,100}15000\)/);
+  assert.doesNotMatch(discovery,/await fetch\(/);
+});
 test('future-only incoming cannot make stock fresh',()=>{const r=f.computeFIFO({stock:2,sales:1,shelfLife:24,incoming:[{date:'2026-10-07',qty:5}],_checkDate:'2026-10-06'});assert.deepEqual(r,{soldExpired:1,expiredOnShelf:2,freshOnShelf:0,freshSold:0});});
 test('FIFO 24h stock',()=>{assert.deepEqual(f.computeFIFO({stock:3,sales:0,shelfLife:24,incoming:[{date:'2026-10-06',qty:2}],_checkDate:'2026-10-06'}),{soldExpired:0,expiredOnShelf:1,freshOnShelf:2,freshSold:0});});
 test('FIFO oldest sales first',()=>{const r=f.computeFIFO({stock:0,sales:3,shelfLife:24,incoming:[{date:'2026-10-05',qty:2},{date:'2026-10-06',qty:2}],_checkDate:'2026-10-06'});assert.equal(r.soldExpired,2);assert.equal(r.freshSold,1);});
