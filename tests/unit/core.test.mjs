@@ -26,6 +26,22 @@ const f=load('clampNum','isValidDate','safeDate','onlyDigits','hoursToDays','day
 
 test('numeric and date primitives',()=>{assert.equal(f.clampNum(12.5,0,10,0),10);assert.equal(f.clampNum('x',0,10,7),7);assert.equal(f.safeDate(2026,10,6),'2026-10-06');assert.equal(f.isValidDate(new Date(2026,9,6)),true);assert.equal(f.onlyDigits('a1-2b'),'12');});
 test('shelf-life conversion',()=>{assert.equal(f.hoursToDays(48),2);assert.equal(f.daysToHours(3),72);assert.equal(f.parseShelfLife('48 ч'),48);assert.equal(f.parseShelfLife('2 дня'),48);});
+test('catalog sanitizer preserves missing shelf life as null and rejects zero as a valid duration',()=>{
+  const sanitizer=new Function('MAX_CATALOG','MAX_NAME','MAX_SHELF_HOURS','clampNum','normalizeName','isValidCategory',
+    extract('sanitizeProducts')+'; return sanitizeProducts;')(
+      5000,100,720,
+      (v,min,max,fallback)=>Number.isFinite(Number(v))?Math.min(max,Math.max(min,Number(v))):fallback,
+      v=>String(v||'').trim().toLowerCase().replace(/\s+/g,' '),
+      c=>c==='desserts'||c==='lunches'||c==='pastry'
+    );
+  assert.equal(sanitizer([{name:'Без срока',shelfLife:null,category:null}])[0].shelfLife,null);
+  assert.equal(sanitizer([{name:'Нулевой срок',shelfLife:0,category:null}])[0].shelfLife,null);
+  assert.equal(sanitizer([{name:'Нормальный срок',shelfLife:48,category:null}])[0].shelfLife,48);
+  const gateStart=html.indexOf('function getFinishCheckIssues()');
+  const gateEnd=html.indexOf('function getFinishCheckBlockReason(',gateStart);
+  const gate=html.slice(gateStart,gateEnd);
+  assert.match(gate,/r\.shelfLife == null \|\| !Number\.isFinite\(Number\(r\.shelfLife\)\) \|\| Number\(r\.shelfLife\) <= 0/);
+});
 test('text normalization',()=>{assert.equal(f.normalizeName('  Пончик   Фисташка '),'пончик фисташка');assert.equal(f.normalizeForSearch('Ёлка'),'елка');assert.equal(f.cleanProductName('  Эклер  '),'Эклер');assert.equal(f.isServiceLine('Накладная №123'),true);assert.equal(f.isServiceLine('Пончик'),false);assert.ok(f.naturalCompare('Товар 2','Товар 10')<0);});
 test('date parsing',()=>{const ref=new Date(2026,9,6);assert.equal(f.parseDateRu('27.09.2026',ref),'2026-09-27');assert.equal(f.parseDateRu('27.09',ref),'2026-09-27');assert.equal(f.inferIsoFromDdmm('05.10',ref),'2026-10-05');});
 test('incoming merge',()=>{assert.deepEqual(f.mergeIncomingByDate([{date:'2026-10-07',qty:2},{date:'2026-10-06',qty:1},{date:'2026-10-07',qty:3}]),[{date:'2026-10-06',qty:1,_originalQty:1},{date:'2026-10-07',qty:5,_originalQty:2}]);});
