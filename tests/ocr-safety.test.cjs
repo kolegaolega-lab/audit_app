@@ -463,6 +463,8 @@ test('applying OCR comparison edits synchronizes corrected quantities into resul
   assert.ok(syncStart >= 0 && syncEnd > syncStart);
   const sync = html.slice(syncStart, syncEnd);
   assert.match(sync, /item\.quantity = edit\.quantity/);
+  assert.match(sync, /parsedDate\.getDate\(\)[\s\S]*parsedDate\.getMonth\(\) \+ 1/);
+  assert.doesNotMatch(sync, /fmtDateRuShort\(parsedDate\)/);
   assert.match(sync, /item\.quantity_status = 'confirmed'/);
   assert.match(sync, /data\.review\.handwritten_confirmation = data\.review\.handwritten_confirmation\.filter/);
   assert.match(sync, /_lastGeminiJsons = \{ first, second \}/);
