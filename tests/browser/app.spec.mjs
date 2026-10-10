@@ -2313,3 +2313,33 @@ test('offline send reports failure when local queue cannot be persisted', async 
   expect(result.queued).toBe(1);
   expect(result.status).toContain('не смог сохранить проверку в локальную очередь');
 });
+
+
+test('card refresh preserves missing-incoming warning after manual stock edit', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const row = {
+      name:'Товар без накладной', salesOnly:false, stock:1, sales:0,
+      shelfLife:24, category:'desserts', incoming:[], _checkDate:'2026-10-10'
+    };
+    const card = document.createElement('div');
+    card.className = 'card';
+    const resultNode = document.createElement('div');
+    resultNode.dataset.role = 'cardResult';
+    card.appendChild(resultNode);
+    document.body.appendChild(card);
+
+    refreshCardRow(row, card);
+    const warningAfterEdit = resultNode.textContent;
+
+    const salesOnlyRow = {
+      name:'Только продажи', salesOnly:true, stock:null, sales:2,
+      shelfLife:null, category:'desserts', incoming:[], _checkDate:'2026-10-10'
+    };
+    refreshCardRow(salesOnlyRow, card);
+    const salesOnlyText = resultNode.textContent;
+    return {warningAfterEdit, salesOnlyText};
+  });
+  expect(result.warningAfterEdit).toContain('нет — просрочка, проверить с персоналом');
+  expect(result.salesOnlyText).not.toContain('нет — просрочка, проверить с персоналом');
+});
