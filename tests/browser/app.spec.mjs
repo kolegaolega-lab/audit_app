@@ -1434,7 +1434,7 @@ test('report headline treats missing incoming as a problem', async ({page}) => {
   });
   expect(result).toContain('1 проблема');
   expect(result).not.toContain('всё свежее');
-  expect(result).toContain('Нет прихода за срок годности');
+  expect(result).toContain('Нет подтверждённого поступления за срок годности');
 });
 
 test('completion gate blocks unresolved double-run comparison even when table inputs are complete', async ({page}) => {
@@ -1535,7 +1535,7 @@ test('completion gate allows missing incoming as an explicit audit finding', asy
   });
   expect(result.before).toEqual({canFinish:true, disabled:false});
   expect(result.modalOpen).toBe(true);
-  expect(result.reportText).toContain('Нет прихода');
+  expect(result.reportText).toContain('Нет подтверждённого поступления за срок годности');
 });
 
 test('completion gate allows expired FIFO findings after all required inputs are present', async ({page}) => {
@@ -1752,7 +1752,7 @@ test('card status, report and history snapshot agree for zero stock with no inco
   expect(result.status).toEqual({cls:'row-fresh',label:'fresh'});
   expect(result.card).toBe('fresh');
   expect(result.reportText).toContain('всё свежее');
-  expect(result.reportText).not.toContain('Нет прихода');
+  expect(result.reportText).not.toContain('Нет подтверждённого поступления за срок годности');
   expect(result.snapshotItem.noIncoming).toBe(false);
   expect(result.snapshotTotals.noIncoming).toBe(0);
 });
@@ -1780,7 +1780,7 @@ test('history snapshot preserves explicit missing-incoming finding consistently 
   });
   expect(result.calc).toEqual({soldExpired:0,expiredOnShelf:3,freshOnShelf:0,freshSold:0});
   expect(result.status).toEqual({cls:'row-danger',label:'danger'});
-  expect(result.reportText).toContain('Нет прихода');
+  expect(result.reportText).toContain('Нет подтверждённого поступления за срок годности');
   expect(result.snapshotItem.noIncoming).toBe(true);
   expect(result.snapshotTotals.noIncoming).toBe(1);
   expect(result.snapshotTotals.expiredOnShelf).toBe(3);
@@ -2095,7 +2095,7 @@ test('report totals match history snapshot for mixed FIFO findings', async ({pag
       {name:'Свежий',salesOnly:false,stock:1,sales:0,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-08',qty:1}],_checkDate:'2026-10-08'},
       {name:'Просроченный остаток',salesOnly:false,stock:2,sales:0,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-07',qty:2}],_checkDate:'2026-10-08'},
       {name:'Продажа просрочкой',salesOnly:false,stock:0,sales:2,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-07',qty:1}],_checkDate:'2026-10-08'},
-      {name:'Нет прихода',salesOnly:false,stock:1,sales:0,shelfLife:24,category:'desserts',incoming:[],_checkDate:'2026-10-08'},
+      {name:'Нет подтверждённого поступления за срок годности',salesOnly:false,stock:1,sales:0,shelfLife:24,category:'desserts',incoming:[],_checkDate:'2026-10-08'},
       {name:'Только продажа',salesOnly:true,stock:null,sales:3,shelfLife:null,category:'pastry',incoming:[],_checkDate:'2026-10-08'}
     ];
     unknownRows=[]; noCategoryRows=[]; _dailyAccum=[]; _cmpData=null;
@@ -2116,7 +2116,7 @@ test('report totals match history snapshot for mixed FIFO findings', async ({pag
   expect(result.report).toContain('Свежих на витрине');
   expect(result.report).toContain('Просрочено на витрине');
   expect(result.report).toContain('Продано просрочкой');
-  expect(result.report).toContain('Нет прихода за срок годности');
+  expect(result.report).toContain('Нет подтверждённого поступления за срок годности');
   expect(result.report).toContain('Только продажи');
 });
 
@@ -2178,7 +2178,7 @@ test('category report detail lists missing incoming as a problem', async ({page}
     return $('reportBody')?.textContent || '';
   });
   expect(result).toContain('Позиция без прихода в деталях');
-  expect(result).toContain('Нет прихода');
+  expect(result).toContain('Нет подтверждённого поступления за срок годности');
   expect(result).toContain('1 проблемная позиция');
 });
 
@@ -2200,7 +2200,7 @@ test('category report counts missing incoming as a problem', async ({page}) => {
     return {summary, card:card?.textContent || ''};
   });
   expect(result.summary).toContain('1 проблема');
-  expect(result.summary).toContain('Нет прихода');
+  expect(result.summary).toContain('Нет подтверждённого поступления за срок годности');
   expect(result.card).toContain('1 проблема');
   expect(result.card).not.toContain('0 проблем');
 });
