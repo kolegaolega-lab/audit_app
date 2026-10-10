@@ -5413,7 +5413,7 @@ function updateCardResults() {
     const freshStock = calc.freshOnShelf;
     const freshSales = calc.freshSold;
     const incoming = getIncomingSummary(row);
-    const noIncoming = !row.salesOnly && row.stock != null && !hasUsableIncomingForAudit(row);
+    const noIncoming = !row.salesOnly && row.stock != null && !hasUsableIncomingForAudit(row) && (Number(row.stock) > 0 || (Number(row.sales) || 0) > 0);
     res.innerHTML = `
       <div class="card-result-source">Приходы: <b>${escapeHtml(noIncoming ? "нет — просрочка, проверить с персоналом" : incoming.text)}</b></div>
       <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
@@ -5435,7 +5435,7 @@ function refreshCardRow(row, card) {
     const freshStock = calc.freshOnShelf;
     const freshSales = calc.freshSold;
     const incoming = getIncomingSummary(row);
-    const noIncoming = !row.salesOnly && row.stock != null && !hasUsableIncomingForAudit(row);
+    const noIncoming = !row.salesOnly && row.stock != null && !hasUsableIncomingForAudit(row) && (Number(row.stock) > 0 || (Number(row.sales) || 0) > 0);
     res.innerHTML = `
       <div class="card-result-source">Приходы: <b>${escapeHtml(noIncoming ? "нет — просрочка, проверить с персоналом" : incoming.text)}</b></div>
       <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
