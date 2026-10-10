@@ -502,6 +502,17 @@ test('application version is consistent across package, runtime, and visible UI'
   assert.match(html, new RegExp('id="aboutVersion">[^<]*' + escapedVersion + '<'));
   assert.doesNotMatch(html, /v9\.24\.1[6-8]/);
 });
+test('local audit edits are protected from stale cross-tab session writes', () => {
+  assert.match(html, /let _sessionLocallyEdited = false/);
+  assert.match(html, /function scheduleSessionSave\(\)[\s\S]{0,220}_sessionLocallyEdited = true/);
+  assert.match(html, /if \(e\.key === SESSION_KEY && !isRestoring && !_sessionLocallyEdited\)/);
+});
+
+test('missing incoming warning explains the next action in plain Russian', () => {
+  assert.match(html, /Нет подтверждённого поступления за срок годности — проверьте накладные и уточните у сотрудника, не просрочен ли товар/);
+  assert.doesNotMatch(html, /Нет прихода за срок годности · проверить с персоналом/);
+});
+
 test('double-run comparison merges likely OCR name variants into one row', () => {
   assert.match(html, /function cmpNameSimilarity\(a, b\)/);
   assert.match(html, /Возможное совпадение: «/);
