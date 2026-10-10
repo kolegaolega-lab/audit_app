@@ -2901,39 +2901,59 @@ function validateRemoteCatalog(remote) {
     return { ok: false, reason: 'invalid-envelope' };
   }
   if (!Array.isArray(remote.products)) return { ok: false, reason: 'invalid-products' };
+  if (remote.products.length > MAX_CATALOG || remote.products.some(p =>
+      !p || typeof p !== 'object' || Array.isArray(p) ||
+      typeof p.name !== 'string' || !p.name.trim())) {
+    return { ok: false, reason: 'invalid-product-row' };
+  }
   const products = sanitizeProducts(remote.products);
   if (!products.length) return { ok: false, reason: 'empty-products' };
-  if (remote.ignored !== undefined && !Array.isArray(remote.ignored)) {
+  if (remote.ignored !== undefined &&
+      (!Array.isArray(remote.ignored) || remote.ignored.some(x => typeof x !== 'string' || !x.trim()))) {
     return { ok: false, reason: 'invalid-ignored' };
   }
-  if (remote.aliases !== undefined && !Array.isArray(remote.aliases)) {
+  if (remote.aliases !== undefined &&
+      (!Array.isArray(remote.aliases) || remote.aliases.some(x =>
+        !x || typeof x !== 'object' || Array.isArray(x) ||
+        typeof x.alias !== 'string' || !x.alias.trim() ||
+        typeof x.target !== 'string' || !x.target.trim()))) {
     return { ok: false, reason: 'invalid-aliases' };
   }
-  if (remote.prices !== undefined &&
-      (!remote.prices || typeof remote.prices !== 'object' || Array.isArray(remote.prices))) {
-    return { ok: false, reason: 'invalid-prices' };
+  if (remote.prices !== undefined) {
+    if (!remote.prices || typeof remote.prices !== 'object' || Array.isArray(remote.prices)) {
+      return { ok: false, reason: 'invalid-prices' };
+    }
+    for (const [name, rawPrice] of Object.entries(remote.prices)) {
+      const price = Number(rawPrice);
+      if (!safeStr(name, MAX_NAME) || !Number.isFinite(price) || price < 0) {
+        return { ok: false, reason: 'invalid-price-entry' };
+      }
+    }
   }
   if (remote.points !== undefined) {
     if (!Array.isArray(remote.points)) return { ok: false, reason: 'invalid-points' };
+    if (remote.points.length === 0 || remote.points.some(point => {
+      if (!point || typeof point !== 'object' || Array.isArray(point)) return true;
+      const id = safeStr(point.id || '', 30);
+      const num = safeStr(point.num || '', 20);
+      return !id || !num || !normalizeName(num) ||
+        (point.name != null && typeof point.name !== 'string') ||
+        (point.address != null && typeof point.address !== 'string');
+    })) return { ok: false, reason: 'invalid-points' };
+    // Duplicate IDs/numbers are allowed here and deduplicated when applying the
+    // payload; malformed rows are rejected before any local catalog is changed.
     const ids = new Set();
     const nums = new Set();
     let validPoints = 0;
     for (const point of remote.points.slice(0, 500)) {
-      if (!point || typeof point !== 'object' || Array.isArray(point)) continue;
       const id = safeStr(point.id || '', 30);
-      const num = safeStr(point.num || '', 20);
-      if (!id || !num) continue;
-      const numKey = normalizeName(num);
-      if (!numKey || ids.has(id) || nums.has(numKey)) continue;
+      const numKey = normalizeName(safeStr(point.num || '', 20));
+      if (!id || !numKey || ids.has(id) || nums.has(numKey)) continue;
       ids.add(id);
       nums.add(numKey);
       validPoints++;
     }
-    // A non-empty points list that contains no usable point is corruption, not a
-    // request to erase the locally cached network of coffee shops.
-    if (remote.points.length === 0 || validPoints === 0) {
-      return { ok: false, reason: 'invalid-points' };
-    }
+    if (validPoints === 0) return { ok: false, reason: 'invalid-points' };
   }
   return { ok: true, products };
 }
@@ -2959,24 +2979,41 @@ function syncPullFromServer(opts) {
   const cleaned = validation.products;
   PRODUCTS = cleaned; saveCatalog();
   if (Array.isArray(remote.ignored)) {
-    IGNORED = remote.ignored.filter(x => typeof x === 'string').map(x => x.trim()).filter(Boolean).slice(0, MAX_CATALOG);
+    const seenIgnored = new Set();
+    IGNORED = [];
+    for (const item of remote.ignored) {
+      const name = item.trim().slice(0, MAX_NAME);
+      const key = normalizeName(name);
+      if (!key || seenIgnored.has(key)) continue;
+      seenIgnored.add(key);
+      IGNORED.push(name);
+      if (IGNORED.length >= MAX_CATALOG) break;
+    }
     saveIgnored();
   }
   if (Array.isArray(remote.aliases)) {
-    ALIASES = remote.aliases
-      .filter(x => x && typeof x === 'object' && typeof x.alias === 'string' && typeof x.target === 'string')
-      .map(x => ({ alias: x.alias.trim().slice(0, MAX_NAME), target: x.target.trim().slice(0, MAX_NAME) }))
-      .filter(x => x.alias && x.target)
-      .slice(0, MAX_CATALOG);
+    const seenAliases = new Set();
+    ALIASES = [];
+    for (const item of remote.aliases) {
+      const alias = item.alias.trim().slice(0, MAX_NAME);
+      const target = item.target.trim().slice(0, MAX_NAME);
+      const key = normalizeName(alias);
+      if (!key || !target || seenAliases.has(key)) continue;
+      seenAliases.add(key);
+      ALIASES.push({ alias, target });
+      if (ALIASES.length >= MAX_CATALOG) break;
+    }
     saveAliases();
   }
   if (remote.prices && typeof remote.prices === 'object' && !Array.isArray(remote.prices)) {
     const out = {};
+    const seenPriceNames = new Set();
     for (const name of Object.keys(remote.prices).slice(0, MAX_CATALOG)) {
       const n = safeStr(name, MAX_NAME);
+      const key = normalizeName(n);
       const v = Number(remote.prices[name]);
-      if (!n) continue;
-      if (!isFinite(v) || v < 0) continue;
+      if (!key || !isFinite(v) || v < 0 || seenPriceNames.has(key)) continue;
+      seenPriceNames.add(key);
       out[n] = Math.round(v * 100) / 100;
     }
     PRICES = out; savePrices();
