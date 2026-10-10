@@ -56,6 +56,18 @@ test('Gemini model discovery and probes have bounded network waits',()=>{
   assert.match(discovery,/fetchWithTimeout\(\$\{GEMINI_API\}[\s\S]{0,220}15000\)/);
   assert.doesNotMatch(discovery,/await fetch\(/);
 });
+test('photo storage read failures are surfaced instead of converted to an empty queue',()=>{
+  const start=html.indexOf('async function getPhotos()');
+  const end=html.indexOf('async function deletePhoto(',start);
+  assert.ok(start>=0 && end>start);
+  const source=html.slice(start,end);
+  assert.match(source,/reject\(tx\.error\s*\|\|\s*req\.error/);
+  assert.doesNotMatch(source,/catch\s*\([^)]*\)\s*\{\s*return\s*\[\]\s*;?\s*\}/);
+  assert.match(html,/recognizeWithGemini: photo storage read failed/);
+  assert.match(html,/recognizeDaily: photo storage read failed/);
+  assert.match(html,/shareToAI: photo storage read failed/);
+  assert.match(html,/renderPhotoQueue: unable to read photo storage/);
+});
 test('future-only incoming cannot make stock fresh',()=>{const r=f.computeFIFO({stock:2,sales:1,shelfLife:24,incoming:[{date:'2026-10-07',qty:5}],_checkDate:'2026-10-06'});assert.deepEqual(r,{soldExpired:1,expiredOnShelf:2,freshOnShelf:0,freshSold:0});});
 test('FIFO 24h stock',()=>{assert.deepEqual(f.computeFIFO({stock:3,sales:0,shelfLife:24,incoming:[{date:'2026-10-06',qty:2}],_checkDate:'2026-10-06'}),{soldExpired:0,expiredOnShelf:1,freshOnShelf:2,freshSold:0});});
 test('FIFO oldest sales first',()=>{const r=f.computeFIFO({stock:0,sales:3,shelfLife:24,incoming:[{date:'2026-10-05',qty:2},{date:'2026-10-06',qty:2}],_checkDate:'2026-10-06'});assert.equal(r.soldExpired,2);assert.equal(r.freshSold,1);});
