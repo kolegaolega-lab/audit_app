@@ -5563,16 +5563,18 @@ function updateUnknownMatchBtn() {
 function addSelectedUnknown() {
   const items = document.querySelectorAll('#unknownRows .row-unk.selected');
   const toAdd = [];
+  let invalidHours = false;
   items.forEach(item => {
     const name = safeStr(item.dataset.name, MAX_NAME);
     if (!name) return;
     if (PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) return;
     const hInp = item.querySelector('input[data-role="shelfHours"]');
     const rawHours = hInp ? Number(onlyDigits(hInp.value) || '0') : 0;
-    if (rawHours > MAX_SHELF_HOURS) showToast(`Максимум ${MAX_SHELF_DAYS} суток (${MAX_SHELF_HOURS} часов). Укажите срок заново.`);
-    const hours = Number.isFinite(rawHours) && rawHours > 0 && rawHours <= MAX_SHELF_HOURS ? rawHours : null;
+    if (rawHours > MAX_SHELF_HOURS) { invalidHours = true; return; }
+    const hours = Number.isFinite(rawHours) && rawHours > 0 ? rawHours : null;
     toAdd.push({ name, hours });
   });
+  if (invalidHours) { showToast(`Максимум ${MAX_SHELF_DAYS} суток (${MAX_SHELF_HOURS} часов). Исправьте срок годности.`); return; }
   if (!toAdd.length) { showToast('Ничего не выбрано'); return; }
   const newCat = isValidCategory(_activeCategory) ? _activeCategory : (isValidCategory(_lastImportedCategory) ? _lastImportedCategory : null);
   const addKeys = new Set(toAdd.map(x => normalizeName(x.name)));
