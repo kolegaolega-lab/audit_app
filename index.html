@@ -9401,6 +9401,27 @@ function cmpRefreshSafetyGate() {
       if ((row.a?.salesStatus !== 'confirmed' || row.b?.salesStatus !== 'confirmed') && !hasEdit(row, 'sales', 'sales')) unresolvedValue = true;
     }
     row.status = nameMismatch ? (unresolvedValue ? 'err' : 'warn') : (unresolvedValue ? 'err' : 'ok');
+    // Обновляем пояснения вместе со статусом: раньше числовое значение уже
+    // считалось подтверждённым, но старый текст «не совпадает» оставался на экране.
+    row.details = (row.details || []).filter(detail => {
+      if (/^Приход не совпадает/.test(detail)) {
+        const match = detail.match(/^Приход не совпадает · (.*?) ·/);
+        const dk = match && match[1];
+        return !(dk && hasEdit(row, dk, 'incoming'));
+      }
+      if (/^Продажи не совпадают/.test(detail)) return !hasEdit(row, 'sales', 'sales');
+      if (/^Количество не подтверждено/.test(detail)) {
+        const match = detail.match(/^Количество не подтверждено · (.*?) ·/);
+        const dk = match && match[1];
+        return !(dk && hasEdit(row, dk, 'incoming'));
+      }
+      if (/^Продажи не подтверждены/.test(detail)) return !hasEdit(row, 'sales', 'sales');
+      if (/^Название не совпадает/.test(detail)) return !row.edits?.nameAccepted;
+      return true;
+    });
+    if (!unresolvedValue && row.edits && (Object.keys(row.edits.incoming || {}).length || row.edits.sales != null)) {
+      row.details = row.details.filter(detail => !/^Есть только в результате [12]$/.test(detail));
+    }
   });
   _cmpData.okCount = _cmpData.rows.filter(r => r.status === 'ok').length;
   _cmpData.warnCount = _cmpData.rows.filter(r => r.status === 'warn').length;
@@ -9675,7 +9696,17 @@ function cmpUpdateOCRJsonWithCorrections(raw, edits) {
       (Array.isArray(invoice?.items) ? invoice.items : []).forEach(item => {
         const itemKey = cmpCanonicalName(item?.name || '');
         if (!itemKey || !dateKey) return;
-        const edit = incomingEdits.find(x => x.name === itemKey && x.dateKey === dateKey);
+        // В двух независимых OCR-прогонах название может отличаться на 1–2 слова.
+        // Сверка объединяет такие строки; применяем выбранное количество ко всем
+        // исходным названиям этой объединённой строки, а не только к первому.
+        const edit = incomingEdits.find(x =>
+          x.dateKey === dateKey &&
+          ((Array.isArray(x.names) && x.names.includes(itemKey)) || x.name === itemKey)
+        ) || incomingEdits.find(x =>
+          x.dateKey === dateKey &&
+          Array.isArray(x.names) &&
+          x.names.some(name => cmpNameSimilarity(name, itemKey) >= 0.72)
+        );
         if (!edit) return;
         item.quantity = edit.quantity;
         item.quantity_status = 'confirmed';
@@ -9691,7 +9722,11 @@ function cmpUpdateOCRJsonWithCorrections(raw, edits) {
     data.sales.forEach(item => {
       const itemKey = cmpCanonicalName(item?.name || '');
       if (!itemKey) return;
-      const edit = salesEdits.find(x => x.name === itemKey);
+      const edit = salesEdits.find(x =>
+        (Array.isArray(x.names) && x.names.includes(itemKey)) || x.name === itemKey
+      ) || salesEdits.find(x =>
+        Array.isArray(x.names) && x.names.some(name => cmpNameSimilarity(name, itemKey) >= 0.72)
+      );
       if (!edit) return;
       item.quantity = edit.quantity;
       item.quantity_status = 'confirmed';
@@ -9712,10 +9747,14 @@ function cmpSyncAppliedCorrectionsToOCR() {
   _cmpData.rows.forEach(row => {
     Object.entries(row.edits?.incoming || {}).forEach(([dateKey, quantity]) => {
       if (quantity == null || !Number.isFinite(Number(quantity))) return;
-      edits.push({ name: cmpCanonicalName(row.name), dateKey, quantity: Number(quantity), kind: 'incoming' });
+      const names = [...new Set([row.name, row.a?.name, row.b?.name]
+        .filter(Boolean).map(name => cmpCanonicalName(name)))];
+      edits.push({ name: cmpCanonicalName(row.name), names, dateKey, quantity: Number(quantity), kind: 'incoming' });
     });
     if (row.edits?.sales != null && Number.isFinite(Number(row.edits.sales))) {
-      edits.push({ name: cmpCanonicalName(row.name), quantity: Number(row.edits.sales), kind: 'sales' });
+      const names = [...new Set([row.name, row.a?.name, row.b?.name]
+        .filter(Boolean).map(name => cmpCanonicalName(name)))];
+      edits.push({ name: cmpCanonicalName(row.name), names, quantity: Number(row.edits.sales), kind: 'sales' });
     }
   });
   if (!edits.length) return;
