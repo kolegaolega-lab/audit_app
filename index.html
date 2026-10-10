@@ -2827,12 +2827,29 @@ async function fetchGeminiWithRetry(url, opts, onRetry) {
     await new Promise(resolve => setTimeout(resolve, delay));
   }
 }
+async function fetchWithRetry(url, opts, timeoutMs, maxRetries = 2) {
+  for (let attempt = 0; ; attempt++) {
+    let res;
+    try {
+      res = await fetchWithTimeout(url, opts, timeoutMs);
+    } catch (e) {
+      if (attempt >= maxRetries) throw e;
+      await new Promise(resolve => setTimeout(resolve, Math.min(4000, 500 * (2 ** attempt))));
+      continue;
+    }
+    if (![429, 500, 502, 503, 504].includes(res.status) || attempt >= maxRetries) return res;
+    let delay = Math.min(4000, 500 * (2 ** attempt));
+    const retryAfter = Number(res.headers?.get?.('Retry-After'));
+    if (Number.isFinite(retryAfter) && retryAfter > 0) delay = Math.min(10000, retryAfter * 1000);
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
+}
 async function fetchRemoteCatalog() {
   try {
     // Read from the same explicit branch used for writes, not the Pages URL
-    // (which may still be published from main).
+    // (which may still be published from main). Retry only transient GET failures.
     const url = `https://raw.githubusercontent.com/${GITHUB_REPO}/${encodeURIComponent(GITHUB_BRANCH).replace('%2F', '/')}/${GITHUB_FILE}?t=${Date.now()}`;
-    const res = await fetchWithTimeout(url, { cache: 'no-store' }, 15000);
+    const res = await fetchWithRetry(url, { cache: 'no-store' }, 15000, 2);
     if (!res.ok) return null;
     const data = await res.json();
     if (!data || !Array.isArray(data.products)) return null;
@@ -2856,10 +2873,10 @@ async function pushToGitHub(token, data) {
   const writeUrl = `${GITHUB_API}/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`;
   let sha = null;
   try {
-    const getRes = await fetchWithTimeout(readUrl, {
+    const getRes = await fetchWithRetry(readUrl, {
       headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' },
       cache: 'no-store'
-    }, 30000);
+    }, 30000, 2);
     if (getRes.ok) {
       const info = await getRes.json();
       sha = info.sha || null;
@@ -2883,7 +2900,7 @@ async function pushToGitHub(token, data) {
     if (putRes.status === 401) return { ok: false, code: 401, message: 'Неверный токен' };
     if (putRes.status === 403) return { ok: false, code: 403, message: 'Нет прав / лимит' };
     if (putRes.status === 404) return { ok: false, code: 404, message: 'Файл не найден' };
-    if (putRes.status === 409) return { ok: false, code: 409, message: 'Конфликт версий — повторите' };
+    if (putRes.status === 409 || putRes.status === 422) return { ok: false, code: putRes.status, message: 'Справочник изменился параллельно. Сначала загрузите актуальную версию и сверьте изменения; не публикуйте поверх неё без проверки.' };
     return { ok: false, code: putRes.status, message: `Ошибка ${putRes.status}` };
   } catch (e) { return { ok: false, code: 0, message: 'Нет связи с сервером' }; }
 }
@@ -3051,29 +3068,44 @@ function syncPullFromServer(opts) {
   }
   return true;
 }
+let _catalogPushInFlight = false;
 async function syncPushToServer() {
   const statusEl = $('syncStatus');
-  const token = localStorage.getItem(ACCESS_KEY);
-  if (!token) {
-    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Нет токена — активируйте режим владельца.'; }
-    return { ok: false };
+  if (_catalogPushInFlight) {
+    const message = 'Публикация уже выполняется. Дождитесь завершения текущей операции.';
+    if (statusEl) { statusEl.className = 'status show info'; statusEl.textContent = message; }
+    return { ok: false, message };
   }
-  const payload = buildSyncPayload();
-  if (statusEl) { statusEl.className = 'status show info'; statusEl.textContent = 'Публикация…'; }
-  const result = await pushToGitHub(token, payload);
-  if (result.ok) {
-    try { localStorage.setItem(SYNC_LOCAL_UPDATED_AT, payload.updatedAt); } catch (e) {}
-    try {
-      const backup = { version: 1, savedAt: Date.now(), products: PRODUCTS, ignored: IGNORED, aliases: ALIASES, prices: PRICES, points: _points };
-      localStorage.setItem(CATALOG_BACKUP_KEY, JSON.stringify(backup));
-    } catch (e) {}
-    updateCatalogMeta();
-    if (statusEl) { statusEl.className = 'status show ok'; statusEl.textContent = `Опубликовано: ${PRODUCTS.length} позиций, ${_points.length} точек.`; }
-    return { ok: true };
-  } else {
-    let msg = result.message || 'Ошибка публикации';
-    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = msg; }
-    return { ok: false, message: msg };
+  _catalogPushInFlight = true;
+  try {
+    const token = localStorage.getItem(ACCESS_KEY);
+    if (!token) {
+      if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = 'Нет токена — активируйте режим владельца.'; }
+      return { ok: false, message: 'Нет токена — активируйте режим владельца.' };
+    }
+    const payload = buildSyncPayload();
+    if (statusEl) { statusEl.className = 'status show info'; statusEl.textContent = 'Публикация…'; }
+    const result = await pushToGitHub(token, payload);
+    if (result.ok) {
+      try { localStorage.setItem(SYNC_LOCAL_UPDATED_AT, payload.updatedAt); } catch (e) {}
+      try {
+        const backup = { version: 1, savedAt: Date.now(), products: PRODUCTS, ignored: IGNORED, aliases: ALIASES, prices: PRICES, points: _points };
+        localStorage.setItem(CATALOG_BACKUP_KEY, JSON.stringify(backup));
+      } catch (e) {}
+      updateCatalogMeta();
+      if (statusEl) { statusEl.className = 'status show ok'; statusEl.textContent = `Опубликовано: ${PRODUCTS.length} позиций, ${_points.length} точек.`; }
+      return { ok: true };
+    }
+    const message = result.message || 'Ошибка публикации';
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = message; }
+    return { ok: false, message };
+  } catch (e) {
+    const message = 'Не удалось опубликовать справочник. Локальные изменения сохранены; проверьте сеть и повторите позже.';
+    console.warn('syncPushToServer:', e);
+    if (statusEl) { statusEl.className = 'status show err'; statusEl.textContent = message; }
+    return { ok: false, message };
+  } finally {
+    _catalogPushInFlight = false;
   }
 }
 function setLastCheckTime() {
