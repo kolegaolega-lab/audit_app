@@ -9612,11 +9612,26 @@ function cmpCloseEdit() {
   cmpRenderResults();
 }
 const CMP_EDITS_KEY = 'audit_app_compare_edits_v1';
+function cmpEditIdentity(row) {
+  const names = [row?.a?.name, row?.b?.name]
+    .map(name => String(name || '').trim())
+    .filter(Boolean)
+    .map(name => cmpCanonicalName(name))
+    .filter(Boolean)
+    .sort();
+  if (!names.length && row?.name) {
+    const fallback = cmpCanonicalName(String(row.name).trim());
+    if (fallback) names.push(fallback);
+  }
+  return JSON.stringify(names);
+}
 function cmpPersistEdits() {
   try {
     if (!_cmpData || !$('cmpJson1') || !$('cmpJson2')) return;
     const edits = (_cmpData.rows || []).filter(r => r && r.edits).map(r => ({
       key: r.key,
+      identity: cmpEditIdentity(r),
+      names: [r.a?.name, r.b?.name].filter(name => typeof name === 'string' && name.trim()).map(name => name.trim()),
       edits: {
         incoming: { ...(r.edits.incoming || {}) },
         sales: r.edits.sales == null ? null : r.edits.sales,
@@ -9637,14 +9652,29 @@ function cmpRestorePersistedEdits(json1, json2) {
     const saved = JSON.parse(raw);
     if (!saved || !Array.isArray(saved.edits)) return false;
     // JSON в поле сверки может измениться после сохранения исправлений.
-    // Восстанавливаем их по устойчивому ключу товара и даты, а не отбрасываем
-    // все изменения из-за отличия исходного текста. Несовпавшие строки игнорируем.
+    // Восстанавливаем по ключу, а если алиас изменил ключ — по канонической
+    // идентичности названий обеих OCR-сторон. Несовпавшие строки игнорируем.
     const exactSource = saved.json1 === json1 && saved.json2 === json2;
     const byKey = new Map(saved.edits.filter(x => x && typeof x.key === 'string')
       .map(x => [x.key, x.edits]));
+    const byIdentity = new Map();
+    const rememberIdentity = (identity, edits) => {
+      if (typeof identity === 'string' && identity && edits) byIdentity.set(identity, edits);
+    };
+    saved.edits.forEach(item => {
+      if (!item || !item.edits) return;
+      rememberIdentity(item.identity, item.edits);
+      // Re-normalize saved source names with the current alias table too. This
+      // supports aliases created or retargeted after the edit snapshot was saved.
+      const names = (Array.isArray(item.names) ? item.names : [])
+        .map(name => cmpCanonicalName(String(name || '').trim()))
+        .filter(Boolean)
+        .sort();
+      if (names.length) rememberIdentity(JSON.stringify(names), item.edits);
+    });
     let restored = false;
     (_cmpData?.rows || []).forEach(row => {
-      const edits = byKey.get(row.key);
+      const edits = byKey.get(row.key) || byIdentity.get(cmpEditIdentity(row));
       if (!edits) return;
       const incoming = {};
       Object.entries(edits.incoming || {}).forEach(([dateKey, quantity]) => {
@@ -9660,7 +9690,7 @@ function cmpRestorePersistedEdits(json1, json2) {
       };
       restored = true;
     });
-    // Keep the current JSON as the new snapshot after a successful key-based restore.
+    // Keep the current JSON as the new snapshot after a successful restore.
     if (restored && !exactSource) cmpPersistEdits();
     return restored;
   } catch (e) { console.warn('cmpRestorePersistedEdits:', e); return false; }
