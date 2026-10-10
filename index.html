@@ -8029,7 +8029,18 @@ async function recognizeDaily(){
       try{await clearAllPhotos()}catch(e){}
       await renderPhotoQueue();
     }
-  }catch(e){set("err","Ошибка: "+(e.message||e))}
+  }catch(e){
+    const raw=String(e?.message||e||"");
+    const friendly=/Gemini HTTP 503|HTTP 503/i.test(raw)
+      ? "Gemini сейчас перегружен и не ответил даже после нескольких попыток. Загруженные фото и накопленные даты сохранены; подождите немного и повторите распознавание."
+      : (/Gemini HTTP 429|HTTP 429/i.test(raw)
+        ? "Gemini временно ограничил число запросов. Подождите немного и повторите распознавание."
+        : (/load failed|failed to fetch|networkerror|network request failed|abort/i.test(raw)
+          ? "Не удалось получить ответ от Gemini: соединение было прервано Safari или сетью. Проверьте интернет и повторите."
+          : "Ошибка: "+raw));
+    set("err",friendly);
+    finishOCRProgress(false);
+  }
   finally{shareBusy=false}
 }
 function rebuildDailyJsonFromTable(iso){const idx=_dailyAccum.findIndex(x=>x.iso===iso);if(idx<0)return false;const e=_dailyAccum[idx],items=[];for(const r of tableRows){if(!r||e.category&&r.category!==e.category)continue;const p=(r.incoming||[]).find(x=>x.date===iso);if(!p)continue;items.push({line:null,name:r.name,quantity:p.qty||0,quantity_status:"confirmed",price:null,amount:null})}if(!items.length)return false;e.json=JSON.stringify({schema_version:"1.0",document_type:"combined",check_date:iso,source:{photo_count:0,processed_photo_count:0,duplicate_photo_count:0},invoices:[{number:"",date:iso,continuation:false,last_line_number:null,printed_total:null,items}],sales:[],review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:["Пересобрано из таблицы аудита"]}});e.needsCheck=!!(e.sourceMissing||[]).length;e.blocked=e.needsCheck;e.safetyIssues=e.needsCheck?e.sourceMissing.map(title=>({code:"SOURCE_MISSING",title})):[];e.ts=Date.now();saveDailyAccum();return true}
