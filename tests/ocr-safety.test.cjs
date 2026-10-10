@@ -81,6 +81,9 @@ test('confirming equivalent OCR names persists an alias to the catalog product',
     alias: 'Лингвини с жаренными креветками',
     target: 'Лингвини с жареными креветками'
   }]);
+  // Не оставляем каталог в общем VM-контексте для следующих safety-тестов.
+  delete context.PRODUCTS;
+  delete context.addOrUpdateAlias;
 });
 
 test('OCR comparison treats slash and hyphen product-name variants as the same item', () => {
