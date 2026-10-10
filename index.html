@@ -9653,8 +9653,12 @@ function cmpSyncAppliedCorrectionsToOCR() {
     return JSON.stringify(data);
   };
 
-  const first = updateJson(_lastGeminiJsons.first);
-  const second = updateJson(_lastGeminiJsons.second);
+  // Тексты в окне сверки — актуальный источник: пользователь мог открыть
+  // сравнение из вручную вставленного JSON, не проходя обычный OCR-запуск.
+  const sourceFirst = ($('cmpJson1') && $('cmpJson1').value) || _lastGeminiJsons.first;
+  const sourceSecond = ($('cmpJson2') && $('cmpJson2').value) || _lastGeminiJsons.second;
+  const first = updateJson(sourceFirst);
+  const second = updateJson(sourceSecond);
   _lastGeminiJsons = { first, second };
   const jsonInput = $('jsonInput');
   if (jsonInput && first) {
