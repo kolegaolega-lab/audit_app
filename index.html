@@ -3854,6 +3854,13 @@ function buildCheckSnapshot() {
     });
     cats[cat] = items;
   });
+  // Sales-only rows are allowed without a product category. Keep them in the
+  // history snapshot instead of silently dropping them from category groups.
+  const salesOnlyRows = tableRows
+    .filter(r => r && r.salesOnly && !CATEGORY_ORDER.includes(r.category))
+    .map(r => ({ name: r.name, sales: r.sales || 0, salesOnly: true, category: null }));
+  totalPositions += salesOnlyRows.length;
+
   const auditDate = (tableRows || [])
     .map(r => String(r && r._checkDate || '').trim())
     .find(v => /^\d{4}-\d{2}-\d{2}$/.test(v)) || getTodayStr();
@@ -3864,6 +3871,7 @@ function buildCheckSnapshot() {
     authorName: (_profile && _profile.name) ? _profile.name : '',
     authorLogin: (_profile && _profile.login) ? _profile.login : '',
     categories: cats,
+    salesOnlyRows,
     totals: {
       positions: totalPositions,
       freshOnShelf: totalFreshOnShelf, freshSold: totalFreshSold,
@@ -4378,6 +4386,9 @@ function countCheckProblems(snapshot) {
       if (exp > 0 || sxp > 0) problems++;
     }
   }
+  // Sales-only entries are retained for traceability but are not shelf-life
+  // findings and therefore do not increase the problem count.
+  positions += Array.isArray(snapshot.salesOnlyRows) ? snapshot.salesOnlyRows.length : 0;
   return { positions, problems };
 }
 async function openDayModal(day) {
@@ -4591,6 +4602,21 @@ function openCheckDetails(snapshot) {
       '<div class="sheet-section">' +
         '<div class="sheet-section-header"><h2>По категориям</h2></div>' +
         '<div class="sheet-section-body">' + catRows + '</div>' +
+      '</div>';
+  }
+
+  const salesOnlyRows = Array.isArray(snapshot.salesOnlyRows) ? snapshot.salesOnlyRows : [];
+  if (salesOnlyRows.length) {
+    const salesOnlyHtml = salesOnlyRows.map(item =>
+      '<div class="sheet-pos-row">' +
+        '<span class="sheet-pos-name">' + escapeHtml(item.name || 'Без названия') + '</span>' +
+        '<span class="sheet-pos-val">Продажи: ' + escapeHtml(String(item.sales || 0)) + ' · остаток не проверяется</span>' +
+      '</div>'
+    ).join('');
+    html +=
+      '<div class="sheet-section">' +
+        '<div class="sheet-section-header"><h2>Только продажи · без категории</h2></div>' +
+        '<div class="sheet-section-body">' + salesOnlyHtml + '</div>' +
       '</div>';
   }
 
