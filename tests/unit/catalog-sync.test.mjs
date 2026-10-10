@@ -34,7 +34,7 @@ test('remote catalog rejects missing, malformed and empty product payloads', () 
   assert.equal(validate(null).ok, false);
   assert.equal(validate({ products: {} }).reason, 'invalid-products');
   assert.equal(validate({ products: [] }).reason, 'empty-products');
-  assert.equal(validate({ products: [{ name: '' }] }).reason, 'empty-products');
+  assert.equal(validate({ products: [{ name: '' }] }).reason, 'invalid-product-row');
 });
 
 test('remote catalog rejects malformed optional sections before applying any section', () => {
