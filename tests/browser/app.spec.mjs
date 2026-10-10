@@ -2016,6 +2016,33 @@ test('history snapshot is independent of active category filter and keeps sales-
   expect(result.totals.positions).toBe(2);
 });
 
+test('history snapshot and details preserve sales-only rows without a category', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Продажа без категории', salesOnly:true, stock:null, sales:3,
+      shelfLife:null, category:null, incoming:[], _checkDate:'2026-10-08'
+    }];
+    const snapshot = buildCheckSnapshot();
+    const counts = countCheckProblems(snapshot);
+    openCheckDetails(snapshot);
+    return {
+      salesOnlyRows:snapshot.salesOnlyRows,
+      totals:snapshot.totals,
+      counts,
+      details:$('cdModalBody')?.textContent || ''
+    };
+  });
+  expect(result.salesOnlyRows).toEqual([{
+    name:'Продажа без категории', sales:3, salesOnly:true, category:null
+  }]);
+  expect(result.totals.positions).toBe(1);
+  expect(result.counts).toEqual({positions:1,problems:0});
+  expect(result.details).toContain('Продажа без категории');
+  expect(result.details).toContain('Продажи: 3');
+  expect(result.details).toContain('остаток не проверяется');
+});
+
 test('final report explicitly separates sales-only rows from auditable positions', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-08T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
