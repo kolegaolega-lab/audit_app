@@ -6713,7 +6713,9 @@ function buildSeparatedOCRPrompt(checkDate,type){
       "Цена, сумма, НДС и другие денежные показатели НЕ нужны, НЕ включай их в JSON и никогда не используй их как количество.",
       "Не вычисляй quantity через цену или сумму.",
       "Не включай printed_total: общий итог не нужен для аудита.",
-      "last_line_number = максимальный номер строки этой накладной.",
+      "last_line_number = максимальный номер строки накладной, видимый на всех её страницах; обязательно сверь его с номерами строк в items.",
+      "Перед возвратом JSON проверь: last_line_number должен быть не меньше максимального items[].line. Если в items есть строка 22, запрещено возвращать last_line_number=21; поставь не меньше 22.",
+      "Не считай последнюю строку по количеству распознанных товаров и не угадывай по числу позиций: используй напечатанный номер последней строки на документе и проверь согласованность с items[].line.",
       "Если строка нечитабельна, не заменяй её похожей цифрой или нулём.",
       "Верни invoices с number/date/continuation/last_line_number/items и пустой sales[].",
       "JSON без CSV, markdown и текста вне JSON.",
@@ -9449,13 +9451,13 @@ function cmpRunCompare() {
     const aName = String(m.row?.name || '').trim();
     const bName = String(m.candidate?.name || '').trim();
     if (aName && bName) {
-      catalogDetailParts.push('Возможное совпадение: <b>' + escapeHtml(aName) + '</b> ↔ <b>' + escapeHtml(bName) + '</b>');
+      catalogDetailParts.push('Возможное совпадение: ' + aName + ' ↔ ' + bName);
     }
   });
   notFound.forEach(x => {
     const n = cmpCanonicalName(x.name);
     if (catalogPairKeys.has(n)) return;
-    catalogDetailParts.push('<b>' + escapeHtml(x.name) + '</b> (' + x.runs.join(', ') + ')');
+    catalogDetailParts.push(x.name + ' (' + x.runs.join(', ') + ')');
   });
   checks.push({
     ok: notFound.length === 0,
@@ -9464,7 +9466,7 @@ function cmpRunCompare() {
     detail: notFound.length === 0
       ? 'Все позиции из обоих результатов есть в справочнике.'
       : catalogDetailParts.join(' · ') +
-        '<br><span class="cmp-detail">Это не ошибка OCR и не блокирует применение. Проверьте справочник, если позиция действительно должна быть в текущей категории.</span>'
+        ' — это не ошибка OCR и не блокирует применение. Проверьте справочник, если позиция действительно должна быть в текущей категории.'
   });
 
   _cmpEditKey = null;
