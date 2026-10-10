@@ -7504,14 +7504,40 @@ function getOCRSafetyIssues(text,report,count){
   const invoices = Array.isArray(d.invoices) ? d.invoices : [];
   const sales = Array.isArray(d.sales) ? d.sales : [];
   const knownInvoiceDates = new Map();
+  let activeInvoiceDate = '';
+  const missingInvoiceDates = [];
   invoices.forEach(inv => {
     const num = String(inv?.number || '').trim();
-    if (num && !inv?.continuation && isoDate(inv?.date)) knownInvoiceDates.set(num, String(inv.date).trim());
-  });
-  const missingInvoiceDates = invoices.filter(inv => {
-    if (isoDate(inv?.date)) return false;
-    const num = String(inv?.number || '').trim();
-    return !(inv?.continuation && num && knownInvoiceDates.has(num));
+    const rawDate = String(inv?.date || '').trim();
+    const hasDate = !!rawDate && isoDate(rawDate);
+    if (hasDate) {
+      const parsedDate = parseDateRu(rawDate, new Date());
+      const normalizedDate = parsedDate instanceof Date
+        ? (isNaN(parsedDate.getTime()) ? '' : [
+            parsedDate.getFullYear(),
+            String(parsedDate.getMonth() + 1).padStart(2, '0'),
+            String(parsedDate.getDate()).padStart(2, '0')
+          ].join('-'))
+        : String(parsedDate || '').trim();
+      if (normalizedDate) {
+        activeInvoiceDate = normalizedDate;
+        if (num && !inv?.continuation) knownInvoiceDates.set(num, normalizedDate);
+      }
+      return;
+    }
+    // Страница-продолжение без даты (и даже без номера) наследует дату
+    // последней явно датированной накладной. Без предыдущей даты блокируем.
+    if (inv?.continuation) {
+      const inheritedDate = (num && knownInvoiceDates.get(num)) || activeInvoiceDate;
+      if (!inheritedDate) missingInvoiceDates.push(inv);
+      else {
+        activeInvoiceDate = inheritedDate;
+        if (num) knownInvoiceDates.set(num, inheritedDate);
+      }
+      return;
+    }
+    missingInvoiceDates.push(inv);
+    activeInvoiceDate = '';
   });
   if (missingInvoiceDates.length) out.push({code:"invoice-date-review",title:"Есть накладные без подтверждённой даты"});
   if (isoDate(d.check_date)) {
