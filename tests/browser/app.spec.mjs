@@ -2465,3 +2465,29 @@ test('comparison safety details render OCR-provided HTML as text, not markup', a
   expect(result.executed).toBe(false);
   expect(result.text).toContain('<img src="x" onerror="window.__auditXss = true">');
 });
+
+test('Gemini model discovery progress treats remote model IDs as text', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(async () => {
+    window.setGeminiKey('test-key');
+    const payload = '</option><option value="evil">Injected option</option><option>';
+    let release;
+    window.discoverGeminiModels = async (_key, onProgress) => {
+      onProgress(1, 1, payload);
+      await new Promise(resolve => { release = resolve; });
+      return [{ id:'gemini-3.1-flash-lite', displayName:'' }];
+    };
+    const pending = window.refreshModelSelect(true);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    const select = document.getElementById('geminiModelSelect');
+    const duringProgress = {
+      optionCount: select.options.length,
+      text: select.textContent
+    };
+    release();
+    await pending;
+    return duringProgress;
+  });
+  expect(result.optionCount).toBe(1);
+  expect(result.text).toContain('</option><option value="evil">Injected option</option><option>');
+});
