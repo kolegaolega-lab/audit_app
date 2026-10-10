@@ -5171,7 +5171,7 @@ function renderTable() {
       dates.forEach(d => {
         const td = document.createElement('td');
         td.className = 'income-cell num-cell';
-        const party = (row.incoming || []).find(p => p.date === d);
+        let party = (row.incoming || []).find(p => p.date === d);
         if (row.salesOnly) {
           const span = document.createElement('span'); span.className = 'num-disabled'; span.textContent = '—'; td.appendChild(span);
         } else {
@@ -5179,7 +5179,8 @@ function renderTable() {
             value: party ? party.qty : 0,
             onInput: (cleaned) => {
               const newQty = cleaned === '' ? 0 : clampNum(cleaned, 0, MAX_NUM, 0);
-              if (party) party.qty = newQty; else row.incoming.push({ date: d, qty: newQty, _originalQty: 0 });
+              if (party) party.qty = newQty;
+              else { party = { date: d, qty: newQty, _originalQty: 0 }; row.incoming.push(party); }
               markEdited(td, party, newQty);
               refreshRow(row, tr); scheduleSessionSave(); scheduleCardsSync();
             }
@@ -5448,13 +5449,14 @@ function renderCards() {
         original: row._originalSales
       })));
       dates.forEach(d => {
-        const party = (row.incoming || []).find(p => p.date === d);
+        let party = (row.incoming || []).find(p => p.date === d);
         scroll.appendChild(buildCardCell(fmtDateRuShort(d), buildCardInput(row, {
           value: party ? party.qty : 0,
           isEdited: () => party && party._originalQty != null && party._originalQty !== party.qty,
           onChange: v => {
             const newQty = v === '' ? 0 : clampNum(v, 0, MAX_NUM, 0);
-            if (party) party.qty = newQty; else row.incoming.push({ date: d, qty: newQty, _originalQty: 0 });
+            if (party) party.qty = newQty;
+              else { party = { date: d, qty: newQty, _originalQty: 0 }; row.incoming.push(party); }
             refreshCardRow(row, card); scheduleSessionSave();
           },
           onReset: () => {
