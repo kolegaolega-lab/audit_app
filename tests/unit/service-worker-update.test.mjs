@@ -4,14 +4,14 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const html = fs.readFileSync(new URL('../../index.html', import.meta.url), 'utf8');
-const script = (html.match(/<script[^>]*>[\\s\\S]*?<\\/script>/gi) || [])
-  .map(s => s.replace(/^<script[^>]*>|<\\/script>$/gi, '')).join('\\n');
+const script = (html.match(/<script[^>]*>[\s\S]*?<\/script>/gi) || [])
+  .map(s => s.replace(/^<script[^>]*>|<\/script>$/gi, '')).join('\n');
 
 function extractFunction(name) {
-  const start = new RegExp('function\\\\s+' + name + '\\\\s*\\\\([^)]*\\\\)\\\\s*\\\\{', 'm').exec(script);
+  const start = new RegExp('function\\s+' + name + '\\s*\\([^)]*\\)\\s*\\{', 'm').exec(script);
   assert.ok(start, 'missing function: ' + name);
   const from = start.index + start[0].length;
-  const next = script.slice(from).search(/\\nfunction\\s+[A-Za-z_$][\\w$]*\\s*\\(/);
+  const next = script.slice(from).search(/\nfunction\s+[A-Za-z_$][\w$]*\s*\(/);
   return next < 0 ? script.slice(start.index) : script.slice(start.index, from + next);
 }
 
@@ -46,7 +46,7 @@ test('service worker lifecycle activates waiting updates and reloads after the f
     },
     console: { warn() {} }
   };
-  vm.runInNewContext(extractFunction('initSW') + '\\ninitSW();', context);
+  vm.runInNewContext(extractFunction('initSW') + '\ninitSW();', context);
   windowListeners.load();
   await Promise.resolve();
   await Promise.resolve();
