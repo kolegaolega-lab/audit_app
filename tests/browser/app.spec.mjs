@@ -2343,3 +2343,30 @@ test('card refresh preserves missing-incoming warning after manual stock edit', 
   expect(result.warningAfterEdit).toContain('нет — просрочка, проверить с персоналом');
   expect(result.salesOnlyText).not.toContain('нет — просрочка, проверить с персоналом');
 });
+
+
+test('card warning matches report rule when no incoming and no stock or sales', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    const row = {
+      name:'Товар без движения', salesOnly:false, stock:0, sales:0,
+      shelfLife:24, category:'desserts', incoming:[], _checkDate:'2026-10-10'
+    };
+    tableRows = [row];
+    const card = document.createElement('div');
+    card.className = 'card';
+    const resultNode = document.createElement('div');
+    resultNode.dataset.role = 'cardResult';
+    card.appendChild(resultNode);
+    document.querySelector('#cardsView')?.appendChild(card);
+    if (!document.querySelector('#cardsView')) document.body.appendChild(card);
+
+    updateCardResults();
+    const initialText = resultNode.textContent;
+    refreshCardRow(row, card);
+    const refreshedText = resultNode.textContent;
+    return {initialText, refreshedText};
+  });
+  expect(result.initialText).not.toContain('нет — просрочка, проверить с персоналом');
+  expect(result.refreshedText).not.toContain('нет — просрочка, проверить с персоналом');
+});
