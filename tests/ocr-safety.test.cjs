@@ -455,3 +455,22 @@ test('OCR safety does not duplicate handwritten confirmation when quantity statu
   assert.equal(issues.filter(x => x.code === 'quantity-status-review').length, 1);
   assert.equal(issues.filter(x => x.code === 'handwritten-confirmation').length, 0);
 });
+
+
+test('applying OCR comparison edits synchronizes corrected quantities into result JSON and AI report', () => {
+  const syncStart = html.indexOf('function cmpSyncAppliedCorrectionsToOCR()');
+  const syncEnd = html.indexOf('function cmpApplyMatched()', syncStart);
+  assert.ok(syncStart >= 0 && syncEnd > syncStart);
+  const sync = html.slice(syncStart, syncEnd);
+  assert.match(sync, /item\.quantity = edit\.quantity/);
+  assert.match(sync, /item\.quantity_status = 'confirmed'/);
+  assert.match(sync, /data\.review\.handwritten_confirmation = data\.review\.handwritten_confirmation\.filter/);
+  assert.match(sync, /_lastGeminiJsons = \{ first, second \}/);
+  assert.match(sync, /jsonInput\.value = first/);
+  assert.match(sync, /report\.invoiceJson = updateJson\(report\.invoiceJson\)/);
+  assert.match(sync, /persistAIReport\(report\)/);
+  const applyStart = html.indexOf('function cmpApplyMatched()');
+  const syncCall = html.indexOf('cmpSyncAppliedCorrectionsToOCR();', applyStart);
+  const renderCall = html.indexOf('renderTable();', applyStart);
+  assert.ok(syncCall > applyStart && renderCall > syncCall, 'sync must run when comparison is applied');
+});
