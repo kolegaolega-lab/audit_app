@@ -2140,7 +2140,7 @@ function normalizeName(s) {
     .replace(/[\u2010-\u2015\u2212]/g, '-')
     .replace(/-/g, ' ')
     // OCR may use slash or spaces for the same product-name separator.
-    .replace(/\\s*\\/\\s*/g, ' ')
+    .replace(/\s*\/\s*/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
