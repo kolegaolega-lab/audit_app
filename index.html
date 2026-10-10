@@ -2087,7 +2087,7 @@ function daysToHours(days) {
 }
 function formatDays(hours) {
   const d = hoursToDays(hours);
-  if (d === 0) return '0';
+  if (d <= 0) return '';
   if (Number.isInteger(d)) return String(d);
   return '';
 }
@@ -2348,11 +2348,9 @@ function sanitizeProducts(arr) {
     const key = normalizeName(name);
     if (seen.has(key)) continue;
     seen.add(key);
-    let shelf;
-    const rawShelf = Number(p.shelfLife);
-    if (p.shelfLife === 0 || rawShelf === 0) shelf = 0;
-    else if (Number.isFinite(rawShelf) && rawShelf > 0) shelf = clampNum(rawShelf, 1, MAX_SHELF_HOURS, null);
-    else shelf = null;
+    let shelf = null;
+    const rawShelf = p.shelfLife == null || p.shelfLife === '' ? NaN : Number(p.shelfLife);
+    if (Number.isFinite(rawShelf) && rawShelf > 0) shelf = clampNum(rawShelf, 1, MAX_SHELF_HOURS, null);
     const category = isValidCategory(p.category) ? p.category : null;
     out.push({ name, shelfLife: shelf, category });
   }
@@ -5480,7 +5478,7 @@ function renderUnknownModal() {
 
     const hoursWrap = document.createElement('div');
     hoursWrap.className = 'unk-hours';
-    const hInp = makeNumInput({ className: 'pill center', value: r.shelfLife && r.shelfLife > 0 ? r.shelfLife : 0 });
+    const hInp = makeNumInput({ className: 'pill center', value: r.shelfLife && r.shelfLife > 0 ? r.shelfLife : '' });
     hInp.dataset.role = 'shelfHours';
     hInp.addEventListener('click', e => e.stopPropagation());
     hInp.addEventListener('focus', e => e.stopPropagation());
@@ -5572,7 +5570,8 @@ function addSelectedUnknown() {
     if (!name) return;
     if (PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) return;
     const hInp = item.querySelector('input[data-role="shelfHours"]');
-    const hours = clampNum(hInp ? (onlyDigits(hInp.value) || '0') : 0, 0, MAX_SHELF_HOURS, 0);
+    const rawHours = hInp ? Number(onlyDigits(hInp.value) || '0') : 0;
+    const hours = Number.isFinite(rawHours) && rawHours > 0 ? clampNum(rawHours, 1, MAX_SHELF_HOURS, null) : null;
     toAdd.push({ name, hours });
   });
   if (!toAdd.length) { showToast('Ничего не выбрано'); return; }
@@ -5770,7 +5769,7 @@ function renderCatalogList() {
     const hoursInput = document.createElement('input');
     hoursInput.type = 'text'; hoursInput.className = 'pill center';
     hoursInput.inputMode = 'numeric'; hoursInput.pattern = '[0-9]*';
-    hoursInput.value = String(p.shelfLife); hoursInput.placeholder = '0'; hoursInput.maxLength = 3;
+    hoursInput.value = p.shelfLife != null && Number(p.shelfLife) > 0 ? String(p.shelfLife) : ''; hoursInput.placeholder = '—'; hoursInput.maxLength = 3;
     hoursInput.readOnly = _catalogSelectMode || _catalogReadOnly;
     hoursWrap.appendChild(hoursInput);
     const hoursUnit = document.createElement('span'); hoursUnit.className = 'unit'; hoursUnit.textContent = 'ч';
@@ -5783,12 +5782,14 @@ function renderCatalogList() {
     hoursInput.addEventListener('change', () => {
       if (_catalogSelectMode) return;
       const cleaned = onlyDigits(hoursInput.value);
-      let v;
-      if (cleaned === '') v = 0;
-      else { const n = Number(cleaned); if (!isFinite(n) || n === 0) v = 0; else v = clampNum(n, 1, MAX_SHELF_HOURS, 48); }
+      let v = null;
+      if (cleaned !== '') {
+        const n = Number(cleaned);
+        if (Number.isFinite(n) && n > 0) v = clampNum(n, 1, MAX_SHELF_HOURS, null);
+      }
       if (cleaned !== '' && Number(cleaned) > MAX_SHELF_HOURS) showToast(`Максимум ${MAX_SHELF_HOURS} ч (${MAX_SHELF_DAYS} суток)`);
       PRODUCTS[p._idx].shelfLife = v;
-      hoursInput.value = String(v);
+      hoursInput.value = v == null ? '' : String(v);
       daysInput.value = formatDays(v);
       tableRows.forEach(r => { if (r.name === PRODUCTS[p._idx].name) r.shelfLife = v; });
       saveCatalog(); scheduleSessionSave();
@@ -5821,9 +5822,9 @@ function renderCatalogList() {
         daysInput.value = formatDays(oldHours);
         return;
       }
-      const hours = clampNum(hoursRaw, 0, MAX_SHELF_HOURS, 0);
+      const hours = hoursRaw > 0 ? clampNum(hoursRaw, 1, MAX_SHELF_HOURS, null) : null;
       PRODUCTS[p._idx].shelfLife = hours;
-      hoursInput.value = String(hours);
+      hoursInput.value = hours == null ? '' : String(hours);
       daysInput.value = formatDays(hours);
       tableRows.forEach(r => { if (r.name === PRODUCTS[p._idx].name) r.shelfLife = hours; });
       saveCatalog(); scheduleSessionSave();
@@ -6013,7 +6014,7 @@ function ignoredToCatalog() {
   });
   returned.forEach(name => {
     if (!PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) {
-      PRODUCTS.push({ name, shelfLife: 0, category: null });
+      PRODUCTS.push({ name, shelfLife: null, category: null });
     }
   });
   saveIgnored(); saveCatalog();
@@ -8124,7 +8125,7 @@ function getFinishCheckIssues() {
   const rows = Array.isArray(tableRows) ? tableRows : [];
   const auditable = rows.filter(r => !r.salesOnly);
   const missingStock = auditable.filter(r => r.stock == null);
-  const missingShelfLife = auditable.filter(r => r.shelfLife == null);
+  const missingShelfLife = auditable.filter(r => r.shelfLife == null || !Number.isFinite(Number(r.shelfLife)) || Number(r.shelfLife) <= 0);
   const unknownCount = Array.isArray(unknownRows) ? unknownRows.length : 0;
   const noCategoryCount = Array.isArray(noCategoryRows) ? noCategoryRows.length : 0;
 
@@ -9687,7 +9688,7 @@ function cmpApplyMatched() {
       incomingArr.push({ date: iso, qty: incoming[dk] || 0 });
     });
     newUnknown.push({
-      name: r.name, sales: sales, shelfLife: 0, category: null,
+      name: r.name, sales: sales, shelfLife: null, category: null,
       incoming: incomingArr, salesOnly: false
     });
   });
@@ -10313,8 +10314,8 @@ function bindUI() {
     let hours;
     if (daysVal > 0) hours = daysToHours(daysVal);
     else if (hoursVal > 0) hours = clampNum(hoursVal, 1, MAX_SHELF_HOURS, 0);
-    else hours = 0;
-    if (hours > MAX_SHELF_HOURS) { showToast(`Максимум ${MAX_SHELF_DAYS} суток (${MAX_SHELF_HOURS} часов)`); return; }
+    else hours = null;
+    if (hours != null && hours > MAX_SHELF_HOURS) { showToast(`Максимум ${MAX_SHELF_DAYS} суток (${MAX_SHELF_HOURS} часов)`); return; }
     if (!name) { alert('Введите название.'); return; }
     if (PRODUCTS.some(p => normalizeName(p.name) === normalizeName(name))) { alert('Такая позиция уже есть.'); return; }
     if (PRODUCTS.length >= MAX_CATALOG) { alert('Справочник переполнен.'); return; }
@@ -10322,8 +10323,8 @@ function bindUI() {
     PRODUCTS.push({ name, shelfLife: hours, category: newCat });
     saveCatalog();
     if (nameEl) nameEl.value = '';
-    if (hoursEl) hoursEl.value = '0';
-    if (daysEl) daysEl.value = '0';
+    if (hoursEl) hoursEl.value = '';
+    if (daysEl) daysEl.value = '';
     renderCatalogList();
     showToast(`Добавлено: ${name}`);
   };
@@ -10335,7 +10336,7 @@ function bindUI() {
       if (cleaned !== newProdHours.value) newProdHours.value = cleaned;
       const h = Number(cleaned || '0');
       if (h > 0 && newProdDays) newProdDays.value = formatDays(h);
-      else if (newProdDays) newProdDays.value = '0';
+      else if (newProdDays) newProdDays.value = '';
     });
   }
   if (newProdDays) {
