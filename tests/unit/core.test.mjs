@@ -42,7 +42,7 @@ test('FIFO uses the original saved audit time after a later session restore',()=
 });
 test('session save and restore preserve the check moment used by FIFO',()=>{
   assert.match(html,/checkMoment:\s*\(\(\)\s*=>/);
-  assert.match(html,/_checkMoment:\s*Number\.isFinite\(Number\(data\.checkMoment\)\)/);
+  assert.match(html,/_checkMoment:\s*typeof data\.checkMoment === 'number'//);
   assert.match(html,/r\._checkMoment\s*=\s*checkMoment/);
 });
 test('future-only incoming cannot make stock fresh',()=>{const r=f.computeFIFO({stock:2,sales:1,shelfLife:24,incoming:[{date:'2026-10-07',qty:5}],_checkDate:'2026-10-06'});assert.deepEqual(r,{soldExpired:1,expiredOnShelf:2,freshOnShelf:0,freshSold:0});});
