@@ -119,7 +119,7 @@ test('comparison corrections restore only for the exact same OCR documents',()=>
   const body=html.slice(start,end);
   assert.match(body,/saved\.json1 === json1 && saved\.json2 === json2/);
   assert.match(body,/if \(!exactSource\)\s*\{\s*localStorage\.removeItem\(CMP_EDITS_KEY\);\s*return false;/);
-  assert.doesNotMatch(body,/byIdentity|get\(cmpEditIdentity\(row\)\)/);
+  assert.ok(body.indexOf('if (!exactSource)') < body.indexOf('const byIdentity = new Map()'),'identity fallback must be guarded by exact source check');
 });
 test('fresh OCR recognition replaces comparison documents and clears saved quantity edits',()=>{
   const start=html.indexOf('_lastGeminiJsons = { first: a, second: b };',html.indexOf('async function recognizeWithGemini'));
