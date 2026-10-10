@@ -10803,16 +10803,41 @@ function initLogoFallback() {
 }
 function initSW() {
   if (!('serviceWorker' in navigator)) return;
+
+  // Keep this flag live: a page opened before the first SW install must still
+  // reload when a later update takes control.
+  let hasControlledPage = !!navigator.serviceWorker.controller;
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hasControlledPage) {
+      hasControlledPage = true;
+      return;
+    }
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+
+  const activateWaitingWorker = registration => {
+    if (registration && registration.waiting && navigator.serviceWorker.controller) {
+      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    }
+  };
+
   window.addEventListener('load', () => {
-    const hadController = !!navigator.serviceWorker.controller;
-    navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW registration failed:', err));
-    let refreshing = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (refreshing) return;
-      refreshing = true;
-      if (!hadController) return;
-      window.location.reload();
-    });
+    navigator.serviceWorker.register('sw.js').then(registration => {
+      activateWaitingWorker(registration);
+      registration.addEventListener('updatefound', () => {
+        const installing = registration.installing;
+        if (!installing) return;
+        installing.addEventListener('statechange', () => {
+          if (installing.state === 'installed') activateWaitingWorker(registration);
+        });
+      });
+      if (typeof registration.update === 'function') {
+        registration.update().catch(err => console.warn('SW update check failed:', err));
+      }
+    }).catch(err => console.warn('SW registration failed:', err));
   });
 }
 function init() {
