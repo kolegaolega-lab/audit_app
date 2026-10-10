@@ -328,6 +328,13 @@ test('OCR safety blocks future audit and invoice dates', () => {
   const futureAuditCodes = context.getOCRSafetyIssues(futureAudit, reportFor(futureAudit), 2).map(x => x.code);
   assert.ok(futureAuditCodes.includes('future-check-date'));
 
+  // Dates entered in Russian format must be normalized before the future-date
+  // comparison; a lexical comparison of "08.10.2026" and "2026-10-07"
+  // incorrectly lets the future audit date through.
+  const futureRussianAudit = validJson({ check_date: '08.10.2026' });
+  const futureRussianAuditCodes = context.getOCRSafetyIssues(futureRussianAudit, reportFor(futureRussianAudit), 2).map(x => x.code);
+  assert.ok(futureRussianAuditCodes.includes('future-check-date'));
+
   const futureInvoice = validJson({
     invoices: [{
       number: '123', date: '2026-10-07', continuation: false, last_line_number: 1,
