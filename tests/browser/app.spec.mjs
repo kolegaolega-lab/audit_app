@@ -2450,9 +2450,9 @@ test('card warning matches report rule when no incoming and no stock or sales', 
 test('comparison safety details render OCR-provided HTML as text, not markup', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
-    const target = document.createElement('div');
-    target.id = 'cmpCheckResults';
-    document.body.appendChild(target);
+    const target = document.getElementById('cmpCheckResults');
+    if (!target) throw new Error('comparison safety result container is missing');
+    target.innerHTML = '';
     const payload = '<img src="x" onerror="window.__auditXss = true">';
     window.cmpRenderChecks([{ ok:false, title:'OCR warning', detail:payload }]);
     return {
