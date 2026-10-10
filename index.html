@@ -2535,7 +2535,7 @@ function deletePrice(name) {
 /* ═══════════════════════════════════════════
    FIFO / СРОКИ
    ═══════════════════════════════════════════ */
-function getCheckMoment(referenceDate) {
+function getCheckMoment(referenceDate, storedMoment) {
   const now = new Date();
   const s = String(referenceDate || '').trim();
   const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -2544,9 +2544,12 @@ function getCheckMoment(referenceDate) {
   if (d.getFullYear() !== Number(m[1]) || d.getMonth() !== Number(m[2]) - 1 || d.getDate() !== Number(m[3])) {
     return now;
   }
-  // JSON содержит дату аудита, но не время. Сохраняем фактическое время проверки,
-  // заменяя только календарную дату на check_date из JSON.
-  d.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+
+  // Сохраняем время самой проверки в сессии. Если проверяется историческая дата,
+  // переносим сохранённое время суток на check_date, а не берём часы повторного открытия.
+  const saved = storedMoment == null || storedMoment === '' ? null : new Date(Number(storedMoment));
+  const timeSource = saved && Number.isFinite(saved.getTime()) ? saved : now;
+  d.setHours(timeSource.getHours(), timeSource.getMinutes(), timeSource.getSeconds(), timeSource.getMilliseconds());
   return d;
 }
 function getWriteOffMoment(partyDate, shelfLife) {
@@ -2643,7 +2646,7 @@ function computeFIFO(row) {
   const sales = clampNum(row.sales, 0, MAX_NUM, 0);
   const shelfLife = Number(row.shelfLife);
   if (!Number.isFinite(shelfLife) || shelfLife <= 0 || shelfLife > 10000) return emptyResult();
-  const moment = getCheckMoment(row._checkDate);
+  const moment = getCheckMoment(row._checkDate, row._checkMoment);
 
   const toDayKey = value => {
     if (value && typeof value.getTime === 'function' && !isNaN(value.getTime())) {
@@ -3238,6 +3241,10 @@ function saveSession() {
       noCategory: noCategoryRows.slice(0, MAX_ROWS).map(r => ({ name: r.name })),
       needsCheck: [..._needsCheckNames].slice(0, MAX_ROWS),
       comparisonPending: !!(_cmpData && _cmpData.comparisonValid === false),
+      checkMoment: (() => {
+        const r = tableRows.find(x => x && Number.isFinite(Number(x._checkMoment)));
+        return r ? Number(r._checkMoment) : null;
+      })(),
       checkDate: (() => {
         const r = tableRows.find(x => x && /^\d{4}-\d{2}-\d{2}$/.test(String(x._checkDate || '')));
         return r ? String(r._checkDate) : '';
@@ -3297,7 +3304,8 @@ function applySession(data) {
             return { date: typeof p.date === 'string' ? p.date : '', qty, _originalQty: orig };
           }).filter(p => /^\d{4}-\d{2}-\d{2}$/.test(p.date) && parseDateRu(p.date, new Date()) === p.date) : [],
           salesOnly: !!r.salesOnly,
-          _checkDate: data.checkDate
+          _checkDate: data.checkDate,
+          _checkMoment: Number.isFinite(Number(data.checkMoment)) ? Number(data.checkMoment) : null
         };
       }).filter(r => r.name);
     } else tableRows = [];
@@ -6290,7 +6298,8 @@ async function applyJSON() {
     const reference = new Date();
     const { rows, truncated, json } = parseJSON(text, reference);
     const checkDate = String(json?.check_date || '').trim();
-    rows.forEach(r => { r._checkDate = checkDate; });
+    const checkMoment = Date.now();
+    rows.forEach(r => { r._checkDate = checkDate; r._checkMoment = checkMoment; });
     if (!rows.length) throw new Error('Не удалось распознать строки.');
     if (myToken !== resetToken) return false;
 
@@ -7574,7 +7583,7 @@ function hasUsableIncomingForAudit(row) {
   const checkKey = typeof checkDay === 'string'
     ? checkDay
     : [checkDay.getFullYear(), String(checkDay.getMonth() + 1).padStart(2, '0'), String(checkDay.getDate()).padStart(2, '0')].join('-');
-  const checkMoment = getCheckMoment(checkKey);
+  const checkMoment = getCheckMoment(checkKey, row._checkMoment);
   return row.incoming.some(p => {
     if (!p || Number(p.qty) <= 0 || !/^\d{4}-\d{2}-\d{2}$/.test(String(p.date || ''))) return false;
     // p.date уже прошла строгую ISO-проверку выше. Не полагаемся на тип,
