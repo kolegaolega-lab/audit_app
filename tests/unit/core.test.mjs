@@ -43,6 +43,33 @@ test('catalog sanitizer preserves missing shelf life as null and rejects zero as
   const gate=html.slice(gateStart,gateEnd);
   assert.match(gate,/r\.shelfLife == null \|\| !Number\.isFinite\(Number\(r\.shelfLife\)\) \|\| Number\(r\.shelfLife\) <= 0/);
 });
+test('alias chains resolve stale OCR names to canonical products and price lookup normalizes spelling', () => {
+  const products = [
+    {name:'"Чизкейк Чёрная Смородина" пирожное'},
+    {name:'Крем-суп тыквенный на кокосовом молоке'},
+    {name:'Лингвини с жаренными креветками'}
+  ];
+  const aliases = [
+    {alias:'Т "Чизкейк Чёрная смородина" Пирожное (НОВАЯ)',target:'"Чизкейк Чёрная смородина" Пирожное (НОВАЯ)'},
+    {alias:'Чизкейк черная смородина',target:'"Чизкейк Чёрная смородина" Пирожное (НОВАЯ)'},
+    {alias:'Чизкейк Чёрная смородина Пирожное (НОВАЯ)',target:'"Чизкейк Чёрная Смородина" пирожное'},
+    {alias:'Крем суп тыквенный',target:'Т Крем-суп тыквенный на кокосовом молоке'},
+    {alias:'Т Крем-суп тыквенный на кокосовом молоке',target:'Крем-суп тыквенный на кокосовом молоке'}
+  ];
+  const prices = {'Лингвини с жареными креветками':147.54};
+  const priceIndex = new Map([['лингвини с жареными креветками',147.54]]);
+  const source = [
+    extract('normalizeName'), extract('cleanProductName'), extract('findAlias'),
+    extract('applyAliases'), extract('cmpCanonicalName'), extract('getPriceFor')
+  ].join('\\n') + '\\nreturn {applyAliases,getPriceFor};';
+  const api = new Function('ALIASES','PRODUCTS','PRICES','_priceIndex',source)(
+    aliases,products,prices,priceIndex
+  );
+  assert.equal(api.applyAliases('Чизкейк черная смородина'),products[0].name);
+  assert.equal(api.applyAliases('Крем суп тыквенный'),products[1].name);
+  assert.equal(api.getPriceFor('Лингвини с жаренными креветками'),147.54);
+});
+
 test('text normalization',()=>{assert.equal(f.normalizeName('  Пончик   Фисташка '),'пончик фисташка');assert.equal(f.normalizeForSearch('Ёлка'),'елка');assert.equal(f.cleanProductName('  Эклер  '),'Эклер');assert.equal(f.isServiceLine('Накладная №123'),true);assert.equal(f.isServiceLine('Пончик'),false);assert.ok(f.naturalCompare('Товар 2','Товар 10')<0);});
 test('date parsing',()=>{const ref=new Date(2026,9,6);assert.equal(f.parseDateRu('27.09.2026',ref),'2026-09-27');assert.equal(f.parseDateRu('27.09',ref),'2026-09-27');assert.equal(f.inferIsoFromDdmm('05.10',ref),'2026-10-05');});
 test('incoming merge',()=>{assert.deepEqual(f.mergeIncomingByDate([{date:'2026-10-07',qty:2},{date:'2026-10-06',qty:1},{date:'2026-10-07',qty:3}]),[{date:'2026-10-06',qty:1,_originalQty:1},{date:'2026-10-07',qty:5,_originalQty:2}]);});

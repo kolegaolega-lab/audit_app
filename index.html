@@ -2460,12 +2460,36 @@ function updateAliasesCount() {
   const el = $('aliasesCount'); if (el) el.textContent = String(ALIASES.length);
 }
 function findAlias(name) {
-  const key = normalizeName(name);
-  return ALIASES.find(a => normalizeName(a.alias) === key);
+  const key = normalizeName(cleanProductName(name));
+  if (!key) return null;
+  const matches = ALIASES.filter(a => normalizeName(cleanProductName(a.alias)) === key);
+  // Prefer a useful mapping over a stale self-alias when legacy records share
+  // the same normalized alias (common after OCR spelling corrections).
+  return matches.find(a => normalizeName(cleanProductName(a.target)) !== key) || matches[0] || null;
 }
 function applyAliases(name) {
-  const a = findAlias(name);
-  return a ? a.target : name;
+  const original = String(name == null ? '' : name);
+  let current = cleanProductName(original);
+  const seen = new Set();
+  for (let depth = 0; depth < 10; depth++) {
+    const key = normalizeName(current);
+    if (!key) return original;
+    if (seen.has(key)) return original;
+    seen.add(key);
+    const alias = findAlias(current);
+    if (!alias) break;
+    const target = cleanProductName(alias.target);
+    const targetKey = normalizeName(target);
+    if (!targetKey) return original;
+    if (targetKey === key) { current = target; break; }
+    if (seen.has(targetKey)) return original;
+    current = target;
+  }
+  const canonicalKey = normalizeName(cleanProductName(current));
+  const product = Array.isArray(PRODUCTS)
+    ? PRODUCTS.find(p => p && normalizeName(cleanProductName(p.name)) === canonicalKey)
+    : null;
+  return product ? product.name : current || original;
 }
 function addOrUpdateAlias(alias, target) {
   const aliasName = safeStr(alias, MAX_NAME).trim();
@@ -2526,7 +2550,11 @@ function savePrices() {
 function getPriceFor(name) {
   if (!name) return 0;
   if (PRICES[name] != null) return PRICES[name];
-  const key = normalizeName(name);
+  const aliased = typeof applyAliases === 'function' ? applyAliases(name) : name;
+  if (PRICES[aliased] != null) return PRICES[aliased];
+  const key = typeof cmpCanonicalName === 'function'
+    ? cmpCanonicalName(aliased)
+    : normalizeName(aliased);
   if (!key) return 0;
   const v = _priceIndex.get(key);
   return v != null ? v : 0;
