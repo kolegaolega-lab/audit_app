@@ -9634,12 +9634,9 @@ function cmpSyncAppliedCorrectionsToOCR() {
       else if (!invoice?.continuation) activeDate = '';
       const effectiveDate = rawDate || (invoice?.continuation ? activeDate : '');
       const parsedDate = effectiveDate ? parseDateRu(effectiveDate, new Date()) : null;
-      // parseDateRu возвращает Date, а fmtDateRuShort принимает ISO-строку.
-      // Формируем ключ сравнения явно, иначе даты накладных DD.MM.YYYY не совпадают
-      // с ключами дат в сверке и правка остаётся только в карточке товара.
-      const dateKey = parsedDate
-        ? `${String(parsedDate.getDate()).padStart(2, '0')}.${String(parsedDate.getMonth() + 1).padStart(2, '0')}`
-        : '';
+      // parseDateRu возвращает ISO-строку YYYY-MM-DD; преобразуем её
+      // в DD.MM, как представлены ключи дат в сравнении.
+      const dateKey = parsedDate ? fmtDateRuShort(parsedDate) : '';
       (Array.isArray(invoice?.items) ? invoice.items : []).forEach(item => {
         const itemKey = cmpCanonicalName(item?.name || '');
         if (!itemKey || !dateKey) return;
