@@ -13,5 +13,7 @@ jobs:
       - run: npm install
       - run: npx playwright install chromium
       - run: npm run test:all
+      - run: npx playwright install --with-deps webkit
+      - run: npx playwright test tests/browser/mobile-safari.spec.mjs --browser=webkit
       - run: npm run test:inventory
       - run: node --test tests/tools/function-inventory.mjs
