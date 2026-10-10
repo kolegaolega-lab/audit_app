@@ -5636,7 +5636,9 @@ function renderUnknownModal() {
 
     row.addEventListener('click', e => {
       if (e.target.closest('input')) return;
-      const key = cmpCanonicalName(r.name);
+      // Use the same key as renderUnknownModal() and the match-button handler.
+      // cmpCanonicalName() may rewrite aliases, making the selected row impossible to find by its original name.
+      const key = normalizeName(r.name);
       if (unknownSelected.has(key)) { unknownSelected.delete(key); row.classList.remove('selected'); cb.classList.remove('checked'); }
       else { unknownSelected.add(key); row.classList.add('selected'); cb.classList.add('checked'); }
       if (selectedEl) selectedEl.textContent = String(unknownSelected.size);
