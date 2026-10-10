@@ -1889,7 +1889,7 @@ const GITHUB_FILE = 'sync.json';
 // Never rely on the repository default branch (main) for catalog writes.
 const GITHUB_BRANCH = 'fix/fifo-shelf-life';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.24.34';
+const APP_VERSION = 'v9.24.35';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -3128,9 +3128,10 @@ function restoreCatalogBackup() {
     return false;
   }
   const savedAt = Number(backup.savedAt);
+  const hasValidSavedAt = Number.isFinite(savedAt) && savedAt > 0 && savedAt <= 8640000000000000;
   const remote = {
     version: backup.version,
-    updatedAt: Number.isFinite(savedAt) && savedAt > 0 ? new Date(savedAt).toISOString() : '',
+    updatedAt: hasValidSavedAt ? new Date(savedAt).toISOString() : '',
     products: backup.products,
     ignored: backup.ignored,
     aliases: backup.aliases,
@@ -3149,7 +3150,7 @@ function restoreCatalogBackup() {
   }
   if (statusEl) {
     statusEl.className = 'status show ok';
-    statusEl.textContent = `Восстановлена резервная копия от ${Number.isFinite(savedAt) && savedAt > 0 ? formatDateTimeRu(new Date(savedAt).toISOString()) : 'последней публикации'}. Проверьте справочник перед дальнейшей публикацией.`;
+    statusEl.textContent = `Восстановлена резервная копия от ${hasValidSavedAt ? formatDateTimeRu(new Date(savedAt).toISOString()) : 'последней публикации'}. Проверьте справочник перед дальнейшей публикацией.`;
   }
   return true;
 }
