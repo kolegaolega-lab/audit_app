@@ -7483,9 +7483,18 @@ function getOCRSafetyIssues(text,report,count){
     out.push({code:"completeness-mismatch",title:"Не подтверждена обработка всех фотографий"});
   }
 
+  const parsedCheckDate = parseDateRu(String(d.check_date || ''), new Date());
+  const checkDateIso = parsedCheckDate instanceof Date
+    ? (isNaN(parsedCheckDate.getTime()) ? '' : [
+        parsedCheckDate.getFullYear(),
+        String(parsedCheckDate.getMonth() + 1).padStart(2, '0'),
+        String(parsedCheckDate.getDate()).padStart(2, '0')
+      ].join('-'))
+    : (/^\d{4}-\d{2}-\d{2}$/.test(String(parsedCheckDate || '').trim())
+        ? String(parsedCheckDate).trim() : '');
   if (!isoDate(d.check_date)) {
     out.push({code:"invalid-check-date",title:"Некорректная дата проверки"});
-  } else if (String(d.check_date) > getTodayStr()) {
+  } else if (checkDateIso && checkDateIso > getTodayStr()) {
     out.push({code:"future-check-date",title:"Дата проверки указана в будущем"});
   }
   if (!Array.isArray(d.invoices) || !Array.isArray(d.sales)) {
