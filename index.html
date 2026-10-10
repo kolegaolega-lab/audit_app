@@ -9653,6 +9653,27 @@ function cmpApplyMatched() {
     else if (r.b && r.b.salesStatus === 'confirmed') sales = r.b.sales;
     byKey.set(cmpCanonicalName(r.name), { incoming, sales });
   });
+  // Двойная сверка может быть первым шагом аудита: в этом случае applyJSON()
+  // ещё не создавал карточки и tableRows пуст. Создаём строки выбранной категории
+  // из справочника до переноса подтверждённых результатов сверки.
+  if (!Array.isArray(tableRows)) tableRows = [];
+  const existingTableKeys = new Set(tableRows.map(row => cmpCanonicalName(row.name)));
+  getCategoryProducts(_activeCategory).forEach(product => {
+    const key = cmpCanonicalName(product.name);
+    if (!key || existingTableKeys.has(key)) return;
+    tableRows.push({
+      name: product.name,
+      stock: null,
+      sales: 0,
+      _originalSales: 0,
+      shelfLife: product.shelfLife,
+      category: _activeCategory,
+      incoming: [],
+      salesOnly: false
+    });
+    existingTableKeys.add(key);
+  });
+
   let applied = 0;
   const _refDate = new Date();
   tableRows.forEach(row => {
