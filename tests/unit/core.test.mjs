@@ -86,6 +86,12 @@ test('photo storage read failures are surfaced instead of converted to an empty 
   assert.match(html,/shareToAI: photo storage read failed/);
   assert.match(html,/renderPhotoQueue: unable to read photo storage/);
 });
+test('exact duplicate files are checked before every OCR/share path',()=>{
+  assert.match(html,/async function findExactDuplicatePhotoFiles\(items\)/);
+  assert.match(html,/const duplicatePhotos = await findExactDuplicatePhotoFiles\(items\)/);
+  assert.match(html,/const duplicatePhotos = await findExactDuplicatePhotoFiles\(all\)/);
+  assert.match(html,/Удалите дубликаты из списка и запустите распознавание снова/);
+});
 test('future-only incoming cannot make stock fresh',()=>{const r=f.computeFIFO({stock:2,sales:1,shelfLife:24,incoming:[{date:'2026-10-07',qty:5}],_checkDate:'2026-10-06'});assert.deepEqual(r,{soldExpired:1,expiredOnShelf:2,freshOnShelf:0,freshSold:0});});
 test('FIFO 24h stock',()=>{assert.deepEqual(f.computeFIFO({stock:3,sales:0,shelfLife:24,incoming:[{date:'2026-10-06',qty:2}],_checkDate:'2026-10-06'}),{soldExpired:0,expiredOnShelf:1,freshOnShelf:2,freshSold:0});});
 test('FIFO oldest sales first',()=>{const r=f.computeFIFO({stock:0,sales:3,shelfLife:24,incoming:[{date:'2026-10-05',qty:2},{date:'2026-10-06',qty:2}],_checkDate:'2026-10-06'});assert.equal(r.soldExpired,2);assert.equal(r.freshSold,1);});

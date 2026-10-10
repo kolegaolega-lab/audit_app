@@ -7015,13 +7015,18 @@ async function findExactDuplicatePhotoFiles(items) {
   if (!Array.isArray(items) || items.length < 2) return [];
   if (typeof crypto === 'undefined' || !crypto.subtle) return [];
   const seen = new Map(), duplicates = [];
-  for (const item of items) {
-    if (!item || !item.blob || typeof item.blob.arrayBuffer !== 'function') continue;
-    const digest = await crypto.subtle.digest('SHA-256', await item.blob.arrayBuffer());
-    const hash = Array.from(new Uint8Array(digest)).map(x => x.toString(16).padStart(2, '0')).join('');
-    const key = String(item.type || '') + ':' + hash;
-    if (seen.has(key)) duplicates.push({ first: seen.get(key), duplicate: item });
-    else seen.set(key, item);
+  try {
+    for (const item of items) {
+      if (!item || !item.blob || typeof item.blob.arrayBuffer !== 'function') continue;
+      const digest = await crypto.subtle.digest('SHA-256', await item.blob.arrayBuffer());
+      const hash = Array.from(new Uint8Array(digest)).map(x => x.toString(16).padStart(2, '0')).join('');
+      const key = String(item.type || '') + ':' + hash;
+      if (seen.has(key)) duplicates.push({ first: seen.get(key), duplicate: item });
+      else seen.set(key, item);
+    }
+  } catch (e) {
+    console.warn('findExactDuplicatePhotoFiles:', e);
+    return [];
   }
   return duplicates;
 }
@@ -7713,6 +7718,12 @@ async function recognizeWithGemini(){
   try { items = await getPhotos(); }
   catch (e) { console.warn('recognizeWithGemini: photo storage read failed', e); set("err", "Не удалось прочитать загруженные файлы. Перезагрузите приложение и проверьте список файлов."); return; }
   if (!items.length) { set("info", "Сначала загрузите материалы."); return; }
+  const duplicatePhotos = await findExactDuplicatePhotoFiles(items);
+  if (duplicatePhotos.length) {
+    const names = [...new Set(duplicatePhotos.map(x => x.duplicate.name))].slice(0, 3).join(', ');
+    set("warn", `Найдены повторные файлы (${duplicatePhotos.length}). Удалите дубликаты из списка и запустите распознавание снова: ${names}`);
+    return;
+  }
   shareBusy = true;
   setOCRProgress("Распознавание запущено", "Подготавливаю " + items.length + " фото…", 12);
   try {
@@ -7884,6 +7895,12 @@ async function recognizeDaily(){
   catch (e) { console.warn('recognizeDaily: photo storage read failed', e); set("err", "Не удалось прочитать загруженные файлы. Перезагрузите приложение и проверьте список файлов."); return; }
   const inv=all.filter(x=>x.type==="invoice"),sales=all.filter(x=>x.type==="sales");
   if(!inv.length&&!sales.length){set("info","Сначала загрузите фото накладных и чек продаж.");return}
+  const duplicatePhotos = await findExactDuplicatePhotoFiles(all);
+  if (duplicatePhotos.length) {
+    const names = [...new Set(duplicatePhotos.map(x => x.duplicate.name))].slice(0, 3).join(', ');
+    set("warn", `Найдены повторные файлы (${duplicatePhotos.length}). Удалите дубликаты из списка и запустите распознавание снова: ${names}`);
+    return;
+  }
   shareBusy=true;
   setOCRProgress("Распознавание запущено","Подготавливаю накладные и чек продаж…",10);
   try{
@@ -8028,6 +8045,13 @@ async function shareToAI() {
   if (!items.length) {
     const el = $('shareStatus');
     if (el) { el.className = 'status show info'; el.textContent = 'Сначала загрузите материалы.'; }
+    return;
+  }
+  const duplicatePhotos = await findExactDuplicatePhotoFiles(items);
+  if (duplicatePhotos.length) {
+    const names = [...new Set(duplicatePhotos.map(x => x.duplicate.name))].slice(0, 3).join(', ');
+    const el = $('shareStatus');
+    if (el) { el.className = 'status show warn'; el.textContent = `Найдены повторные файлы (${duplicatePhotos.length}). Удалите дубликаты и повторите: ${names}`; }
     return;
   }
   if (!isValidCategory(_activeCategory)) {
