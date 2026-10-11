@@ -5170,6 +5170,9 @@ function makeNumInput(opts) {
 function bindTableInput(inp) {
   inp.addEventListener('click', e => e.stopPropagation());
   inp.addEventListener('focus', e => { e.stopPropagation(); requestAnimationFrame(() => scrollIntoContainer(inp)); });
+  // Не перестраиваем таблицу, пока аудитор редактирует поле: renderTable()
+  // удаляет активный input из DOM и может потерять незавершённый ввод.
+  inp.addEventListener('blur', () => scheduleTableSync());
   inp.addEventListener('keydown', tableKey);
 }
 function createResetIcon() {
@@ -5434,7 +5437,9 @@ function scheduleTableSync() {
   _tableSyncTimer = setTimeout(() => {
     _tableSyncTimer = null;
     if (isRendering) return;
-    if (document.activeElement && document.activeElement.closest('#cardsView')) return;
+    const active = document.activeElement;
+    // Отложенный пересчёт не должен уничтожать поле, в котором сейчас вводят число.
+    if (active && (active.closest('#cardsView') || active.matches('#resultTable input.num'))) return;
     renderTable();
   }, SYNC_DEBOUNCE_MS);
 }
