@@ -722,3 +722,12 @@ test('catalog warnings ignore sales-only rows outside the invoice category', () 
   assert.doesNotMatch(block, /totalQty === 0 && \(row\.sales \|\| 0\) === 0/,
     'sales-only rows must not be considered missing catalog products');
 });
+
+test('every catalog alias points to an existing canonical product name', () => {
+  const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'sync.json'), 'utf8'));
+  const productNames = new Set((catalog.products || []).map(p => String(p.name || '').trim().toLocaleLowerCase('ru')));
+  const unresolved = (catalog.aliases || []).filter(alias =>
+    !productNames.has(String(alias.target || '').trim().toLocaleLowerCase('ru'))
+  );
+  assert.deepEqual(unresolved, [], 'alias targets must resolve to exact catalog product names');
+});
