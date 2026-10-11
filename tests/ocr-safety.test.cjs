@@ -731,3 +731,18 @@ test('every catalog alias points to an existing canonical product name', () => {
   );
   assert.deepEqual(unresolved, [], 'alias targets must resolve to exact catalog product names');
 });
+
+test('table sync does not destroy an actively edited numeric input and schedules refresh on blur', () => {
+  const bindStart = html.indexOf('function bindTableInput(inp)');
+  const bindEnd = html.indexOf('function createResetIcon()', bindStart);
+  assert.ok(bindStart >= 0 && bindEnd > bindStart);
+  const bind = html.slice(bindStart, bindEnd);
+  assert.match(bind, /addEventListener\('blur',\s*\(\)\s*=>\s*scheduleTableSync\(\)\)/);
+  const syncStart = html.indexOf('function scheduleTableSync()');
+  const syncEnd = html.indexOf('function scheduleCardsSync()', syncStart);
+  assert.ok(syncStart >= 0 && syncEnd > syncStart);
+  const sync = html.slice(syncStart, syncEnd);
+  assert.match(sync, /active\.matches\('#resultTable input\.num'\)/);
+  assert.match(sync, /active\.closest\('#cardsView'\)/);
+});
+
