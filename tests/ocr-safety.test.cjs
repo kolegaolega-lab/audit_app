@@ -710,3 +710,15 @@ test('comparison edits restore after a confirmed alias changes the row key', () 
   delete context.localStorage;
   delete context._cmpData;
 });
+
+test('catalog warnings ignore sales-only rows outside the invoice category', () => {
+  const start = html.indexOf('const catalogSet = new Set(PRODUCTS.map(p => cmpCanonicalName(p.name)));');
+  assert.notEqual(start, -1, 'catalog comparison block exists');
+  const end = html.indexOf('const notFound = [...notFoundByRun.values()];', start);
+  assert.notEqual(end, -1, 'catalog comparison block ends');
+  const block = html.slice(start, end);
+  assert.match(block, /if \(totalQty === 0\) continue;/,
+    'rows without invoice receipts must not trigger catalog warnings merely because they have sales');
+  assert.doesNotMatch(block, /totalQty === 0 && \(row\.sales \|\| 0\) === 0/,
+    'sales-only rows must not be considered missing catalog products');
+});
