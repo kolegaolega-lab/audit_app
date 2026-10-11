@@ -9595,7 +9595,10 @@ function cmpRunCompare() {
       const row = data.rows[key];
       const allValues = Object.values(row.incoming);
       const totalQty = allValues.reduce((a, b) => a + b, 0);
-      if (totalQty === 0 && (row.sales || 0) === 0) continue;
+      // Справочник текущей категории проверяем по поступлениям из накладных.
+      // Продажи из iiko могут включать напитки, блюда и другие категории,
+      // которых нет в справочнике выпечки; они не должны создавать ложные предупреждения.
+      if (totalQty === 0) continue;
       const normalized = cmpCanonicalName(row.name);
       if (!catalogSet.has(normalized)) {
         const prev = notFoundByRun.get(normalized);
