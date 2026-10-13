@@ -2591,3 +2591,45 @@ test('Gemini model discovery progress treats remote model IDs as text', async ({
   expect(result.optionCount).toBe(1);
   expect(result.text).toContain('</option><option value="evil">Injected option</option><option>');
 });
+
+test('matching an unknown OCR name merges into the existing canonical audit row without losing edits', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    localStorage.clear();
+    PRODUCTS = [{name:'Эклер малина',shelfLife:48,category:'desserts'}];
+    ALIASES = [];
+    tableRows = [{
+      name:'Эклер малина', stock:4, sales:5, _originalSales:4,
+      shelfLife:48, category:'desserts',
+      incoming:[{date:'2026-10-13',qty:4,_originalQty:3}],
+      salesOnly:false, _checkDate:'2026-10-14'
+    }];
+    unknownRows = [{
+      name:'Эклер малина (накладная)', stock:null, sales:2, _originalSales:2,
+      shelfLife:null, category:null,
+      incoming:[{date:'2026-10-13',qty:2,_originalQty:2}],
+      salesOnly:false, _checkDate:'2026-10-14'
+    }];
+    noCategoryRows = [];
+    _needsCheckNames = new Set();
+    _aliasTargetMode = 'unknown';
+    _aliasTargetForList = ['Эклер малина (накладная)'];
+    handleAliasTargetClick('Эклер малина');
+    return {
+      rows:tableRows.map(r => ({
+        name:r.name, stock:r.stock, sales:r.sales, originalSales:r._originalSales,
+        shelfLife:r.shelfLife, category:r.category,
+        incoming:r.incoming.map(p => ({date:p.date,qty:p.qty,originalQty:p._originalQty}))
+      })),
+      unknown:unknownRows.map(r=>r.name),
+      aliases:ALIASES.map(a=>({alias:a.alias,target:a.target}))
+    };
+  });
+  expect(result.rows).toEqual([{
+    name:'Эклер малина', stock:4, sales:7, originalSales:6,
+    shelfLife:48, category:'desserts',
+    incoming:[{date:'2026-10-13',qty:6,originalQty:5}]
+  }]);
+  expect(result.unknown).toEqual([]);
+  expect(result.aliases).toEqual([{alias:'Эклер малина (накладная)',target:'Эклер малина'}]);
+});
