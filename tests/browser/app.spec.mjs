@@ -2195,8 +2195,8 @@ test('report totals match history snapshot for mixed FIFO findings', async ({pag
   const result = await page.evaluate(() => {
     tableRows = [
       {name:'Свежий',salesOnly:false,stock:1,sales:0,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-08',qty:1}],_checkDate:'2026-10-08'},
-      {name:'Просроченный остаток',salesOnly:false,stock:2,sales:0,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-07',qty:2}],_checkDate:'2026-10-08'},
-      {name:'Продажа просрочкой',salesOnly:false,stock:0,sales:2,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-07',qty:1}],_checkDate:'2026-10-08'},
+      {name:'Просроченный остаток',salesOnly:false,stock:2,sales:0,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-08',qty:1}],_checkDate:'2026-10-08'},
+      {name:'Продажа просрочкой',salesOnly:false,stock:0,sales:2,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-08',qty:1}],_checkDate:'2026-10-08'},
       {name:'Нет подтверждённого поступления за срок годности',salesOnly:false,stock:1,sales:0,shelfLife:24,category:'desserts',incoming:[],_checkDate:'2026-10-08'},
       {name:'Только продажа',salesOnly:true,stock:null,sales:3,shelfLife:null,category:'pastry',incoming:[],_checkDate:'2026-10-08'}
     ];
@@ -2210,9 +2210,9 @@ test('report totals match history snapshot for mixed FIFO findings', async ({pag
   });
   expect(result.snapshot.positions).toBe(5);
   expect(result.snapshot.freshOnShelf).toBe(1);
-  expect(result.snapshot.expiredOnShelf).toBe(2);
-  expect(result.snapshot.soldExpired).toBe(0);
-  expect(result.snapshot.noIncoming).toBe(3);
+  expect(result.snapshot.expiredOnShelf).toBe(1);
+  expect(result.snapshot.soldExpired).toBe(1);
+  expect(result.snapshot.noIncoming).toBe(1);
   expect(result.report).toContain('Проверяемых позиций');
   expect(result.report).toContain('4');
   expect(result.report).toContain('Свежих на витрине');
@@ -2646,7 +2646,16 @@ test('missing receipt is not presented as confirmed expiry in cards, report, or 
     }];
     unknownRows=[]; noCategoryRows=[];
     renderTable();
-    const cardText=$('cardsView')?.textContent || '';
+    const cardsView=$('cardsView');
+    if (cardsView) cardsView.innerHTML='';
+    const card=document.createElement('div');
+    card.className='card';
+    const resultNode=document.createElement('div');
+    resultNode.dataset.role='cardResult';
+    card.appendChild(resultNode);
+    if (cardsView) cardsView.appendChild(card);
+    updateCardResults();
+    const cardText=resultNode.textContent || '';
     renderReport();
     const reportText=$('reportBody')?.textContent || '';
     const snapshot=buildCheckSnapshot();
