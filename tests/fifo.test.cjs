@@ -204,10 +204,11 @@ test('receipt inside shelf-life window is a usable incoming', () => {
 });
 
 
-test('regression: OCR reconciliation excludes names not found in the catalog even when category filtering is disabled', () => {
+test('regression: full OCR diagnostics retain unknown names, but working reconciliation requires a catalog match', () => {
   assert.match(html, /const catalogKey = normalizeName\(cleanProductName\(a\)\)/);
   assert.match(html, /const p = _cmpProductIndexCache\.get\(catalogKey\)/);
-  assert.match(html, /if \(!p \|\| \(applyCategory && \(!_activeCategory \|\| p\.category !== _activeCategory\)\)\) return null;/);
+  assert.match(html, /if \(applyCategory && \(!p \|\| !_activeCategory \|\| p\.category !== _activeCategory\)\) return null;/);
+  assert.match(html, /const d1full = cmpParseJSON\(t1, false\);\s*const d2full = cmpParseJSON\(t2, false\);\s*const d1 = cmpParseJSON\(t1, true, true\);\s*const d2 = cmpParseJSON\(t2, true, true\);/);
 });
 
 test('session persists and restores the audit date used by FIFO', () => {
