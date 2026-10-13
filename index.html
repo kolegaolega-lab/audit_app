@@ -6714,6 +6714,8 @@ async function applyJSON() {
       alreadyKeys.add(key);
     }
     tableRows = sortRowsAlphabetically(otherRows.concat(inCategory));
+    updateAutoDate();
+    updateAutoTime();
     unknownRows = sortRowsAlphabetically(notInCatalog);
     noCategoryRows = noCategory.slice();
 
