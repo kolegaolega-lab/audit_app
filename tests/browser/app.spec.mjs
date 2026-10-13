@@ -2694,7 +2694,7 @@ test('reapplying OCR refreshes existing unknown product quantities instead of ke
     ]}],
     sales:[],review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
   });
-  const result = await page.evaluate(json => {
+  const result = await page.evaluate(async json => {
     PRODUCTS=[];
     ALIASES=[];
     tableRows=[];
@@ -2704,7 +2704,7 @@ test('reapplying OCR refreshes existing unknown product quantities instead of ke
     _activeCategory='desserts';
     $('cmpJson1').value=json;
     $('cmpJson2').value=json;
-    cmpRunCompare();
+    await cmpRunCompare();
     cmpApplyMatched();
     return unknownRows.map(r=>({name:r.name,sales:r.sales,incoming:r.incoming.map(x=>[x.date,x.qty])}));
   }, payload);
