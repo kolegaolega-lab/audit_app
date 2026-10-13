@@ -4039,15 +4039,21 @@ function buildCheckSnapshot() {
       const noIncoming = !r.salesOnly && r.stock != null && !hasUsableIncomingForAudit(r) && (r.stock > 0 || (Number(r.sales) || 0) > 0);
       if (noIncoming) totalNoIncoming++;
       totalPositions++;
-      if (c.freshOnShelf != null) totalFreshOnShelf += c.freshOnShelf;
-      if (c.freshSold != null) totalFreshSold += c.freshSold;
-      if (c.expiredOnShelf != null) totalExpiredOnShelf += c.expiredOnShelf;
-      if (c.soldExpired != null) totalSoldExpired += c.soldExpired;
+      // Без подтверждённого прихода расчёт FIFO не доказывает просрочку:
+      // сохраняем исходные приходы, но не включаем предположительные числа в итоги.
+      if (!noIncoming) {
+        if (c.freshOnShelf != null) totalFreshOnShelf += c.freshOnShelf;
+        if (c.freshSold != null) totalFreshSold += c.freshSold;
+        if (c.expiredOnShelf != null) totalExpiredOnShelf += c.expiredOnShelf;
+        if (c.soldExpired != null) totalSoldExpired += c.soldExpired;
+      }
       return {
         name: r.name, stock: r.stock, sales: r.sales || 0, shelfLife: r.shelfLife,
         category: r.category || null, salesOnly: !!r.salesOnly, incoming, noIncoming,
-        freshOnShelf: c.freshOnShelf, freshSold: c.freshSold,
-        expiredOnShelf: c.expiredOnShelf, soldExpired: c.soldExpired
+        freshOnShelf: noIncoming ? null : c.freshOnShelf,
+        freshSold: noIncoming ? null : c.freshSold,
+        expiredOnShelf: noIncoming ? null : c.expiredOnShelf,
+        soldExpired: noIncoming ? null : c.soldExpired
       };
     });
     cats[cat] = items;
@@ -8656,10 +8662,12 @@ function renderReport() {
       totalPositions++;
       if (r.salesOnly) totalSalesOnly++;
       else totalAuditablePositions++;
-      if (c.freshOnShelf != null) totalFreshOnShelf += c.freshOnShelf;
-      if (c.expiredOnShelf != null) totalExpiredOnShelf += c.expiredOnShelf;
-      if (c.soldExpired != null) totalSoldExpired += c.soldExpired;
-      const noIncoming = !r.salesOnly && r.stock != null && !hasUsableIncomingForAudit(r) && (r.stock > 0 || r.sales > 0);
+      const noIncoming = isIncomingUnverified(r);
+      if (!noIncoming) {
+        if (c.freshOnShelf != null) totalFreshOnShelf += c.freshOnShelf;
+        if (c.expiredOnShelf != null) totalExpiredOnShelf += c.expiredOnShelf;
+        if (c.soldExpired != null) totalSoldExpired += c.soldExpired;
+      }
       if (noIncoming) totalNoIncoming++;
       if (noIncoming || (c.soldExpired || 0) > 0 || (c.expiredOnShelf || 0) > 0) totalProblems++;
     });
@@ -8704,8 +8712,8 @@ function renderReport() {
       const rows = tableRows.filter(r => r.category === cat);
       const problems = rows.filter(r => {
         const c = computeFIFO(r);
-        const noIncoming = !r.salesOnly && r.stock != null && !hasUsableIncomingForAudit(r) && (r.stock > 0 || (Number(r.sales) || 0) > 0);
-        return noIncoming || (c.soldExpired != null && c.soldExpired > 0) || (c.expiredOnShelf != null && c.expiredOnShelf > 0);
+        const noIncoming = isIncomingUnverified(r);
+        return noIncoming || (!noIncoming && ((c.soldExpired != null && c.soldExpired > 0) || (c.expiredOnShelf != null && c.expiredOnShelf > 0)));
       }).length;
       const hasData = rows.length > 0;
       let statusCls, statusText, subText;
@@ -8802,14 +8810,11 @@ function renderReport() {
           row.stock != null &&
           !hasUsableIncomingForAudit(row) &&
           (row.stock > 0 || (Number(row.sales) || 0) > 0);
-        const critical = (calc.soldExpired || 0) > 0;
+        const critical = !noIncoming && (calc.soldExpired || 0) > 0;
         const dotCls = noIncoming || critical ? 'red' : 'orange';
         let reason;
         if (noIncoming) {
-          reason = 'Нет подтверждённого поступления за срок годности — проверьте накладные и уточните у сотрудника, не просрочен ли товар';
-          if (critical || (calc.expiredOnShelf || 0) > 0) {
-            reason += ' · есть просроченный остаток/продажа';
-          }
+          reason = 'Нет подтверждённого поступления за срок годности — проверьте накладные и уточните у сотрудника. Просрочка пока не подтверждена.';
         } else if (critical && calc.expiredOnShelf > 0) reason = 'Продано просрочкой: ' + calc.soldExpired + ' · Просрочено на витрине: ' + calc.expiredOnShelf;
         else if (critical) reason = 'Продано просрочкой: ' + calc.soldExpired;
         else reason = 'Просрочено на витрине: ' + calc.expiredOnShelf;
