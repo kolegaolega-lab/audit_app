@@ -2705,17 +2705,10 @@ test('reapplying OCR refreshes existing unknown product quantities instead of ke
     $('cmpJson1').value=json;
     $('cmpJson2').value=json;
     await cmpRunCompare();
-    const debug = {
-      valid: _cmpData?.comparisonValid,
-      safety: (_cmpData?.safetyIssues || []).map(x => x.code),
-      rows: (_cmpData?.rows || []).map(x => x.name),
-      fullRows: Object.values(_cmpData?.json1Full?.rows || {}).map(x => ({name:x.name,incoming:x.incoming,incomingStatus:x.incomingStatus})),
-      ignored: isIgnored('Неизвестная слойка')
-    };
     cmpApplyMatched();
-    return {unknown:unknownRows.map(r=>({name:r.name,sales:r.sales,incoming:r.incoming.map(x=>[x.date,x.qty])})),debug};
+    return unknownRows.map(r=>({name:r.name,sales:r.sales,incoming:r.incoming.map(x=>[x.date,x.qty])}));
   }, payload);
-  expect(result).toEqual({unknown:[{name:'Неизвестная слойка',sales:0,incoming:[['2026-10-13',4]]}],debug:{}});
+  expect(result).toEqual([{name:'Неизвестная слойка',sales:0,incoming:[['2026-10-13',4]]}]);
 });
 
 test('comparison preserves invoice products missing from the catalog instead of dropping them', async ({page}) => {
