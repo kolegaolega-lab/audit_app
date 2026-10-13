@@ -10508,12 +10508,12 @@ function cmpApplyMatched() {
   });
   _cmpAppliedForDaily = true;
   _needsCheckNames = new Set();
+  // A partial edit does not resolve the entire product row. Only rows whose
+  // comparison status is actually OK may be considered reviewed; do not let
+  // one edited date hide another unresolved date or sales mismatch.
   diffRows.forEach(r => {
-    if (hasEdits(r)) return;
     if (!r.name) return;
-    const key = normalizeName(r.name);
-    if (byKey.has(key)) return;
-    _needsCheckNames.add(key);
+    _needsCheckNames.add(normalizeName(r.name));
   });
 
   // Переносим неизвестные позиции из ПОЛНЫХ результатов OCR, а не только
