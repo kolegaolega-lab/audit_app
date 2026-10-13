@@ -2681,3 +2681,43 @@ test('missing receipt is not presented as confirmed expiry in cards, report, or 
   expect(result.totals.soldExpired).toBe(0);
   expect(result.totals.noIncoming).toBe(1);
 });
+
+test('comparison preserves invoice products missing from the catalog instead of dropping them', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const payload = qty => JSON.stringify({
+    schema_version:'1.0', document_type:'combined', check_date:'2026-10-14',
+    source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
+    invoices:[{number:'INV-UNKNOWN',date:'2026-10-13',continuation:false,last_line_number:2,items:[
+      {line:1,name:'Товар из справочника',quantity:2,price:10,amount:20,quantity_status:'confirmed'},
+      {line:2,name:'Неизвестная слойка',quantity:qty,price:15,amount:qty*15,quantity_status:'confirmed'}
+    ]}],
+    sales:[],
+    review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+  });
+  const result = await page.evaluate(({a,b}) => {
+    PRODUCTS=[{name:'Товар из справочника',shelfLife:48,category:'desserts'}];
+    ALIASES=[];
+    tableRows=[];
+    unknownRows=[];
+    noCategoryRows=[];
+    _activeCategory='desserts';
+    $('cmpJson1').value=a;
+    $('cmpJson2').value=b;
+    cmpRunCompare();
+    const visibleRows=_cmpData.rows.map(r=>r.name);
+    const catalogWarning=_cmpData.checks.find(c=>String(c.title).includes('Справочник'))?.detail || '';
+    cmpApplyMatched();
+    const unknown=unknownRows.map(r=>({
+      name:r.name, shelfLife:r.shelfLife, category:r.category,
+      incoming:(r.incoming||[]).map(p=>[p.date,p.qty])
+    }));
+    return {visibleRows,catalogWarning,unknown,finishBlocked:!canFinishCheck()};
+  }, {a:payload(3),b:payload(3)});
+  expect(result.visibleRows).not.toContain('Неизвестная слойка');
+  expect(result.catalogWarning).toContain('Неизвестная слойка');
+  expect(result.unknown).toEqual([{
+    name:'Неизвестная слойка',shelfLife:null,category:null,
+    incoming:[['2026-10-13',3]]
+  }]);
+  expect(result.finishBlocked).toBe(true);
+});
