@@ -208,7 +208,8 @@ test('regression: full OCR diagnostics retain unknown names, but working reconci
   assert.match(html, /const catalogKey = normalizeName\(cleanProductName\(a\)\)/);
   assert.match(html, /const p = _cmpProductIndexCache\.get\(catalogKey\)/);
   assert.match(html, /if \(applyCategory && \(!p \|\| \(_activeCategory && p\.category !== _activeCategory\)\)\) return null;/);
-  assert.match(html, /const d1full = cmpParseJSON\(t1, false\);\s*const d2full = cmpParseJSON\(t2, false\);\s*const d1 = cmpParseJSON\(t1, true, true\);\s*const d2 = cmpParseJSON\(t2, true, true\);/);
+  assert.match(html, /const d1full = cmpParseJSON\(t1, false, true\);\s*const d2full = cmpParseJSON\(t2, false, true\);\s*const d1 = cmpParseJSON\(t1, true, true\);\s*const d2 = cmpParseJSON\(t2, true, true\);/);
+  assert.match(html, /hasUnrepresentedUnconfirmedIncoming/);
 });
 
 test('session persists and restores the audit date used by FIFO', () => {
