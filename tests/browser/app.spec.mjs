@@ -2750,6 +2750,10 @@ test('unresolved one-sided OCR product blocks audit completion until comparison 
     $('cmpJson1').value=a;
     $('cmpJson2').value=b;
     cmpRunCompare();
+    // A single edited quantity must not conceal the unresolved one-sided sales/value state.
+    const oneSided = _cmpData.rows.find(r => r.name === 'Товар B');
+    oneSided.edits.incoming['13.10'] = 3;
+    cmpRefreshSafetyGate();
     cmpApplyMatched();
     return {
       needsCheck:[..._needsCheckNames],
