@@ -796,6 +796,40 @@ test('missing shelf life in catalog never defaults to 48h and blocks audit compl
   });
 });
 
+test('missing shelf life is warned on the affected table row and mobile card without marking it expired', async ({page}) => {
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name: 'Товар без срока',
+      stock: 2,
+      sales: 1,
+      shelfLife: null,
+      category: 'desserts',
+      incoming: [],
+      salesOnly: false,
+      _checkDate: '2026-10-06'
+    }];
+    renderTable();
+    const row = document.querySelector('#resultTable tbody tr');
+    const card = document.querySelector('#cardsView .card');
+    return {
+      tableWarning: row.querySelector('.shelf-life-warning')?.textContent || '',
+      shelfCell: row.children[6]?.textContent || '',
+      cardWarning: card.querySelector('.card-shelf')?.textContent || '',
+      fifo: computeFIFO(tableRows[0]),
+      finishDisabled: $('finishCheckBtn').disabled,
+      finishText: $('finishCheckBtn').textContent
+    };
+  });
+  expect(result.tableWarning).toContain('Не указан срок годности');
+  expect(result.shelfCell).toBe('Не указан');
+  expect(result.cardWarning).toContain('Срок не указан');
+  expect(result.fifo.soldExpired).toBeNull();
+  expect(result.fifo.expiredOnShelf).toBeNull();
+  expect(result.finishDisabled).toBe(true);
+  expect(result.finishText).toBe('Укажите срок годности: 1');
+});
+
 test('restored audit keeps missing shelf life as missing and blocks completion', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
