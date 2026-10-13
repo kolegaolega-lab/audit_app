@@ -6412,8 +6412,38 @@ function handleAliasTargetClick(baseName) {
     row.category = p2 ? p2.category : row.category;
     if (Array.isArray(row.incoming)) row.incoming.forEach(x => { x._originalQty = x.qty; });
     unknownRows.splice(idx, 1);
-    tableRows = sortRowsAlphabetically(tableRows.concat([row]));
-    tableRows.forEach(r => { if (r.name === baseName && p2) r.shelfLife = p2.shelfLife; });
+
+    // Если каноническая позиция уже есть в аудите (например, продажи пришли
+    // под правильным именем, а накладная — под неизвестным), объединяем данные
+    // в одну строку. Суммируем исходные значения отдельно, чтобы сохранить
+    // пользовательские поправки как разницу между текущим и исходным значением.
+    const existing = tableRows.find(r => cmpCanonicalName(r.name) === cmpCanonicalName(baseName));
+    if (existing) {
+      const incomingByDate = new Map();
+      (existing.incoming || []).forEach(p => {
+        const key = String(p.date || '');
+        incomingByDate.set(key, {
+          date: key, qty: Number(p.qty) || 0,
+          _originalQty: p._originalQty != null ? Number(p._originalQty) || 0 : Number(p.qty) || 0
+        });
+      });
+      (row.incoming || []).forEach(p => {
+        const key = String(p.date || '');
+        const prior = incomingByDate.get(key) || { date: key, qty: 0, _originalQty: 0 };
+        prior.qty += Number(p.qty) || 0;
+        prior._originalQty += p._originalQty != null ? (Number(p._originalQty) || 0) : (Number(p.qty) || 0);
+        incomingByDate.set(key, prior);
+      });
+      existing.incoming = mergeIncomingByDate([...incomingByDate.values()]);
+      existing.sales = (Number(existing.sales) || 0) + (Number(row.sales) || 0);
+      existing._originalSales = (existing._originalSales != null ? Number(existing._originalSales) || 0 : Number(existing.sales) - (Number(row.sales) || 0)) + (Number(row._originalSales != null ? row._originalSales : row.sales) || 0);
+      if (p2) {
+        existing.shelfLife = p2.shelfLife;
+        existing.category = p2.category || null;
+      }
+    } else {
+      tableRows = sortRowsAlphabetically(tableRows.concat([row]));
+    }
     renderTable(); updateUnknownBanner(); scheduleSessionSave();
   }
   unknownSelected = new Set();
