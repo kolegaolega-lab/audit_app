@@ -186,6 +186,20 @@ test('OCR safety catches a missing first line when detected lines start at 2', (
   assert.match(gap.detail, /1/);
 });
 
+test('OCR safety flags a row beyond the declared last line', () => {
+  const json = validJson({
+    invoices: [{
+      number: '220646', date: '2026-10-06', continuation: false, last_line_number: 21,
+      items: [{ line: 22, name: 'Товар 22', quantity: 1, quantity_status: 'confirmed' }]
+    }]
+  });
+  const issues = context.getOCRSafetyIssues(json, reportFor(json), 2);
+  const mismatch = issues.find(x => x.code === 'invoice-last-line-inconsistent');
+  assert.ok(mismatch);
+  assert.match(mismatch.title, /последней строки/i);
+  assert.doesNotMatch(mismatch.detail, /не блокирует/i);
+});
+
 test('OCR safety catches an invoice with declared lines but no recognized item rows', () => {
   const json = validJson({
     invoices: [{ number: '123', date: '2026-10-06', continuation: false, last_line_number: 3, items: [] }]
