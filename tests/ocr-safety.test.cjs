@@ -151,6 +151,49 @@ test('OCR safety still blocks a continuation page without any preceding invoice 
   assert.equal(issues.some(x => x.code === 'invoice-date-review'), true);
 });
 
+
+test('continuation page without date or number inherits the preceding invoice and merges', () => {
+  const input = JSON.stringify({
+    schema_version: '1.0', document_type: 'combined', check_date: '2026-10-10',
+    source: { photo_count: 2, processed_photo_count: 2, duplicate_photo_count: 0 },
+    invoices: [
+      { number: '220725', date: '01.10.2026', continuation: false, last_line_number: 9, items: [{ line: 1, name: 'Эклер малина', quantity: 1, quantity_status: 'confirmed' }] },
+      { number: '', date: '', continuation: true, last_line_number: 18, items: [{ line: 10, name: 'Эклер ванильный', quantity: 2, quantity_status: 'confirmed' }] }
+    ],
+    sales: [], review: { unreadable: [], handwritten_confirmation: [], uncertain_rows: [], notes: [] }
+  });
+  const normalized = JSON.parse(context.normalizeKnownQuantityConfirmations(input));
+  assert.equal(normalized.invoices.length, 1);
+  assert.equal(normalized.invoices[0].number, '220725');
+  assert.equal(normalized.invoices[0].date, '2026-10-01');
+  assert.equal(normalized.invoices[0].items.length, 2);
+  assert.equal(normalized.invoices[0].last_line_number, 18);
+});
+
+test('OCR safety catches a missing first line when detected lines start at 2', () => {
+  const json = validJson({
+    invoices: [{
+      number: '123', date: '2026-10-06', continuation: false, last_line_number: 3,
+      items: [
+        { line: 2, name: 'Товар 2', quantity: 2, quantity_status: 'confirmed' },
+        { line: 3, name: 'Товар 3', quantity: 1, quantity_status: 'confirmed' }
+      ]
+    }]
+  });
+  const issues = context.getOCRSafetyIssues(json, reportFor(json), 2);
+  const gap = issues.find(x => x.code === 'invoice-line-gap');
+  assert.ok(gap);
+  assert.match(gap.detail, /1/);
+});
+
+test('OCR safety catches an invoice with declared lines but no recognized item rows', () => {
+  const json = validJson({
+    invoices: [{ number: '123', date: '2026-10-06', continuation: false, last_line_number: 3, items: [] }]
+  });
+  const issues = context.getOCRSafetyIssues(json, reportFor(json), 2);
+  assert.ok(issues.some(x => x.code === 'invoice-rows-missing'));
+});
+
 test('OCR safety checks that every photo was processed', () => {
   const json = validJson({ source: { photo_count: 2, processed_photo_count: 1, duplicate_photo_count: 0 } });
   const issues = context.getOCRSafetyIssues(json, reportFor(json), 2);
