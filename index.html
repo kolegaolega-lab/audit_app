@@ -10588,12 +10588,32 @@ function cmpApplyMatched() {
     };
   });
   if (newUnknown.length) {
-    const existingKeys = new Set(unknownRows.map(r => normalizeName(r.name)));
-    const trulyNew = newUnknown.filter(r => !existingKeys.has(normalizeName(r.name)));
-    if (trulyNew.length) {
-      unknownRows = sortRowsAlphabetically(unknownRows.concat(trulyNew));
-      updateUnknownBanner();
-    }
+    const incomingByKey = new Map(newUnknown.map(row => [normalizeName(row.name), row]));
+    const catalogKeysWithAliases = new Set(PRODUCTS.map(p =>
+      normalizeName(cleanProductName(p.name))));
+    // Если неизвестная позиция с прошлого запуска теперь сопоставлена через
+    // алиас с каталогом, не оставляем её второй раз в блоке «Не в справочнике».
+    unknownRows = unknownRows.filter(row => {
+      if (isIgnored(row.name)) return false;
+      const resolved = typeof applyAliases === 'function' ? applyAliases(row.name) : row.name;
+      return !catalogKeysWithAliases.has(normalizeName(cleanProductName(resolved)));
+    });
+    const updatedKeys = new Set();
+    unknownRows = unknownRows.map(existing => {
+      const key = normalizeName(existing.name);
+      const fresh = incomingByKey.get(key);
+      if (!fresh) return existing;
+      updatedKeys.add(key);
+      // Повторное применение OCR должно заменять старые приход/продажи, а не
+      // оставлять устаревшие значения из предыдущей сессии. Остальные поля
+      // сохраняем, чтобы не терять данные, добавленные интерфейсом.
+      return { ...existing, ...fresh, name: existing.name };
+    });
+    const trulyNew = newUnknown.filter(row => !updatedKeys.has(normalizeName(row.name)) &&
+      !unknownRows.some(existing => normalizeName(existing.name) === normalizeName(row.name)));
+    if (trulyNew.length) unknownRows = unknownRows.concat(trulyNew);
+    unknownRows = sortRowsAlphabetically(unknownRows);
+    updateUnknownBanner();
   }
 
   // Синхронизируем подтверждённые правки не только с карточками, но и с JSON,
