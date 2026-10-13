@@ -2683,6 +2683,7 @@ test('missing receipt is not presented as confirmed expiry in cards, report, or 
 });
 
 test('comparison preserves invoice products missing from the catalog instead of dropping them', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-14T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
   const payload = qty => JSON.stringify({
     schema_version:'1.0', document_type:'combined', check_date:'2026-10-14',
