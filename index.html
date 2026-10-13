@@ -5192,7 +5192,7 @@ function updateFinishCheckBtn() {
   const btn = $('finishCheckBtn');
   const issues = getFinishCheckIssues();
   const rows = Array.isArray(tableRows) ? tableRows : [];
-  const { missingStock, missingShelfLife, unresolvedReference, comparisonPending, dailyPending } = issues;
+  const { missingStock, missingShelfLife, unresolvedReference, comparisonPending, unresolvedOCRDifferences, dailyPending } = issues;
   wrap.style.display = rows.length ? 'block' : 'none';
   if (btn) {
     const blocked = !canFinishCheck();
@@ -5209,6 +5209,9 @@ function updateFinishCheckBtn() {
       btn.title = 'Добавьте позиции в справочник и назначьте категорию';
     } else if (comparisonPending) {
       btn.textContent = 'Завершите сверку результатов';
+      btn.title = blockReason;
+    } else if (unresolvedOCRDifferences) {
+      btn.textContent = 'Проверьте отличия: ' + unresolvedOCRDifferences;
       btn.title = blockReason;
     } else if (dailyPending.length) {
       btn.textContent = 'Проверьте распознавание: ' + dailyPending.length;
@@ -8625,6 +8628,7 @@ function getFinishCheckIssues() {
     missingCategory,
     unresolvedReference: unknownCount + noCategoryCount,
     comparisonPending,
+    unresolvedOCRDifferences: _needsCheckNames instanceof Set ? _needsCheckNames.size : 0,
     dailyPending
   };
 }
@@ -8635,6 +8639,7 @@ function getFinishCheckBlockReason(issues) {
   if (issues.missingCategory && issues.missingCategory.length) return 'Укажите категорию для всех позиций (' + issues.missingCategory.length + ').';
   if (issues.unresolvedReference) return 'Проверьте позиции, не сопоставленные со справочником (' + issues.unresolvedReference + ').';
   if (issues.comparisonPending) return 'Завершите проверку двух результатов распознавания перед окончанием аудита.';
+  if (issues.unresolvedOCRDifferences) return 'Сверьте отличающиеся позиции с фотографиями и выберите подтверждённые значения (' + issues.unresolvedOCRDifferences + ').';
   if (issues.dailyPending.length) return 'Проверьте результаты распознавания: есть даты, требующие подтверждения (' + issues.dailyPending.length + ').';
   return '';
 }
