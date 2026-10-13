@@ -1577,7 +1577,7 @@ test('report headline treats missing incoming as a problem', async ({page}) => {
   });
   expect(result).toContain('1 проблема');
   expect(result).not.toContain('всё свежее');
-  expect(result).toContain('Нет подтверждённого прихода в пределах срока годности — считать просроченным');
+  expect(result).toContain('Без подтверждённого прихода в пределах срока годности — считать просроченными');
 });
 
 test('completion gate blocks unresolved double-run comparison even when table inputs are complete', async ({page}) => {
