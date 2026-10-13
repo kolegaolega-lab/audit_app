@@ -1577,7 +1577,7 @@ test('report headline treats missing incoming as a problem', async ({page}) => {
   });
   expect(result).toContain('1 проблема');
   expect(result).not.toContain('всё свежее');
-  expect(result).toContain('Нет подтверждённого поступления за срок годности');
+  expect(result).toContain('Нет подтверждённого прихода в пределах срока годности — считать просроченным');
 });
 
 test('completion gate blocks unresolved double-run comparison even when table inputs are complete', async ({page}) => {
@@ -1678,7 +1678,7 @@ test('completion gate allows missing incoming as an explicit audit finding', asy
   });
   expect(result.before).toEqual({canFinish:true, disabled:false});
   expect(result.modalOpen).toBe(true);
-  expect(result.reportText).toContain('Нет подтверждённого поступления за срок годности');
+  expect(result.reportText).toContain('Нет подтверждённого прихода в пределах срока годности — считать просроченным');
 });
 
 test('completion gate allows expired FIFO findings after all required inputs are present', async ({page}) => {
@@ -1895,7 +1895,7 @@ test('card status, report and history snapshot agree for zero stock with no inco
   expect(result.status).toEqual({cls:'row-fresh',label:'fresh'});
   expect(result.card).toBe('fresh');
   expect(result.reportText).toContain('всё свежее');
-  expect(result.reportText).not.toContain('Нет подтверждённого поступления за срок годности');
+  expect(result.reportText).not.toContain('Нет подтверждённого прихода в пределах срока годности — считать просроченным');
   expect(result.snapshotItem.noIncoming).toBe(false);
   expect(result.snapshotTotals.noIncoming).toBe(0);
 });
@@ -1923,7 +1923,7 @@ test('history snapshot preserves explicit missing-incoming finding consistently 
   });
   expect(result.calc).toEqual({soldExpired:0,expiredOnShelf:3,freshOnShelf:0,freshSold:0});
   expect(result.status).toEqual({cls:'row-danger',label:'danger'});
-  expect(result.reportText).toContain('Нет подтверждённого поступления за срок годности');
+  expect(result.reportText).toContain('Нет подтверждённого прихода в пределах срока годности — считать просроченным');
   expect(result.snapshotItem.noIncoming).toBe(true);
   expect(result.snapshotItem.expiredOnShelf).toBeNull();
   expect(result.snapshotItem.soldExpired).toBeNull();
@@ -2240,7 +2240,7 @@ test('report totals match history snapshot for mixed FIFO findings', async ({pag
       {name:'Свежий',salesOnly:false,stock:1,sales:0,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-08',qty:1}],_checkDate:'2026-10-08'},
       {name:'Просроченный остаток',salesOnly:false,stock:2,sales:0,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-08',qty:1}],_checkDate:'2026-10-08'},
       {name:'Продажа просрочкой',salesOnly:false,stock:0,sales:2,shelfLife:24,category:'desserts',incoming:[{date:'2026-10-08',qty:1}],_checkDate:'2026-10-08'},
-      {name:'Нет подтверждённого поступления за срок годности',salesOnly:false,stock:1,sales:0,shelfLife:24,category:'desserts',incoming:[],_checkDate:'2026-10-08'},
+      {name:'Нет подтверждённого прихода в пределах срока годности — считать просроченным',salesOnly:false,stock:1,sales:0,shelfLife:24,category:'desserts',incoming:[],_checkDate:'2026-10-08'},
       {name:'Только продажа',salesOnly:true,stock:null,sales:3,shelfLife:null,category:'pastry',incoming:[],_checkDate:'2026-10-08'}
     ];
     unknownRows=[]; noCategoryRows=[]; _dailyAccum=[]; _cmpData=null;
@@ -2253,7 +2253,7 @@ test('report totals match history snapshot for mixed FIFO findings', async ({pag
   });
   expect(result.snapshot.positions).toBe(5);
   expect(result.snapshot.freshOnShelf).toBe(2);
-  expect(result.snapshot.expiredOnShelf).toBe(1);
+  expect(result.snapshot.expiredOnShelf).toBe(2);
   expect(result.snapshot.soldExpired).toBe(1);
   expect(result.snapshot.noIncoming).toBe(1);
   expect(result.report).toContain('Проверяемых позиций');
@@ -2261,7 +2261,7 @@ test('report totals match history snapshot for mixed FIFO findings', async ({pag
   expect(result.report).toContain('Свежих на витрине');
   expect(result.report).toContain('Просрочено на витрине');
   expect(result.report).toContain('Продано просрочкой');
-  expect(result.report).toContain('Нет подтверждённого поступления за срок годности');
+  expect(result.report).toContain('Нет подтверждённого прихода в пределах срока годности — считать просроченным');
   expect(result.report).toContain('Только продажи');
 });
 
@@ -2323,7 +2323,7 @@ test('category report detail lists missing incoming as a problem', async ({page}
     return $('reportBody')?.textContent || '';
   });
   expect(result).toContain('Позиция без прихода в деталях');
-  expect(result).toContain('Нет подтверждённого поступления за срок годности');
+  expect(result).toContain('Нет подтверждённого прихода в пределах срока годности — считать просроченным');
   expect(result).toContain('1 проблемная позиция');
 });
 
@@ -2345,7 +2345,7 @@ test('category report counts missing incoming as a problem', async ({page}) => {
     return {summary, card:card?.textContent || ''};
   });
   expect(result.summary).toContain('1 проблема');
-  expect(result.summary).toContain('Нет подтверждённого поступления за срок годности');
+  expect(result.summary).toContain('Нет подтверждённого прихода в пределах срока годности — считать просроченным');
   expect(result.card).toContain('1 проблема');
   expect(result.card).not.toContain('0 проблем');
 });
@@ -2559,8 +2559,8 @@ test('card refresh preserves missing-incoming warning after manual stock edit', 
     const salesOnlyText = resultNode.textContent;
     return {warningAfterEdit, salesOnlyText};
   });
-  expect(result.warningAfterEdit).toContain('Нет подтверждённого поступления за срок годности');
-  expect(result.salesOnlyText).not.toContain('Нет подтверждённого поступления за срок годности');
+  expect(result.warningAfterEdit).toContain('Нет подтверждённого прихода в пределах срока годности — считать просроченным');
+  expect(result.salesOnlyText).not.toContain('Нет подтверждённого прихода в пределах срока годности — считать просроченным');
 });
 
 
@@ -2588,8 +2588,8 @@ test('card warning matches report rule when no incoming and no stock or sales', 
     const refreshedText = resultNode.textContent;
     return {initialText, refreshedText};
   });
-  expect(result.initialText).not.toContain('Нет подтверждённого поступления за срок годности');
-  expect(result.refreshedText).not.toContain('Нет подтверждённого поступления за срок годности');
+  expect(result.initialText).not.toContain('Нет подтверждённого прихода в пределах срока годности — считать просроченным');
+  expect(result.refreshedText).not.toContain('Нет подтверждённого прихода в пределах срока годности — считать просроченным');
 });
 
 test('comparison safety details render OCR-provided HTML as text, not markup', async ({page}) => {
@@ -2679,7 +2679,7 @@ test('matching an unknown OCR name merges into the existing canonical audit row 
   expect(result.aliases).toEqual([{alias:'Эклер малина (накладная)',target:'Эклер малина'}]);
 });
 
-test('missing receipt is not presented as confirmed expiry in cards, report, or history totals', async ({page}) => {
+test('missing receipt is treated as expired in cards, report, and history totals', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-08T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
   const result = await page.evaluate(() => {
@@ -2710,18 +2710,18 @@ test('missing receipt is not presented as confirmed expiry in cards, report, or 
     };
   });
   expect(result.fifo.expiredOnShelf).toBe(3);
-  expect(result.cardText).toContain('Нет подтверждённого поступления за срок годности');
-  expect(result.cardText).toContain('Просрочено на витрине: —');
-  expect(result.cardText).toContain('Продано просроченным: —');
-  expect(result.reportText).toContain('Нет подтверждённого поступления за срок годности');
-  expect(result.reportText).not.toContain('есть просроченный остаток/продажа');
-  expect(result.reportText).toContain('Просрочено на витрине0');
-  expect(result.reportText).toContain('Продано просрочкой0');
+  expect(result.cardText).toContain('Нет подтверждённого прихода в пределах срока годности — считать просроченным');
+  expect(result.cardText).toContain('Просрочено на витрине: 3');
+  expect(result.cardText).toContain('Продано просроченным: 2');
+  expect(result.reportText).toContain('Нет подтверждённого прихода в пределах срока годности — считать просроченным');
+  expect(result.reportText).toContain('Просрочено на витрине3');
+  expect(result.reportText).toContain('Просрочено на витрине3');
+  expect(result.reportText).toContain('Продано просрочкой2');
   expect(result.item.noIncoming).toBe(true);
-  expect(result.item.expiredOnShelf).toBeNull();
-  expect(result.item.soldExpired).toBeNull();
-  expect(result.totals.expiredOnShelf).toBe(0);
-  expect(result.totals.soldExpired).toBe(0);
+  expect(result.item.expiredOnShelf).toBe(3);
+  expect(result.item.soldExpired).toBe(2);
+  expect(result.totals.expiredOnShelf).toBe(3);
+  expect(result.totals.soldExpired).toBe(2);
   expect(result.totals.noIncoming).toBe(1);
 });
 
