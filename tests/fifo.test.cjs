@@ -115,6 +115,35 @@ test('no receipts means stock and sales are flagged as expired', () => {
     { freshOnShelf:0, expiredOnShelf:1, freshSold:0, soldExpired:2 });
 });
 
+test('no receipt means sales are expired even when actual stock has not been entered', () => {
+  assert.deepEqual(computeFIFO(row(48, [], null, 3)), {
+    soldExpired: 3, expiredOnShelf: null, freshOnShelf: null, freshSold: 0
+  });
+});
+
+test('audit date and start time stay tied to the historical sales report, not the phone date', () => {
+  const controls = { autoDate: { value: '' }, autoTime: { value: '' } };
+  const dateContext = {
+    tableRows: [{
+      _checkDate: '2026-09-25',
+      _checkMoment: new Date(2026, 9, 14, 13, 45, 0).getTime()
+    }],
+    $: id => controls[id] || null,
+    getTodayStr: () => '2026-10-14',
+    formatDateRu: value => value,
+    getCurrentTimeStr: () => '00:30'
+  };
+  vm.createContext(dateContext);
+  vm.runInContext(extractFunction(html, 'getCheckMoment', 'function getWriteOffMoment('), dateContext);
+  vm.runInContext(extractFunction(html, 'getAuditCheckDate', 'function updateAutoDate('), dateContext);
+  vm.runInContext(extractFunction(html, 'updateAutoDate', 'function startAutoDateTime('), dateContext);
+  assert.equal(dateContext.getAuditCheckDate(), '2026-09-25');
+  dateContext.updateAutoDate();
+  dateContext.updateAutoTime();
+  assert.equal(controls.autoDate.value, '2026-09-25');
+  assert.equal(controls.autoTime.value, '13:45');
+});
+
 
 test('future receipts are ignored for the audit date', () => {
   assert.deepEqual(computeFIFO(row(24, [{date:'2026-10-04', qty:5}], 3, 0)), {
