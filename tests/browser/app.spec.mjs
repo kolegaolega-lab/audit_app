@@ -1199,6 +1199,49 @@ test('comparison applies selected values from second run for one-sided rows and 
   expect(result.b.sales).toBe(3);
 });
 
+
+test('unconfirmed quantity on a catalog-unknown invoice row stays blocking after visible rows are edited', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-14T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const payload = JSON.stringify({
+    schema_version:'1.0', document_type:'combined', check_date:'2026-10-14',
+    source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
+    invoices:[{number:'INV-SAFETY',date:'2026-10-13',continuation:false,last_line_number:2,items:[
+      {line:1,name:'Товар из каталога',quantity:2,price:10,amount:20,quantity_status:'confirmed'},
+      {line:2,name:'Неизвестная слойка',quantity:4,price:15,amount:60,quantity_status:'handwritten'}
+    ]}],
+    sales:[],
+    review:{unreadable:[],handwritten_confirmation:['Неизвестная слойка'],uncertain_rows:[],notes:[]}
+  });
+  const result = await page.evaluate(json => {
+    PRODUCTS=[{name:'Товар из каталога',shelfLife:48,category:'desserts'}];
+    ALIASES=[];
+    _cmpProductIndexCache=null;
+    tableRows=[];
+    unknownRows=[];
+    noCategoryRows=[];
+    _activeCategory='desserts';
+    $('cmpJson1').value=json;
+    $('cmpJson2').value=json;
+    cmpRunCompare();
+    const visibleRows=_cmpData.rows.map(r=>r.name);
+    const initiallyBlocked=_cmpData.comparisonValid === false;
+    const row=_cmpData.rows.find(r=>r.name==='Товар из каталога');
+    if(row) row.edits.incoming['13.10']=2;
+    cmpRefreshSafetyGate();
+    return {
+      visibleRows, initiallyBlocked,
+      stillBlocked:_cmpData.comparisonValid === false,
+      unresolved:_cmpData.safetyIssues.map(x=>x.code)
+    };
+  }, payload);
+  expect(result.visibleRows).toContain('Товар из каталога');
+  expect(result.visibleRows).not.toContain('Неизвестная слойка');
+  expect(result.initiallyBlocked).toBe(true);
+  expect(result.stillBlocked).toBe(true);
+  expect(result.unresolved).toContain('quantity-status-review');
+});
+
 test('comparison blocks applying OCR runs with unresolved invoice date', async ({page}) => {
   await page.goto('file://' + path.join(root,'index.html'));
   const payload = JSON.stringify({
