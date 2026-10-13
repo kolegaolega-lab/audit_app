@@ -814,7 +814,7 @@ test('missing shelf life is warned on the affected table row and mobile card wit
     const card = document.querySelector('#cardsView .card');
     return {
       tableWarning: row.querySelector('.shelf-life-warning')?.textContent || '',
-      shelfCell: row.children[6]?.textContent || '',
+      shelfCell: row.querySelector('td:nth-child(4)')?.textContent || '',
       cardWarning: card.querySelector('.card-shelf')?.textContent || '',
       fifo: computeFIFO(tableRows[0]),
       finishDisabled: $('finishCheckBtn').disabled,
