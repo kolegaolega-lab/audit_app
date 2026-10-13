@@ -1882,8 +1882,10 @@ test('history snapshot preserves explicit missing-incoming finding consistently 
   expect(result.status).toEqual({cls:'row-danger',label:'danger'});
   expect(result.reportText).toContain('Нет подтверждённого поступления за срок годности');
   expect(result.snapshotItem.noIncoming).toBe(true);
+  expect(result.snapshotItem.expiredOnShelf).toBeNull();
+  expect(result.snapshotItem.soldExpired).toBeNull();
   expect(result.snapshotTotals.noIncoming).toBe(1);
-  expect(result.snapshotTotals.expiredOnShelf).toBe(3);
+  expect(result.snapshotTotals.expiredOnShelf).toBe(0);
 });
 
 
@@ -2208,8 +2210,8 @@ test('report totals match history snapshot for mixed FIFO findings', async ({pag
   });
   expect(result.snapshot.positions).toBe(5);
   expect(result.snapshot.freshOnShelf).toBe(1);
-  expect(result.snapshot.expiredOnShelf).toBe(3);
-  expect(result.snapshot.soldExpired).toBe(2);
+  expect(result.snapshot.expiredOnShelf).toBe(2);
+  expect(result.snapshot.soldExpired).toBe(0);
   expect(result.snapshot.noIncoming).toBe(3);
   expect(result.report).toContain('Проверяемых позиций');
   expect(result.report).toContain('4');
@@ -2632,4 +2634,39 @@ test('matching an unknown OCR name merges into the existing canonical audit row 
   }]);
   expect(result.unknown).toEqual([]);
   expect(result.aliases).toEqual([{alias:'Эклер малина (накладная)',target:'Эклер малина'}]);
+});
+
+test('missing receipt is not presented as confirmed expiry in cards, report, or history totals', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-08T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const result = await page.evaluate(() => {
+    tableRows = [{
+      name:'Эклер без накладной',salesOnly:false,stock:3,sales:2,shelfLife:24,
+      category:'desserts',incoming:[],_checkDate:'2026-10-08'
+    }];
+    unknownRows=[]; noCategoryRows=[];
+    renderTable();
+    const cardText=$('cardsView')?.textContent || '';
+    renderReport();
+    const reportText=$('reportBody')?.textContent || '';
+    const snapshot=buildCheckSnapshot();
+    return {
+      cardText, reportText,
+      item:snapshot.categories.desserts[0],
+      totals:snapshot.totals,
+      fifo:computeFIFO(tableRows[0])
+    };
+  });
+  expect(result.fifo.expiredOnShelf).toBe(3);
+  expect(result.cardText).toContain('Нет подтверждённого поступления за срок годности');
+  expect(result.cardText).toContain('Просрочено на витрине: —');
+  expect(result.cardText).toContain('Продано просроченным: —');
+  expect(result.reportText).toContain('Просрочка пока не подтверждена');
+  expect(result.reportText).not.toContain('есть просроченный остаток/продажа');
+  expect(result.item.noIncoming).toBe(true);
+  expect(result.item.expiredOnShelf).toBeNull();
+  expect(result.item.soldExpired).toBeNull();
+  expect(result.totals.expiredOnShelf).toBe(0);
+  expect(result.totals.soldExpired).toBe(0);
+  expect(result.totals.noIncoming).toBe(1);
 });
