@@ -10511,39 +10511,76 @@ function cmpApplyMatched() {
     _needsCheckNames.add(key);
   });
 
-  const tableKeys = new Set(tableRows.map(r => cmpCanonicalName(r.name)));
-  const unknownKeys = new Set(unknownRows.map(r => cmpCanonicalName(r.name)));
-  const newUnknown = [];
-  _cmpData.rows.forEach(r => {
-    const key = cmpCanonicalName(r.name);
-    if (tableKeys.has(key)) return;
-    if (unknownKeys.has(key)) return;
-    if (PRODUCTS.some(p => cmpCanonicalName(p.name) === key)) return;
-    if (isIgnored(r.name)) return;
-    const incoming = {};
-    const dateKeys = new Set([
-      ...(r.a ? Object.keys(r.a.incoming || {}) : []),
-      ...(r.b ? Object.keys(r.b.incoming || {}) : []),
-      ...Object.keys(r.edits?.incoming || {})
-    ]);
-    dateKeys.forEach(dk => {
-      if (r.edits?.incoming?.[dk] != null) incoming[dk] = r.edits.incoming[dk];
-      else if (r.a?.incomingStatus?.[dk] == null && Object.prototype.hasOwnProperty.call(r.a?.incoming || {}, dk)) incoming[dk] = r.a.incoming[dk];
-      else if (r.b?.incomingStatus?.[dk] == null && Object.prototype.hasOwnProperty.call(r.b?.incoming || {}, dk)) incoming[dk] = r.b.incoming[dk];
+  // Переносим неизвестные позиции из ПОЛНЫХ результатов OCR, а не только
+  // из строк рабочей сверки: cmpParseJSON(..., true) намеренно отбрасывает
+  // товары вне справочника/текущей категории. Раньше такие строки показывались
+  // в предупреждении о справочнике, но терялись при нажатии «Применить».
+  const exactCatalogKeys = new Set(PRODUCTS.map(p => normalizeName(cleanProductName(p.name))));
+  const unknownCandidates = new Map();
+  const fullRuns = [
+    { data: _cmpData.json1Full, label: 'Первый результат' },
+    { data: _cmpData.json2Full, label: 'Второй результат' }
+  ];
+  fullRuns.forEach(({data, label}) => {
+    Object.values(data?.rows || {}).forEach(r => {
+      const dates = Object.keys(r.incoming || {});
+      const qtyTotal = dates.reduce((sum, dk) => sum + (Number(r.incoming[dk]) || 0), 0);
+      if (qtyTotal <= 0 || !r.name || isIgnored(r.name)) return;
+      const resolvedName = typeof applyAliases === 'function' ? applyAliases(r.name) : r.name;
+      const exactKey = normalizeName(cleanProductName(resolvedName));
+      if (exactCatalogKeys.has(exactKey)) return;
+      const key = normalizeName(cleanProductName(r.name));
+      if (!key) return;
+      let candidate = unknownCandidates.get(key);
+      if (!candidate) {
+        candidate = { name: r.name, incoming: {}, sales: 0, sources: new Set(), needsCheck: false };
+        unknownCandidates.set(key, candidate);
+      }
+      candidate.sources.add(label);
+      dates.forEach(dk => {
+        const unconfirmed = !!r.incomingStatus?.[dk];
+        const qty = Number(r.incoming[dk]) || 0;
+        if (unconfirmed) {
+          candidate.needsCheck = true;
+          return;
+        }
+        if (Object.prototype.hasOwnProperty.call(candidate.incoming, dk) &&
+            candidate.incoming[dk] !== qty) {
+          // Два прогона OCR не являются двумя поставками. При расхождении не
+          // складываем значения: оставляем первое и помечаем позицию для проверки.
+          candidate.needsCheck = true;
+        } else if (!Object.prototype.hasOwnProperty.call(candidate.incoming, dk)) {
+          candidate.incoming[dk] = qty;
+        }
+      });
+      if (r.salesStatus === 'confirmed') {
+        if (candidate._salesSeen && candidate.sales !== Number(r.sales || 0)) candidate.needsCheck = true;
+        else if (!candidate._salesSeen) candidate.sales = Number(r.sales || 0);
+        candidate._salesSeen = true;
+      } else if (Number(r.sales || 0) > 0) {
+        candidate.needsCheck = true;
+      }
     });
-    const sales = (r.edits && r.edits.sales != null) ? r.edits.sales :
-      (r.a?.salesStatus === 'confirmed' ? r.a.sales :
-      (r.b?.salesStatus === 'confirmed' ? r.b.sales : 0));
-    const incomingArr = [];
-    Object.keys(incoming).forEach(dk => {
+  });
+  const newUnknown = [...unknownCandidates.values()].map(candidate => {
+    const incoming = [];
+    Object.keys(candidate.incoming).forEach(dk => {
       const iso = inferIsoFromDdmm(dk, _refDate);
-      if (!iso) return;
-      incomingArr.push({ date: iso, qty: incoming[dk] || 0 });
+      if (!iso) {
+        candidate.needsCheck = true;
+        return;
+      }
+      incoming.push({ date: iso, qty: candidate.incoming[dk] || 0 });
     });
-    newUnknown.push({
-      name: r.name, sales: sales, shelfLife: null, category: null,
-      incoming: incomingArr, salesOnly: false
-    });
+    if (candidate.needsCheck) _needsCheckNames.add(normalizeName(candidate.name));
+    return {
+      name: candidate.name,
+      sales: candidate.sales || 0,
+      shelfLife: null,
+      category: null,
+      incoming: incoming.sort((a, b) => a.date.localeCompare(b.date)),
+      salesOnly: false
+    };
   });
   if (newUnknown.length) {
     const existingKeys = new Set(unknownRows.map(r => normalizeName(r.name)));
