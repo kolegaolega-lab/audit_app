@@ -204,10 +204,10 @@ test('receipt inside shelf-life window is a usable incoming', () => {
 });
 
 
-test('regression: catalog matching uses canonical OCR names', () => {
-  assert.match(html, /const nk = cmpCanonicalName\(x\.name\)/);
-  assert.match(html, /const key = cmpCanonicalName\(r\.name\);\s*const p = PRODUCTS\.find\(x => cmpCanonicalName\(x\.name\) === key\)/);
-  assert.match(html, /const catalogSet = new Set\(PRODUCTS\.map\(p => cmpCanonicalName\(p\.name\)\)\)/);
+test('regression: OCR reconciliation excludes names not found in the catalog even when category filtering is disabled', () => {
+  assert.match(html, /const catalogKey = normalizeName\(cleanProductName\(a\)\)/);
+  assert.match(html, /const p = _cmpProductIndexCache\.get\(catalogKey\)/);
+  assert.match(html, /if \(!p \|\| \(applyCategory && \(!_activeCategory \|\| p\.category !== _activeCategory\)\)\) return null;/);
 });
 
 test('session persists and restores the audit date used by FIFO', () => {
