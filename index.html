@@ -6861,7 +6861,7 @@ function buildSeparatedOCRPrompt(checkDate,type){
       "Источник: только ТОРГ-12/накладные. Продажи из iiko не читать и не выдумывать.",
       "Одна накладная может состоять из нескольких фото.",
       "Фото без шапки, но со сквозной нумерацией строк, — ПРОДОЛЖЕНИЕ той же накладной, а не новый документ.",
-      "Если накладная занимает несколько фотографий/страниц, объединяй их в один объект invoices. Для единого объекта continuation=true, если эта накладная имеет продолжение на следующей фотографии/странице; для одностраничной накладной continuation=false. Если на продолжении нет даты и номера, унаследуй date и number от первой страницы.",
+      "Каждая страница накладной — отдельный объект invoices; continuation=true означает, что ЭТОТ объект является страницей-продолжением предыдущей накладной. Для первой/единственной страницы continuation=false. На странице-продолжении без даты и/или номера унаследуй date и number от первой страницы той же накладной.",
       "В каждой строке quantity = только колонка 8 «Количество (масса), мест, штук». Колонку 7 «в одном месте» НЕ использовать.",
       "Бери печатное количество из колонки 8. Галочка рядом с печатным количеством означает ПОДТВЕРЖДЕНИЕ этого печатного количества: ставь quantity_status=\"confirmed\" и НЕ добавляй строку в review.handwritten_confirmation. Галочка сама по себе НЕ является рукописным количеством. Если цифра количества действительно написана от руки и заменяет/уточняет печатное количество, только тогда ставь quantity_status=\"handwritten\".",
       "Цена, сумма, НДС и другие денежные показатели НЕ нужны, НЕ включай их в JSON и никогда не используй их как количество.",
@@ -7697,11 +7697,13 @@ function normalizeKnownQuantityConfirmations(jsonText) {
 
   (Array.isArray(d.invoices) ? d.invoices : []).forEach(inv => normalizeItems(inv?.items));
 
-  // Объединяем страницы только при совпадении номера и даты и явном continuation.
-  // Страницы без надёжного ключа не присоединяем наугад.
+  // Объединяем страницы одной накладной. У страницы-продолжения дата и/или
+  // номер могут отсутствовать: наследуем их только от непосредственно
+  // предшествующей распознанной накладной, если continuation=true.
   if (Array.isArray(d.invoices)) {
     const merged = [];
     const byKey = new Map();
+    let activeInvoice = null;
     const dateKey = value => {
       const raw = String(value || '').trim();
       if (/^\\d{4}-\\d{2}-\\d{2}$/.test(raw)) return raw;
@@ -7711,12 +7713,26 @@ function normalizeKnownQuantityConfirmations(jsonText) {
       }
       return String(parsed || raw);
     };
-    for (const inv of d.invoices) {
-      const number = String(inv?.number || '').trim();
-      const date = dateKey(inv?.date);
-      const key = number && date ? number + '|' + date : '';
-      const previous = key ? byKey.get(key) : null;
-      if (inv?.continuation && previous) {
+    for (const sourceInv of d.invoices) {
+      const inv = sourceInv && typeof sourceInv === 'object' ? sourceInv : {};
+      let number = String(inv.number || '').trim();
+      let date = dateKey(inv.date);
+      let previous = null;
+      if (inv.continuation) {
+        if (number && date) previous = byKey.get(number + '|' + date) || null;
+        if (!previous && activeInvoice) {
+          const activeNumber = String(activeInvoice.number || '').trim();
+          const activeDate = dateKey(activeInvoice.date);
+          if ((!number || number === activeNumber) && (!date || date === activeDate)) {
+            previous = activeInvoice;
+            if (!number) number = activeNumber;
+            if (!date) date = activeDate;
+          }
+        }
+      }
+      if (previous) {
+        inv.number = number || previous.number || '';
+        inv.date = date || previous.date || '';
         previous.items = [...(Array.isArray(previous.items) ? previous.items : []), ...(Array.isArray(inv.items) ? inv.items : [])];
         const lastLine = Number(inv.last_line_number);
         if (Number.isFinite(lastLine)) previous.last_line_number = Math.max(Number(previous.last_line_number) || 0, lastLine);
@@ -7725,7 +7741,12 @@ function normalizeKnownQuantityConfirmations(jsonText) {
         continue;
       }
       merged.push(inv);
-      if (key && !inv?.continuation && !byKey.has(key)) byKey.set(key, inv);
+      if (number) inv.number = number;
+      if (date) inv.date = date;
+      const key = number && date ? number + '|' + date : '';
+      if (key && !byKey.has(key)) byKey.set(key, inv);
+      // Only a dated/numbered first page is a safe anchor for a continuation.
+      activeInvoice = key ? inv : null;
     }
     d.invoices = merged;
   }
@@ -7861,7 +7882,22 @@ function getOCRSafetyIssues(text,report,count){
     if (Array.isArray(inv?.items)) g.items.push(...inv.items);
   });
   invoiceGroups.forEach(g => {
-    if (!g.items.length || !g.lastLine) return;
+    if (!g.items.length) {
+      if (g.lastLine > 0) out.push({
+        code:'invoice-rows-missing',
+        title:'Не распознаны товарные строки накладной',
+        detail:(g.number ? '№' + g.number + ' · ' : '') + 'по документу заявлено строк до №' + g.lastLine + ', но строки товаров не распознаны'
+      });
+      return;
+    }
+    if (!g.lastLine) {
+      out.push({
+        code:'invoice-last-line-missing',
+        title:'Не определён номер последней строки накладной',
+        detail:(g.number ? '№' + g.number + ' · ' : '') + 'проверьте нижнюю часть документа и полноту распознанных строк'
+      });
+      return;
+    }
     const lines = g.items
       .map(x => Number(x?.line))
       .filter(Number.isInteger);
@@ -7871,8 +7907,9 @@ function getOCRSafetyIssues(text,report,count){
     }
     const unique = new Set(lines);
     const missing = [];
-    const start = Math.min(...lines);
-    if (start === 1 && g.lastLine >= 1) {
+    // Строки накладной нумеруются с 1. Проверяем и начало диапазона:
+    // если OCR вернул 2..N, строка 1 могла быть пропущена.
+    if (g.lastLine >= 1) {
       for (let n = 1; n <= g.lastLine; n++) if (!unique.has(n)) missing.push(n);
     }
     const beyondLast = lines.filter(n => n > g.lastLine);
