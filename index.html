@@ -10424,7 +10424,18 @@ function cmpApplyMatched() {
   const applyRows = [...okRows];
   const okKeys = new Set(okRows.map(r => r.key));
   editedRows.forEach(r => { if (!okKeys.has(r.key)) applyRows.push(r); });
-  if (!applyRows.length && !diffRows.length) { showToast('Нет данных'); return; }
+  const hasFullInvoiceData = [_cmpData.json1Full, _cmpData.json2Full].some(data =>
+    Object.values(data?.rows || {}).some(row =>
+      Object.values(row.incoming || {}).some(quantity => Number(quantity) > 0)
+    )
+  );
+  // Если рабочая сверка пуста только потому, что все строки не входят в
+  // выбранную категорию/справочник, всё равно продолжаем перенос неизвестных
+  // позиций из полных OCR-результатов ниже.
+  if (!applyRows.length && !diffRows.length && !hasFullInvoiceData) {
+    showToast('Нет данных');
+    return;
+  }
   const byKey = new Map();
   applyRows.forEach(r => {
     const incoming = {};
