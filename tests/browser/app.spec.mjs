@@ -37,21 +37,21 @@ test('end-to-end JSON audit pipeline: invoice + iiko sales + stock -> FIFO', asy
       source:{photo_count:3,processed_photo_count:3,duplicate_photo_count:0},
       invoices:[
         {number:'INV-001',date:'2026-10-06',continuation:true,last_line_number:2,items:[
-          {line:1,name:'Пончик с фисташкой',quantity:2,quantity_status:'confirmed'},
+          {line:1,name:'Пончик фисташковый',quantity:2,quantity_status:'confirmed'},
           {line:2,name:'Круассан',quantity:1,quantity_status:'confirmed'}
         ]},
         {number:'INV-001',date:'2026-10-05',continuation:false,last_line_number:1,items:[
-          {line:1,name:'Пончик с фисташкой',quantity:2,quantity_status:'confirmed'}
+          {line:1,name:'Пончик фисташковый',quantity:2,quantity_status:'confirmed'}
         ]}
       ],
       sales:[
-        {name:'Пончик с фисташкой',quantity:2,quantity_status:'confirmed'},
+        {name:'Пончик фисташковый',quantity:2,quantity_status:'confirmed'},
         {name:'Круассан',quantity:1,quantity_status:'confirmed'}
       ],
       review:{unreadable:[],handwritten_confirmation:status === 'handwritten' ? ['строка 1'] : [],uncertain_rows:[],notes:[]}
     };
     const parsed = window.parseJSON(JSON.stringify(payload), new Date('2026-10-06T10:00:00'));
-    const donut = parsed.rows.find(r => r.name === 'Пончик с фисташкой');
+    const donut = parsed.rows.find(r => r.name === 'Пончик фисташковый');
     const croissant = parsed.rows.find(r => r.name === 'Круассан');
     const fifo = window.computeFIFO({
       stock:3, sales:donut.sales, shelfLife:24, incoming:donut.incoming, _checkDate:'2026-10-06'
@@ -543,7 +543,7 @@ test('multi-page invoice continuation inherits date and handwritten quantity is 
       source:{photo_count:2,processed_photo_count:2,duplicate_photo_count:0},
       invoices:[
         {number:'217246',date:'2026-10-06',continuation:false,last_line_number:33,items:[
-          {line:33,name:'Пончик с фисташкой',quantity:2,quantity_status:'confirmed'}
+          {line:33,name:'Пончик фисташковый',quantity:2,quantity_status:'confirmed'}
         ]},
         {number:'217246',date:null,continuation:true,last_line_number:36,items:[
           {line:34,name:'Круассан',quantity:3,quantity_status:'handwritten'},
@@ -565,7 +565,7 @@ test('multi-page invoice continuation inherits date and handwritten quantity is 
     };
   });
   expect(result.rows).toEqual([
-    {name:'Пончик с фисташкой',incoming:[{date:'2026-10-06',qty:2}]},
+    {name:'Пончик фисташковый',incoming:[{date:'2026-10-06',qty:2}]},
     {name:'Круассан',incoming:[]},
     {name:'Эклер',incoming:[{date:'2026-10-06',qty:1}]}
   ]);
@@ -645,7 +645,7 @@ test('product cards do not render duplicate incoming summary', async ({page}) =>
     head.className = 'card-head';
     const name = document.createElement('div');
     name.className = 'card-name';
-    name.textContent = 'Пончик с фисташкой';
+    name.textContent = 'Пончик фисташковый';
     head.appendChild(name);
     card.appendChild(head);
     document.body.appendChild(card);
@@ -1058,9 +1058,9 @@ test('comparison normalizes ISO and Russian invoice dates and renders results', 
     source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
     invoices:[{
       number:'INV-1',date,continuation:false,last_line_number:1,
-      items:[{line:1,name:'Пончик с фисташкой',quantity:2,quantity_status:'confirmed'}]
+      items:[{line:1,name:'Пончик фисташковый',quantity:2,quantity_status:'confirmed'}]
     }],
-    sales:[{name:'Пончик с фисташкой',quantity:1,quantity_status:'confirmed'}],
+    sales:[{name:'Пончик фисташковый',quantity:1,quantity_status:'confirmed'}],
     review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
   });
   const result = await page.evaluate(({a,b}) => {
@@ -1074,8 +1074,8 @@ test('comparison normalizes ISO and Russian invoice dates and renders results', 
     return {
       p1Date: p1?.dateCols?.[0]?.key,
       p2Date: p2?.dateCols?.[0]?.key,
-      p1Qty: p1?.rows?.['пончик с фисташкой']?.incoming?.['06.10'],
-      p2Qty: p2?.rows?.['пончик с фисташкой']?.incoming?.['06.10'],
+      p1Qty: p1?.rows?.['пончик фисташковый']?.incoming?.['06.10'],
+      p2Qty: p2?.rows?.['пончик фисташковый']?.incoming?.['06.10'],
       stats: document.querySelector('#cmpStats')?.textContent || '',
       resultsVisible: document.querySelector('#cmpResultsSection')?.style.display,
       checksVisible: document.querySelector('#cmpChecksSection')?.style.display
@@ -1208,7 +1208,7 @@ test('comparison blocks applying OCR runs with unresolved invoice date', async (
     source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
     invoices:[{
       number:'INV-BAD',date:'',continuation:false,last_line_number:1,
-      items:[{line:1,name:'Пончик с фисташкой',quantity:2,quantity_status:'confirmed'}]
+      items:[{line:1,name:'Пончик фисташковый',quantity:2,quantity_status:'confirmed'}]
     }],
     sales:[],
     review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
