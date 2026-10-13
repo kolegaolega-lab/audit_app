@@ -9185,7 +9185,10 @@ function cmpParseJSON(text, applyCategory = true, includeUnconfirmed = false){
       _cmpProductIndexCache = map;
     }
     const p = _cmpProductIndexCache.get(k);
-    if (applyCategory && p && _activeCategory && p.category && p.category !== _activeCategory) return null;
+    // В рабочей сверке допускаются только товары из справочника выбранной категории.
+    // Неизвестные OCR-названия должны разбираться отдельно, а не попадать в список
+    // «только в результате 1/2» и не применяться к приходу/продажам.
+    if (applyCategory && (!p || !_activeCategory || p.category !== _activeCategory)) return null;
     if (!rows[k]) {
       rows[k] = { name: a, incoming: {}, incomingStatus: {}, sales: 0, salesStatus: 'confirmed', category: p ? (p.category || null) : null };
       order.push(k);
