@@ -9451,8 +9451,10 @@ function cmpRunCompare() {
   // Два представления одного JSON:
   // 1) full — весь документ, независимо от выбранной категории, для контроля полноты;
   // 2) filtered — только выбранная категория для рабочего сравнения FIFO.
-  const d1full = cmpParseJSON(t1, false);
-  const d2full = cmpParseJSON(t2, false);
+  // Полное представление сохраняет и неподтверждённые количества: оно
+  // нужно для проверки строк, которые фильтр категории не показывает в таблице.
+  const d1full = cmpParseJSON(t1, false, true);
+  const d2full = cmpParseJSON(t2, false, true);
   const d1 = cmpParseJSON(t1, true, true);
   const d2 = cmpParseJSON(t2, true, true);
   if (!d1 || !d2 || !d1full || !d2full) { showToast('Не удалось прочитать один из результатов распознавания.'); return; }
@@ -9813,6 +9815,16 @@ function cmpRefreshSafetyGate() {
   if (!_cmpData) return;
   const unresolved = [];
   const rowsByKey = new Map((_cmpData.rows || []).map(r => [r.key, r]));
+  const comparisonKeys = new Set((_cmpData.rows || []).map(row => cmpCanonicalName(row.name)));
+  // Неподтверждённая накладная строка может отсутствовать в рабочей таблице,
+  // если товара нет в справочнике или он вне выбранной категории. Не снимаем
+  // блокировку только потому, что остальные видимые строки уже исправлены.
+  const hasUnrepresentedUnconfirmedIncoming = [_cmpData.json1Full, _cmpData.json2Full].some(data =>
+    Object.values(data?.rows || {}).some(row =>
+      Object.keys(row.incomingStatus || {}).length > 0 &&
+      !comparisonKeys.has(cmpCanonicalName(row.name))
+    )
+  );
   const hasEdit = (row, dk, kind) => {
     if (!row || !row.edits) return false;
     if (kind === 'sales') return row.edits.sales != null;
@@ -9839,7 +9851,7 @@ function cmpRefreshSafetyGate() {
       });
       if (row.b?.salesStatus !== 'confirmed' && !hasEdit(row, 'sales', 'sales')) allResolved = false;
     });
-    if (!allResolved) unresolved.push(issue);
+    if (!allResolved || hasUnrepresentedUnconfirmedIncoming) unresolved.push(issue);
   });
 
   // Сохраняем только ещё не устранённые safety-проблемы. Это важно для кнопки «Применить»:
