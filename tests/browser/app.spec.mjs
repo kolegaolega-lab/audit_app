@@ -2722,3 +2722,50 @@ test('comparison preserves invoice products missing from the catalog instead of 
   }]);
   expect(result.finishBlocked).toBe(true);
 });
+
+test('unresolved one-sided OCR product blocks audit completion until comparison is resolved', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-14T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const payload = items => JSON.stringify({
+    schema_version:'1.0', document_type:'combined', check_date:'2026-10-14',
+    source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
+    invoices:[{number:'INV-DIFF',date:'2026-10-13',continuation:false,last_line_number:items.length,items}],
+    sales:[],
+    review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+  });
+  const result = await page.evaluate(({a,b}) => {
+    PRODUCTS=[
+      {name:'Товар A',shelfLife:48,category:'desserts'},
+      {name:'Товар B',shelfLife:48,category:'desserts'}
+    ];
+    ALIASES=[];
+    _activeCategory='desserts';
+    tableRows=[
+      {name:'Товар A',stock:0,sales:0,shelfLife:48,category:'desserts',incoming:[],salesOnly:false},
+      {name:'Товар B',stock:0,sales:0,shelfLife:48,category:'desserts',incoming:[],salesOnly:false}
+    ];
+    unknownRows=[];
+    noCategoryRows=[];
+    _needsCheckNames=new Set();
+    $('cmpJson1').value=a;
+    $('cmpJson2').value=b;
+    cmpRunCompare();
+    cmpApplyMatched();
+    return {
+      needsCheck:[..._needsCheckNames],
+      canFinish:canFinishCheck(),
+      reason:getFinishCheckBlockReason(getFinishCheckIssues()),
+      buttonDisabled:$('finishCheckBtn')?.disabled ?? null
+    };
+  }, {
+    a:payload([{line:1,name:'Товар A',quantity:1,price:10,amount:10,quantity_status:'confirmed'}]),
+    b:payload([
+      {line:1,name:'Товар A',quantity:1,price:10,amount:10,quantity_status:'confirmed'},
+      {line:2,name:'Товар B',quantity:3,price:10,amount:30,quantity_status:'confirmed'}
+    ])
+  });
+  expect(result.needsCheck).toContain('товар b');
+  expect(result.canFinish).toBe(false);
+  expect(result.reason).toContain('Сверьте отличающиеся позиции с фотографиями');
+  expect(result.buttonDisabled).toBe(true);
+});
