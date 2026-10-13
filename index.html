@@ -5648,6 +5648,8 @@ function updateCardResults() {
     const row = tableRows[idx];
     if (!row) return;
     const calc = computeFIFO(row);
+    const incomingUnverified = isIncomingUnverified(row);
+    const shownCalc = incomingUnverified ? { expiredOnShelf: null, soldExpired: null, freshOnShelf: null, freshSold: null } : calc;
     const cardStatus = getCardStatus(calc, row);
     card.classList.remove('fresh','warn','danger','unknown','empty');
     card.classList.add(cardStatus);
