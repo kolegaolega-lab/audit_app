@@ -6434,7 +6434,7 @@ function handleAliasTargetClick(baseName) {
         prior._originalQty += p._originalQty != null ? (Number(p._originalQty) || 0) : (Number(p.qty) || 0);
         incomingByDate.set(key, prior);
       });
-      existing.incoming = mergeIncomingByDate([...incomingByDate.values()]);
+      existing.incoming = [...incomingByDate.values()].sort((a, b) => a.date.localeCompare(b.date));
       existing.sales = (Number(existing.sales) || 0) + (Number(row.sales) || 0);
       existing._originalSales = (existing._originalSales != null ? Number(existing._originalSales) || 0 : Number(existing.sales) - (Number(row.sales) || 0)) + (Number(row._originalSales != null ? row._originalSales : row.sales) || 0);
       if (p2) {
