@@ -1174,7 +1174,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
           <span class="sq" style="background:var(--bg-elev-2);color:var(--text-secondary)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg></span>
           О приложении
         </span>
-        <span class="lval" id="moreAppVersion">v9.24.36</span>
+        <span class="lval" id="moreAppVersion">v9.24.37</span>
         <span class="chev">›</span>
       </button>
     </div>
@@ -1810,7 +1810,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
   <div class="modal-content">
     <div class="modal-header">
       <h3>О приложении</h3>
-      <p class="hint" id="aboutVersion">French Bakery Аудит · v9.24.36</p>
+      <p class="hint" id="aboutVersion">French Bakery Аудит · v9.24.37</p>
     </div>
     <div class="modal-body">
       <p class="hint" style="margin:0 0 12px">PWA для аудита сроков годности в кондитерской French Bakery.</p>
@@ -1889,7 +1889,7 @@ const GITHUB_FILE = 'sync.json';
 // Never rely on the repository default branch (main) for catalog writes.
 const GITHUB_BRANCH = 'fix/fifo-shelf-life';
 const GITHUB_API = 'https://api.github.com';
-const APP_VERSION = 'v9.24.36';
+const APP_VERSION = 'v9.24.37';
 const PHOTO_DB = 'fbAuditPhotoDB';
 const PHOTO_STORE = 'photos';
 const UNKNOWN_PAGE_SIZE = 30;
@@ -2202,8 +2202,21 @@ function getCategoryProducts(cat) {
 function getCategoryEmoji(cat) { return CATEGORY_EMOJI[cat] || '—'; }
 function getCategoryLabel(cat) { return CATEGORY_LABELS[cat] || 'Без категории'; }
 
-function updateAutoDate() { const el = $('autoDate'); if (el) el.value = formatDateRu(getTodayStr()); }
-function updateAutoTime() { const el = $('autoTime'); if (el) el.value = getCurrentTimeStr(); }
+function getAuditCheckDate() {
+  const row = Array.isArray(tableRows) && tableRows.find(r => r && /^\d{4}-\d{2}-\d{2}$/.test(String(r._checkDate || '')));
+  return row ? String(row._checkDate) : getTodayStr();
+}
+function getAuditCheckMoment() {
+  const row = Array.isArray(tableRows) && tableRows.find(r => r && /^\d{4}-\d{2}-\d{2}$/.test(String(r._checkDate || '')));
+  return row ? getCheckMoment(row._checkDate, row._checkMoment) : new Date();
+}
+function updateAutoDate() { const el = $('autoDate'); if (el) el.value = formatDateRu(getAuditCheckDate()); }
+function updateAutoTime() {
+  const el = $('autoTime');
+  if (!el) return;
+  const d = getAuditCheckMoment();
+  el.value = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
 function startAutoDateTime() {
   updateAutoDate(); updateAutoTime();
   if (_timeUpdater) clearInterval(_timeUpdater);
@@ -2713,9 +2726,8 @@ function computeFIFO(row) {
     return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null, isSalesOnly: true };
   }
   if (row.shelfLife === 0 || row.shelfLife == null) return emptyResult();
-  if (row.stock == null) return emptyResult();
-
-  const stock = clampNum(row.stock, 0, MAX_NUM, 0);
+  const hasStock = row.stock != null;
+  const stock = hasStock ? clampNum(row.stock, 0, MAX_NUM, 0) : 0;
   const sales = clampNum(row.sales, 0, MAX_NUM, 0);
   const shelfLife = Number(row.shelfLife);
   if (!Number.isFinite(shelfLife) || shelfLife <= 0 || shelfLife > 10000) return emptyResult();
@@ -2743,7 +2755,12 @@ function computeFIFO(row) {
     .filter(p => p.qty > 0 && p.partyDateKey && p.partyDateKey <= checkDayKey && p.writeOff);
 
   if (!parties.length) {
-    return { soldExpired: sales, expiredOnShelf: stock, freshOnShelf: 0, freshSold: 0 };
+    return {
+      soldExpired: sales,
+      expiredOnShelf: hasStock ? stock : null,
+      freshOnShelf: hasStock ? 0 : null,
+      freshSold: 0
+    };
   }
 
   let salesLeft = sales;
@@ -2765,6 +2782,12 @@ function computeFIFO(row) {
 
   if (salesLeft > 0) soldExpired += salesLeft;
 
+  // Продажи можно классифицировать и без введённого остатка. Не придумываем
+  // остаток, но отсутствие подтверждённого прихода означает просрочку продаж.
+  if (!hasStock) {
+    return { soldExpired, expiredOnShelf: null, freshOnShelf: null, freshSold };
+  }
+
   for (const party of parties) {
     if (stockLeft <= 0) break;
     const onShelf = Math.min(party.qty, stockLeft);
@@ -2781,7 +2804,7 @@ function computeFIFO(row) {
 function emptyResult() { return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null }; }
 function getRowStatus(calc, row) {
   if (row && row.salesOnly) return { cls: 'row-info', label: 'info' };
-  if (row && row.stock != null && (row.stock > 0 || (Number(row.sales) || 0) > 0) && (!hasUsableIncomingForAudit(row))) return { cls: 'row-danger', label: 'danger' };
+  if (row && (Number(row.stock) > 0 || (Number(row.sales) || 0) > 0) && (!hasUsableIncomingForAudit(row))) return { cls: 'row-danger', label: 'danger' };
   if (row && row.stock == null) return { cls: 'row-unknown', label: 'empty' };
   if (!calc || calc.soldExpired === null) return { cls: 'row-unknown', label: 'unknown' };
   if (calc.soldExpired > 0) return { cls: 'row-danger', label: 'danger' };
@@ -2790,7 +2813,7 @@ function getRowStatus(calc, row) {
 }
 function getCardStatus(calc, row) {
   if (row && row.salesOnly) return 'fresh';
-  if (row && row.stock != null && (row.stock > 0 || (Number(row.sales) || 0) > 0) && (!hasUsableIncomingForAudit(row))) return 'danger';
+  if (row && (Number(row.stock) > 0 || (Number(row.sales) || 0) > 0) && (!hasUsableIncomingForAudit(row))) return 'danger';
   if (row && row.stock == null) return 'empty';
   if (!calc || calc.soldExpired === null) return 'fresh';
   if (calc.soldExpired > 0) return 'danger';
@@ -4036,24 +4059,21 @@ function buildCheckSnapshot() {
     const items = rows.map(r => {
       const c = computeFIFO(r);
       const incoming = (r.incoming || []).map(p2 => ({ date: p2.date, qty: p2.qty }));
-      const noIncoming = !r.salesOnly && r.stock != null && !hasUsableIncomingForAudit(r) && (r.stock > 0 || (Number(r.sales) || 0) > 0);
+      const noIncoming = !r.salesOnly && !hasUsableIncomingForAudit(r) && (Number(r.stock) > 0 || (Number(r.sales) || 0) > 0);
       if (noIncoming) totalNoIncoming++;
       totalPositions++;
-      // Без подтверждённого прихода расчёт FIFO не доказывает просрочку:
-      // сохраняем исходные приходы, но не включаем предположительные числа в итоги.
-      if (!noIncoming) {
-        if (c.freshOnShelf != null) totalFreshOnShelf += c.freshOnShelf;
-        if (c.freshSold != null) totalFreshSold += c.freshSold;
-        if (c.expiredOnShelf != null) totalExpiredOnShelf += c.expiredOnShelf;
-        if (c.soldExpired != null) totalSoldExpired += c.soldExpired;
-      }
+      // По правилу аудита отсутствие свежего подтверждённого прихода означает просрочку.
+      if (c.freshOnShelf != null) totalFreshOnShelf += c.freshOnShelf;
+      if (c.freshSold != null) totalFreshSold += c.freshSold;
+      if (c.expiredOnShelf != null) totalExpiredOnShelf += c.expiredOnShelf;
+      if (c.soldExpired != null) totalSoldExpired += c.soldExpired;
       return {
         name: r.name, stock: r.stock, sales: r.sales || 0, shelfLife: r.shelfLife,
         category: r.category || null, salesOnly: !!r.salesOnly, incoming, noIncoming,
-        freshOnShelf: noIncoming ? null : c.freshOnShelf,
-        freshSold: noIncoming ? null : c.freshSold,
-        expiredOnShelf: noIncoming ? null : c.expiredOnShelf,
-        soldExpired: noIncoming ? null : c.soldExpired
+        freshOnShelf: c.freshOnShelf,
+        freshSold: c.freshSold,
+        expiredOnShelf: c.expiredOnShelf,
+        soldExpired: c.soldExpired
       };
     });
     cats[cat] = items;
@@ -4068,8 +4088,10 @@ function buildCheckSnapshot() {
   const auditDate = (tableRows || [])
     .map(r => String(r && r._checkDate || '').trim())
     .find(v => /^\d{4}-\d{2}-\d{2}$/.test(v)) || getTodayStr();
+  const auditRow = (tableRows || []).find(r => r && String(r._checkDate || '').trim() === auditDate);
+  const auditMoment = auditRow ? getCheckMoment(auditDate, auditRow._checkMoment) : new Date(auditDate + 'T12:00:00');
   return {
-    version: 1, createdAt: now.toISOString(), date: auditDate,
+    version: 1, createdAt: now.toISOString(), auditStartedAt: auditMoment.toISOString(), date: auditDate,
     pointId: p ? p.id : null, pointNum: p ? p.num : '',
     pointName: p ? p.name : '', pointAddress: p ? p.address : '',
     authorName: (_profile && _profile.name) ? _profile.name : '',
@@ -5559,7 +5581,7 @@ function renderCards() {
   tableRows.forEach(row => {
     const calc = computeFIFO(row);
     const incomingUnverified = isIncomingUnverified(row);
-    const shownCalc = incomingUnverified ? { expiredOnShelf: null, soldExpired: null, freshOnShelf: null, freshSold: null } : calc;
+    const shownCalc = calc;
     const cardStatus = getCardStatus(calc, row);
     const card = document.createElement('div');
     card.className = `card ${cardStatus}`;
@@ -5652,7 +5674,7 @@ function updateCardResults() {
     if (!row) return;
     const calc = computeFIFO(row);
     const incomingUnverified = isIncomingUnverified(row);
-    const shownCalc = incomingUnverified ? { expiredOnShelf: null, soldExpired: null, freshOnShelf: null, freshSold: null } : calc;
+    const shownCalc = calc;
     const cardStatus = getCardStatus(calc, row);
     card.classList.remove('fresh','warn','danger','unknown','empty');
     card.classList.add(cardStatus);
@@ -5663,7 +5685,7 @@ function updateCardResults() {
     const freshStock = shownCalc.freshOnShelf;
     const freshSales = shownCalc.freshSold;
     const missingIncomingWarning = !row.salesOnly && row.stock != null && (Number(row.stock) > 0 || Number(row.sales) > 0) && !hasUsableIncomingForAudit(row)
-      ? '<span class="card-incoming-warning">Нет подтверждённого поступления за срок годности — проверьте накладные и уточните у сотрудника, не просрочен ли товар</span>' : '';
+      ? '<span class="card-incoming-warning">Нет подтверждённого прихода в пределах срока годности — считать просроченным</span>' : '';
     res.innerHTML = `
       <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
       <span>Продано свежих: <span class="rv">${freshSales === null ? '—' : freshSales}</span></span>
@@ -5676,7 +5698,7 @@ function updateCardResults() {
 function refreshCardRow(row, card) {
   const calc = computeFIFO(row);
   const incomingUnverified = isIncomingUnverified(row);
-  const shownCalc = incomingUnverified ? { expiredOnShelf: null, soldExpired: null, freshOnShelf: null, freshSold: null } : calc;
+  const shownCalc = calc;
   const cardStatus = getCardStatus(calc, row);
   card.classList.remove('fresh','warn','danger','unknown','empty');
   card.classList.add(cardStatus);
@@ -5687,7 +5709,7 @@ function refreshCardRow(row, card) {
     const freshStock = shownCalc.freshOnShelf;
     const freshSales = shownCalc.freshSold;
     const missingIncomingWarning = !row.salesOnly && row.stock != null && (Number(row.stock) > 0 || Number(row.sales) > 0) && !hasUsableIncomingForAudit(row)
-      ? '<span class="card-incoming-warning">Нет подтверждённого поступления за срок годности — проверьте накладные и уточните у сотрудника, не просрочен ли товар</span>' : '';
+      ? '<span class="card-incoming-warning">Нет подтверждённого прихода в пределах срока годности — считать просроченным</span>' : '';
     res.innerHTML = `
       <span>Свежих на витрине: <span class="rv">${freshStock === null ? '—' : freshStock}</span></span>
       <span>Продано свежих: <span class="rv">${freshSales === null ? '—' : freshSales}</span></span>
@@ -6647,7 +6669,11 @@ async function applyJSON() {
     if (safetyIssues.length) throw new Error(formatOCRSafetyMessage(safetyIssues));
     const reference = new Date();
     const { rows, truncated, json } = parseJSON(text, reference);
-    const checkDate = String(json?.check_date || '').trim();
+    const rawCheckDate = String(json?.check_date || '').trim();
+    const parsedAuditDate = parseDateRu(rawCheckDate, reference);
+    const checkDate = typeof parsedAuditDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(parsedAuditDate)
+      ? parsedAuditDate
+      : rawCheckDate;
     const checkMoment = Date.now();
     rows.forEach(r => { r._checkDate = checkDate; r._checkMoment = checkMoment; });
     if (!rows.length) throw new Error('Не удалось распознать строки.');
@@ -8041,7 +8067,7 @@ function getOCRSafetyIssues(text,report,count){
 }
 
 function isIncomingUnverified(row) {
-  return !!(row && !row.salesOnly && row.stock != null &&
+  return !!(row && !row.salesOnly &&
     ((Number(row.stock) || 0) > 0 || (Number(row.sales) || 0) > 0) &&
     !hasUsableIncomingForAudit(row));
 }
@@ -8670,11 +8696,9 @@ function renderReport() {
       if (r.salesOnly) totalSalesOnly++;
       else totalAuditablePositions++;
       const noIncoming = isIncomingUnverified(r);
-      if (!noIncoming) {
-        if (c.freshOnShelf != null) totalFreshOnShelf += c.freshOnShelf;
-        if (c.expiredOnShelf != null) totalExpiredOnShelf += c.expiredOnShelf;
-        if (c.soldExpired != null) totalSoldExpired += c.soldExpired;
-      }
+      if (c.freshOnShelf != null) totalFreshOnShelf += c.freshOnShelf;
+      if (c.expiredOnShelf != null) totalExpiredOnShelf += c.expiredOnShelf;
+      if (c.soldExpired != null) totalSoldExpired += c.soldExpired;
       if (noIncoming) totalNoIncoming++;
       if (noIncoming || (c.soldExpired || 0) > 0 || (c.expiredOnShelf || 0) > 0) totalProblems++;
     });
@@ -8709,7 +8733,7 @@ function renderReport() {
             '<div class="row"><span>Свежих на витрине</span><b>' + totalFreshOnShelf + '</b></div>' +
             '<div class="row"><span>Просрочено на витрине</span><b>' + totalExpiredOnShelf + '</b></div>' +
             '<div class="row"><span>Продано просрочкой</span><b' + (totalSoldExpired > 0 ? ' class="red"' : '') + '>' + totalSoldExpired + '</b></div>' +
-            (totalNoIncoming ? '<div class="row"><span>Нет подтверждённого поступления за срок годности — проверьте накладные и уточните у сотрудника, не просрочен ли товар</span><b class="red">' + totalNoIncoming + '</b></div>' : '') +
+            (totalNoIncoming ? '<div class="row"><span>Без подтверждённого прихода в пределах срока годности — считать просроченными</span><b class="red">' + totalNoIncoming + '</b></div>' : '') +
           '</div>' +
         '</div>' +
       '</div>';
@@ -8817,11 +8841,11 @@ function renderReport() {
           row.stock != null &&
           !hasUsableIncomingForAudit(row) &&
           (row.stock > 0 || (Number(row.sales) || 0) > 0);
-        const critical = !noIncoming && (calc.soldExpired || 0) > 0;
+        const critical = (calc.soldExpired || 0) > 0;
         const dotCls = noIncoming || critical ? 'red' : 'orange';
         let reason;
         if (noIncoming) {
-          reason = 'Нет подтверждённого поступления за срок годности — проверьте накладные и уточните у сотрудника. Просрочка пока не подтверждена.';
+          reason = 'Нет подтверждённого прихода в пределах срока годности — считать просроченным. На витрине: ' + (calc.expiredOnShelf == null ? 'остаток не введён' : calc.expiredOnShelf) + ' · Продано: ' + (calc.soldExpired == null ? 0 : calc.soldExpired);
         } else if (critical && calc.expiredOnShelf > 0) reason = 'Продано просрочкой: ' + calc.soldExpired + ' · Просрочено на витрине: ' + calc.expiredOnShelf;
         else if (critical) reason = 'Продано просрочкой: ' + calc.soldExpired;
         else reason = 'Просрочено на витрине: ' + calc.expiredOnShelf;
