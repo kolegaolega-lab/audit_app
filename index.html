@@ -868,6 +868,7 @@ main{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
   }
 }
 .card-incoming-warning{color:var(--red);font-weight:600;}
+.shelf-life-warning{display:block;margin-top:4px;color:var(--red);font-size:11px;font-weight:700;line-height:1.25;}
 </style>
 </head>
 <body>
@@ -5291,6 +5292,14 @@ function renderTable() {
       nameText.className = 'name-text';
       nameText.textContent = row.name;
       tdName.appendChild(nameText);
+      const missingShelfLife = !row.salesOnly && (row.shelfLife == null || !Number.isFinite(Number(row.shelfLife)) || Number(row.shelfLife) <= 0);
+      if (missingShelfLife) {
+        const shelfWarning = document.createElement('span');
+        shelfWarning.className = 'shelf-life-warning';
+        shelfWarning.textContent = '⚠ Не указан срок годности. Укажите его в справочнике.';
+        shelfWarning.title = 'Пока срок годности не указан, позиция не оценивается как просроченная.';
+        tdName.appendChild(shelfWarning);
+      }
       if (_needsCheckNames.has(normalizeName(row.name))) {
         const warnIcon = document.createElement('span');
         warnIcon.className = 'check-warn-icon';
@@ -5387,7 +5396,12 @@ function renderTable() {
       });
 
       const tdShelf = document.createElement('td');
-      tdShelf.textContent = `${row.shelfLife} ч`;
+      const shelfMissing = !row.salesOnly && (row.shelfLife == null || !Number.isFinite(Number(row.shelfLife)) || Number(row.shelfLife) <= 0);
+      tdShelf.textContent = shelfMissing ? 'Не указан' : `${row.shelfLife} ч`;
+      if (shelfMissing) {
+        tdShelf.classList.add('shelf-life-warning');
+        tdShelf.title = 'Укажите срок годности в справочнике';
+      }
       tr.appendChild(tdShelf);
 
       const tdFresh = document.createElement('td');
@@ -5599,8 +5613,10 @@ function renderCards() {
       nameEl.appendChild(warnIcon);
     }
     const shelfEl = document.createElement('div');
-    shelfEl.className = 'card-shelf';
-    shelfEl.textContent = `${row.shelfLife} ч`;
+    const shelfMissing = !row.salesOnly && (row.shelfLife == null || !Number.isFinite(Number(row.shelfLife)) || Number(row.shelfLife) <= 0);
+    shelfEl.className = 'card-shelf' + (shelfMissing ? ' shelf-life-warning' : '');
+    shelfEl.textContent = shelfMissing ? '⚠ Срок не указан' : `${row.shelfLife} ч`;
+    if (shelfMissing) shelfEl.title = 'Укажите срок годности в справочнике. Позиция не считается просроченной без этого значения.';
     head.appendChild(nameEl);
     head.appendChild(shelfEl);
     card.appendChild(head);
