@@ -5549,6 +5549,8 @@ function renderCards() {
   if (dates.length > MAX_DATES) dates = dates.slice(0, MAX_DATES);
   tableRows.forEach(row => {
     const calc = computeFIFO(row);
+    const incomingUnverified = isIncomingUnverified(row);
+    const shownCalc = incomingUnverified ? { expiredOnShelf: null, soldExpired: null, freshOnShelf: null, freshSold: null } : calc;
     const cardStatus = getCardStatus(calc, row);
     const card = document.createElement('div');
     card.className = `card ${cardStatus}`;
@@ -5645,10 +5647,10 @@ function updateCardResults() {
     card.classList.add(cardStatus);
     const res = card.querySelector('[data-role="cardResult"]');
     if (!res) return;
-    const exp = calc.expiredOnShelf;
-    const sxp = calc.soldExpired;
-    const freshStock = calc.freshOnShelf;
-    const freshSales = calc.freshSold;
+    const exp = shownCalc.expiredOnShelf;
+    const sxp = shownCalc.soldExpired;
+    const freshStock = shownCalc.freshOnShelf;
+    const freshSales = shownCalc.freshSold;
     const missingIncomingWarning = !row.salesOnly && row.stock != null && (Number(row.stock) > 0 || Number(row.sales) > 0) && !hasUsableIncomingForAudit(row)
       ? '<span class="card-incoming-warning">Нет подтверждённого поступления за срок годности — проверьте накладные и уточните у сотрудника, не просрочен ли товар</span>' : '';
     res.innerHTML = `
@@ -5662,15 +5664,17 @@ function updateCardResults() {
 }
 function refreshCardRow(row, card) {
   const calc = computeFIFO(row);
+  const incomingUnverified = isIncomingUnverified(row);
+  const shownCalc = incomingUnverified ? { expiredOnShelf: null, soldExpired: null, freshOnShelf: null, freshSold: null } : calc;
   const cardStatus = getCardStatus(calc, row);
   card.classList.remove('fresh','warn','danger','unknown','empty');
   card.classList.add(cardStatus);
   const res = card.querySelector('[data-role="cardResult"]');
   if (res) {
-    const exp = calc.expiredOnShelf;
-    const sxp = calc.soldExpired;
-    const freshStock = calc.freshOnShelf;
-    const freshSales = calc.freshSold;
+    const exp = shownCalc.expiredOnShelf;
+    const sxp = shownCalc.soldExpired;
+    const freshStock = shownCalc.freshOnShelf;
+    const freshSales = shownCalc.freshSold;
     const missingIncomingWarning = !row.salesOnly && row.stock != null && (Number(row.stock) > 0 || Number(row.sales) > 0) && !hasUsableIncomingForAudit(row)
       ? '<span class="card-incoming-warning">Нет подтверждённого поступления за срок годности — проверьте накладные и уточните у сотрудника, не просрочен ли товар</span>' : '';
     res.innerHTML = `
@@ -8023,6 +8027,12 @@ function getOCRSafetyIssues(text,report,count){
     if (errors.length) out.push({code:"validation-errors",title:"Распознавание содержит ошибки, требующие проверки"});
   }
   return out;
+}
+
+function isIncomingUnverified(row) {
+  return !!(row && !row.salesOnly && row.stock != null &&
+    ((Number(row.stock) || 0) > 0 || (Number(row.sales) || 0) > 0) &&
+    !hasUsableIncomingForAudit(row));
 }
 
 function hasUsableIncomingForAudit(row) {
