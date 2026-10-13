@@ -136,7 +136,8 @@ test('audit date and start time stay tied to the historical sales report, not th
   vm.createContext(dateContext);
   vm.runInContext(extractFunction(html, 'getCheckMoment', 'function getWriteOffMoment('), dateContext);
   vm.runInContext(extractFunction(html, 'getAuditCheckDate', 'function updateAutoDate('), dateContext);
-  vm.runInContext(extractFunction(html, 'updateAutoDate', 'function startAutoDateTime('), dateContext);
+  vm.runInContext(extractFunction(html, 'updateAutoDate', 'function updateAutoTime('), dateContext);
+  vm.runInContext(extractFunction(html, 'updateAutoTime', 'function startAutoDateTime('), dateContext);
   assert.equal(dateContext.getAuditCheckDate(), '2026-09-25');
   dateContext.updateAutoDate();
   dateContext.updateAutoTime();
