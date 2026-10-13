@@ -2725,19 +2725,12 @@ function computeFIFO(row) {
   if (row.salesOnly) {
     return { soldExpired: null, expiredOnShelf: null, freshOnShelf: null, freshSold: null, isSalesOnly: true };
   }
+  if (row.shelfLife === 0 || row.shelfLife == null) return emptyResult();
   const hasStock = row.stock != null;
   const stock = hasStock ? clampNum(row.stock, 0, MAX_NUM, 0) : 0;
   const sales = clampNum(row.sales, 0, MAX_NUM, 0);
   const shelfLife = Number(row.shelfLife);
-  if (row.shelfLife === 0 || row.shelfLife == null || !Number.isFinite(shelfLife) || shelfLife <= 0 || shelfLife > 10000) {
-    // Без срока годности FIFO нельзя рассчитать, но отсутствие любого
-    // подтверждённого прихода всё равно не должно выглядеть как «неизвестно».
-    const hasDatedIncoming = mergeIncomingByDate(row.incoming).some(p => p.qty > 0);
-    if (!hasDatedIncoming) {
-      return { soldExpired: sales, expiredOnShelf: hasStock ? stock : null, freshOnShelf: hasStock ? 0 : null, freshSold: 0 };
-    }
-    return emptyResult();
-  }
+  if (!Number.isFinite(shelfLife) || shelfLife <= 0 || shelfLife > 10000) return emptyResult();
   const moment = getCheckMoment(row._checkDate, row._checkMoment);
 
   const toDayKey = value => {
