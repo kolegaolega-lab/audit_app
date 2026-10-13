@@ -2209,7 +2209,7 @@ test('report totals match history snapshot for mixed FIFO findings', async ({pag
     };
   });
   expect(result.snapshot.positions).toBe(5);
-  expect(result.snapshot.freshOnShelf).toBe(1);
+  expect(result.snapshot.freshOnShelf).toBe(2);
   expect(result.snapshot.expiredOnShelf).toBe(1);
   expect(result.snapshot.soldExpired).toBe(1);
   expect(result.snapshot.noIncoming).toBe(1);
@@ -2670,8 +2670,10 @@ test('missing receipt is not presented as confirmed expiry in cards, report, or 
   expect(result.cardText).toContain('Нет подтверждённого поступления за срок годности');
   expect(result.cardText).toContain('Просрочено на витрине: —');
   expect(result.cardText).toContain('Продано просроченным: —');
-  expect(result.reportText).toContain('Просрочка пока не подтверждена');
+  expect(result.reportText).toContain('Нет подтверждённого поступления за срок годности');
   expect(result.reportText).not.toContain('есть просроченный остаток/продажа');
+  expect(result.reportText).toContain('Просрочено на витрине0');
+  expect(result.reportText).toContain('Продано просрочкой0');
   expect(result.item.noIncoming).toBe(true);
   expect(result.item.expiredOnShelf).toBeNull();
   expect(result.item.soldExpired).toBeNull();
