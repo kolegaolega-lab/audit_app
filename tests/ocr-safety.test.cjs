@@ -566,7 +566,7 @@ test('local audit edits are protected from stale cross-tab session writes', () =
 });
 
 test('missing incoming warning explains the next action in plain Russian', () => {
-  assert.match(html, /Нет подтверждённого поступления за срок годности — проверьте накладные и уточните у сотрудника, не просрочен ли товар/);
+  assert.match(html, /Нет подтверждённого прихода в пределах срока годности — считать просроченным/);
   assert.doesNotMatch(html, /Нет прихода за срок годности · проверить с персоналом/);
 });
 
