@@ -2682,6 +2682,35 @@ test('missing receipt is not presented as confirmed expiry in cards, report, or 
   expect(result.totals.noIncoming).toBe(1);
 });
 
+
+test('reapplying OCR refreshes existing unknown product quantities instead of keeping stale values', async ({page}) => {
+  await page.clock.setFixedTime(new Date('2026-10-14T10:00:00'));
+  await page.goto('file://' + path.join(root,'index.html'));
+  const payload = JSON.stringify({
+    schema_version:'1.0', document_type:'combined', check_date:'2026-10-14',
+    source:{photo_count:1,processed_photo_count:1,duplicate_photo_count:0},
+    invoices:[{number:'INV-REFRESH',date:'2026-10-13',continuation:false,last_line_number:1,items:[
+      {line:1,name:'Неизвестная слойка',quantity:4,price:15,amount:60,quantity_status:'confirmed'}
+    ]}],
+    sales:[],review:{unreadable:[],handwritten_confirmation:[],uncertain_rows:[],notes:[]}
+  });
+  const result = await page.evaluate(json => {
+    PRODUCTS=[];
+    ALIASES=[];
+    tableRows=[];
+    unknownRows=[{name:'Неизвестная слойка',sales:9,shelfLife:null,category:null,
+      incoming:[{date:'2026-10-12',qty:8}],salesOnly:false}];
+    noCategoryRows=[];
+    _activeCategory='desserts';
+    $('cmpJson1').value=json;
+    $('cmpJson2').value=json;
+    cmpRunCompare();
+    cmpApplyMatched();
+    return unknownRows.map(r=>({name:r.name,sales:r.sales,incoming:r.incoming.map(x=>[x.date,x.qty])}));
+  }, payload);
+  expect(result).toEqual([{name:'Неизвестная слойка',sales:0,incoming:[['2026-10-13',4]]}]);
+});
+
 test('comparison preserves invoice products missing from the catalog instead of dropping them', async ({page}) => {
   await page.clock.setFixedTime(new Date('2026-10-14T10:00:00'));
   await page.goto('file://' + path.join(root,'index.html'));
