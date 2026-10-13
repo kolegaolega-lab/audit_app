@@ -9193,7 +9193,7 @@ function cmpParseJSON(text, applyCategory = true, includeUnconfirmed = false){
       _cmpProductIndexCache = map;
     }
     const p = _cmpProductIndexCache.get(catalogKey);
-    if (applyCategory && (!p || !_activeCategory || p.category !== _activeCategory)) return null;
+    if (applyCategory && (!p || (_activeCategory && p.category !== _activeCategory))) return null;
     const k = cmpCanonicalName(p ? p.name : a);
     if (!rows[k]) {
       rows[k] = { name: a, incoming: {}, incomingStatus: {}, sales: 0, salesStatus: 'confirmed', category: p ? (p.category || null) : null };
