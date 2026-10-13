@@ -9254,7 +9254,9 @@ function cmpParseJSON(text, applyCategory = true, includeUnconfirmed = false){
       if (status !== 'confirmed') row.salesStatus = status;
     }
   });
-  return order.length ? { rows, order, dateCols, document: d } : null;
+  // Empty catalog-filtered results are valid: safety checks and invoice-date diagnostics must still run.
+  // Unknown products stay out of working rows, but must not abort the whole comparison.
+  return { rows, order, dateCols, document: d };
 }
 function cmpCalcSigmaForDate(jsonData, dateKey) {
   let total = 0; let count = 0; const missing = [];
